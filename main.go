@@ -62,7 +62,8 @@ func main() {
 		if p == port {
 			continue
 		}
-		go network.NewPeer(p)
+		peer := network.NewPeer(p)
+		go peer.Send("hello")
 	}
 	
 	listen(port)
