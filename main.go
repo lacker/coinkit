@@ -7,6 +7,8 @@ import "net"
 import "os"
 import "strconv"
 
+import "coinkit/network"
+
 const (
 	BASE_PORT = 9000
 	NODES = 4
@@ -40,15 +42,6 @@ func listen(port int) {
 	}
 }
 
-func connect(port int) {
-	conn, err := net.Dial("tcp", fmt.Sprintf("localhost:%d", port))
-	if err != nil {
-		log.Print("outgoing connection error: ", err)
-		return
-	}
-	fmt.Fprintf(conn, "hello\n")
-}
-
 func main() {
 	// Usage: go run main.go <i> where i is in [0, 1, 2, 3]
 	if len(os.Args) < 2 {
@@ -69,7 +62,7 @@ func main() {
 		if p == port {
 			continue
 		}
-		go connect(p)
+		go network.Connect(p)
 	}
 	
 	listen(port)
