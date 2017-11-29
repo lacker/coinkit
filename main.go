@@ -7,6 +7,11 @@ import "net"
 import "os"
 import "strconv"
 
+const (
+	BASE_PORT = 9000
+	NODES = 4
+)
+	
 // Handles an incoming connection
 func handleConnection(conn net.Conn) {
 	log.Printf("handling a connection")
@@ -29,13 +34,19 @@ func listen(port int) {
 	for {
 		conn, err := ln.Accept()
 		if err != nil {
-			log.Printf("connection error: ", err)
+			log.Print("incoming connection error: ", err)
 		}
 		go handleConnection(conn)
 	}
 }
 
 func connect(port int) {
+	conn, err := net.Dial("tcp", fmt.Sprintf("localhost:%d", port))
+	if err != nil {
+		log.Print("outgoing connection error: ", err)
+		return
+	}
+	fmt.Fprintf(conn, "hello\n")
 }
 
 func main() {
@@ -47,12 +58,19 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	if id < 0 || id > 3 {
+	if id < 0 || id >= NODES {
 		log.Fatalf("invalid id: %d", id)
 	}
 	
-	log.Printf("server %d starting up", id)
+	port := BASE_PORT + id
+	log.Printf("server %d starting up on port %d", id, port)
 
-	port := 9000 + id
+	for p := BASE_PORT; p < BASE_PORT + NODES; p++ {
+		if p == port {
+			continue
+		}
+		go connect(p)
+	}
+	
 	listen(port)
 }
