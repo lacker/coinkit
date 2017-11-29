@@ -43,7 +43,7 @@ func listen(port int) {
 }
 
 func main() {
-	// Usage: go run main.go <i> where i is in [0, 1, 2, 3]
+	// Usage: go run main.go <i> where i is in [0, 1, 2, ..., NODES - 1]
 	if len(os.Args) < 2 {
 		log.Fatal("Use an argument with a numerical id.")
 	}
