@@ -1,5 +1,6 @@
 package main
 
+import "bufio"
 import "fmt"
 import "log"
 import "net"
@@ -8,8 +9,15 @@ import "strconv"
 
 // Handles an incoming connection
 func handleConnection(conn net.Conn) {
-	log.Printf("handling a connection, by closing it")
-	conn.Close()
+	log.Printf("handling a connection")
+	for {
+		message, err := bufio.NewReader(conn).ReadString('\n')
+		if err != nil {
+			conn.Close()
+			break
+		}
+		log.Printf("got message: %s", message)
+	}
 }
 
 func listen(port int) {
@@ -25,6 +33,9 @@ func listen(port int) {
 		}
 		go handleConnection(conn)
 	}
+}
+
+func connect(port int) {
 }
 
 func main() {
