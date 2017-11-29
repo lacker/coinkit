@@ -14,7 +14,7 @@ func handleConnection(conn net.Conn) {
 
 func listen(port int) {
 	log.Printf("listening on port %d", port)
-	ln, err := net.Listen("tcp", fmt.Sprintf(":%d", port))
+	ln, err := net.Listen("tcp", fmt.Sprintf("localhost:%d", port))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -43,8 +43,5 @@ func main() {
 	log.Printf("server %d starting up", id)
 
 	port := 9000 + id
-	go listen(port)
-
-	// TODO: dont just end the program
-	log.Printf("end of main")
+	listen(port)
 }
