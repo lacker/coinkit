@@ -11,9 +11,9 @@ import "coinkit/network"
 
 const (
 	BASE_PORT = 9000
-	NODES = 4
+	NODES     = 4
 )
-	
+
 // Handles an incoming connection
 func handleConnection(conn net.Conn) {
 	log.Printf("handling a connection")
@@ -54,17 +54,17 @@ func main() {
 	if id < 0 || id >= NODES {
 		log.Fatalf("invalid id: %d", id)
 	}
-	
+
 	port := BASE_PORT + id
 	log.Printf("server %d starting up on port %d", id, port)
 
-	for p := BASE_PORT; p < BASE_PORT + NODES; p++ {
+	for p := BASE_PORT; p < BASE_PORT+NODES; p++ {
 		if p == port {
 			continue
 		}
 		peer := network.NewPeer(p)
 		go peer.Send("hello")
 	}
-	
+
 	listen(port)
 }
