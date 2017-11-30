@@ -8,38 +8,45 @@ import "time"
 type Peer struct {
 	port int
 	conn net.Conn
-	live bool
-	failCount int
+	outbox chan string
 }
 
 // Retries until it is connected
-// TODO: make this threadsafe
 // TODO: reconnect after a disconnect
-func (p *Peer) ensureConnected() {
-	if p.live {
-		return
-	}
+func (p *Peer) sendForever() {
+	// Connect
+	failCount := 0
 	for {
 		conn, err := net.Dial("tcp", fmt.Sprintf("localhost:%d", p.port))
 		if err == nil {
-			p.failCount = 0
+			failCount = 0
 			p.conn = conn
-			p.live = true
-			return
+			break
 		}
 
-		p.failCount++
+		failCount++
 		log.Printf("dial failed. waiting %d seconds on port %d",
-			p.failCount, p.port)
-		time.Sleep(time.Duration(p.failCount) * time.Second)
+			failCount, p.port)
+		time.Sleep(time.Duration(failCount) * time.Second)
+	}
+
+	// Send from the queue
+	for {
+		message := <-p.outbox
+		fmt.Fprintf(p.conn, message + "\n")
 	}
 }
 
 func (p *Peer) Send(message string) {
-	p.ensureConnected()
-	fmt.Fprintf(p.conn, message + "\n")
+	go p.blockingSend(message)
+}
+
+func (p *Peer) blockingSend(message string) {
+	p.outbox <- message
 }
 
 func NewPeer(port int) *Peer {
-	return &Peer{port: port}
+	p := &Peer{port: port, outbox: make(chan string)}
+	go p.sendForever();
+	return p
 }
