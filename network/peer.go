@@ -65,15 +65,27 @@ func (p *Peer) sendForever() {
 }
 
 func (p *Peer) Send(message string) {
-	go p.blockingSend(message)
-}
+	for {
+		// Add to the outbox if we can
+		select {
+		case p.outbox <- message:
+			return
+		default:
+			// The queue filled up
+		}
 
-func (p *Peer) blockingSend(message string) {
-	p.outbox <- message
+		// Pop something off the outbox to be discarded if we can
+		select {
+		case _ = <-p.outbox:
+		default:
+			// There must be some racing. Just busy-add
+		}
+	}
 }
 
 func NewPeer(port int) *Peer {
-	p := &Peer{port: port, outbox: make(chan string)}
+	// outbox has a buffer of 10 outgoing messages
+	p := &Peer{port: port, outbox: make(chan string, 10)}
 	go p.sendForever();
 	return p
 }
