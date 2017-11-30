@@ -1,5 +1,6 @@
 package network
 
+import "bufio"
 import "fmt"
 import "log"
 import "net"
@@ -9,19 +10,21 @@ type Peer struct {
 	port int
 	conn net.Conn
 	outbox chan string
+	connected bool
 }
 
-// Retries until it is connected
-// TODO: reconnect after a disconnect
-func (p *Peer) sendForever() {
-	// Connect
+// connect is idempotent
+func (p *Peer) connect() {
+	if p.connected {
+		return
+	}
 	failCount := 0
 	for {
 		conn, err := net.Dial("tcp", fmt.Sprintf("localhost:%d", p.port))
 		if err == nil {
-			failCount = 0
 			p.conn = conn
-			break
+			p.connected = true
+			return
 		}
 
 		failCount++
@@ -29,11 +32,35 @@ func (p *Peer) sendForever() {
 			failCount, p.port)
 		time.Sleep(time.Duration(failCount) * time.Second)
 	}
+}
 
+func (p *Peer) disconnect() {
+	if p.conn != nil {
+		p.conn.Close()
+	}
+	p.connected = false
+}
+
+// sendForever should handle disconnects or unresponsive peers.
+func (p *Peer) sendForever() {
 	// Send from the queue
 	for {
 		message := <-p.outbox
-		fmt.Fprintf(p.conn, message + "\n")
+		for {
+			p.connect()
+			log.Printf("sending message: %s", message)
+			fmt.Fprintf(p.conn, message + "\n")
+
+			// If we get an ok, great.
+			// If we don't get an ok, disconnect and try again.
+			p.conn.SetReadDeadline(time.Now().Add(5 * time.Second))
+			_, err := bufio.NewReader(p.conn).ReadString('\n')
+			if err == nil {
+				break
+			}
+			log.Print("did not receive an ok: ", err)
+			p.disconnect()
+		}
 	}
 }
 

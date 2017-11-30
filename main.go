@@ -6,12 +6,13 @@ import "log"
 import "net"
 import "os"
 import "strconv"
+import "time"
 
 import "coinkit/network"
 
 const (
 	BASE_PORT = 9000
-	NODES     = 4
+	NODES     = 2
 )
 
 // Handles an incoming connection
@@ -24,6 +25,7 @@ func handleConnection(conn net.Conn) {
 			break
 		}
 		log.Printf("got message: %s", message)
+		fmt.Fprintf(conn, "ok\n")
 	}
 }
 
@@ -58,13 +60,25 @@ func main() {
 	port := BASE_PORT + id
 	log.Printf("server %d starting up on port %d", id, port)
 
+	// Make some peers
+	var peers []*network.Peer
 	for p := BASE_PORT; p < BASE_PORT+NODES; p++ {
 		if p == port {
 			continue
 		}
 		peer := network.NewPeer(p)
-		peer.Send("hello")
+		peers = append(peers, peer)
 	}
 
-	listen(port)
+	go listen(port)
+
+	uptime := 0
+	for {
+		time.Sleep(time.Second)
+		log.Printf("uptime is %d", uptime)
+		for _, peer := range peers {
+			peer.Send(fmt.Sprintf("node %d has uptime %d", id, uptime))
+		}
+		uptime++
+	}
 }
