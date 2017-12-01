@@ -11,8 +11,8 @@ import "time"
 import "coinkit/network"
 
 const (
-	BASE_PORT = 9000
-	NODES     = 2
+	BasePort = 9000
+	Nodes     = 2
 )
 
 // Handles an incoming connection
@@ -45,7 +45,7 @@ func listen(port int) {
 }
 
 func main() {
-	// Usage: go run main.go <i> where i is in [0, 1, 2, ..., NODES - 1]
+	// Usage: go run main.go <i> where i is in [0, 1, 2, ..., Nodes - 1]
 	if len(os.Args) < 2 {
 		log.Fatal("Use an argument with a numerical id.")
 	}
@@ -53,16 +53,16 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	if id < 0 || id >= NODES {
+	if id < 0 || id >= Nodes {
 		log.Fatalf("invalid id: %d", id)
 	}
 
-	port := BASE_PORT + id
+	port := BasePort + id
 	log.Printf("server %d starting up on port %d", id, port)
 
 	// Make some peers
 	var peers []*network.Peer
-	for p := BASE_PORT; p < BASE_PORT+NODES; p++ {
+	for p := BasePort; p < BasePort+Nodes; p++ {
 		if p == port {
 			continue
 		}
