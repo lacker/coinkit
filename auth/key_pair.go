@@ -23,6 +23,11 @@ func NewKeyPair() *KeyPair {
 }
 
 func NewKeyPairFromSecretPhrase(phrase string) *KeyPair {
+	// ed25519 needs 32 bytes of "entropy".
+	// Repeat the passphrase with commas to pad it out
+	for len(phrase) < 32 {
+		phrase = phrase + "," + phrase
+	}
 	reader := bytes.NewReader([]byte(phrase))
 	pub, priv, err := ed25519.GenerateKey(reader)
 	if err != nil {
