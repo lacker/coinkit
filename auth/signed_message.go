@@ -10,6 +10,6 @@ func NewSignedMessage(kp *KeyPair, message string) *SignedMessage {
 	return &SignedMessage{
 		message: message,
 		signer: kp.PublicKey(),
-		signature: kp.Sign(message).
+		signature: kp.Sign(message),
 	}
 }
