@@ -38,7 +38,7 @@ func NewKeyPairFromSecretPhrase(phrase string) *KeyPair {
 
 // A transportable version of the public key, using base64
 func (kp *KeyPair) PublicKey() string {
-	return base64.StdEncoding.EncodeToString(kp.publicKey)
+	return base64.RawStdEncoding.EncodeToString(kp.publicKey)
 }
 
 // Interprets the message as utf8, then returns the signature as base64.
@@ -47,16 +47,16 @@ func (kp *KeyPair) Sign(message string) string {
 	if err != nil {
 		panic(err)
 	}
-	return base64.StdEncoding.EncodeToString(signature)
+	return base64.RawStdEncoding.EncodeToString(signature)
 }
 
 // The external versions: message is handled as utf8, the keys and sigs are base64.
 func Verify(publicKey string, message string, signature string) bool {
-	pub, err := base64.StdEncoding.DecodeString(publicKey)
+	pub, err := base64.RawStdEncoding.DecodeString(publicKey)
 	if err != nil || len(pub) != ed25519.PublicKeySize {
 		return false
 	}
-	sig, err := base64.StdEncoding.DecodeString(signature)
+	sig, err := base64.RawStdEncoding.DecodeString(signature)
 	if err != nil || len(sig) != ed25519.SignatureSize {
 		return false
 	}

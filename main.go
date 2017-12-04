@@ -1,10 +1,12 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"strconv"
-	
+
+	"coinkit/auth"
 	"coinkit/network"
 )
 
@@ -27,7 +29,7 @@ func main() {
 	}
 
 	port := BasePort + id
-
+	kp := auth.NewKeyPairFromSecretPhrase(fmt.Sprintf("testnet node %d", id))
 
 	// Make some peers
 	var peers []*network.Peer
@@ -39,6 +41,6 @@ func main() {
 		peers = append(peers, peer)
 	}
 
-	server := network.NewServer(port, peers)
+	server := network.NewServer(port, kp, peers)
 	server.ServeForever()
 }

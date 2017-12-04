@@ -6,15 +6,18 @@ import (
 	"log"
 	"net"
 	"time"
+
+	"coinkit/auth"
 )
 
 type Server struct {
 	port int
+	keyPair *auth.KeyPair
 	peers []*Peer
 }
 
-func NewServer(port int, peers []*Peer) *Server {
-	return &Server{port: port, peers: peers}
+func NewServer(port int, kp *auth.KeyPair, peers []*Peer) *Server {
+	return &Server{port: port, keyPair: kp, peers: peers}
 }
 
 // Handles an incoming connection
@@ -54,7 +57,7 @@ func (s *Server) ServeForever() {
 		time.Sleep(time.Second)
 		log.Printf("uptime is %d", uptime)
 		for _, peer := range s.peers {
-			peer.Send(fmt.Sprintf("broadcasting uptime %d", uptime))
+			peer.Send(fmt.Sprintf("node %s has uptime %d", s.keyPair.PublicKey(), uptime))
 		}
 		uptime++
 	}
