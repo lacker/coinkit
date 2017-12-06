@@ -13,7 +13,10 @@ func TestSignedMessage(t *testing.T) {
 	sm := NewSignedMessage(kp, m)
 	str := sm.Serialize()
 	sm2, _ := NewSignedMessageFromSerialized(str)
-	if sm.message != sm2.message || sm.signer != sm2.signer {
+	if sm2 == nil {
+		t.Fatal("sm2 should not be nil")
+	}
+	if sm.signer != sm2.signer || sm.signature != sm2.signature {
 		log.Printf("sm: %+v", sm)
 		log.Printf("sm2: %+v", sm2)
 		t.Fatal("sm should equal sm2")
