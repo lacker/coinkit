@@ -34,7 +34,7 @@ func (sm *SignedMessage) Signer() string {
 }
 
 func (sm *SignedMessage) Serialize() string {
-	return fmt.Sprintf("e:%s:%s:%s", sm.signer, sm.signature, sm.message)
+	return fmt.Sprintf("e:%s:%s:%s", sm.signer, sm.signature, sm.messageString)
 }
 
 func NewSignedMessageFromSerialized(serialized string) (*SignedMessage, error) {
