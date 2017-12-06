@@ -41,7 +41,7 @@ func (s *Server) handleConnection(conn net.Conn) {
 			conn.Close()
 			break
 		}
-		log.Printf("got message: %s", sm.Message())
+		log.Printf("got message: %s", network.EncodeMessage(sm.Message()))
 		fmt.Fprintf(conn, "ok\n")
 	}
 }
