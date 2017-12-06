@@ -20,6 +20,14 @@ func NewSignedMessage(kp *KeyPair, message string) *SignedMessage {
 	}
 }
 
+func (sm *SignedMessage) Message() string {
+	return sm.message
+}
+
+func (sm *SignedMessage) Signer() string {
+	return sm.signer
+}
+
 func (sm *SignedMessage) Serialize() string {
 	return fmt.Sprintf("e:%s:%s:%s", sm.signer, sm.signature, sm.message)
 }

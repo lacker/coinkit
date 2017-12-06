@@ -24,12 +24,23 @@ func NewServer(port int, kp *auth.KeyPair, peers []*Peer) *Server {
 func (s *Server) handleConnection(conn net.Conn) {
 	log.Printf("handling a connection")
 	for {
-		message, err := bufio.NewReader(conn).ReadString('\n')
+		data, err := bufio.NewReader(conn).ReadString('\n')
 		if err != nil {
 			conn.Close()
 			break
 		}
-		log.Printf("got message: %s", message)
+		// Chop the newline
+		serialized := data[:len(data)-1]
+		sm, err := auth.NewSignedMessageFromSerialized(serialized)
+		if err != nil {
+			// The signature isn't valid.
+			// Maybe the message got chopped off? Maybe they are bad guys?
+			// Assume good intentions and close the connection.
+			log.Printf("got bad data: [%s]", data)
+			conn.Close()
+			break
+		}
+		log.Printf("got message: %s", sm.Message())
 		fmt.Fprintf(conn, "ok\n")
 	}
 }
