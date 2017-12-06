@@ -57,7 +57,10 @@ func (s *Server) ServeForever() {
 		time.Sleep(time.Second)
 		log.Printf("uptime is %d", uptime)
 		for _, peer := range s.peers {
-			peer.Send(fmt.Sprintf("node %s has uptime %d", s.keyPair.PublicKey(), uptime))
+			message := fmt.Sprintf(
+				"node %s has uptime %d", s.keyPair.PublicKey(), uptime)
+			sm := auth.NewSignedMessage(s.keyPair, message)
+			peer.Send(sm.Serialize())
 		}
 		uptime++
 	}
