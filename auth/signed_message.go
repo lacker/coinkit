@@ -4,23 +4,28 @@ import (
 	"errors"
 	"fmt"
 	"strings"
+
+	"coinkit/network"
 )
 
 type SignedMessage struct {
-	message string
+	message Message
+	messageString string
 	signer string
 	signature string
 }
 
-func NewSignedMessage(kp *KeyPair, message string) *SignedMessage {
+func NewSignedMessage(kp *KeyPair, message network.Message) *SignedMessage {
+	ms := message.String()
 	return &SignedMessage{
 		message: message,
+		messageString: ms,
 		signer: kp.PublicKey(),
-		signature: kp.Sign(message),
+		signature: kp.Sign(m),
 	}
 }
 
-func (sm *SignedMessage) Message() string {
+func (sm *SignedMessage) Message() network.Message {
 	return sm.message
 }
 
@@ -37,12 +42,21 @@ func NewSignedMessageFromSerialized(serialized string) (*SignedMessage, error) {
 	if len(parts) != 4 {
 		return nil, errors.New("could not find 4 parts")
 	}
-	version, signer, signature, message := parts[0], parts[1], parts[2], parts[3]
+	version, signer, signature, ms := parts[0], parts[1], parts[2], parts[3]
 	if version != "e" {
 		return nil, errors.New("unrecognized version")
 	}
-	if !Verify(signer, message, signature) {
+	if !Verify(signer, ms, signature) {
 		return nil, errors.New("signature failed verification")
 	}
-	return &SignedMessage{message: message, signer: signer, signature: signature}, nil
+	m, err := auth.NewMessage(ms)
+	if err != nil {
+		return nil, err
+	}
+	return &SignedMessage{
+		message: m,
+		messageString: ms,
+		signer: signer,
+		signature: signature
+	}, nil
 }
