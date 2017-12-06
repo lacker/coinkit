@@ -1,25 +1,24 @@
 package network
 
 import (
+	"encoding/json"
 	"errors"
-	"json"
 )	
 
 type Message interface {
 	MessageType() string
-	String() string
 }
 
-func (m Message) String() string {
+func EncodeMessage(m Message) string {
 	b, err := json.Marshal(m)
-	if err {
+	if err != nil {
 		panic(err)
 	}
 	return string(b)
 }
 
-func NewMessage(encoded string) (Message, error) {
-	b := []bytes(encoded)
+func DecodeMessage(encoded string) (Message, error) {
+	b := []byte(encoded)
 	var m map[string]interface{}
 	err := json.Unmarshal(b, &m)
 	if err != nil {

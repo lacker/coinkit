@@ -41,6 +41,6 @@ func main() {
 		peers = append(peers, peer)
 	}
 
-	server := network.NewServer(port, kp, peers)
+	server := NewServer(port, kp, peers)
 	server.ServeForever()
 }

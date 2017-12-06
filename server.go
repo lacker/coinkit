@@ -1,4 +1,4 @@
-package network
+package main
 
 import (
 	"bufio"
@@ -8,15 +8,16 @@ import (
 	"time"
 
 	"coinkit/auth"
+	"coinkit/network"
 )
 
 type Server struct {
 	port int
 	keyPair *auth.KeyPair
-	peers []*Peer
+	peers []*network.Peer
 }
 
-func NewServer(port int, kp *auth.KeyPair, peers []*Peer) *Server {
+func NewServer(port int, kp *auth.KeyPair, peers []*network.Peer) *Server {
 	return &Server{port: port, keyPair: kp, peers: peers}
 }
 
@@ -68,8 +69,7 @@ func (s *Server) ServeForever() {
 		time.Sleep(time.Second)
 		log.Printf("uptime is %d", uptime)
 		for _, peer := range s.peers {
-			message := fmt.Sprintf(
-				"node %s has uptime %d", s.keyPair.PublicKey(), uptime)
+			message := &network.UptimeMessage{Uptime: uptime}
 			sm := auth.NewSignedMessage(s.keyPair, message)
 			peer.Send(sm.Serialize())
 		}

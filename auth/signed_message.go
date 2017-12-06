@@ -9,19 +9,19 @@ import (
 )
 
 type SignedMessage struct {
-	message Message
+	message network.Message
 	messageString string
 	signer string
 	signature string
 }
 
 func NewSignedMessage(kp *KeyPair, message network.Message) *SignedMessage {
-	ms := message.String()
+	ms := network.EncodeMessage(message)
 	return &SignedMessage{
 		message: message,
 		messageString: ms,
 		signer: kp.PublicKey(),
-		signature: kp.Sign(m),
+		signature: kp.Sign(ms),
 	}
 }
 
@@ -49,7 +49,7 @@ func NewSignedMessageFromSerialized(serialized string) (*SignedMessage, error) {
 	if !Verify(signer, ms, signature) {
 		return nil, errors.New("signature failed verification")
 	}
-	m, err := auth.NewMessage(ms)
+	m, err := network.DecodeMessage(ms)
 	if err != nil {
 		return nil, err
 	}
@@ -57,6 +57,6 @@ func NewSignedMessageFromSerialized(serialized string) (*SignedMessage, error) {
 		message: m,
 		messageString: ms,
 		signer: signer,
-		signature: signature
+		signature: signature,
 	}, nil
 }
