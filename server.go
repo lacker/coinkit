@@ -11,14 +11,32 @@ import (
 	"coinkit/network"
 )
 
+type PeerInfo struct {
+	publicKey string
+	uptime int
+}
+
+func NewPeerInfo(publicKey string) *PeerInfo {
+	return &PeerInfo{
+		publicKey: publicKey,
+		uptime: 0,
+	}
+}
+
 type Server struct {
 	port int
 	keyPair *auth.KeyPair
 	peers []*network.Peer
+	info map[string]*PeerInfo
 }
 
 func NewServer(port int, kp *auth.KeyPair, peers []*network.Peer) *Server {
-	return &Server{port: port, keyPair: kp, peers: peers}
+	return &Server{
+		port: port,
+		keyPair: kp,
+		peers: peers,
+		info: make(map[string]*PeerInfo),
+	}
 }
 
 // Handles an incoming connection
@@ -41,7 +59,29 @@ func (s *Server) handleConnection(conn net.Conn) {
 			conn.Close()
 			break
 		}
-		log.Printf("got message: %s", network.EncodeMessage(sm.Message()))
+
+		// Get the info for this peer
+		info, ok := s.info[sm.Signer()]
+		if !ok {
+			info = NewPeerInfo(sm.Signer())
+			s.info[info.publicKey] = info
+		}
+		
+		switch m := sm.Message().(type) {
+		case *network.UptimeMessage:
+			if m.Uptime > info.uptime {
+				// As it should be
+				info.uptime = m.Uptime
+			} else if m.Uptime == info.uptime {
+				log.Printf("duplicate message for uptime %d from %s",
+					info.uptime, info.publicKey)
+			} else {
+				log.Printf("node %s appears to have restarted", info.publicKey)
+			}
+		default:
+			log.Printf("could not handle message: %s", network.EncodeMessage(m))
+		}
+				
 		fmt.Fprintf(conn, "ok\n")
 	}
 }
