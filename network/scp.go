@@ -6,9 +6,10 @@ import (
 // Stuff for implementing the Stellar Consensus Protocol. See:
 // https://www.stellar.org/papers/stellar-consensus-protocol.pdf
 
-// For now the network will just be tracking its own uptime.
+// For now each block just has a list of comments.
+// This isn't supposed to be useful, it's just for testing.
 type SlotValue struct {
-	Uptime float64
+	Comments []string
 }
 
 type QuorumSlice struct {
@@ -22,7 +23,7 @@ type QuorumSlice struct {
 	Threshold int
 }
 
-type NominateMessage interface {
+type NominateMessage struct {
 	// What slot we are nominating values for
 	Slot int
 
@@ -30,3 +31,42 @@ type NominateMessage interface {
 	Accept []SlotValue
 	Slice QuorumSlice
 }
+
+func (m *NominateMessage) MessageType() string {
+	return "Nominate"
+}
+
+// Ballot phases
+type Phase int
+const (
+	Prepare Phase = iota
+	Confirm
+	Externalize
+)
+
+type StateBuilder struct {
+	// Which slot is actively being built
+	slot int
+
+	// Values for past slots that have already achieved consensus
+	map[int]SlotValue
+
+	// The nomination pipeline
+	nominated []SlotValue
+	accepted []SlotValue
+	candidates []SlotValue
+
+	// The last NominateMessage received from each node
+	lastNominate map[string]NominateMessage
+
+	phase Phase
+	// TODO: more stuff, see pg 23
+	
+	// The last BallotMessage received from each node
+	lastBallot map[string]BallotMessage
+}
+
+func NewStateBuilder() *StateBuilder {
+	// TODO
+}
+
