@@ -36,6 +36,15 @@ func (m *NominateMessage) MessageType() string {
 	return "Nominate"
 }
 
+type NominationState struct {
+	nominated []SlotValue
+	accepted []SlotValue
+	candidates []SlotValue
+
+	// The last NominateMessage received from each node
+	received map[string]*NominateMessage
+}
+
 // Ballot phases
 type Phase int
 const (
@@ -44,29 +53,35 @@ const (
 	Externalize
 )
 
+type BallotMessage struct {
+	// TODO
+}
+
+type BallotState struct {
+	// The current ballot we are trying to prepare and commit.
+	// Lowest valid ballot is 1.
+	current int
+
+	// The highest two ballots that are accepted as prepared.
+	// 0 means there is no such accepted ballot
+	highestAccepted int
+	nextHighestAccepted int
+
+	// TODO: more stuff from pg 23
+}
+
 type StateBuilder struct {
 	// Which slot is actively being built
 	slot int
 
 	// Values for past slots that have already achieved consensus
-	map[int]SlotValue
+	map[int]SlotValue values
 
-	// The nomination pipeline
-	nominated []SlotValue
-	accepted []SlotValue
-	candidates []SlotValue
-
-	// The last NominateMessage received from each node
-	lastNominate map[string]NominateMessage
-
-	phase Phase
-	// TODO: more stuff, see pg 23
-	
-	// The last BallotMessage received from each node
-	lastBallot map[string]BallotMessage
+	NominationState nomination
+	BallotState ballot
 }
 
 func NewStateBuilder() *StateBuilder {
-	// TODO
+	// TODO,
 }
 
