@@ -53,6 +53,11 @@ const (
 	Externalize
 )
 
+type Ballot struct {
+	counter int
+	value SlotValue
+}
+
 type BallotMessage struct {
 	// TODO
 }
