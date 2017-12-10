@@ -5,6 +5,8 @@ import (
 
 // Stuff for implementing the Stellar Consensus Protocol. See:
 // https://www.stellar.org/papers/stellar-consensus-protocol.pdf
+// When there are frustrating single-letter variable names, it's because we are
+// making the names line up with the protocol paper.
 
 // For now each block just has a list of comments.
 // This isn't supposed to be useful, it's just for testing.
@@ -25,11 +27,15 @@ type QuorumSlice struct {
 
 type NominateMessage struct {
 	// What slot we are nominating values for
-	Slot int
+	I int
 
-	Nominate []SlotValue
-	Accept []SlotValue
-	Slice QuorumSlice
+	// The values we have voted to nominate
+	X []SlotValue
+
+	// The values we have accepted as nominated
+	Y []SlotValue
+	
+	D QuorumSlice
 }
 
 func (m *NominateMessage) MessageType() string {
@@ -37,12 +43,17 @@ func (m *NominateMessage) MessageType() string {
 }
 
 type NominationState struct {
-	nominated []SlotValue
-	accepted []SlotValue
-	candidates []SlotValue
+	// The values we have voted to nominate
+	X []SlotValue
+
+	// The values we have accepted as nominated
+	Y []SlotValue
+
+	// The values that we consider to be candidates 
+	Z []SlotValue
 
 	// The last NominateMessage received from each node
-	received map[string]*NominateMessage
+	N map[string]*NominateMessage
 }
 
 // Ballot phases
@@ -54,25 +65,30 @@ const (
 )
 
 type Ballot struct {
-	counter int
-	value SlotValue
-}
+	// An increasing counter, n >= 1, to ensure we can always have more ballots
+	n int
 
-type BallotMessage struct {
-	// TODO
+	// The value this ballot proposes
+	x SlotValue
 }
 
 type BallotState struct {
 	// The current ballot we are trying to prepare and commit.
-	// Lowest valid ballot is 1.
-	current int
+	// TODO: figure out when if ever this is nil
+	b *Ballot
 
 	// The highest two ballots that are accepted as prepared.
-	// 0 means there is no such accepted ballot
-	highestAccepted int
-	nextHighestAccepted int
+	// p is the highest, pPrime the next.
+	// It's nil if there is no such ballot.
+	p *Ballot
+	pPrime *Ballot
 
 	// TODO: more stuff from pg 23
+}
+
+// PrepareMessage is part of the ballot protocol
+type PrepareMessage struct {
+	// TODO
 }
 
 type StateBuilder struct {
@@ -82,8 +98,8 @@ type StateBuilder struct {
 	// Values for past slots that have already achieved consensus
 	map[int]SlotValue values
 
-	NominationState nomination
-	BallotState ballot
+	nState NominationState
+	bState BallotState
 }
 
 func NewStateBuilder() *StateBuilder {
