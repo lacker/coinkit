@@ -42,6 +42,7 @@ func (m *NominateMessage) MessageType() string {
 	return "Nominate"
 }
 
+// See page 21 of the protocol paper for more detail here.
 type NominationState struct {
 	// The values we have voted to nominate
 	X []SlotValue
@@ -72,9 +73,9 @@ type Ballot struct {
 	x SlotValue
 }
 
+// See page 23 of the protocol paper for more detail here.
 type BallotState struct {
 	// The current ballot we are trying to prepare and commit.
-	// TODO: figure out when if ever this is nil
 	b *Ballot
 
 	// The highest two ballots that are accepted as prepared.
@@ -83,12 +84,48 @@ type BallotState struct {
 	p *Ballot
 	pPrime *Ballot
 
-	// TODO: more stuff from pg 23
+	// In the Prepare phase, c is the lowest and h is the highest ballot
+	// for which we have voted to commit but not accepted abort.
+	// In the Confirm phase, c is the lowest and h is the highest ballot
+	// for which we accepted commit.
+	// In the Externalize phase, c is the lowest and h is the highest ballot
+	// for which we confirmed commit.
+	// If c is not nil, then c <= h <= b.
+	c *Ballot
+	h *Ballot
+
+	// The value to use in the next ballot
+	z SlotValue
+	
+	// The latest PrepareMessage, ConfirmMessage, or ExternalizeMessage from each peer
+	M map[string]Message
 }
 
-// PrepareMessage is part of the ballot protocol
+// PrepareMessage is the first phase of the three-phase ballot protocol
 type PrepareMessage struct {
 	// TODO
+}
+
+func (m *PrepareMessage) MessageType() string {
+	return "Prepare"
+}
+
+// ConfirmMessage is the second phase of the three-phase ballot protocol
+type ConfirmMessage struct {
+	// TODO
+}
+
+func (m *ConfirmMessage) MessageType() string {
+	return "Confirm"
+}
+
+// ExternalizeMessage is the third phase of the three-phase ballot protocol
+type ExternalizeMessage struct {
+	// TODO
+}
+
+func (m *ExternalizeMessage) MessageType() string {
+	return "Externalize"
 }
 
 type StateBuilder struct {
