@@ -1,8 +1,10 @@
 package network
 
 import (
+	"fmt"
 	"sort"
 	"strings"
+	"time"
 )
 
 // Stuff for implementing the Stellar Consensus Protocol. See:
@@ -266,9 +268,22 @@ func NewStateBuilder(publicKey string, members []string, threshold int) *StateBu
 
 // OutgoingMessage returns nil if there should be no outgoing message at this time
 func (sb *StateBuilder) OutgoingMessage() Message {
-	// TODO: craft an outgoing nomination message rather than doing nothing, if
-	// we have nothing
-	return nil
+	// TODO: check if nomination is done and we should send a ballot message
+
+	if !sb.nState.HasNomination() {
+		// There's nothing to nominate. Let's nominate something.
+		// TODO: if it's not our turn, wait instead of nominating
+		comment := fmt.Sprintf(
+			"this is %s at %s", sb.publicKey, time.Now().Format("15:04:05.00000"))
+		sb.nState.SetDefault(MakeSlotValue(comment))
+	}
+
+	return &NominateMessage{
+		I: sb.slot,
+		X: sb.nState.X,
+		Y: sb.nState.Y,
+		D: sb.D,
+	}
 }
 
 // Handle handles an incoming message
