@@ -103,7 +103,26 @@ type BallotState struct {
 
 // PrepareMessage is the first phase of the three-phase ballot protocol
 type PrepareMessage struct {
-	// TODO
+	// What slot we are preparing ballots for
+	I int
+
+	// The current ballot we are trying to prepare
+	Bn int
+	Bx SlotValue
+
+	// The contents of state.p
+	Pn int
+	Px SlotValue
+
+	// The contents of state.pPrime
+	Ppn int
+	Ppx SlotValue
+
+	// Ballot numbers for c and h
+	Cn int
+	Hn int
+
+	D QuorumSlice
 }
 
 func (m *PrepareMessage) MessageType() string {
@@ -112,7 +131,23 @@ func (m *PrepareMessage) MessageType() string {
 
 // ConfirmMessage is the second phase of the three-phase ballot protocol
 type ConfirmMessage struct {
-	// TODO
+	// What slot we are confirming ballots for
+	I int
+
+	// The current ballot we are trying to confirm
+	Bn int
+	Bx SlotValue
+
+	// state.p.n
+	Pn int
+
+	// state.c.n
+	Cn int
+
+	// state.h.n
+	Hn int
+
+	D QuorumSlice
 }
 
 func (m *ConfirmMessage) MessageType() string {
@@ -120,8 +155,21 @@ func (m *ConfirmMessage) MessageType() string {
 }
 
 // ExternalizeMessage is the third phase of the three-phase ballot protocol
+// Sent after we have confirmed a commit
 type ExternalizeMessage struct {
-	// TODO
+	// What slot we are externalizing
+	I int
+
+	// The value at this slot
+	X SlotValue
+
+	// state.c.n
+	Cn int
+
+	// state.h.n
+	Hn int
+
+	D QuorumSlice
 }
 
 func (m *ExternalizeMessage) MessageType() string {
@@ -140,6 +188,6 @@ type StateBuilder struct {
 }
 
 func NewStateBuilder() *StateBuilder {
-	// TODO,
+	// TODO
 }
 
