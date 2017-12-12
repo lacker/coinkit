@@ -241,15 +241,28 @@ type StateBuilder struct {
 	// Values for past slots that have already achieved consensus
 	values map[int]SlotValue
 
-	nState NominationState
-	bState BallotState
+	nState *NominationState
+	bState *BallotState
+
+	// Who we care about
+	D QuorumSlice
+
+	// Who we are
+	publicKey string
 }
 
-func NewStateBuilder() *StateBuilder {
+func NewStateBuilder(publicKey string, members []string, threshold int) *StateBuilder {
+	// TODO: configure quorum
+	
 	return &StateBuilder{
 		slot: 1,
 		values: make(map[int]SlotValue),
 		nState: NewNominationState(),
+		D: QuorumSlice{
+			Members: members,
+			Threshold: threshold,
+		},
+		publicKey: publicKey,
 	}
 }
 
