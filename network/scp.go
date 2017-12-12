@@ -249,6 +249,7 @@ func NewStateBuilder() *StateBuilder {
 	return &StateBuilder{
 		slot: 1,
 		values: make(map[int]SlotValue),
+		nState: NewNominationState(),
 	}
 }
 
