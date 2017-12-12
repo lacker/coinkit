@@ -1,6 +1,7 @@
 package network
 
 import (
+	"strings"
 )
 
 // Stuff for implementing the Stellar Consensus Protocol. See:
@@ -12,6 +13,16 @@ import (
 // This isn't supposed to be useful, it's just for testing.
 type SlotValue struct {
 	Comments []string
+}
+
+func HasSlotValue(list []SlotValue, v SlotValue) {
+	k := strings.join(v, ",")
+	for _, s := range list {
+		if strings.join(s, ",") == k {
+			return true
+		}
+	}
+	return false
 }
 
 type QuorumSlice struct {
@@ -55,6 +66,36 @@ type NominationState struct {
 
 	// The last NominateMessage received from each node
 	N map[string]*NominateMessage
+}
+
+func NewNominationState() *NominationState {
+	return &NominationState{
+		X: make([]SlotValue),
+		Y: make([]SlotValue),
+		Z: make([]SlotValue),
+		N: make(map[string]*NominateMessage),
+	}
+}
+
+// HasNomination tells you whether this nomination state can currently send out
+// a nominate message.
+// If we have never received a nomination from a peer, and haven't had SetDefault
+// called ourselves, then we won't have a nomination.
+func (s *NominationState) HasNomination() bool {
+	return len(s.X) > 0
+}
+
+func (s *NominationState) SetDefault(SlotValue v) {
+	if s.HasNomination() {
+		// We already have something to nominate
+		return
+	}
+	s.X = []SlotValue{v}
+}
+
+// Handles an incoming nomination message from a peer
+func (s *NominationState) Handle(node string, NominationMessage *m) {
+	// TODO
 }
 
 // Ballot phases
