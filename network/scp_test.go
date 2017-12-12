@@ -12,6 +12,7 @@ func TestCombineSlotValues(t *testing.T) {
 	d := Combine(a, b)
 	e := Combine(d, c)
 	if strings.Join(e.Comments, ",") != "bar,baz,foo" {
+		t.Fatal("a is", a)
 		t.Fatal("e is", e)
 	}
 }

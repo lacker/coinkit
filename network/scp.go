@@ -25,7 +25,7 @@ func Combine(a SlotValue, b SlotValue) SlotValue {
 	sort.Strings(joined)
 	answer := []string{}
 	for _, item := range joined {
-		if len(answer) != 0 && answer[len(answer)-1] != item {
+		if len(answer) == 0 || answer[len(answer)-1] != item {
 			answer = append(answer, item)
 		}
 	}
