@@ -252,8 +252,6 @@ type StateBuilder struct {
 }
 
 func NewStateBuilder(publicKey string, members []string, threshold int) *StateBuilder {
-	// TODO: configure quorum
-	
 	return &StateBuilder{
 		slot: 1,
 		values: make(map[int]SlotValue),
