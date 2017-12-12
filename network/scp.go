@@ -264,3 +264,15 @@ func NewStateBuilder(publicKey string, members []string, threshold int) *StateBu
 	}
 }
 
+// OutgoingMessage returns nil if there should be no outgoing message at this time
+func (sb *StateBuilder) OutgoingMessage() Message {
+	// TODO: craft an outgoing nomination message rather than doing nothing, if
+	// we have nothing
+	return nil
+}
+
+// Handle handles an incoming message
+func (sb *StateBuilder) Handle(sender string, m Message) {
+	// TODO: handle incoming nomination messages
+}
+
