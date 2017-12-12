@@ -1,6 +1,7 @@
 package network
 
 import (
+	"sort"
 	"strings"
 )
 
@@ -13,6 +14,22 @@ import (
 // This isn't supposed to be useful, it's just for testing.
 type SlotValue struct {
 	Comments []string
+}
+
+func MakeSlotValue(comment string) SlotValue {
+	return SlotValue{Comments: []string{comment}
+}
+
+func Combine(a SlotValue, b SlotValue) {
+	joined := append(a, b...)
+	sort.Strings(joined)
+	answer := []string{}
+	for _, item := range joined {
+		if len(answer) != 0 && answer[len(answer)-1] != item {
+			answer = append(answer, item)
+		}
+	}
+	return SlotValue{Comments: answer}
 }
 
 func HasSlotValue(list []SlotValue, v SlotValue) {
@@ -94,7 +111,7 @@ func (s *NominationState) SetDefault(SlotValue v) {
 }
 
 // Handles an incoming nomination message from a peer
-func (s *NominationState) Handle(node string, NominationMessage *m) {
+func (s *NominationState) Handle(node string, NominateMessage *m) {
 	// TODO
 }
 
