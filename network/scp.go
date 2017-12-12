@@ -17,11 +17,11 @@ type SlotValue struct {
 }
 
 func MakeSlotValue(comment string) SlotValue {
-	return SlotValue{Comments: []string{comment}
+	return SlotValue{Comments: []string{comment}}
 }
 
-func Combine(a SlotValue, b SlotValue) {
-	joined := append(a, b...)
+func Combine(a SlotValue, b SlotValue) SlotValue {
+	joined := append(a.Comments, b.Comments...)
 	sort.Strings(joined)
 	answer := []string{}
 	for _, item := range joined {
@@ -32,10 +32,10 @@ func Combine(a SlotValue, b SlotValue) {
 	return SlotValue{Comments: answer}
 }
 
-func HasSlotValue(list []SlotValue, v SlotValue) {
-	k := strings.join(v, ",")
+func HasSlotValue(list []SlotValue, v SlotValue) bool {
+	k := strings.Join(v.Comments, ",")
 	for _, s := range list {
-		if strings.join(s, ",") == k {
+		if strings.Join(s.Comments, ",") == k {
 			return true
 		}
 	}
@@ -87,9 +87,9 @@ type NominationState struct {
 
 func NewNominationState() *NominationState {
 	return &NominationState{
-		X: make([]SlotValue),
-		Y: make([]SlotValue),
-		Z: make([]SlotValue),
+		X: make([]SlotValue, 0),
+		Y: make([]SlotValue, 0),
+		Z: make([]SlotValue, 0),
 		N: make(map[string]*NominateMessage),
 	}
 }
@@ -102,7 +102,7 @@ func (s *NominationState) HasNomination() bool {
 	return len(s.X) > 0
 }
 
-func (s *NominationState) SetDefault(SlotValue v) {
+func (s *NominationState) SetDefault(v SlotValue) {
 	if s.HasNomination() {
 		// We already have something to nominate
 		return
@@ -111,7 +111,7 @@ func (s *NominationState) SetDefault(SlotValue v) {
 }
 
 // Handles an incoming nomination message from a peer
-func (s *NominationState) Handle(node string, NominateMessage *m) {
+func (s *NominationState) Handle(node string, m *NominateMessage) {
 	// TODO
 }
 
@@ -239,13 +239,16 @@ type StateBuilder struct {
 	slot int
 
 	// Values for past slots that have already achieved consensus
-	map[int]SlotValue values
+	values map[int]SlotValue
 
 	nState NominationState
 	bState BallotState
 }
 
 func NewStateBuilder() *StateBuilder {
-	// TODO
+	return &StateBuilder{
+		slot: 1,
+		values: make(map[int]SlotValue),
+	}
 }
 
