@@ -30,10 +30,15 @@ type Server struct {
 	info map[string]*PeerInfo
 }
 
-func NewServer(port int, kp *auth.KeyPair, peers []*network.Peer) *Server {
+func NewServer(c *Config) *Server {
+	var peers []*network.Peer
+	for _, p := range c.PeerPorts {
+		peers = append(peers, network.NewPeer(p))
+	}
+	
 	return &Server{
-		port: port,
-		keyPair: kp,
+		port: c.Port,
+		keyPair: c.KeyPair,
 		peers: peers,
 		info: make(map[string]*PeerInfo),
 	}
