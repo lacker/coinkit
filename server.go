@@ -50,6 +50,7 @@ func NewServer(c *Config) *Server {
 }
 
 // Handles an incoming connection
+// TODO: put the data logic in the core loop to avoid parallelism bugs
 func (s *Server) handleConnection(conn net.Conn) {
 	log.Printf("handling a connection")
 	for {

@@ -22,6 +22,7 @@ func MakeSlotValue(comment string) SlotValue {
 	return SlotValue{Comments: []string{comment}}
 }
 
+// Combine is specific to what the slot values are
 func Combine(a SlotValue, b SlotValue) SlotValue {
 	joined := append(a.Comments, b.Comments...)
 	sort.Strings(joined)
@@ -32,6 +33,18 @@ func Combine(a SlotValue, b SlotValue) SlotValue {
 		}
 	}
 	return SlotValue{Comments: answer}
+}
+
+// CombineSlice just runs Combine on each value in a slice
+func CombineSlice(list []SlotValue) SlotValue {
+	if len(list) == 0 {
+		panic("CombineSlice should not be called on empty slices")
+	}
+	if len(list) == 1 {
+		return list[0]
+	}
+	mid := len(list) / 2
+	return Combine(CombineSlice(list[:mid]), CombineSlice(list[mid:]))
 }
 
 func HasSlotValue(list []SlotValue, v SlotValue) bool {
@@ -110,6 +123,20 @@ func (s *NominationState) SetDefault(v SlotValue) {
 		return
 	}
 	s.X = []SlotValue{v}
+}
+
+// PredictValue can predict the value iff HasNomination is true. If not, panic
+func (s *NominationState) PredictValue() SlotValue {
+	if len(s.Z) > 0 {
+		return CombineSlice(s.Z)
+	}
+	if len(s.Y) > 0 {
+		return CombineSlice(s.Y)
+	}
+	if len(s.X) > 0 {
+		return CombineSlice(s.X)
+	}
+	panic("PredictValue was called when HasNomination was false")
 }
 
 // Handles an incoming nomination message from a peer
