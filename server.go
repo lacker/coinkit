@@ -28,6 +28,7 @@ type Server struct {
 	keyPair *auth.KeyPair
 	peers []*network.Peer
 	info map[string]*PeerInfo
+	state *network.StateBuilder
 }
 
 func NewServer(c *Config) *Server {
@@ -35,12 +36,15 @@ func NewServer(c *Config) *Server {
 	for _, p := range c.PeerPorts {
 		peers = append(peers, network.NewPeer(p))
 	}
+
+	state := network.NewStateBuilder(c.KeyPair.PublicKey(), c.Members, c.Threshold)
 	
 	return &Server{
 		port: c.Port,
 		keyPair: c.KeyPair,
 		peers: peers,
 		info: make(map[string]*PeerInfo),
+		state: state,
 	}
 }
 
@@ -83,6 +87,8 @@ func (s *Server) handleConnection(conn net.Conn) {
 			} else {
 				log.Printf("node %s appears to have restarted", info.publicKey)
 			}
+		case *network.NominateMessage:
+			s.state.Handle(info.publicKey, m)
 		default:
 			log.Printf("could not handle message: %s", network.EncodeMessage(m))
 		}
