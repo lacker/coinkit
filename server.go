@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"log"
+	"math/rand"
 	"net"
 	"time"
 
@@ -112,18 +113,20 @@ func (s *Server) listen() {
 	}
 }
 
+func (s *Server) broadcast(m network.Message) {
+	sm := auth.NewSignedMessage(s.keyPair, m)
+	line := sm.Serialize()
+	for _, peer := range s.peers {
+		peer.Send(line)
+	}
+}
+
 func (s *Server) ServeForever() {
 	go s.listen()
 
-	uptime := 0
 	for {
-		time.Sleep(time.Second)
-		log.Printf("uptime is %d", uptime)
-		for _, peer := range s.peers {
-			message := &network.UptimeMessage{Uptime: uptime}
-			sm := auth.NewSignedMessage(s.keyPair, message)
-			peer.Send(sm.Serialize())
-		}
-		uptime++
+		message := s.state.OutgoingMessage()
+		time.Sleep(time.Second * time.Duration(0.5 + rand.Float64()))
+		s.broadcast(message)
 	}
 }
