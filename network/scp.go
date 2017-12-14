@@ -59,6 +59,7 @@ func HasSlotValue(list []SlotValue, v SlotValue) bool {
 
 type QuorumSlice struct {
 	// Members is a list of public keys for nodes that occur in the quorum slice.
+	// Members must be unique.
 	// Typically includes ourselves.
 	Members []string
 
@@ -66,6 +67,22 @@ type QuorumSlice struct {
 	// The protocol can support other sorts of slices, like weighted or any wacky
 	// thing, but for now we only do this simple "any k out of these n" voting.
 	Threshold int
+}
+
+func (qs *QuorumSlice) MeetsQuorum(nodes []string) bool {
+	count := 0
+	for _, member := range qs.Members {
+		for _, node := range nodes {
+			if node == member {
+				count++
+				if count >= qs.Threshold {
+					return true
+				}
+				break
+			}
+		}
+	}
+	return false
 }
 
 type NominateMessage struct {
@@ -98,14 +115,22 @@ type NominationState struct {
 
 	// The last NominateMessage received from each node
 	N map[string]*NominateMessage
+
+	// Who we are
+	publicKey string
+
+	// Who we listen to for quorum
+	D QuorumSlice
 }
 
-func NewNominationState() *NominationState {
+func NewNominationState(publicKey string, qs QuorumSlice) *NominationState {
 	return &NominationState{
 		X: make([]SlotValue, 0),
 		Y: make([]SlotValue, 0),
 		Z: make([]SlotValue, 0),
 		N: make(map[string]*NominateMessage),
+		publicKey: publicKey,
+		D: qs,
 	}
 }
 
@@ -137,6 +162,17 @@ func (s *NominationState) PredictValue() SlotValue {
 		return CombineSlice(s.X)
 	}
 	panic("PredictValue was called when HasNomination was false")
+}
+
+func (s *NominationState) QuorumSlice(node string) (*QuorumSlice, bool) {
+	if node == s.publicKey {
+		return &s.D, true
+	}
+	m, ok := s.N[node]
+	if !ok {
+		return nil, false
+	}
+	return &m.D, true
 }
 
 // Handles an incoming nomination message from a peer
@@ -186,6 +222,8 @@ type BallotState struct {
 	
 	// The latest PrepareMessage, ConfirmMessage, or ExternalizeMessage from each peer
 	M map[string]Message
+
+	D QuorumSlice
 }
 
 // PrepareMessage is the first phase of the three-phase ballot protocol
@@ -281,14 +319,15 @@ type StateBuilder struct {
 }
 
 func NewStateBuilder(publicKey string, members []string, threshold int) *StateBuilder {
+	qs := QuorumSlice{
+		Members: members,
+		Threshold: threshold,
+	}
 	return &StateBuilder{
 		slot: 1,
 		values: make(map[int]SlotValue),
-		nState: NewNominationState(),
-		D: QuorumSlice{
-			Members: members,
-			Threshold: threshold,
-		},
+		nState: NewNominationState(publicKey, qs),
+		D: qs,
 		publicKey: publicKey,
 	}
 }
