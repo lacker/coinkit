@@ -180,7 +180,7 @@ func (s *NominationState) PublicKey() string {
 }
 
 type QuorumFinder interface {
-	QuorumSlice(node string) QuorumSlice
+	QuorumSlice(node string) (*QuorumSlice, bool)
 	PublicKey() string
 }
 
@@ -192,8 +192,8 @@ func MeetsQuorum(f QuorumFinder, nodes []string) bool {
 	hasUs := false
 	filtered := []string{}
 	for _, node := range nodes {
-		qs := f.QuorumSlice(node)
-		if qs.SatisfiedWith(nodes) {
+		qs, ok := f.QuorumSlice(node)
+		if ok && qs.SatisfiedWith(nodes) {
 			filtered = append(filtered, node)
 			if node == f.PublicKey() {
 				hasUs = true

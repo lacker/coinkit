@@ -16,3 +16,13 @@ func TestCombineSlotValues(t *testing.T) {
 		t.Fatal("e is", e)
 	}
 }
+
+func TestSolipsistQuorum(t *testing.T) {
+	s := NewStateBuilder("foo", []string{"foo"}, 1)
+	if !MeetsQuorum(s.nState, []string{"foo"}) {
+		t.Fatal("foo should meet the quorum")
+	}
+	if MeetsQuorum(s.nState, []string{"bar"}) {
+		t.Fatal("bar should not meet the quorum")
+	}
+}
