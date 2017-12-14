@@ -222,7 +222,7 @@ func MeetsQuorum(f QuorumFinder, nodes []string) bool {
 func (s *NominationState) MaybeAccept(v SlotValue) bool {
 	if HasSlotValue(s.Y, v) {
 		// We already did accept v's nomination
-		return
+		return false
 	}
 	
 	votedOrAccepted := []string{}
