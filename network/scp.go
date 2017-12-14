@@ -185,7 +185,6 @@ type QuorumFinder interface {
 }
 
 // Returns whether this set of nodes meets the quorum for the network overall.
-// TODO: test this logic
 func MeetsQuorum(f QuorumFinder, nodes []string) bool {
 	// Filter out the nodes in the potential quorum that do not have their
 	// own quorum slices met
