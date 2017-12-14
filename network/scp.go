@@ -69,7 +69,7 @@ type QuorumSlice struct {
 	Threshold int
 }
 
-func (qs *QuorumSlice) MeetsQuorum(nodes []string) bool {
+func (qs *QuorumSlice) SatisfiedWith(nodes []string) bool {
 	count := 0
 	for _, member := range qs.Members {
 		for _, node := range nodes {
@@ -173,6 +173,40 @@ func (s *NominationState) QuorumSlice(node string) (*QuorumSlice, bool) {
 		return nil, false
 	}
 	return &m.D, true
+}
+
+func (s *NominationState) PublicKey() string {
+	return s.publicKey
+}
+
+type QuorumFinder interface {
+	QuorumSlice(node string) QuorumSlice
+	PublicKey() string
+}
+
+// Returns whether this set of nodes meets the quorum for the network overall.
+// TODO: test this logic
+func MeetsQuorum(f QuorumFinder, nodes []string) bool {
+	// Filter out the nodes in the potential quorum that do not have their
+	// own quorum slices met
+	hasUs := false
+	filtered := []string{}
+	for _, node := range nodes {
+		qs := f.QuorumSlice(node)
+		if qs.SatisfiedWith(nodes) {
+			filtered = append(filtered, node)
+			if node == f.PublicKey() {
+				hasUs = true
+			}
+		}
+	}
+	if !hasUs {
+		return false
+	}
+	if len(filtered) == len(nodes) {
+		return true
+	}
+	return MeetsQuorum(f, filtered)
 }
 
 // Handles an incoming nomination message from a peer
