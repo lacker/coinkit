@@ -69,13 +69,13 @@ type QuorumSlice struct {
 	Threshold int
 }
 
-func (qs *QuorumSlice) SatisfiedWith(nodes []string) bool {
+func (qs *QuorumSlice) atLeast(nodes []string, t int) bool {
 	count := 0
 	for _, member := range qs.Members {
 		for _, node := range nodes {
 			if node == member {
 				count++
-				if count >= qs.Threshold {
+				if count >= t {
 					return true
 				}
 				break
@@ -83,6 +83,14 @@ func (qs *QuorumSlice) SatisfiedWith(nodes []string) bool {
 		}
 	}
 	return false
+}
+
+func (qs *QuorumSlice) BlockedBy(nodes []string) bool {
+	return qs.atLeast(nodes, len(qs.Members) - qs.Threshold + 1)
+}
+
+func (qs *QuorumSlice) SatisfiedWith(nodes []string) bool {
+	return qs.atLeast(nodes, qs.Threshold)
 }
 
 type NominateMessage struct {
@@ -206,6 +214,46 @@ func MeetsQuorum(f QuorumFinder, nodes []string) bool {
 		return true
 	}
 	return MeetsQuorum(f, filtered)
+}
+
+// MaybeAccept checks whether we should accept the nomination for this slot value,
+// and adds it to our accepted list if appropriate.
+// Returns whether we added v.
+func (s *NominationState) MaybeAccept(v SlotValue) bool {
+	if HasSlotValue(s.Y, v) {
+		// We already did accept v's nomination
+		return
+	}
+	
+	votedOrAccepted := []string{}
+	if HasSlotValue(s.X, v) {
+		votedOrAccepted = append(votedOrAccepted, s.publicKey)
+	}
+	accepted := []string{}
+	for node, m := range s.N {
+		if HasSlotValue(m.Y, v) {
+			votedOrAccepted = append(votedOrAccepted, node)
+			accepted = append(accepted, node)
+			continue
+		}
+		if HasSlotValue(m.X, v) {
+			votedOrAccepted = append(votedOrAccepted, node)
+		}
+	}
+
+	// The rules are on page 13, section 5.3
+	// Rule 1: if a quorum has either voted for the nomination or accepted the
+	// nomination, we accept it.
+	if MeetsQuorum(s, votedOrAccepted) {
+		s.Y = append(s.Y, v)
+		return true
+	}
+	// Rule 2: if a blocking set for us accepts the nomination, we accept it.
+	if s.D.BlockedBy(accepted) {
+		s.Y = append(s.Y, v)
+		return true
+	}
+	return false
 }
 
 // Handles an incoming nomination message from a peer
