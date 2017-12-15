@@ -34,10 +34,23 @@ func TestConsensus(t *testing.T) {
 	cal := NewStateBuilder("cal", members, 3)
 	dan := NewStateBuilder("dan", members, 3)
 
+	// Let everyone receive an initial nomination from Amy
 	a := amy.OutgoingMessage()
 	bob.Handle("amy", a)
 	cal.Handle("amy", a)
 	dan.Handle("amy", a)
 
-	// TODO: test something about the state here
+	// At this point everyone should have a nomination
+	if !amy.nState.HasNomination() {
+		t.Fatal("!amy.nState.HasNomination()")
+	}
+	if !bob.nState.HasNomination() {
+		t.Fatal("!bob.nState.HasNomination()")
+	}
+	if !cal.nState.HasNomination() {
+		t.Fatal("!cal.nState.HasNomination()")
+	}
+	if !dan.nState.HasNomination() {
+		t.Fatal("!dan.nState.HasNomination()")
+	}
 }
