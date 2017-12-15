@@ -94,7 +94,7 @@ func (qs *QuorumSlice) SatisfiedWith(nodes []string) bool {
 	return qs.atLeast(nodes, qs.Threshold)
 }
 
-type NominateMessage struct {
+type NominationMessage struct {
 	// What slot we are nominating values for
 	I int
 
@@ -107,8 +107,8 @@ type NominateMessage struct {
 	D QuorumSlice
 }
 
-func (m *NominateMessage) MessageType() string {
-	return "Nominate"
+func (m *NominationMessage) MessageType() string {
+	return "Nomination"
 }
 
 // See page 21 of the protocol paper for more detail here.
@@ -122,8 +122,8 @@ type NominationState struct {
 	// The values that we consider to be candidates 
 	Z []SlotValue
 
-	// The last NominateMessage received from each node
-	N map[string]*NominateMessage
+	// The last NominationMessage received from each node
+	N map[string]*NominationMessage
 
 	// Who we are
 	publicKey string
@@ -137,7 +137,7 @@ func NewNominationState(publicKey string, qs QuorumSlice) *NominationState {
 		X: make([]SlotValue, 0),
 		Y: make([]SlotValue, 0),
 		Z: make([]SlotValue, 0),
-		N: make(map[string]*NominateMessage),
+		N: make(map[string]*NominationMessage),
 		publicKey: publicKey,
 		D: qs,
 	}
@@ -268,7 +268,7 @@ func (s *NominationState) MaybeAdvance(v SlotValue) bool {
 }
 
 // Handles an incoming nomination message from a peer node
-func (s *NominationState) Handle(node string, m *NominateMessage) {
+func (s *NominationState) Handle(node string, m *NominationMessage) {
 	// What nodes we have seen new information about
 	touched := []SlotValue{}
 
@@ -474,7 +474,7 @@ func (sb *StateBuilder) OutgoingMessage() Message {
 		sb.nState.SetDefault(MakeSlotValue(comment))
 	}
 
-	return &NominateMessage{
+	return &NominationMessage{
 		I: sb.slot,
 		X: sb.nState.X,
 		Y: sb.nState.Y,
@@ -485,7 +485,7 @@ func (sb *StateBuilder) OutgoingMessage() Message {
 // Handle handles an incoming message
 func (sb *StateBuilder) Handle(sender string, message Message) {
 	switch m := message.(type) {
-	case *NominateMessage:
+	case *NominationMessage:
 		sb.nState.Handle(sender, m)
 	default:
 		log.Printf("unrecognized message: %v", m)

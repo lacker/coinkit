@@ -89,7 +89,7 @@ func (s *Server) handleConnection(conn net.Conn) {
 			} else {
 				log.Printf("node %s appears to have restarted", info.publicKey)
 			}
-		case *network.NominateMessage:
+		case *network.NominationMessage:
 			s.state.Handle(info.publicKey, m)
 		default:
 			log.Printf("could not handle message: %s", network.EncodeMessage(m))
