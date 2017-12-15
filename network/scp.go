@@ -216,20 +216,25 @@ func MeetsQuorum(f QuorumFinder, nodes []string) bool {
 	return MeetsQuorum(f, filtered)
 }
 
-// MaybeAccept checks whether we should accept the nomination for this slot value,
+// MaybeAdvance checks whether we should accept the nomination for this slot value,
 // and adds it to our accepted list if appropriate.
-// Returns whether we added v.
-func (s *NominationState) MaybeAccept(v SlotValue) bool {
-	if HasSlotValue(s.Y, v) {
-		// We already did accept v's nomination
+// It also checks whether we should confirm the nomination.
+// Returns whether we made any changes.
+func (s *NominationState) MaybeAdvance(v SlotValue) bool {
+	if HasSlotValue(s.Z, v) {
+		// We already confirmed this, so we can't do anything more
 		return false
 	}
 	
+	changed := false	
 	votedOrAccepted := []string{}
+	accepted := []string{}
 	if HasSlotValue(s.X, v) {
 		votedOrAccepted = append(votedOrAccepted, s.publicKey)
 	}
-	accepted := []string{}
+	if HasSlotValue(s.Y, v) {
+		accepted = append(accepted, s.publicKey)
+	}
 	for node, m := range s.N {
 		if HasSlotValue(m.Y, v) {
 			votedOrAccepted = append(votedOrAccepted, node)
@@ -241,19 +246,24 @@ func (s *NominationState) MaybeAccept(v SlotValue) bool {
 		}
 	}
 
-	// The rules are on page 13, section 5.3
+	// The rules for accepting are on page 13, section 5.3
 	// Rule 1: if a quorum has either voted for the nomination or accepted the
 	// nomination, we accept it.
-	if MeetsQuorum(s, votedOrAccepted) {
-		s.Y = append(s.Y, v)
-		return true
-	}
 	// Rule 2: if a blocking set for us accepts the nomination, we accept it.
-	if s.D.BlockedBy(accepted) {
+	accept := MeetsQuorum(s, votedOrAccepted) || s.D.BlockedBy(accepted)
+
+	if accept && !HasSlotValue(s.Y, v) {
+		// Accept this value
+		changed = true
 		s.Y = append(s.Y, v)
-		return true
 	}
-	return false
+
+	// We confirm once a quorum has accepted
+	if MeetsQuorum(s, accepted) {
+		changed = true
+		s.Z = append(s.Z, v)
+	}
+	return changed
 }
 
 // Handles an incoming nomination message from a peer
