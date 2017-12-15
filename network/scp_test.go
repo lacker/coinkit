@@ -53,4 +53,25 @@ func TestConsensus(t *testing.T) {
 	if !dan.nState.HasNomination() {
 		t.Fatal("!dan.nState.HasNomination()")
 	}
+
+	// Once bob and cal broadcast, everyone should have one accepted value,
+	// but still no candidates. This works even without dan, who has nothing accepted.
+	b := bob.OutgoingMessage()
+	amy.Handle("bob", b)
+	cal.Handle("bob", b)
+	c := cal.OutgoingMessage()
+	amy.Handle("cal", c)
+	bob.Handle("cal", c)
+	if len(amy.nState.Y) != 1 {
+		t.Fatal("len(amy.nState.Y) != 1")
+	}
+	if len(bob.nState.Y) != 1 {
+		t.Fatal("len(bob.nState.Y) != 1")
+	}
+	if len(cal.nState.Y) != 1 {
+		t.Fatal("len(cal.nState.Y) != 1")
+	}
+	if len(dan.nState.Y) != 0 {
+		t.Fatal("len(dan.nState.Y) != 0")
+	}
 }
