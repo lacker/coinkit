@@ -26,3 +26,18 @@ func TestSolipsistQuorum(t *testing.T) {
 		t.Fatal("bar should not meet the quorum")
 	}
 }
+
+func TestConsensus(t *testing.T) {
+	members := []string{"amy", "bob", "cal", "dan"}
+	amy := NewStateBuilder("amy", members, 3)
+	bob := NewStateBuilder("bob", members, 3)
+	cal := NewStateBuilder("cal", members, 3)
+	dan := NewStateBuilder("dan", members, 3)
+
+	a := amy.OutgoingMessage()
+	bob.Handle("amy", a)
+	cal.Handle("amy", a)
+	dan.Handle("amy", a)
+
+	// TODO: test something about the state here
+}

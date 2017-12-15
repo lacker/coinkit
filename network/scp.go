@@ -483,7 +483,12 @@ func (sb *StateBuilder) OutgoingMessage() Message {
 }
 
 // Handle handles an incoming message
-func (sb *StateBuilder) Handle(sender string, m Message) {
-	// TODO: handle incoming nomination messages
+func (sb *StateBuilder) Handle(sender string, message Message) {
+	switch m := message.(type) {
+	case *NominateMessage:
+		sb.nState.Handle(sender, m)
+	default:
+		log.Printf("unrecognized message: %v", m)
+	}
 }
 
