@@ -287,6 +287,12 @@ func (s *NominationState) Handle(node string, m *NominationMessage) {
 		log.Printf("node %s sent a stale message: %v", node, m)
 		return
 	}
+	if len(m.X) == oldLenX && len(m.Y) == oldLenY {
+		// It's just a dupe
+		return
+	}
+	// Update our most-recent-message
+	s.N[node] = m
 	
 	for i := oldLenX; i < len(m.X); i++ {
 		if !HasSlotValue(touched, m.X[i]) {

@@ -37,6 +37,9 @@ func TestConsensus(t *testing.T) {
 	// Let everyone receive an initial nomination from Amy
 	a := amy.OutgoingMessage()
 	bob.Handle("amy", a)
+	if len(bob.nState.N) != 1 {
+		t.Fatal("len(bob.nState.N) != 1")
+	}
 	cal.Handle("amy", a)
 	dan.Handle("amy", a)
 
@@ -58,6 +61,9 @@ func TestConsensus(t *testing.T) {
 	// but still no candidates. This works even without dan, who has nothing accepted.
 	b := bob.OutgoingMessage()
 	amy.Handle("bob", b)
+	if len(amy.nState.N) != 1 {
+		t.Fatalf("amy.nState.N = %#v", amy.nState.N)
+	}
 	cal.Handle("bob", b)
 	c := cal.OutgoingMessage()
 	amy.Handle("cal", c)
