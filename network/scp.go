@@ -2,6 +2,7 @@ package network
 
 import (
 	"fmt"
+	"log"
 	"sort"
 	"strings"
 	"time"
@@ -266,9 +267,47 @@ func (s *NominationState) MaybeAdvance(v SlotValue) bool {
 	return changed
 }
 
-// Handles an incoming nomination message from a peer
+// Handles an incoming nomination message from a peer node
 func (s *NominationState) Handle(node string, m *NominateMessage) {
-	// TODO
+	// What nodes we have seen new information about
+	touched := []SlotValue{}
+
+	// Check if there's anything new
+	old, ok := s.N[node]
+	var oldLenX, oldLenY int
+	if ok {
+		oldLenX = len(old.X)
+		oldLenY = len(old.Y)
+	}
+	if len(m.X) < oldLenX {
+		log.Printf("node %s sent a stale message: %v", node, m)
+		return
+	}
+	if len(m.Y) < oldLenY {
+		log.Printf("node %s sent a stale message: %v", node, m)
+		return
+	}
+	
+	for i := oldLenX; i < len(m.X); i++ {
+		if !HasSlotValue(touched, m.X[i]) {
+			touched = append(touched, m.X[i])
+		}
+
+		// If we don't have a candidate, we can support this new nomination
+		if !HasSlotValue(s.X, m.X[i]) {
+			s.X = append(s.X, m.X[i])
+		}
+	}
+
+	for i := oldLenY; i < len(m.Y); i++ {
+		if !HasSlotValue(touched, m.Y[i]) {
+			touched = append(touched, m.Y[i])
+		}
+	}
+
+	for _, v := range touched {
+		s.MaybeAdvance(v)
+	}
 }
 
 // Ballot phases
