@@ -255,12 +255,14 @@ func (s *NominationState) MaybeAdvance(v SlotValue) bool {
 
 	if accept && !HasSlotValue(s.Y, v) {
 		// Accept this value
+		log.Printf("I accept the nomination of %+v", v)
 		changed = true
 		s.Y = append(s.Y, v)
 	}
 
 	// We confirm once a quorum has accepted
 	if MeetsQuorum(s, accepted) {
+		log.Printf("I confirm the nomination of %+v", v)		
 		changed = true
 		s.Z = append(s.Z, v)
 	}
@@ -301,7 +303,7 @@ func (s *NominationState) Handle(node string, m *NominationMessage) {
 
 		// If we don't have a candidate, we can support this new nomination
 		if !HasSlotValue(s.X, m.X[i]) {
-			log.Printf("supporting the nomination of: %+v", m.X[i])
+			log.Printf("I support the nomination of %+v", m.X[i])
 			s.X = append(s.X, m.X[i])
 		}
 	}
@@ -478,8 +480,9 @@ func (sb *StateBuilder) OutgoingMessage() Message {
 		// TODO: if it's not our turn, wait instead of nominating
 		comment := fmt.Sprintf(
 			"this is %s at %s", sb.publicKey, time.Now().Format("15:04:05.00000"))
-		log.Printf("nominating block: '%s'", comment)
-		sb.nState.SetDefault(MakeSlotValue(comment))
+		v := MakeSlotValue(comment)
+		log.Printf("I nominate %+v", v)
+		sb.nState.SetDefault(v)
 	}
 
 	return &NominationMessage{
@@ -494,7 +497,7 @@ func (sb *StateBuilder) OutgoingMessage() Message {
 func (sb *StateBuilder) Handle(sender string, message Message) {
 	switch m := message.(type) {
 	case *NominationMessage:
-		log.Printf("handling: %+v", m)
+		// log.Printf("handling: %+v", m)
 		sb.nState.Handle(sender, m)
 	default:
 		log.Printf("unrecognized message: %v", m)

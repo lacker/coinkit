@@ -118,7 +118,7 @@ func (s *Server) listen() {
 func (s *Server) broadcast(m network.Message) {
 	sm := auth.NewSignedMessage(s.keyPair, m)
 	line := sm.Serialize()
-	log.Printf("sending %d bytes of data: [%s]", len(line), line)
+	// log.Printf("sending %d bytes of data: [%s]", len(line), line)
 	for _, peer := range s.peers {
 		peer.Send(line)
 	}
@@ -129,7 +129,7 @@ func (s *Server) ServeForever() {
 
 	for {
 		message := s.state.OutgoingMessage()
-		time.Sleep(time.Second * time.Duration(0.5 + rand.Float64()))
+		time.Sleep(time.Second * time.Duration(5 + rand.Float64()))
 		s.broadcast(message)
 	}
 }

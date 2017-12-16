@@ -47,7 +47,7 @@ func (p *Peer) sendForever() {
 		message := <-p.outbox
 		for {
 			p.connect()
-			log.Printf("sending message: %s", message)
+			// log.Printf("sending message: %s", message)
 			fmt.Fprintf(p.conn, message + "\n")
 
 			// If we get an ok, great.
