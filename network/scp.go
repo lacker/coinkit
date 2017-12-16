@@ -444,6 +444,9 @@ type StateBuilder struct {
 	// Which slot is actively being built
 	slot int
 
+	// The time we started working on this slot
+	start Time
+	
 	// Values for past slots that have already achieved consensus
 	values map[int]SlotValue
 
@@ -464,6 +467,7 @@ func NewStateBuilder(publicKey string, members []string, threshold int) *StateBu
 	}
 	return &StateBuilder{
 		slot: 1,
+		start: time.Now(),
 		values: make(map[int]SlotValue),
 		nState: NewNominationState(publicKey, qs),
 		D: qs,
