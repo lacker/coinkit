@@ -445,7 +445,7 @@ type StateBuilder struct {
 	slot int
 
 	// The time we started working on this slot
-	start Time
+	start time.Time
 	
 	// Values for past slots that have already achieved consensus
 	values map[int]SlotValue
