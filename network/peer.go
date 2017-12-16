@@ -28,8 +28,7 @@ func (p *Peer) connect() {
 		}
 
 		failCount++
-		log.Printf("dial failed. waiting %d seconds on port %d",
-			failCount, p.port)
+		// log.Printf("dial failed. waiting %d seconds on port %d", failCount, p.port)
 		time.Sleep(time.Duration(failCount) * time.Second)
 	}
 }
@@ -84,8 +83,10 @@ func (p *Peer) Send(message string) {
 }
 
 func NewPeer(port int) *Peer {
-	// outbox has a buffer of 10 outgoing messages
-	p := &Peer{port: port, outbox: make(chan string, 10)}
+	log.Printf("connecting to peer at port %d", port)
+	// outbox has a buffer of buflen outgoing messages
+	buflen := 1
+	p := &Peer{port: port, outbox: make(chan string, buflen)}
 	go p.sendForever();
 	return p
 }

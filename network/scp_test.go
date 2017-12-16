@@ -27,6 +27,25 @@ func TestSolipsistQuorum(t *testing.T) {
 	}
 }
 
+func TestNominationMessage(t *testing.T) {
+	v := MakeSlotValue("hello")
+	D := QuorumSlice{
+		Members: []string{"foo", "bar", "baz", "qux"},
+		Threshold: 3,
+	}
+	m := &NominationMessage{
+		I: 1,
+		X: []SlotValue{v},
+		Y: []SlotValue{v},
+		D: D,
+	}
+	s := EncodeMessage(m)
+	_, err := DecodeMessage(s)
+	if err != nil {
+		t.Fatal("could not decode message: %v", err)
+	}
+}
+
 func TestConsensus(t *testing.T) {
 	members := []string{"amy", "bob", "cal", "dan"}
 	amy := NewStateBuilder("amy", members, 3)

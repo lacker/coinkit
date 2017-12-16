@@ -301,6 +301,7 @@ func (s *NominationState) Handle(node string, m *NominationMessage) {
 
 		// If we don't have a candidate, we can support this new nomination
 		if !HasSlotValue(s.X, m.X[i]) {
+			log.Printf("supporting the nomination of: %+v", m.X[i])
 			s.X = append(s.X, m.X[i])
 		}
 	}
@@ -477,6 +478,7 @@ func (sb *StateBuilder) OutgoingMessage() Message {
 		// TODO: if it's not our turn, wait instead of nominating
 		comment := fmt.Sprintf(
 			"this is %s at %s", sb.publicKey, time.Now().Format("15:04:05.00000"))
+		log.Printf("nominating block: '%s'", comment)
 		sb.nState.SetDefault(MakeSlotValue(comment))
 	}
 
@@ -492,6 +494,7 @@ func (sb *StateBuilder) OutgoingMessage() Message {
 func (sb *StateBuilder) Handle(sender string, message Message) {
 	switch m := message.(type) {
 	case *NominationMessage:
+		log.Printf("handling: %+v", m)
 		sb.nState.Handle(sender, m)
 	default:
 		log.Printf("unrecognized message: %v", m)

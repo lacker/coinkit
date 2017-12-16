@@ -32,6 +32,14 @@ func DecodeMessage(encoded string) (Message, error) {
 		}
 		return message, nil
 	}
+	if _, ok := m["X"]; ok {
+		message := new(NominationMessage)
+		err := json.Unmarshal(b, &message)
+		if err != nil {
+			return nil, err
+		}
+		return message, nil
+	}
 	return nil, errors.New("unrecognized message format")
 }
 

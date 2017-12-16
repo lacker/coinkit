@@ -55,6 +55,7 @@ func NewLocalConfig(arg int) *Config {
 
 	return &Config{
 		Port: port,
+		PeerPorts: peerPorts,
 		KeyPair: kp,
 		Members: members,
 		Threshold: threshold,

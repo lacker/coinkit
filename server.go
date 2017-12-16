@@ -34,6 +34,7 @@ type Server struct {
 
 func NewServer(c *Config) *Server {
 	var peers []*network.Peer
+	log.Printf("config has peers: %v", c.PeerPorts)
 	for _, p := range c.PeerPorts {
 		peers = append(peers, network.NewPeer(p))
 	}
@@ -52,7 +53,6 @@ func NewServer(c *Config) *Server {
 // Handles an incoming connection
 // TODO: put the data logic in the core loop to avoid parallelism bugs
 func (s *Server) handleConnection(conn net.Conn) {
-	log.Printf("handling a connection")
 	for {
 		data, err := bufio.NewReader(conn).ReadString('\n')
 		if err != nil {
@@ -66,7 +66,8 @@ func (s *Server) handleConnection(conn net.Conn) {
 			// The signature isn't valid.
 			// Maybe the message got chopped off? Maybe they are bad guys?
 			// Assume good intentions and close the connection.
-			log.Printf("got bad data: [%s]", data)
+			log.Printf("got %d bytes of bad data: [%s]", len(serialized), serialized)
+			log.Printf("error: %v", err)
 			conn.Close()
 			break
 		}
@@ -117,6 +118,7 @@ func (s *Server) listen() {
 func (s *Server) broadcast(m network.Message) {
 	sm := auth.NewSignedMessage(s.keyPair, m)
 	line := sm.Serialize()
+	log.Printf("sending %d bytes of data: [%s]", len(line), line)
 	for _, peer := range s.peers {
 		peer.Send(line)
 	}
