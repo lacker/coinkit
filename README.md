@@ -22,7 +22,12 @@ Then, the simplest way to run some local servers is to run them in four separate
 terminals.
 
 ```
+# First install dependencies
 cd ~/go/src/coinkit
+go get ./...
+
+# If you would like to run the unit tests
+go test ./...
 
 # And then run one of these commands, to run server 0, 1, 2, or 3
 go run *.go 0
