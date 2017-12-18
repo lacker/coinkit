@@ -207,31 +207,16 @@ func (s *NominationState) Handle(node string, m *NominationMessage) {
 	}
 }
 
-// Ballot phases
-// Invalid is 0 so that if we inadvertently create a new message the wrong way and
-// leave things zeroed it will be obviously an invalid phase
-type Phase int
-const (
-	Invalid Phase = iota
-	Prepare
-	Confirm
-	Externalize
-)
-
-type Ballot struct {
-	// An increasing counter, n >= 1, to ensure we can always have more ballots
-	n int
-
-	// The value this ballot proposes
-	x SlotValue
-}
-
 // See page 23 of the protocol paper for more detail here.
+// The null ballot is represented by a nil.
 type BallotState struct {
+	// What phase of balloting we are in
+	phase Phase
+	
 	// The current ballot we are trying to prepare and commit.
 	b *Ballot
 
-	// The highest two ballots that are accepted as prepared.
+	// The highest two incompatible ballots that are accepted as prepared.
 	// p is the highest, pPrime the next.
 	// It's nil if there is no such ballot.
 	p *Ballot
@@ -247,8 +232,9 @@ type BallotState struct {
 	c *Ballot
 	h *Ballot
 
-	// The value to use in the next ballot
-	z SlotValue
+	// The value to use in the next ballot, if this ballot fails.
+	// We may have no idea what value we would use. In that case, z is nil.
+	z *SlotValue
 	
 	// The latest PrepareMessage, ConfirmMessage, or ExternalizeMessage from
 	// each peer
@@ -264,6 +250,8 @@ type BallotState struct {
 func NewBallotState(publicKey string, qs QuorumSlice) *BallotState {
 	// TODO: other stuff
 	return &BallotState{
+		phase: Prepare,
+		M: make(map[string]BallotMessage),
 		publicKey: publicKey,
 		D: qs,
 	}
@@ -285,106 +273,11 @@ func (s *BallotState) QuorumSlice(node string) (*QuorumSlice, bool) {
 	return &qs, true
 }
 
-type BallotMessage interface {
-	QuorumSlice() QuorumSlice
-	MessageType() string
+func (s *BallotState) Handle(node string, message BallotMessage) {
+	// TODO
 }
 
-// PrepareMessage is the first phase of the three-phase ballot protocol
-type PrepareMessage struct {
-	// T is Prepare for a PrepareMessage
-	T Phase
-	
-	// What slot we are preparing ballots for
-	I int
 
-	// The current ballot we are trying to prepare
-	Bn int
-	Bx SlotValue
-
-	// The contents of state.p
-	Pn int
-	Px SlotValue
-
-	// The contents of state.pPrime
-	Ppn int
-	Ppx SlotValue
-
-	// Ballot numbers for c and h
-	Cn int
-	Hn int
-
-	D QuorumSlice
-}
-
-func (m *PrepareMessage) QuorumSlice() QuorumSlice {
-	return m.D
-}
-
-func (m *PrepareMessage) MessageType() string {
-	return "Prepare"
-}
-
-// ConfirmMessage is the second phase of the three-phase ballot protocol
-type ConfirmMessage struct {
-	// T is Confirm for a ConfirmMessage
-	T Phase
-	
-	// What slot we are confirming ballots for
-	I int
-
-	// The current ballot we are trying to confirm
-	Bn int
-	Bx SlotValue
-
-	// state.p.n
-	Pn int
-
-	// state.c.n
-	Cn int
-
-	// state.h.n
-	Hn int
-
-	D QuorumSlice
-}
-
-func (m *ConfirmMessage) QuorumSlice() QuorumSlice {
-	return m.D
-}
-
-func (m *ConfirmMessage) MessageType() string {
-	return "Confirm"
-}
-
-// ExternalizeMessage is the third phase of the three-phase ballot protocol
-// Sent after we have confirmed a commit
-type ExternalizeMessage struct {
-	// T is Externalize for an ExternalizeMessage
-	T Phase
-	
-	// What slot we are externalizing
-	I int
-
-	// The value at this slot
-	X SlotValue
-
-	// state.c.n
-	Cn int
-
-	// state.h.n
-	Hn int
-
-	D QuorumSlice
-}
-
-func (m *ExternalizeMessage) QuorumSlice() QuorumSlice {
-	return m.D
-}
-
-func (m *ExternalizeMessage) MessageType() string {
-	return "Externalize"
-}
 
 type StateBuilder struct {
 	// Which slot is actively being built
