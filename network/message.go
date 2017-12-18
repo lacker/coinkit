@@ -3,6 +3,7 @@ package network
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 )	
 
 type Message interface {
@@ -39,6 +40,33 @@ func DecodeMessage(encoded string) (Message, error) {
 			return nil, err
 		}
 		return message, nil
+	}
+	if messageType, ok := m["T"]; ok {
+		switch messageType {
+		case Prepare:
+			message := new(PrepareMessage)
+			err := json.Unmarshal(b, &message)
+			if err != nil {
+				return nil, err
+			}
+			return message, nil
+		case Confirm:
+			message := new(ConfirmMessage)
+			err := json.Unmarshal(b, &message)
+			if err != nil {
+				return nil, err
+			}
+			return message, nil
+		case Externalize:
+			message := new(ExternalizeMessage)
+			err := json.Unmarshal(b, &message)
+			if err != nil {
+				return nil, err
+			}
+			return message, nil
+		default:
+			return nil, fmt.Errorf("unrecognized ballot phase: %v", messageType)
+		}
 	}
 	return nil, errors.New("unrecognized message format")
 }

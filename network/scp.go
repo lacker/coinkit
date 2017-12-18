@@ -289,6 +289,9 @@ type BallotMessage interface {
 
 // PrepareMessage is the first phase of the three-phase ballot protocol
 type PrepareMessage struct {
+	// T is Prepare for a PrepareMessage
+	T Phase
+	
 	// What slot we are preparing ballots for
 	I int
 
@@ -321,6 +324,9 @@ func (m *PrepareMessage) MessageType() string {
 
 // ConfirmMessage is the second phase of the three-phase ballot protocol
 type ConfirmMessage struct {
+	// T is Confirm for a ConfirmMessage
+	T Phase
+	
 	// What slot we are confirming ballots for
 	I int
 
@@ -351,6 +357,9 @@ func (m *ConfirmMessage) MessageType() string {
 // ExternalizeMessage is the third phase of the three-phase ballot protocol
 // Sent after we have confirmed a commit
 type ExternalizeMessage struct {
+	// T is Externalize for an ExternalizeMessage
+	T Phase
+	
 	// What slot we are externalizing
 	I int
 
