@@ -208,9 +208,12 @@ func (s *NominationState) Handle(node string, m *NominationMessage) {
 }
 
 // Ballot phases
+// Invalid is 0 so that if we inadvertently create a new message the wrong way and
+// leave things zeroed it will be obviously an invalid phase
 type Phase int
 const (
-	Prepare Phase = iota
+	Invalid Phase = iota
+	Prepare
 	Confirm
 	Externalize
 )
