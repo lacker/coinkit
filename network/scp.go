@@ -3,8 +3,6 @@ package network
 import (
 	"fmt"
 	"log"
-	"sort"
-	"strings"
 	"time"
 )
 
@@ -12,51 +10,6 @@ import (
 // https://www.stellar.org/papers/stellar-consensus-protocol.pdf
 // When there are frustrating single-letter variable names, it's because we are
 // making the names line up with the protocol paper.
-
-// For now each block just has a list of comments.
-// This isn't supposed to be useful, it's just for testing.
-type SlotValue struct {
-	Comments []string
-}
-
-func MakeSlotValue(comment string) SlotValue {
-	return SlotValue{Comments: []string{comment}}
-}
-
-// Combine is specific to what the slot values are
-func Combine(a SlotValue, b SlotValue) SlotValue {
-	joined := append(a.Comments, b.Comments...)
-	sort.Strings(joined)
-	answer := []string{}
-	for _, item := range joined {
-		if len(answer) == 0 || answer[len(answer)-1] != item {
-			answer = append(answer, item)
-		}
-	}
-	return SlotValue{Comments: answer}
-}
-
-// CombineSlice just runs Combine on each value in a slice
-func CombineSlice(list []SlotValue) SlotValue {
-	if len(list) == 0 {
-		panic("CombineSlice should not be called on empty slices")
-	}
-	if len(list) == 1 {
-		return list[0]
-	}
-	mid := len(list) / 2
-	return Combine(CombineSlice(list[:mid]), CombineSlice(list[mid:]))
-}
-
-func HasSlotValue(list []SlotValue, v SlotValue) bool {
-	k := strings.Join(v.Comments, ",")
-	for _, s := range list {
-		if strings.Join(s.Comments, ",") == k {
-			return true
-		}
-	}
-	return false
-}
 
 type NominationMessage struct {
 	// What slot we are nominating values for
