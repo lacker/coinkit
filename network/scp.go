@@ -247,10 +247,44 @@ type BallotState struct {
 	// The value to use in the next ballot
 	z SlotValue
 	
-	// The latest PrepareMessage, ConfirmMessage, or ExternalizeMessage from each peer
-	M map[string]Message
+	// The latest PrepareMessage, ConfirmMessage, or ExternalizeMessage from
+	// each peer
+	M map[string]BallotMessage
 
+	// Who we are
+	publicKey string
+
+	// Who we listen to for quorum
 	D QuorumSlice
+}
+
+func NewBallotState(publicKey string, qs QuorumSlice) *BallotState {
+	// TODO: other stuff
+	return &BallotState{
+		publicKey: publicKey,
+		D: qs,
+	}
+}
+
+func (s *BallotState) PublicKey() string {
+	return s.publicKey
+}
+
+func (s *BallotState) QuorumSlice(node string) (*QuorumSlice, bool) {
+	if node == s.publicKey {
+		return &s.D, true
+	}
+	m, ok := s.M[node]
+	if !ok {
+		return nil, false
+	}
+	qs := m.QuorumSlice()
+	return &qs, true
+}
+
+type BallotMessage interface {
+	QuorumSlice() QuorumSlice
+	MessageType() string
 }
 
 // PrepareMessage is the first phase of the three-phase ballot protocol
@@ -275,6 +309,10 @@ type PrepareMessage struct {
 	Hn int
 
 	D QuorumSlice
+}
+
+func (m *PrepareMessage) QuorumSlice() QuorumSlice {
+	return m.D
 }
 
 func (m *PrepareMessage) MessageType() string {
@@ -302,6 +340,10 @@ type ConfirmMessage struct {
 	D QuorumSlice
 }
 
+func (m *ConfirmMessage) QuorumSlice() QuorumSlice {
+	return m.D
+}
+
 func (m *ConfirmMessage) MessageType() string {
 	return "Confirm"
 }
@@ -322,6 +364,10 @@ type ExternalizeMessage struct {
 	Hn int
 
 	D QuorumSlice
+}
+
+func (m *ExternalizeMessage) QuorumSlice() QuorumSlice {
+	return m.D
 }
 
 func (m *ExternalizeMessage) MessageType() string {
