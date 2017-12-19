@@ -25,6 +25,10 @@ type BallotMessage interface {
 	// to commit, not whether some past message can be determined to
 	// have voted to commit
 	VoteToCommit(n int, x SlotValue) bool
+
+	// The highest ballot number this node is voting for
+	// Used to decide when we should start going to a higher number
+	BallotNumber() int
 }
 
 // Ballot phases
@@ -133,6 +137,10 @@ func (m *PrepareMessage) VoteToCommit(n int, x SlotValue) bool {
 	return m.Cn <= n && n <= m.Hn
 }
 
+func (m *PrepareMessage) BallotNumber() int {
+	return m.Bn
+}
+
 // ConfirmMessage is the second phase of the three-phase ballot protocol
 // "Confirm" seems like a bad name for this phase, it seems like it should be
 // named "Commit". Because you are also confirming as part of nominate and prepare.
@@ -191,6 +199,10 @@ func (m *ConfirmMessage) VoteToCommit(n int, x SlotValue) bool {
 	return false
 }
 
+func (m *ConfirmMessage) BallotNumber() int {
+	return m.Hn
+}
+
 // ExternalizeMessage is the third phase of the three-phase ballot protocol
 // Sent after we have confirmed a commit.
 type ExternalizeMessage struct {
@@ -239,6 +251,10 @@ func (m *ExternalizeMessage) AcceptAsCommitted(n int, x SlotValue) bool {
 
 func (m *ExternalizeMessage) VoteToCommit(n int, x SlotValue) bool {
 	return false
+}
+
+func (m *ExternalizeMessage) BallotNumber() int {
+	return m.Hn
 }
 
 // Compare returns -1 if ballot1 < ballot2

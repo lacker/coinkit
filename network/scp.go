@@ -276,7 +276,7 @@ func (s *BallotState) QuorumSlice(node string) (*QuorumSlice, bool) {
 
 func (s *BallotState) MaybeAcceptAsPrepared(n int, x SlotValue) {
 	if s.phase != Prepare {
-		log.Fatal("MaybeAcceptAsPrepared should only operate in the prepare phase")
+		return
 	}
 	if n == 0 {
 		return
@@ -354,7 +354,7 @@ func (s *BallotState) MaybeAcceptAsPrepared(n int, x SlotValue) {
 
 func (s *BallotState) MaybeConfirmAsPrepared(n int, x SlotValue) {
 	if s.phase != Prepare {
-		log.Fatal("MaybeConfirmAsPrepared should only run in prepare phase")
+		return
 	}
 	if s.hn >= n {
 		// We are already past this ballot
@@ -403,9 +403,9 @@ func (s *BallotState) MaybeConfirmAsPrepared(n int, x SlotValue) {
 	}
 }
 
-func (s *BallotState) MaybeAcceptCommit(n int, x SlotValue) {
+func (s *BallotState) MaybeAcceptAsCommitted(n int, x SlotValue) {
 	if s.phase == Externalize {
-		log.Fatal("MaybeAcceptCommit shoudl not run in externalize")
+		return
 	}
 	if s.phase == Confirm && s.cn <= n && n <= s.hn {
 		// We already do accept this commit
@@ -415,7 +415,8 @@ func (s *BallotState) MaybeAcceptCommit(n int, x SlotValue) {
 	votedOrAccepted := []string{}
 	accepted := []string{}
 
-	if s.b != nil && Equal(s.b.x, x) && s.cn != 0 && s.cn <= n && s.hn >= n {
+	if s.phase == Prepare && s.b != nil &&
+		Equal(s.b.x, x) && s.cn != 0 && s.cn <= n && n <= s.hn {
 		// We vote to commit this
 		votedOrAccepted = append(votedOrAccepted, s.publicKey)
 	}
@@ -429,7 +430,114 @@ func (s *BallotState) MaybeAcceptCommit(n int, x SlotValue) {
 		}
 	}
 
-	// TODO: more code here
+	if !MeetsQuorum(s, votedOrAccepted) && !s.D.BlockedBy(accepted) {
+		// We can't accept this commit yet
+		return
+	}
+
+	// We accept this commit
+	s.phase = Confirm
+	if s.b == nil || !Equal(s.b.x, x) {
+		// Totally replace our old target value
+		s.b = &Ballot{
+			n: n,
+			x: x,
+		}
+		s.cn = n
+		s.hn = n
+		s.z = &x
+	} else {
+		// Just update our range of acceptance
+		if n < s.cn {
+			s.cn = n
+		}
+		if n > s.hn {
+			s.hn = n
+		}
+	}
+}
+
+func (s *BallotState) MaybeConfirmAsCommitted(n int, x SlotValue) {
+	if s.phase == Prepare {
+		return
+	}
+	if s.b == nil || !Equal(s.b.x, x) {
+		return
+	}
+	
+	accepted := []string{}
+	if s.phase == Confirm {
+		if s.cn <= n && n <= s.hn {
+			accepted = append(accepted, s.publicKey)
+		}
+	} else if s.cn <= n && n <= s.hn {
+		// We already did confirm this as committed
+		return
+	}
+
+	for node, m := range s.M {
+		if m.AcceptAsCommitted(n, x) {
+			accepted = append(accepted, node)
+		}
+	}
+
+	if !MeetsQuorum(s, accepted) {
+		return
+	}
+	if s.phase == Confirm {
+		s.phase = Externalize
+		s.cn = n
+		s.hn = n
+	} else {
+		if n < s.cn {
+			s.cn = n
+		}
+		if n > s.hn {
+			s.hn = n
+		}
+	}
+}
+
+// Returns whether we needed to bump the ballot number.
+// We bump the ballot number if the set of nodes with a higher
+// ballot number is blocking.
+// TODO: figure out what the distinction is between s.b.n and s.hn
+// TODO: figure out if s.z and s.b.x are redundant
+func (s *BallotState) MaybeNextBallot() bool {
+	if s.z == nil || s.b == nil {
+		return false
+	}
+	
+	// Nodes with a higher ballot number
+	higher := []string{}
+	current := 0
+	if s.b != nil {
+		current = s.b.n
+	}
+
+	for node, m := range s.M {
+		if m.BallotNumber() > current {
+			higher = append(higher, node)
+		}
+	}
+
+	if !s.D.BlockedBy(higher) {
+		return false
+	}
+
+	// s.z and s.b.x should be equivalent here
+	s.b.n++
+	return true
+}
+
+// Update the stage of this ballot as needed
+// See the handling algorithm on page 24 of the Mazieres paper.
+// The investigate method does steps 1-8
+func (s *BallotState) Investigate(n int, x SlotValue) {
+	s.MaybeAcceptAsPrepared(n, x)
+	s.MaybeConfirmAsPrepared(n, x)
+	s.MaybeAcceptAsCommitted(n, x)
+	s.MaybeConfirmAsCommitted(n, x)
 }
 
 func (s *BallotState) Handle(node string, message BallotMessage) {
@@ -440,44 +548,29 @@ func (s *BallotState) Handle(node string, message BallotMessage) {
 	}
 	s.M[node] = message
 
-	// See the 9-step handling algorithm on page 24 of the Mazieres paper
-	// This switch statement handles steps 1 through 3.
-	// Step 1: see if we accept more ballots as prepared
-	// Step 2: see if we confirm more ballots as prepared
-	// Step 3: keep the c-h range up to date
-	// NOTE: This logic might be mishandling ranges by only handling the end
-	// values. It's not clear to me if that is okay, and it is also not clear to
-	// me how to handle the entirety of the range efficiently.
-	// TODO: figure out how to do this efficiently, and explicitly handle every
-	// index in the ranges
-	if s.phase == Prepare {
+	for {
+		// Investigate all ballots whose state might be updated
+		// TODO: make sure we aren't missing ballot numbers internal to the
+		// ranges
 		switch m := message.(type) {
 		case *PrepareMessage:
-			s.MaybeAcceptAsPrepared(m.Bn, m.Bx)
-			s.MaybeAcceptAsPrepared(m.Pn, m.Px)
-			s.MaybeAcceptAsPrepared(m.Ppn, m.Ppx)
-			
-			s.MaybeConfirmAsPrepared(m.Bn, m.Bx)
-			s.MaybeConfirmAsPrepared(m.Pn, m.Px)
-			s.MaybeConfirmAsPrepared(m.Ppn, m.Ppx)
+			s.Investigate(m.Bn, m.Bx)
+			s.Investigate(m.Pn, m.Px)
+			s.Investigate(m.Ppn, m.Ppx)
 		case *ConfirmMessage:
-			s.MaybeAcceptAsPrepared(m.Hn, m.X)
-			s.MaybeConfirmAsPrepared(m.Hn, m.X)
+			s.Investigate(m.Hn, m.X)
 		case *ExternalizeMessage:
 			for i := m.Cn; i <= m.Hn; i++ {
-				s.MaybeAcceptAsPrepared(i, m.X)
-				s.MaybeConfirmAsPrepared(i, m.X)
+				s.Investigate(i, m.X)
 			}
 		}
-	}
 
-	// Step 4: see if we can accept the commit of more ballots
-	if s.phase != Externalize {
-		// TODO
+		// Step 9 of the processing algorithm
+		if !s.MaybeNextBallot() {
+			break
+		}
 	}
 }
-
-
 
 type StateBuilder struct {
 	// Which slot is actively being built
@@ -515,6 +608,7 @@ func NewStateBuilder(publicKey string, members []string, threshold int) *StateBu
 }
 
 // OutgoingMessage returns nil if there should be no outgoing message at this time
+// TODO: figure out what the ballot message should be
 func (sb *StateBuilder) OutgoingMessage() Message {
 	// TODO: check if nomination is done and we should send a ballot message
 
