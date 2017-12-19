@@ -1,7 +1,6 @@
 package network
 
 import (
-
 )
 
 // See page 23 of the protocol paper for a description of balloting.
@@ -28,6 +27,10 @@ type Ballot struct {
 
 	// The value this ballot proposes
 	x SlotValue
+}
+
+func Compatible(ballot1 Ballot, ballot2 Ballot) bool {
+	return Equal(ballot1.x, ballot2.x)
 }
 
 // PrepareMessage is the first phase of the three-phase ballot protocol

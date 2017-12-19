@@ -23,6 +23,10 @@ func MakeSlotValue(comment string) SlotValue {
 	return SlotValue{Comments: []string{comment}}
 }
 
+func Equal(a SlotValue, b SlotValue) bool {
+	return strings.Join(a.Comments, ",") == strings.Join(b.Comments, ",")
+}
+
 // Combine is specific to what the slot values are
 func Combine(a SlotValue, b SlotValue) SlotValue {
 	joined := append(a.Comments, b.Comments...)
