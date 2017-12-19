@@ -273,8 +273,113 @@ func (s *BallotState) QuorumSlice(node string) (*QuorumSlice, bool) {
 	return &qs, true
 }
 
+func (s *BallotState) MaybeAcceptAsPrepared(n int, x SlotValue) {
+	if s.phase != Prepare {
+		panic("MaybeAcceptAsPrepared should only operate in the prepare phase")
+	}
+	if n == 0 {
+		return
+	}
+
+	// Check if we already accept this as prepared
+	if s.p != nil && s.p.n >= n && Equal(s.p.x, x) {
+		return
+	}
+	if s.pPrime != nil && s.pPrime.n >= n && Equal(s.pPrime.x, x) {
+		return
+	}
+
+	if s.pPrime != nil && s.pPrime.n >= n {
+		// This is about an old ballot number, we don't care even if it is
+		// accepted
+		return
+	}
+	
+	// The rules for accepting are, if a quorum has voted or accepted,
+	// we can accept.
+	// Or, if a local blocking set has accepted, we can accept.
+	votedOrAccepted := []string{}
+	accepted := []string{}
+	if s.b != nil && s.b.n >= n && Equal(s.b.x, x) {
+		// We have voted for this
+		votedOrAccepted = append(votedOrAccepted, s.publicKey)
+	}
+
+	for node, m := range s.M {
+		if m.AcceptAsPrepared(n, x) {
+			accepted = append(accepted, node)
+			votedOrAccepted = append(votedOrAccepted, node)
+			continue
+		}
+		if m.VoteToPrepare(n, x) {
+			votedOrAccepted = append(votedOrAccepted, node)
+		}
+	}
+
+	if !MeetsQuorum(s, votedOrAccepted) && !s.D.BlockedBy(accepted) {
+		// We can't accept this as prepared yet
+		return
+	}
+
+	// p and p prime should be the top two conflicting things we accept
+	// as prepared. update them accordingly
+	if s.p == nil {
+		s.p = &Ballot{
+			n: n,
+			x: x,
+		}
+		return
+	}
+
+	if Equal(s.p.x, x) {
+		if n <= s.p.n {
+			log.Fatal("should have short circuited already")
+		}
+		s.p.n = n
+		return
+	}
+
+	if n >= s.p.n {
+		s.pPrime = s.p
+		s.p = &Ballot{
+			n: n,
+			x: x,
+		}
+		return
+	}
+
+	// We already short circuited if it isn't worth bumping p prime
+	s.pPrime = &Ballot{
+		n: n,
+		x: x,
+	}
+}
+
 func (s *BallotState) Handle(node string, message BallotMessage) {
-	// TODO
+	// If this message isn't new, skip it
+	old, ok := s.M[node]
+	if ok && Compare(old, message) >= 0 {
+		return
+	}
+	s.M[node] = message
+
+	// See the 9-step handling algorithm on page 24 of the Mazieres paper
+	// Step 1: in the Prepare phase, check if we can accept new values as
+	// prepared
+	if s.phase == Prepare {
+		switch m := message.(type) {
+		case *PrepareMessage:
+			s.MaybeAcceptAsPrepared(m.Bn, m.Bx)
+			s.MaybeAcceptAsPrepared(m.Pn, m.Px)
+			s.MaybeAcceptAsPrepared(m.Ppn, m.Ppx)
+		case *ConfirmMessage:
+			s.MaybeAcceptAsPrepared(m.Bn, m.Bx)
+		case *ExternalizeMessage:
+			s.MaybeAcceptAsPrepared(m.Cn, m.X)
+		}
+	}
+
+	// Step 2: TODO
 }
 
 

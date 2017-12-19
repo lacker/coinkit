@@ -8,6 +8,14 @@ type BallotMessage interface {
 	QuorumSlice() QuorumSlice
 	Phase() Phase
 	MessageType() string
+
+	// AcceptAsPrepared tells whether this message implies that the sender
+	// accepts this ballot as prepared
+	AcceptAsPrepared(n int, x SlotValue) bool
+
+	// VoteToPrepare indicates whether this message is actively voting to prepare,
+	// not whether some past message can be determined to have voted to prepare.
+	VoteToPrepare(n int, x SlotValue) bool
 }
 
 // Ballot phases
@@ -33,7 +41,11 @@ func Compatible(ballot1 Ballot, ballot2 Ballot) bool {
 	return Equal(ballot1.x, ballot2.x)
 }
 
-// PrepareMessage is the first phase of the three-phase ballot protocol
+// PrepareMessage is the first phase of the three-phase ballot protocol.
+// This message is preparing a ballot.
+// To prepare is to abort any conflicting ballots.
+// This message is voting to prepare b, and also informing the receiver that
+// we have accepted that both p and p prime have already been prepared.
 type PrepareMessage struct {
 	// T is Prepare for a PrepareMessage
 	T Phase
@@ -41,15 +53,15 @@ type PrepareMessage struct {
 	// What slot we are preparing ballots for
 	I int
 
-	// The current ballot we are trying to prepare
+	// The ballot we are voting to prepare
 	Bn int
 	Bx SlotValue
 
-	// The contents of state.p
+	// The contents of state.p, which we accept as prepared
 	Pn int
 	Px SlotValue
 
-	// The contents of state.pPrime
+	// The contents of state.pPrime, which we accept as prepared
 	Ppn int
 	Ppx SlotValue
 
@@ -75,7 +87,28 @@ func (m *PrepareMessage) MessageType() string {
 	return "Prepare"
 }
 
+func (m *PrepareMessage) AcceptAsPrepared(n int, x SlotValue) bool {
+	// A prepare message accepts that both p and p prime are prepared.
+	if Equal(m.Px, x) {
+		return m.Pn >= n
+	}
+	if Equal(m.Ppx, x) {
+		return m.Ppn >= n
+	}
+	return false
+}
+
+func (m *PrepareMessage) VoteToPrepare(n int, x SlotValue) bool {
+	return Equal(x, m.Bx) && m.Bn >= n
+}
+
 // ConfirmMessage is the second phase of the three-phase ballot protocol
+// "Confirm" seems like a bad name for this phase, it seems like it should be
+// named "Commit". Because you are also confirming as part of nominate and prepare.
+// I stuck with "Confirm" because that's what the paper calls it.
+// Intuitively (sic), a confirm message is accepting a commit.
+// The consensus can still get borked at this phase if we don't get a
+// quorum confirming.
 type ConfirmMessage struct {
 	// T is Confirm for a ConfirmMessage
 	T Phase
@@ -83,7 +116,7 @@ type ConfirmMessage struct {
 	// What slot we are confirming ballots for
 	I int
 
-	// The current ballot we are trying to confirm
+	// The current ballot that we are accepting a commit for.
 	Bn int
 	Bx SlotValue
 
@@ -114,8 +147,16 @@ func (m *ConfirmMessage) MessageType() string {
 	return "Confirm"
 }
 
+func (m *ConfirmMessage) AcceptAsPrepared(n int, x SlotValue) bool {
+	return Equal(m.Bx, x)
+}
+
+func (m *ConfirmMessage) VoteToPrepare(n int, x SlotValue) bool {
+	return false
+}
+
 // ExternalizeMessage is the third phase of the three-phase ballot protocol
-// Sent after we have confirmed a commit
+// Sent after we have confirmed a commit.
 type ExternalizeMessage struct {
 	// T is Externalize for an ExternalizeMessage
 	T Phase
@@ -148,6 +189,14 @@ func (m *ExternalizeMessage) Phase() Phase {
 
 func (m *ExternalizeMessage) MessageType() string {
 	return "Externalize"
+}
+
+func (m *ExternalizeMessage) AcceptAsPrepared(n int, x SlotValue) bool {
+	return Equal(m.X, x)
+}
+
+func (m *ExternalizeMessage) VoteToPrepare(n int, x SlotValue) bool {
+	return false
 }
 
 // Compare returns -1 if ballot1 < ballot2
