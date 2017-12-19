@@ -552,6 +552,7 @@ func (s *BallotState) Handle(node string, message BallotMessage) {
 		// Investigate all ballots whose state might be updated
 		// TODO: make sure we aren't missing ballot numbers internal to the
 		// ranges
+		// TODO: make sure a malformed message can't DDOS us here
 		switch m := message.(type) {
 		case *PrepareMessage:
 			s.Investigate(m.Bn, m.Bx)
@@ -660,6 +661,7 @@ func NewStateBuilder(publicKey string, members []string, threshold int) *StateBu
 		start: time.Now(),
 		values: make(map[int]SlotValue),
 		nState: NewNominationState(publicKey, qs),
+		bState: NewBallotState(publicKey, qs),
 		D: qs,
 		publicKey: publicKey,
 	}
