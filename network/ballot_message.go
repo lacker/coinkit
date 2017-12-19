@@ -16,6 +16,15 @@ type BallotMessage interface {
 	// VoteToPrepare indicates whether this message is actively voting to prepare,
 	// not whether some past message can be determined to have voted to prepare.
 	VoteToPrepare(n int, x SlotValue) bool
+
+	// AcceptCommit tells whether this message implies that the sender
+	// accepts this commit
+	AcceptAsCommitted(n int, x SlotValue) bool
+
+	// VoteToCommit indicates whether this message is actively voting
+	// to commit, not whether some past message can be determined to
+	// have voted to commit
+	VoteToCommit(n int, x SlotValue) bool
 }
 
 // Ballot phases
@@ -113,6 +122,17 @@ func (m *PrepareMessage) VoteToPrepare(n int, x SlotValue) bool {
 	return Equal(x, m.Bx) && m.Bn >= n
 }
 
+func (m *PrepareMessage) AcceptAsCommitted(n int, x SlotValue) bool {
+	return false
+}
+
+func (m *PrepareMessage) VoteToCommit(n int, x SlotValue) bool {
+	if m.Cn == 0 || m.Hn == 0 || !Equal(m.Bx, x) {
+		return false
+	}
+	return m.Cn <= n && n <= m.Hn
+}
+
 // ConfirmMessage is the second phase of the three-phase ballot protocol
 // "Confirm" seems like a bad name for this phase, it seems like it should be
 // named "Commit". Because you are also confirming as part of nominate and prepare.
@@ -127,17 +147,14 @@ type ConfirmMessage struct {
 	// What slot we are confirming ballots for
 	I int
 
-	// The current ballot that we are accepting a commit for.
-	Bn int
-	Bx SlotValue
+	// The value that we are accepting a commit for.
+	X SlotValue
 
 	// state.p.n
 	Pn int
 
-	// state.c.n
+	// The range of ballot numbers we accept a commit for.
 	Cn int
-
-	// state.h.n
 	Hn int
 
 	D QuorumSlice
@@ -159,10 +176,18 @@ func (m *ConfirmMessage) MessageType() string {
 }
 
 func (m *ConfirmMessage) AcceptAsPrepared(n int, x SlotValue) bool {
-	return Equal(m.Bx, x)
+	return Equal(m.X, x)
 }
 
 func (m *ConfirmMessage) VoteToPrepare(n int, x SlotValue) bool {
+	return false
+}
+
+func (m *ConfirmMessage) AcceptAsCommitted(n int, x SlotValue) bool {
+	return Equal(m.X, x) && m.Cn <= n && n <= m.Hn
+}
+
+func (m *ConfirmMessage) VoteToCommit(n int, x SlotValue) bool {
 	return false
 }
 
@@ -178,10 +203,8 @@ type ExternalizeMessage struct {
 	// The value at this slot
 	X SlotValue
 
-	// state.c.n
+	// The range of ballot numbers we confirm a commit for
 	Cn int
-
-	// state.h.n
 	Hn int
 
 	D QuorumSlice
@@ -207,6 +230,14 @@ func (m *ExternalizeMessage) AcceptAsPrepared(n int, x SlotValue) bool {
 }
 
 func (m *ExternalizeMessage) VoteToPrepare(n int, x SlotValue) bool {
+	return false
+}
+
+func (m *ExternalizeMessage) AcceptAsCommitted(n int, x SlotValue) bool {
+	return Equal(x, m.X) && m.Cn <= n && n <= m.Hn
+}
+
+func (m *ExternalizeMessage) VoteToCommit(n int, x SlotValue) bool {
 	return false
 }
 
@@ -255,12 +286,6 @@ func Compare(ballot1 BallotMessage, ballot2 BallotMessage) int {
 		return 0
 	case *ConfirmMessage:
 		b2 := ballot2.(*ConfirmMessage)
-		if b1.Bn < b2.Bn {
-			return -1
-		}
-		if b1.Bn > b2.Bn {
-			return 1
-		}
 		if b1.Pn < b2.Pn {
 			return -1
 		}

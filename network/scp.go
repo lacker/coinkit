@@ -378,26 +378,58 @@ func (s *BallotState) MaybeConfirmAsPrepared(n int, x SlotValue) {
 		}
 	}
 
-	if MeetsQuorum(s, accepted) {
-		// We can confirm this as prepared
-		if s.b != nil && !Equal(s.b.x, x) {
-			// We have to abort b
-			s.b = nil
-			s.hn = 0
-			s.cn = 0
-		}
+	if !MeetsQuorum(s, accepted) {
+		return
+	}
+	
+	// We can confirm this as prepared.
+	// Time to vote to commit it
+	if s.b != nil && !Equal(s.b.x, x) {
+		// We have to abort b
+		s.b = nil
+		s.hn = 0
+		s.cn = 0
+	}
 
-		if s.b == nil {
-			// We weren't working on any ballot, but now we can work on this one
-			s.b = ballot
-			s.hn = n
-			s.cn = n
-			s.z = &x
-		} else {
-			// We were just working on a lower number, so bump the range
-			s.hn = n
+	if s.b == nil {
+		// We weren't working on any ballot, but now we can work on this one
+		s.b = ballot
+		s.hn = n
+		s.cn = n
+		s.z = &x
+	} else {
+		// We were just working on a lower number, so bump the range
+		s.hn = n
+	}
+}
+
+func (s *BallotState) MaybeAcceptCommit(n int, x SlotValue) {
+	if s.phase == Externalize {
+		log.Fatal("MaybeAcceptCommit shoudl not run in externalize")
+	}
+	if s.phase == Confirm && s.cn <= n && n <= s.hn {
+		// We already do accept this commit
+		return
+	}
+
+	votedOrAccepted := []string{}
+	accepted := []string{}
+
+	if s.b != nil && Equal(s.b.x, x) && s.cn != 0 && s.cn <= n && s.hn >= n {
+		// We vote to commit this
+		votedOrAccepted = append(votedOrAccepted, s.publicKey)
+	}
+
+	for node, m := range s.M {
+		if m.AcceptAsCommitted(n, x) {
+			votedOrAccepted = append(votedOrAccepted, node)
+			accepted = append(accepted, node)
+		} else if m.VoteToCommit(n, x) {
+			votedOrAccepted = append(votedOrAccepted, node)
 		}
 	}
+
+	// TODO: more code here
 }
 
 func (s *BallotState) Handle(node string, message BallotMessage) {
@@ -409,29 +441,40 @@ func (s *BallotState) Handle(node string, message BallotMessage) {
 	s.M[node] = message
 
 	// See the 9-step handling algorithm on page 24 of the Mazieres paper
-	// Step 1: in the Prepare phase, check if we can accept new values as
-	// prepared.
-	// This logic might be missing the case where you accept as prepared
-	// some intermediate values - it's not obvious to me how you detect
-	// a quorum efficiently when votes are giving you ranges.
+	// This switch statement handles steps 1 through 3.
+	// Step 1: see if we accept more ballots as prepared
+	// Step 2: see if we confirm more ballots as prepared
+	// Step 3: keep the c-h range up to date
+	// NOTE: This logic might be mishandling ranges by only handling the end
+	// values. It's not clear to me if that is okay, and it is also not clear to
+	// me how to handle the entirety of the range efficiently.
+	// TODO: figure out how to do this efficiently, and explicitly handle every
+	// index in the ranges
 	if s.phase == Prepare {
 		switch m := message.(type) {
 		case *PrepareMessage:
 			s.MaybeAcceptAsPrepared(m.Bn, m.Bx)
 			s.MaybeAcceptAsPrepared(m.Pn, m.Px)
 			s.MaybeAcceptAsPrepared(m.Ppn, m.Ppx)
+			
+			s.MaybeConfirmAsPrepared(m.Bn, m.Bx)
+			s.MaybeConfirmAsPrepared(m.Pn, m.Px)
+			s.MaybeConfirmAsPrepared(m.Ppn, m.Ppx)
 		case *ConfirmMessage:
-			s.MaybeAcceptAsPrepared(m.Bn, m.Bx)
+			s.MaybeAcceptAsPrepared(m.Hn, m.X)
+			s.MaybeConfirmAsPrepared(m.Hn, m.X)
 		case *ExternalizeMessage:
 			for i := m.Cn; i <= m.Hn; i++ {
 				s.MaybeAcceptAsPrepared(i, m.X)
+				s.MaybeConfirmAsPrepared(i, m.X)
 			}
 		}
 	}
 
-	// Step 2: in the Prepare phase, check if we can confirm new values as
-	// prepared.
-	// TODO
+	// Step 4: see if we can accept the commit of more ballots
+	if s.phase != Externalize {
+		// TODO
+	}
 }
 
 
