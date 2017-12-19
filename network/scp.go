@@ -572,6 +572,64 @@ func (s *BallotState) Handle(node string, message BallotMessage) {
 	}
 }
 
+func (s *BallotState) HasMessage() bool {
+	return s.b != nil
+}
+
+func (s *BallotState) Message(slot int, qs QuorumSlice) Message {
+	if !s.HasMessage() {
+		panic("coding error")
+	}
+
+	switch s.phase {
+	case Prepare:
+		m := &PrepareMessage{
+			T: Prepare,
+			I: slot,
+			Bn: s.b.n,
+			Bx: s.b.x,
+			Cn: s.cn,
+			Hn: s.hn,
+			D: qs,
+		}
+		if s.p != nil {
+			m.Pn = s.p.n
+			m.Px = s.p.x
+		}
+		if s.pPrime != nil {
+			m.Ppn = s.pPrime.n
+			m.Ppx = s.pPrime.x
+		}
+		return m
+
+	case Confirm:
+		m := &ConfirmMessage{
+			T: Confirm,
+			I: slot,
+			X: s.b.x,
+			Cn: s.cn,
+			Hn: s.hn,
+			D: qs,
+		}
+		if s.p != nil {
+			m.Pn = s.p.n
+		}
+		return m
+
+	case Externalize:
+		return &ExternalizeMessage{
+			T: Externalize,
+			I: slot,
+			X: s.b.x,
+			Cn: s.cn,
+			Hn: s.hn,
+			D: qs,
+		}
+	}
+
+	panic("code flow should not get here")
+}
+
 type StateBuilder struct {
 	// Which slot is actively being built
 	slot int
@@ -607,10 +665,10 @@ func NewStateBuilder(publicKey string, members []string, threshold int) *StateBu
 	}
 }
 
-// OutgoingMessage returns nil if there should be no outgoing message at this time
-// TODO: figure out what the ballot message should be
-func (sb *StateBuilder) OutgoingMessage() Message {
-	// TODO: check if nomination is done and we should send a ballot message
+// OutgoingMessages returns the outgoing messages.
+// There can be zero or one nomination messages, and zero or one ballot messages.
+func (sb *StateBuilder) OutgoingMessages() []Message {
+	answer := []Message{}
 
 	if !sb.nState.HasNomination() {
 		// There's nothing to nominate. Let's nominate something.
@@ -622,20 +680,31 @@ func (sb *StateBuilder) OutgoingMessage() Message {
 		sb.nState.SetDefault(v)
 	}
 
-	return &NominationMessage{
+	answer = append(answer, &NominationMessage{
 		I: sb.slot,
 		X: sb.nState.X,
 		Y: sb.nState.Y,
 		D: sb.D,
+	})
+
+	if sb.bState.HasMessage() {
+		answer = append(answer, sb.bState.Message(sb.slot, sb.D))
 	}
+
+	return answer
 }
 
 // Handle handles an incoming message
 func (sb *StateBuilder) Handle(sender string, message Message) {
 	switch m := message.(type) {
 	case *NominationMessage:
-		// log.Printf("handling: %+v", m)
 		sb.nState.Handle(sender, m)
+	case *PrepareMessage:
+		sb.bState.Handle(sender, m)
+	case *ConfirmMessage:
+		sb.bState.Handle(sender, m)
+	case *ExternalizeMessage:
+		sb.bState.Handle(sender, m)
 	default:
 		log.Printf("unrecognized message: %v", m)
 	}

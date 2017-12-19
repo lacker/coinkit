@@ -54,7 +54,7 @@ func TestConsensus(t *testing.T) {
 	dan := NewStateBuilder("dan", members, 3)
 
 	// Let everyone receive an initial nomination from Amy
-	a := amy.OutgoingMessage()
+	a := amy.OutgoingMessages()[0]
 	bob.Handle("amy", a)
 	if len(bob.nState.N) != 1 {
 		t.Fatal("len(bob.nState.N) != 1")
@@ -78,13 +78,13 @@ func TestConsensus(t *testing.T) {
 
 	// Once bob and cal broadcast, everyone should have one accepted value,
 	// but still no candidates. This works even without dan, who has nothing accepted.
-	b := bob.OutgoingMessage()
+	b := bob.OutgoingMessages()[0]
 	amy.Handle("bob", b)
 	if len(amy.nState.N) != 1 {
 		t.Fatalf("amy.nState.N = %#v", amy.nState.N)
 	}
 	cal.Handle("bob", b)
-	c := cal.OutgoingMessage()
+	c := cal.OutgoingMessages()[0]
 	amy.Handle("cal", c)
 	bob.Handle("cal", c)
 	if len(amy.nState.Y) != 1 {

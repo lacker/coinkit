@@ -128,8 +128,10 @@ func (s *Server) ServeForever() {
 	go s.listen()
 
 	for {
-		message := s.state.OutgoingMessage()
 		time.Sleep(time.Second * time.Duration(5 + rand.Float64()))
-		s.broadcast(message)
+		messages := s.state.OutgoingMessages()
+		for _, message := range messages {
+			s.broadcast(message)
+		}
 	}
 }
