@@ -41,6 +41,23 @@ func Compatible(ballot1 Ballot, ballot2 Ballot) bool {
 	return Equal(ballot1.x, ballot2.x)
 }
 
+// the >~ operator
+func gtincompat(a *Ballot, b *Ballot) bool {
+	if a == nil {
+		return false
+	}
+
+	if b == nil {
+		return true
+	}
+
+	if a.n <= b.n {
+		return false
+	}
+	
+	return !Equal(a.x, b.x)
+}
+
 // PrepareMessage is the first phase of the three-phase ballot protocol.
 // This message is preparing a ballot.
 // To prepare is to abort any conflicting ballots.

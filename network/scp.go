@@ -248,7 +248,6 @@ type BallotState struct {
 }
 
 func NewBallotState(publicKey string, qs QuorumSlice) *BallotState {
-	// TODO: other stuff
 	return &BallotState{
 		phase: Prepare,
 		M: make(map[string]BallotMessage),
@@ -365,7 +364,10 @@ func (s *BallotState) Handle(node string, message BallotMessage) {
 
 	// See the 9-step handling algorithm on page 24 of the Mazieres paper
 	// Step 1: in the Prepare phase, check if we can accept new values as
-	// prepared
+	// prepared.
+	// This logic might be missing the case where you accept as prepared
+	// some intermediate values - it's not obvious to me how you detect
+	// a quorum efficiently when votes are giving you ranges.
 	if s.phase == Prepare {
 		switch m := message.(type) {
 		case *PrepareMessage:
@@ -377,9 +379,15 @@ func (s *BallotState) Handle(node string, message BallotMessage) {
 		case *ExternalizeMessage:
 			s.MaybeAcceptAsPrepared(m.Cn, m.X)
 		}
+
+		if gtincompat(s.p, s.h) || gtincompat(s.pPrime, s.h) {
+			s.c = nil
+		}
 	}
 
-	// Step 2: TODO
+	// Step 2: in the Prepare phase, check if we can confirm new values as
+	// prepared.
+	// TODO
 }
 
 
