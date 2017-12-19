@@ -222,15 +222,17 @@ type BallotState struct {
 	p *Ballot
 	pPrime *Ballot
 
-	// In the Prepare phase, c is the lowest and h is the highest ballot
-	// for which we have voted to commit but not accepted abort.
-	// In the Confirm phase, c is the lowest and h is the highest ballot
-	// for which we accepted commit.
-	// In the Externalize phase, c is the lowest and h is the highest ballot
-	// for which we confirmed commit.
-	// If c is not nil, then c <= h <= b.
-	c *Ballot
-	h *Ballot
+	// [cn, hn] defines a range of ballot numbers that defines a range of
+	// b-compatible ballots.
+	// [0, 0] is the invalid range, rather than [0], since 0 is an invalid ballot
+	// number.
+	// In the Prepare phase, this is the range we have voted to commit (which
+	// we do when we can confirm the ballot is prepared) but that we have not
+	// aborted.
+	// In the Confirm phase, this is the range we have accepted a commit.
+	// In the Externalize phase, this is the range we have confirmed a commit.
+	cn int
+	hn int
 
 	// The value to use in the next ballot, if this ballot fails.
 	// We may have no idea what value we would use. In that case, z is nil.
@@ -274,7 +276,7 @@ func (s *BallotState) QuorumSlice(node string) (*QuorumSlice, bool) {
 
 func (s *BallotState) MaybeAcceptAsPrepared(n int, x SlotValue) {
 	if s.phase != Prepare {
-		panic("MaybeAcceptAsPrepared should only operate in the prepare phase")
+		log.Fatal("MaybeAcceptAsPrepared should only operate in the prepare phase")
 	}
 	if n == 0 {
 		return
@@ -320,37 +322,81 @@ func (s *BallotState) MaybeAcceptAsPrepared(n int, x SlotValue) {
 		return
 	}
 
+	if s.b != nil && s.hn <= n && !Equal(s.b.x, x) {
+		// Accepting this as prepared means we have to abort b
+		s.hn = 0
+		s.cn = 0
+		s.b = nil
+	}
+	
 	// p and p prime should be the top two conflicting things we accept
 	// as prepared. update them accordingly
-	if s.p == nil {
-		s.p = &Ballot{
-			n: n,
-			x: x,
-		}
-		return
+	ballot := &Ballot{
+		n: n,
+		x: x,
 	}
-
-	if Equal(s.p.x, x) {
+	
+	if s.p == nil {
+		s.p = ballot
+	} else if Equal(s.p.x, x) {
 		if n <= s.p.n {
 			log.Fatal("should have short circuited already")
 		}
 		s.p.n = n
-		return
-	}
-
-	if n >= s.p.n {
+	} else if n >= s.p.n {
 		s.pPrime = s.p
-		s.p = &Ballot{
-			n: n,
-			x: x,
-		}
+		s.p = ballot
+	} else {
+		// We already short circuited if it isn't worth bumping p prime
+		s.pPrime = ballot
+	}	
+}
+
+func (s *BallotState) MaybeConfirmAsPrepared(n int, x SlotValue) {
+	if s.phase != Prepare {
+		log.Fatal("MaybeConfirmAsPrepared should only run in prepare phase")
+	}
+	if s.hn >= n {
+		// We are already past this ballot
 		return
 	}
-
-	// We already short circuited if it isn't worth bumping p prime
-	s.pPrime = &Ballot{
+	ballot := &Ballot{
 		n: n,
 		x: x,
+	}
+	
+	// We confirm when a quorum accepts as prepared
+	accepted := []string{}
+	if gtecompat(s.p, ballot) || gtecompat(s.pPrime, ballot) {
+		// We accept as prepared
+		accepted = append(accepted, s.publicKey)
+	}
+
+	for node, m := range s.M {
+		if m.AcceptAsPrepared(n, x) {
+			accepted = append(accepted, node)
+		}
+	}
+
+	if MeetsQuorum(s, accepted) {
+		// We can confirm this as prepared
+		if s.b != nil && !Equal(s.b.x, x) {
+			// We have to abort b
+			s.b = nil
+			s.hn = 0
+			s.cn = 0
+		}
+
+		if s.b == nil {
+			// We weren't working on any ballot, but now we can work on this one
+			s.b = ballot
+			s.hn = n
+			s.cn = n
+			s.z = &x
+		} else {
+			// We were just working on a lower number, so bump the range
+			s.hn = n
+		}
 	}
 }
 
@@ -377,11 +423,9 @@ func (s *BallotState) Handle(node string, message BallotMessage) {
 		case *ConfirmMessage:
 			s.MaybeAcceptAsPrepared(m.Bn, m.Bx)
 		case *ExternalizeMessage:
-			s.MaybeAcceptAsPrepared(m.Cn, m.X)
-		}
-
-		if gtincompat(s.p, s.h) || gtincompat(s.pPrime, s.h) {
-			s.c = nil
+			for i := m.Cn; i <= m.Hn; i++ {
+				s.MaybeAcceptAsPrepared(i, m.X)
+			}
 		}
 	}
 
