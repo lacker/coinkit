@@ -30,15 +30,15 @@ go get ./...
 go test ./...
 
 # And then run one of these commands, to run server 0, 1, 2, or 3
-go run *.go 0
-go run *.go 1
-go run *.go 2
-go run *.go 3
+go run main.go 0
+go run main.go 1
+go run main.go 2
+go run main.go 3
 ```
 
 You can run just three out of the four if you so desire.
 
-Currently, the consensus algorithm will not get all the way through finalizing a block.
-It will only go through the phase of nominating suggestions for the blob.
+TODO: describe how much is expected to work
+
 There is an artificial ~5 second pause between messages, set in `server.go`, to make
 it simpler to see what is going on.
