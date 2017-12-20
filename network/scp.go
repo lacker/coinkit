@@ -185,6 +185,7 @@ func (s *NominationState) Handle(node string, m *NominationMessage) {
 		return
 	}
 	// Update our most-recent-message
+	log.Printf("%s got nomination message from %s: %+v", s.publicKey, node, m)
 	s.N[node] = m
 	s.received++
 	
@@ -410,8 +411,13 @@ func (s *BallotState) MaybeConfirmAsPrepared(n int, x SlotValue) {
 		s.cn = n
 		s.z = &x
 	} else {
-		// We were just working on a lower number, so bump the range
+		// We were either working on a lower number, or had not confirmed
+		// any numbers as prepared.
+		// So bump the range
 		s.hn = n
+		if s.cn == 0 {
+			s.cn = n
+		}
 	}
 }
 
@@ -563,7 +569,7 @@ func (s *BallotState) Handle(node string, message BallotMessage) {
 	if ok && Compare(old, message) >= 0 {
 		return
 	}
-	log.Printf("%s got new message from %s: %+v", s.publicKey, node, message)
+	log.Printf("%s got ballot message from %s: %+v", s.publicKey, node, message)
 	s.received++
 	s.M[node] = message
 

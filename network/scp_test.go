@@ -119,7 +119,10 @@ func rsum(chains []*ChainState) int {
 // Have the chains send messages back and forth until they are making no more
 // progress
 func converge(chains []*ChainState) {
+	i := 0
 	for {
+		i++
+		log.Printf("Pass %d", i)
 		initial := rsum(chains)
 		for _, chain := range chains {
 			messages := chain.OutgoingMessages()
