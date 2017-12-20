@@ -736,6 +736,11 @@ func (cs *ChainState) OutgoingMessages() []Message {
 	return answer
 }
 
+// Done returns whether this chain has externalized all the slots it is working on.
+func (cs *ChainState) Done() bool {
+	return cs.bState.phase == Externalize
+}
+
 // Handle handles an incoming message
 func (cs *ChainState) Handle(sender string, message Message) {
 	if sender == cs.publicKey {

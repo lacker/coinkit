@@ -5,6 +5,8 @@ import (
 	"log"
 	"strings"
 	"testing"
+
+	"github.com/davecgh/go-spew/spew"
 )
 
 func TestCombineSlotValues(t *testing.T) {
@@ -153,6 +155,16 @@ func cluster(size int) []*ChainState {
 		chains = append(chains, chain)
 	}
 	return chains
+}
+
+// assertDone verifies that every chain has externalized all its slots
+func assertDone(chains []*ChainState, t *testing.T) {
+	for _, chain := range chains {
+		if !chain.Done() {
+			t.Fatal("chain %s is not externalized: %s",
+				chain.publicKey, spew.Sdump(chain))
+		}
+	}
 }
 
 func TestConvergence(t *testing.T) {
