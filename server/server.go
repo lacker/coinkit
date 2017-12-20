@@ -92,6 +92,12 @@ func (s *Server) handleConnection(conn net.Conn) {
 			}
 		case *network.NominationMessage:
 			s.state.Handle(info.publicKey, m)
+		case *network.PrepareMessage:
+			s.state.Handle(info.publicKey, m)
+		case *network.ConfirmMessage:
+			s.state.Handle(info.publicKey, m)
+		case *network.ExternalizeMessage:
+			s.state.Handle(info.publicKey, m)
 		default:
 			log.Printf("could not handle message: %s", network.EncodeMessage(m))
 		}
