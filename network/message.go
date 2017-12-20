@@ -33,7 +33,7 @@ func DecodeMessage(encoded string) (Message, error) {
 		}
 		return message, nil
 	}
-	if _, ok := m["X"]; ok {
+	if _, ok := m["Acc"]; ok {
 		message := new(NominationMessage)
 		err := json.Unmarshal(b, &message)
 		if err != nil {

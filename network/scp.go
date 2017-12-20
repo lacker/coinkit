@@ -16,10 +16,10 @@ type NominationMessage struct {
 	I int
 
 	// The values we have voted to nominate
-	X []SlotValue
+	Nom []SlotValue
 
 	// The values we have accepted as nominated
-	Y []SlotValue
+	Acc []SlotValue
 	
 	D QuorumSlice
 }
@@ -128,12 +128,12 @@ func (s *NominationState) MaybeAdvance(v SlotValue) bool {
 		accepted = append(accepted, s.publicKey)
 	}
 	for node, m := range s.N {
-		if HasSlotValue(m.Y, v) {
+		if HasSlotValue(m.Acc, v) {
 			votedOrAccepted = append(votedOrAccepted, node)
 			accepted = append(accepted, node)
 			continue
 		}
-		if HasSlotValue(m.X, v) {
+		if HasSlotValue(m.Nom, v) {
 			votedOrAccepted = append(votedOrAccepted, node)
 		}
 	}
@@ -167,20 +167,20 @@ func (s *NominationState) Handle(node string, m *NominationMessage) {
 
 	// Check if there's anything new
 	old, ok := s.N[node]
-	var oldLenX, oldLenY int
+	var oldLenNom, oldLenAcc int
 	if ok {
-		oldLenX = len(old.X)
-		oldLenY = len(old.Y)
+		oldLenNom = len(old.Nom)
+		oldLenAcc = len(old.Acc)
 	}
-	if len(m.X) < oldLenX {
+	if len(m.Nom) < oldLenNom {
 		log.Printf("%s sent a stale message: %v", node, m)
 		return
 	}
-	if len(m.Y) < oldLenY {
+	if len(m.Acc) < oldLenAcc {
 		log.Printf("%s sent a stale message: %v", node, m)
 		return
 	}
-	if len(m.X) == oldLenX && len(m.Y) == oldLenY {
+	if len(m.Nom) == oldLenNom && len(m.Acc) == oldLenAcc {
 		// It's just a dupe
 		return
 	}
@@ -189,21 +189,21 @@ func (s *NominationState) Handle(node string, m *NominationMessage) {
 	s.N[node] = m
 	s.received++
 	
-	for i := oldLenX; i < len(m.X); i++ {
-		if !HasSlotValue(touched, m.X[i]) {
-			touched = append(touched, m.X[i])
+	for i := oldLenNom; i < len(m.Nom); i++ {
+		if !HasSlotValue(touched, m.Nom[i]) {
+			touched = append(touched, m.Nom[i])
 		}
 
 		// If we don't have a candidate, we can support this new nomination
-		if !HasSlotValue(s.X, m.X[i]) {
-			log.Printf("%s supports the nomination of %+v", s.publicKey, m.X[i])
-			s.X = append(s.X, m.X[i])
+		if !HasSlotValue(s.X, m.Nom[i]) {
+			log.Printf("%s supports the nomination of %+v", s.publicKey, m.Nom[i])
+			s.X = append(s.X, m.Nom[i])
 		}
 	}
 
-	for i := oldLenY; i < len(m.Y); i++ {
-		if !HasSlotValue(touched, m.Y[i]) {
-			touched = append(touched, m.Y[i])
+	for i := oldLenAcc; i < len(m.Acc); i++ {
+		if !HasSlotValue(touched, m.Acc[i]) {
+			touched = append(touched, m.Acc[i])
 		}
 	}
 
@@ -724,8 +724,8 @@ func (cs *ChainState) OutgoingMessages() []Message {
 
 	answer = append(answer, &NominationMessage{
 		I: cs.slot,
-		X: cs.nState.X,
-		Y: cs.nState.Y,
+		Nom: cs.nState.X,
+		Acc: cs.nState.Y,
 		D: cs.D,
 	})
 

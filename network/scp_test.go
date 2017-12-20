@@ -39,8 +39,8 @@ func TestNominationMessage(t *testing.T) {
 	}
 	m := &NominationMessage{
 		I: 1,
-		X: []SlotValue{v},
-		Y: []SlotValue{v},
+		Nom: []SlotValue{v},
+		Acc: []SlotValue{v},
 		D: D,
 	}
 	s := EncodeMessage(m)
