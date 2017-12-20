@@ -322,8 +322,11 @@ func (s *BallotState) MaybeAcceptAsPrepared(n int, x SlotValue) {
 		return
 	}
 
+	log.Printf("accepting as prepared: %d %+v", n, x)
+	
 	if s.b != nil && s.hn <= n && !Equal(s.b.x, x) {
 		// Accepting this as prepared means we have to abort b
+		// TODO: should we set b to something?
 		s.hn = 0
 		s.cn = 0
 		s.b = nil
@@ -381,6 +384,8 @@ func (s *BallotState) MaybeConfirmAsPrepared(n int, x SlotValue) {
 	if !MeetsQuorum(s, accepted) {
 		return
 	}
+
+	log.Printf("confirming as prepared: %d %+v", n, x)
 	
 	// We can confirm this as prepared.
 	// Time to vote to commit it
@@ -435,6 +440,8 @@ func (s *BallotState) MaybeAcceptAsCommitted(n int, x SlotValue) {
 		return
 	}
 
+	log.Printf("accepting as committed: %d %+v", n, x)
+	
 	// We accept this commit
 	s.phase = Confirm
 	if s.b == nil || !Equal(s.b.x, x) {
@@ -484,6 +491,9 @@ func (s *BallotState) MaybeConfirmAsCommitted(n int, x SlotValue) {
 	if !MeetsQuorum(s, accepted) {
 		return
 	}
+	
+	log.Printf("confirming as committed: %d %+v", n, x)
+	
 	if s.phase == Confirm {
 		s.phase = Externalize
 		s.cn = n
@@ -546,6 +556,7 @@ func (s *BallotState) Handle(node string, message BallotMessage) {
 	if ok && Compare(old, message) >= 0 {
 		return
 	}
+	log.Printf("got new message from %s: %+v", node, message)
 	s.M[node] = message
 
 	for {
@@ -569,6 +580,20 @@ func (s *BallotState) Handle(node string, message BallotMessage) {
 		// Step 9 of the processing algorithm
 		if !s.MaybeNextBallot() {
 			break
+		}
+	}
+}
+
+// Initializes the value if it doesn't already have a value
+func (s *BallotState) MaybeInitializeValue(v SlotValue) {
+	if s.z != nil {
+		return
+	}
+	s.z = &v
+	if s.b == nil {
+		s.b = &Ballot{
+			n: 1,
+			x: v,
 		}
 	}
 }
@@ -652,6 +677,7 @@ type StateBuilder struct {
 }
 
 func NewStateBuilder(publicKey string, members []string, threshold int) *StateBuilder {
+	log.Printf("I am %s", publicKey)
 	qs := QuorumSlice{
 		Members: members,
 		Threshold: threshold,
@@ -689,6 +715,12 @@ func (sb *StateBuilder) OutgoingMessages() []Message {
 		D: sb.D,
 	})
 
+	// If we aren't working on any ballot, but we do have a nomination, we can
+	// optimistically start working on that ballot
+	if sb.nState.HasNomination() && sb.bState.z == nil {
+		sb.bState.MaybeInitializeValue(sb.nState.PredictValue())
+	}
+	
 	if sb.bState.HasMessage() {
 		answer = append(answer, sb.bState.Message(sb.slot, sb.D))
 	}
