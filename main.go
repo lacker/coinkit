@@ -4,6 +4,8 @@ import (
 	"log"
 	"os"
 	"strconv"
+
+	"coinkit/server"
 )
 
 func main() {
@@ -15,8 +17,8 @@ func main() {
 		log.Fatal(err)
 	}
 
-	config := NewLocalConfig(arg)
+	config := server.NewLocalConfig(arg)
 	
-	server := NewServer(config)
-	server.ServeForever()
+	s := server.NewServer(config)
+	s.ServeForever()
 }
