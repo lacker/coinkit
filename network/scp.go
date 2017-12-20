@@ -47,6 +47,9 @@ type NominationState struct {
 
 	// Who we listen to for quorum
 	D QuorumSlice
+
+	// The number of non-duplicate messages this state has processed
+	received int
 }
 
 func NewNominationState(publicKey string, qs QuorumSlice) *NominationState {
@@ -183,6 +186,7 @@ func (s *NominationState) Handle(node string, m *NominationMessage) {
 	}
 	// Update our most-recent-message
 	s.N[node] = m
+	s.received++
 	
 	for i := oldLenX; i < len(m.X); i++ {
 		if !HasSlotValue(touched, m.X[i]) {
@@ -247,6 +251,9 @@ type BallotState struct {
 
 	// Who we listen to for quorum
 	D QuorumSlice
+
+	// The number of non-duplicate messages this state has processed
+	received int
 }
 
 func NewBallotState(publicKey string, qs QuorumSlice) *BallotState {
@@ -557,6 +564,7 @@ func (s *BallotState) Handle(node string, message BallotMessage) {
 		return
 	}
 	log.Printf("got new message from %s: %+v", node, message)
+	s.received++
 	s.M[node] = message
 
 	for {
@@ -656,7 +664,7 @@ func (s *BallotState) Message(slot int, qs QuorumSlice) Message {
 	panic("code flow should not get here")
 }
 
-type StateBuilder struct {
+type ChainState struct {
 	// Which slot is actively being built
 	slot int
 
@@ -676,13 +684,13 @@ type StateBuilder struct {
 	publicKey string
 }
 
-func NewStateBuilder(publicKey string, members []string, threshold int) *StateBuilder {
+func NewChainState(publicKey string, members []string, threshold int) *ChainState {
 	log.Printf("I am %s", publicKey)
 	qs := QuorumSlice{
 		Members: members,
 		Threshold: threshold,
 	}
-	return &StateBuilder{
+	return &ChainState{
 		slot: 1,
 		start: time.Now(),
 		values: make(map[int]SlotValue),
@@ -695,50 +703,50 @@ func NewStateBuilder(publicKey string, members []string, threshold int) *StateBu
 
 // OutgoingMessages returns the outgoing messages.
 // There can be zero or one nomination messages, and zero or one ballot messages.
-func (sb *StateBuilder) OutgoingMessages() []Message {
+func (cs *ChainState) OutgoingMessages() []Message {
 	answer := []Message{}
 
-	if !sb.nState.HasNomination() {
+	if !cs.nState.HasNomination() {
 		// There's nothing to nominate. Let's nominate something.
 		// TODO: if it's not our turn, wait instead of nominating
 		comment := fmt.Sprintf(
-			"this is %s at %s", sb.publicKey, time.Now().Format("15:04:05.00000"))
+			"this is %s at %s", cs.publicKey, time.Now().Format("15:04:05.00000"))
 		v := MakeSlotValue(comment)
 		log.Printf("I nominate %+v", v)
-		sb.nState.SetDefault(v)
+		cs.nState.SetDefault(v)
 	}
 
 	answer = append(answer, &NominationMessage{
-		I: sb.slot,
-		X: sb.nState.X,
-		Y: sb.nState.Y,
-		D: sb.D,
+		I: cs.slot,
+		X: cs.nState.X,
+		Y: cs.nState.Y,
+		D: cs.D,
 	})
 
 	// If we aren't working on any ballot, but we do have a nomination, we can
 	// optimistically start working on that ballot
-	if sb.nState.HasNomination() && sb.bState.z == nil {
-		sb.bState.MaybeInitializeValue(sb.nState.PredictValue())
+	if cs.nState.HasNomination() && cs.bState.z == nil {
+		cs.bState.MaybeInitializeValue(cs.nState.PredictValue())
 	}
 	
-	if sb.bState.HasMessage() {
-		answer = append(answer, sb.bState.Message(sb.slot, sb.D))
+	if cs.bState.HasMessage() {
+		answer = append(answer, cs.bState.Message(cs.slot, cs.D))
 	}
 
 	return answer
 }
 
 // Handle handles an incoming message
-func (sb *StateBuilder) Handle(sender string, message Message) {
+func (cs *ChainState) Handle(sender string, message Message) {
 	switch m := message.(type) {
 	case *NominationMessage:
-		sb.nState.Handle(sender, m)
+		cs.nState.Handle(sender, m)
 	case *PrepareMessage:
-		sb.bState.Handle(sender, m)
+		cs.bState.Handle(sender, m)
 	case *ConfirmMessage:
-		sb.bState.Handle(sender, m)
+		cs.bState.Handle(sender, m)
 	case *ExternalizeMessage:
-		sb.bState.Handle(sender, m)
+		cs.bState.Handle(sender, m)
 	default:
 		log.Printf("unrecognized message: %v", m)
 	}

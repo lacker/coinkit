@@ -29,7 +29,7 @@ type Server struct {
 	keyPair *auth.KeyPair
 	peers []*network.Peer
 	info map[string]*PeerInfo
-	state *network.StateBuilder
+	state *network.ChainState
 }
 
 func NewServer(c *Config) *Server {
@@ -39,7 +39,7 @@ func NewServer(c *Config) *Server {
 		peers = append(peers, network.NewPeer(p))
 	}
 
-	state := network.NewStateBuilder(c.KeyPair.PublicKey(), c.Members, c.Threshold)
+	state := network.NewChainState(c.KeyPair.PublicKey(), c.Members, c.Threshold)
 	
 	return &Server{
 		port: c.Port,

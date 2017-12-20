@@ -18,7 +18,7 @@ func TestCombineSlotValues(t *testing.T) {
 }
 
 func TestSolipsistQuorum(t *testing.T) {
-	s := NewStateBuilder("foo", []string{"foo"}, 1)
+	s := NewChainState("foo", []string{"foo"}, 1)
 	if !MeetsQuorum(s.nState, []string{"foo"}) {
 		t.Fatal("foo should meet the quorum")
 	}
@@ -48,10 +48,10 @@ func TestNominationMessage(t *testing.T) {
 
 func TestConsensus(t *testing.T) {
 	members := []string{"amy", "bob", "cal", "dan"}
-	amy := NewStateBuilder("amy", members, 3)
-	bob := NewStateBuilder("bob", members, 3)
-	cal := NewStateBuilder("cal", members, 3)
-	dan := NewStateBuilder("dan", members, 3)
+	amy := NewChainState("amy", members, 3)
+	bob := NewChainState("bob", members, 3)
+	cal := NewChainState("cal", members, 3)
+	dan := NewChainState("dan", members, 3)
 
 	// Let everyone receive an initial nomination from Amy
 	a := amy.OutgoingMessages()[0]
@@ -100,3 +100,5 @@ func TestConsensus(t *testing.T) {
 		t.Fatal("len(dan.nState.Y) != 0")
 	}
 }
+
+// func converge(states []
