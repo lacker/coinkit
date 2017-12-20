@@ -1,6 +1,7 @@
 package network
 
 import (
+	"fmt"
 	"strings"
 	"testing"
 )
@@ -77,7 +78,8 @@ func TestConsensus(t *testing.T) {
 	}
 
 	// Once bob and cal broadcast, everyone should have one accepted value,
-	// but still no candidates. This works even without dan, who has nothing accepted.
+	// but still no candidates. This works even without dan, who has nothing
+	// accepted.
 	b := bob.OutgoingMessages()[0]
 	amy.Handle("bob", b)
 	if len(amy.nState.N) != 1 {
@@ -101,4 +103,53 @@ func TestConsensus(t *testing.T) {
 	}
 }
 
-// func converge(states []
+// Sum of received values for all the chains
+func rsum(chains []*ChainState) int {
+	answer := 0
+	for _, chain := range chains {
+		answer += chain.nState.received
+		answer += chain.bState.received
+	}
+	return answer
+}
+
+// Have the chains send messages back and forth until they are making no more
+// progress
+func converge(chains []*ChainState) {
+	for {
+		initial := rsum(chains)
+		for _, chain := range chains {
+			messages := chain.OutgoingMessages()
+			for _, m := range messages {
+				for _, target := range chains {
+					if chain != target {
+						target.Handle(chain.publicKey, m)
+					}
+				}
+			}
+		}
+		if rsum(chains) == initial {
+			break
+		}
+	}
+}
+
+// Makes a cluster that requires a consensus of more than two thirds.
+func cluster(size int) []*ChainState {
+	threshold := 2 * size / 3 + 1
+	names := []string{}
+	for i := 0; i < size; i++ {
+		names = append(names, fmt.Sprintf("node%d", i))
+	}
+	chains := []*ChainState{}
+	for _, name := range names {
+		chain := NewChainState(name, names, threshold)
+		chains = append(chains, chain)
+	}
+	return chains
+}
+
+func TestConvergence(t *testing.T) {
+	c := cluster(4)
+	converge(c)
+}

@@ -738,6 +738,10 @@ func (cs *ChainState) OutgoingMessages() []Message {
 
 // Handle handles an incoming message
 func (cs *ChainState) Handle(sender string, message Message) {
+	if sender == cs.publicKey {
+		// It's one of our own returning to us, we can ignore it
+		return
+	}
 	switch m := message.(type) {
 	case *NominationMessage:
 		cs.nState.Handle(sender, m)
