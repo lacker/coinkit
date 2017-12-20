@@ -2,6 +2,7 @@ package network
 
 import (
 	"fmt"
+	"log"
 	"strings"
 	"testing"
 )
@@ -120,7 +121,12 @@ func converge(chains []*ChainState) {
 		initial := rsum(chains)
 		for _, chain := range chains {
 			messages := chain.OutgoingMessages()
-			for _, m := range messages {
+			for _, message := range messages {
+				encoded := EncodeMessage(message)
+				m, err := DecodeMessage(encoded)
+				if err != nil {
+					log.Fatal("decoding error:", err)
+				}
 				for _, target := range chains {
 					if chain != target {
 						target.Handle(chain.publicKey, m)
