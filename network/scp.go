@@ -146,14 +146,14 @@ func (s *NominationState) MaybeAdvance(v SlotValue) bool {
 
 	if accept && !HasSlotValue(s.Y, v) {
 		// Accept this value
-		log.Printf("I accept the nomination of %+v", v)
+		log.Printf("%s accepts the nomination of %+v", s.publicKey, v)
 		changed = true
 		s.Y = append(s.Y, v)
 	}
 
 	// We confirm once a quorum has accepted
 	if MeetsQuorum(s, accepted) {
-		log.Printf("I confirm the nomination of %+v", v)		
+		log.Printf("%s confirms the nomination of %+v", s.publicKey, v)		
 		changed = true
 		s.Z = append(s.Z, v)
 	}
@@ -173,11 +173,11 @@ func (s *NominationState) Handle(node string, m *NominationMessage) {
 		oldLenY = len(old.Y)
 	}
 	if len(m.X) < oldLenX {
-		log.Printf("node %s sent a stale message: %v", node, m)
+		log.Printf("%s sent a stale message: %v", node, m)
 		return
 	}
 	if len(m.Y) < oldLenY {
-		log.Printf("node %s sent a stale message: %v", node, m)
+		log.Printf("%s sent a stale message: %v", node, m)
 		return
 	}
 	if len(m.X) == oldLenX && len(m.Y) == oldLenY {
@@ -195,7 +195,7 @@ func (s *NominationState) Handle(node string, m *NominationMessage) {
 
 		// If we don't have a candidate, we can support this new nomination
 		if !HasSlotValue(s.X, m.X[i]) {
-			log.Printf("I support the nomination of %+v", m.X[i])
+			log.Printf("%s supports the nomination of %+v", s.publicKey, m.X[i])
 			s.X = append(s.X, m.X[i])
 		}
 	}
@@ -329,7 +329,7 @@ func (s *BallotState) MaybeAcceptAsPrepared(n int, x SlotValue) {
 		return
 	}
 
-	log.Printf("accepting as prepared: %d %+v", n, x)
+	log.Printf("%s accepts as prepared: %d %+v", s.publicKey, n, x)
 	
 	if s.b != nil && s.hn <= n && !Equal(s.b.x, x) {
 		// Accepting this as prepared means we have to abort b
@@ -392,7 +392,7 @@ func (s *BallotState) MaybeConfirmAsPrepared(n int, x SlotValue) {
 		return
 	}
 
-	log.Printf("confirming as prepared: %d %+v", n, x)
+	log.Printf("%s confirms as prepared: %d %+v", s.publicKey, n, x)
 	
 	// We can confirm this as prepared.
 	// Time to vote to commit it
@@ -447,7 +447,7 @@ func (s *BallotState) MaybeAcceptAsCommitted(n int, x SlotValue) {
 		return
 	}
 
-	log.Printf("accepting as committed: %d %+v", n, x)
+	log.Printf("%s accepts as committed: %d %+v", s.publicKey, n, x)
 	
 	// We accept this commit
 	s.phase = Confirm
@@ -499,7 +499,7 @@ func (s *BallotState) MaybeConfirmAsCommitted(n int, x SlotValue) {
 		return
 	}
 	
-	log.Printf("confirming as committed: %d %+v", n, x)
+	log.Printf("%s confirms as committed: %d %+v", s.publicKey, n, x)
 	
 	if s.phase == Confirm {
 		s.phase = Externalize
@@ -563,7 +563,7 @@ func (s *BallotState) Handle(node string, message BallotMessage) {
 	if ok && Compare(old, message) >= 0 {
 		return
 	}
-	log.Printf("got new message from %s: %+v", node, message)
+	log.Printf("%s got new message from %s: %+v", s.publicKey, node, message)
 	s.received++
 	s.M[node] = message
 
@@ -712,7 +712,7 @@ func (cs *ChainState) OutgoingMessages() []Message {
 		comment := fmt.Sprintf(
 			"this is %s at %s", cs.publicKey, time.Now().Format("15:04:05.00000"))
 		v := MakeSlotValue(comment)
-		log.Printf("I nominate %+v", v)
+		log.Printf("%s nominates %+v", cs.publicKey, v)
 		cs.nState.SetDefault(v)
 	}
 

@@ -161,7 +161,7 @@ func cluster(size int) []*ChainState {
 func assertDone(chains []*ChainState, t *testing.T) {
 	for _, chain := range chains {
 		if !chain.Done() {
-			t.Fatal("chain %s is not externalized: %s",
+			t.Fatalf("%s is not externalizing: %s",
 				chain.publicKey, spew.Sdump(chain))
 		}
 	}
@@ -170,4 +170,5 @@ func assertDone(chains []*ChainState, t *testing.T) {
 func TestConvergence(t *testing.T) {
 	c := cluster(4)
 	converge(c)
+	assertDone(c, t)
 }
