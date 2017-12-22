@@ -116,6 +116,22 @@ func rsum(chains []*ChainState) int {
 	return answer
 }
 
+// Simulate the pending messages being sent from source to target
+func send(source *ChainState, target *ChainState) {
+	if source == target {
+		return
+	}
+	messages := source.OutgoingMessages()
+	for _, message := range messages {
+		encoded := EncodeMessage(message)
+		m, err := DecodeMessage(encoded)
+		if err != nil {
+			log.Fatal("decoding error:", err)
+		}
+		target.Handle(source.publicKey, m)
+	}
+}
+
 // Have the chains send messages back and forth until they are making no more
 // progress
 func converge(chains []*ChainState) {
@@ -124,19 +140,9 @@ func converge(chains []*ChainState) {
 		i++
 		log.Printf("Pass %d", i)
 		initial := rsum(chains)
-		for _, chain := range chains {
-			messages := chain.OutgoingMessages()
-			for _, message := range messages {
-				encoded := EncodeMessage(message)
-				m, err := DecodeMessage(encoded)
-				if err != nil {
-					log.Fatal("decoding error:", err)
-				}
-				for _, target := range chains {
-					if chain != target {
-						target.Handle(chain.publicKey, m)
-					}
-				}
+		for _, source := range chains {
+			for _, target := range chains {
+				send(source, target)
 			}
 		}
 		if rsum(chains) == initial {
