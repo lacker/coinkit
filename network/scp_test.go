@@ -3,6 +3,7 @@ package network
 import (
 	"fmt"
 	"log"
+	"rand"
 	"strings"
 	"testing"
 
@@ -166,6 +167,15 @@ func cluster(size int) []*ChainState {
 	return chains
 }
 
+func allDone(chains []*ChainState) bool {
+	for _, chain := range chains {
+		if !chain.Done() {
+			return false
+		}
+	}
+	return true
+}
+
 // assertDone verifies that every chain has externalized all its slots
 func assertDone(chains []*ChainState, t *testing.T) {
 	for _, chain := range chains {
@@ -176,8 +186,27 @@ func assertDone(chains []*ChainState, t *testing.T) {
 	}
 }
 
+func fuzzTest(chains []*ChainState, seed int, t *testing.T) {
+	rand.Seed(seed)
+	log.Printf("fuzz testing with seed %d", seed)
+	for i := 0; i < 100000; i++ {
+		j := rand.Intn(len(chains))
+		k := rand.Intn(len(chains))
+		send(chains[i], chains[j])
+		if allDone(chains) {
+			break
+		}
+	}
+	if !allDone(chains) {
+		log.Printf("fuzz testing with seed %d did not converge", seed)
+	}
+}
+
 func TestConvergence(t *testing.T) {
 	c := cluster(4)
 	converge(c)
 	assertDone(c, t)
+	t.Fatalf("XXX")
 }
+
+

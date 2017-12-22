@@ -36,7 +36,7 @@ type NominationState struct {
 	// The values we have accepted as nominated
 	Y []SlotValue
 
-	// The values that we consider to be candidates 
+	// The values whose nomination we have confirmed
 	Z []SlotValue
 
 	// The last NominationMessage received from each node
