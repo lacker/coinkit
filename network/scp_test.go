@@ -206,7 +206,11 @@ func TestConvergence(t *testing.T) {
 	c := cluster(4)
 	converge(c)
 	assertDone(c, t)
-	t.Fatalf("XXX")
 }
 
-
+func TestConvergenceWithFuzzing(t *testing.T) {
+	for i := 0; i < 100; i++ {
+		c := cluster(4)
+		fuzzTest(c, i, t)
+	}
+}
