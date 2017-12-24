@@ -3,7 +3,7 @@ package network
 import (
 	"fmt"
 	"log"
-	"rand"
+	"math/rand"
 	"strings"
 	"testing"
 
@@ -186,13 +186,13 @@ func assertDone(chains []*ChainState, t *testing.T) {
 	}
 }
 
-func fuzzTest(chains []*ChainState, seed int, t *testing.T) {
+func fuzzTest(chains []*ChainState, seed int64, t *testing.T) {
 	rand.Seed(seed)
 	log.Printf("fuzz testing with seed %d", seed)
 	for i := 0; i < 100000; i++ {
 		j := rand.Intn(len(chains))
 		k := rand.Intn(len(chains))
-		send(chains[i], chains[j])
+		send(chains[j], chains[k])
 		if allDone(chains) {
 			break
 		}
@@ -209,7 +209,8 @@ func TestConvergence(t *testing.T) {
 }
 
 func TestConvergenceWithFuzzing(t *testing.T) {
-	for i := 0; i < 100; i++ {
+	var i int64
+	for i = 0; i < 100; i++ {
 		c := cluster(4)
 		fuzzTest(c, i, t)
 	}
