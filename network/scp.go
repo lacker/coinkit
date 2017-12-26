@@ -282,26 +282,27 @@ func (s *BallotState) QuorumSlice(node string) (*QuorumSlice, bool) {
 	return &qs, true
 }
 
-func (s *BallotState) MaybeAcceptAsPrepared(n int, x SlotValue) {
+// MaybeAcceptAsPrepared returns true if the ballot state changes.
+func (s *BallotState) MaybeAcceptAsPrepared(n int, x SlotValue) bool {
 	if s.phase != Prepare {
-		return
+		return false
 	}
 	if n == 0 {
-		return
+		return false
 	}
 
 	// Check if we already accept this as prepared
 	if s.p != nil && s.p.n >= n && Equal(s.p.x, x) {
-		return
+		return false
 	}
 	if s.pPrime != nil && s.pPrime.n >= n && Equal(s.pPrime.x, x) {
-		return
+		return false
 	}
 
 	if s.pPrime != nil && s.pPrime.n >= n {
 		// This is about an old ballot number, we don't care even if it is
 		// accepted
-		return
+		return false
 	}
 	
 	// The rules for accepting are, if a quorum has voted or accepted,
@@ -327,7 +328,7 @@ func (s *BallotState) MaybeAcceptAsPrepared(n int, x SlotValue) {
 
 	if !MeetsQuorum(s, votedOrAccepted) && !s.D.BlockedBy(accepted) {
 		// We can't accept this as prepared yet
-		return
+		return false
 	}
 
 	log.Printf("%s accepts as prepared: %d %+v", s.publicKey, n, x)
@@ -360,7 +361,8 @@ func (s *BallotState) MaybeAcceptAsPrepared(n int, x SlotValue) {
 	} else {
 		// We already short circuited if it isn't worth bumping p prime
 		s.pPrime = ballot
-	}	
+	}
+	return true
 }
 
 func (s *BallotState) MaybeConfirmAsPrepared(n int, x SlotValue) {

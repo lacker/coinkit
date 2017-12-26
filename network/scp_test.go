@@ -189,7 +189,7 @@ func assertDone(chains []*ChainState, t *testing.T) {
 func fuzzTest(chains []*ChainState, seed int64, t *testing.T) {
 	rand.Seed(seed)
 	log.Printf("fuzz testing with seed %d", seed)
-	for i := 0; i < 100000; i++ {
+	for i := 0; i < 10000; i++ {
 		j := rand.Intn(len(chains))
 		k := rand.Intn(len(chains))
 		send(chains[j], chains[k])
@@ -198,7 +198,7 @@ func fuzzTest(chains []*ChainState, seed int64, t *testing.T) {
 		}
 	}
 	if !allDone(chains) {
-		log.Printf("fuzz testing with seed %d did not converge", seed)
+		t.Fatalf("fuzz testing with seed %d did not converge", seed)
 	}
 }
 
