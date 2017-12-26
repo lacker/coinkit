@@ -365,13 +365,14 @@ func (s *BallotState) MaybeAcceptAsPrepared(n int, x SlotValue) bool {
 	return true
 }
 
-func (s *BallotState) MaybeConfirmAsPrepared(n int, x SlotValue) {
+// MaybeConfirmAsPrepared returns whether anything in the ballot state changed.
+func (s *BallotState) MaybeConfirmAsPrepared(n int, x SlotValue) bool {
 	if s.phase != Prepare {
-		return
+		return false
 	}
 	if s.hn >= n {
 		// We are already past this ballot
-		return
+		return false
 	}
 	ballot := &Ballot{
 		n: n,
@@ -392,7 +393,7 @@ func (s *BallotState) MaybeConfirmAsPrepared(n int, x SlotValue) {
 	}
 
 	if !MeetsQuorum(s, accepted) {
-		return
+		return false
 	}
 
 	log.Printf("%s confirms as prepared: %d %+v", s.publicKey, n, x)
@@ -421,6 +422,7 @@ func (s *BallotState) MaybeConfirmAsPrepared(n int, x SlotValue) {
 			s.cn = n
 		}
 	}
+	return true
 }
 
 func (s *BallotState) MaybeAcceptAsCommitted(n int, x SlotValue) {
