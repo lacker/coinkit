@@ -483,12 +483,13 @@ func (s *BallotState) MaybeAcceptAsCommitted(n int, x SlotValue) bool {
 	return true
 }
 
-func (s *BallotState) MaybeConfirmAsCommitted(n int, x SlotValue) {
+// MaybeConfirmAsCommitted returns whether anything in the ballot state changed.
+func (s *BallotState) MaybeConfirmAsCommitted(n int, x SlotValue) bool {
 	if s.phase == Prepare {
-		return
+		return false
 	}
 	if s.b == nil || !Equal(s.b.x, x) {
-		return
+		return false
 	}
 	
 	accepted := []string{}
@@ -498,7 +499,7 @@ func (s *BallotState) MaybeConfirmAsCommitted(n int, x SlotValue) {
 		}
 	} else if s.cn <= n && n <= s.hn {
 		// We already did confirm this as committed
-		return
+		return false
 	}
 
 	for node, m := range s.M {
@@ -508,7 +509,7 @@ func (s *BallotState) MaybeConfirmAsCommitted(n int, x SlotValue) {
 	}
 
 	if !MeetsQuorum(s, accepted) {
-		return
+		return false
 	}
 	
 	log.Printf("%s confirms as committed: %d %+v", s.publicKey, n, x)
@@ -525,6 +526,8 @@ func (s *BallotState) MaybeConfirmAsCommitted(n int, x SlotValue) {
 			s.hn = n
 		}
 	}
+
+	return true
 }
 
 // Returns whether we needed to bump the ballot number.
