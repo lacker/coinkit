@@ -425,13 +425,14 @@ func (s *BallotState) MaybeConfirmAsPrepared(n int, x SlotValue) bool {
 	return true
 }
 
-func (s *BallotState) MaybeAcceptAsCommitted(n int, x SlotValue) {
+// MaybeAcceptAsCommitted returns whether anything in the ballot state changed.
+func (s *BallotState) MaybeAcceptAsCommitted(n int, x SlotValue) bool {
 	if s.phase == Externalize {
-		return
+		return false
 	}
 	if s.phase == Confirm && s.cn <= n && n <= s.hn {
 		// We already do accept this commit
-		return
+		return false
 	}
 
 	votedOrAccepted := []string{}
@@ -454,7 +455,7 @@ func (s *BallotState) MaybeAcceptAsCommitted(n int, x SlotValue) {
 
 	if !MeetsQuorum(s, votedOrAccepted) && !s.D.BlockedBy(accepted) {
 		// We can't accept this commit yet
-		return
+		return false
 	}
 
 	log.Printf("%s accepts as committed: %d %+v", s.publicKey, n, x)
@@ -479,6 +480,7 @@ func (s *BallotState) MaybeAcceptAsCommitted(n int, x SlotValue) {
 			s.hn = n
 		}
 	}
+	return true
 }
 
 func (s *BallotState) MaybeConfirmAsCommitted(n int, x SlotValue) {
