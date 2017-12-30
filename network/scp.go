@@ -607,10 +607,11 @@ func (s *BallotState) Handle(node string, message BallotMessage) {
 	}
 }
 
-// Initializes the value if it doesn't already have a value
-func (s *BallotState) MaybeInitializeValue(v SlotValue) {
+// MaybeInitializeValue initializes the value if it doesn't already have a value,
+// and returns whether anything in the ballot state changed.
+func (s *BallotState) MaybeInitializeValue(v SlotValue) bool {
 	if s.z != nil {
-		return
+		return false
 	}
 	s.z = &v
 	if s.b == nil {
@@ -619,6 +620,7 @@ func (s *BallotState) MaybeInitializeValue(v SlotValue) {
 			x: v,
 		}
 	}
+	return true
 }
 
 func (s *BallotState) HasMessage() bool {
