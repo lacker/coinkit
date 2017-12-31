@@ -156,6 +156,7 @@ func (s *NominationState) MaybeAdvance(v SlotValue) bool {
 		log.Printf("%s confirms the nomination of %+v", s.publicKey, v)		
 		changed = true
 		s.Z = append(s.Z, v)
+		log.Printf("new s.Z: %+v", s.Z)
 	}
 	return changed
 }
@@ -198,6 +199,7 @@ func (s *NominationState) Handle(node string, m *NominationMessage) {
 		if !HasSlotValue(s.X, m.Nom[i]) {
 			log.Printf("%s supports the nomination of %+v", s.publicKey, m.Nom[i])
 			s.X = append(s.X, m.Nom[i])
+			log.Printf("new s.X: %+v", s.X)
 		}
 	}
 
