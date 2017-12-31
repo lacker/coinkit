@@ -196,6 +196,9 @@ func fuzzTest(chains []*ChainState, seed int64, t *testing.T) {
 		if allDone(chains) {
 			break
 		}
+		if i % 1000 == 0 {
+			log.Printf("done round: %d", i)
+		}
 	}
 	if !allDone(chains) {
 		t.Fatalf("fuzz testing with seed %d did not converge", seed)
