@@ -201,6 +201,10 @@ func fuzzTest(chains []*ChainState, seed int64, t *testing.T) {
 		}
 	}
 	if !allDone(chains) {
+		for i := 0; i < len(chains); i++ {
+			log.Printf("----------------------------------------")
+			log.Printf("node %d OM: %s", i, spew.Sdump(chains[i].OutgoingMessages()))
+		}
 		t.Fatalf("fuzz testing with seed %d did not converge", seed)
 	}
 }
@@ -213,7 +217,7 @@ func TestConvergence(t *testing.T) {
 
 func TestConvergenceWithFuzzing(t *testing.T) {
 	var i int64
-	for i = 0; i < 100; i++ {
+	for i = 0; i < 3; i++ {
 		c := cluster(4)
 		fuzzTest(c, i, t)
 	}

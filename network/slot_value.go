@@ -1,6 +1,8 @@
 package network
 
 import (
+	"log"
+	"runtime/debug"
 	"sort"
 	"strings"
 )
@@ -29,14 +31,18 @@ func Equal(a SlotValue, b SlotValue) bool {
 
 // Combine is specific to what the slot values are
 func Combine(a SlotValue, b SlotValue) SlotValue {
-	joined := append(a.Comments, b.Comments...)
-	sort.Strings(joined)
-	answer := []string{}
-	for _, item := range joined {
-		if len(answer) == 0 || answer[len(answer)-1] != item {
-			answer = append(answer, item)
-		}
+	cmap := make(map[string]bool)
+	for _, c := range a.Comments {
+		cmap[c] = true
 	}
+	for _, c := range b.Comments {
+		cmap[c] = true
+	}
+	answer := []string{}
+	for c, _ := range cmap {
+		answer = append(answer, c)
+	}
+	sort.Strings(answer)
 	return SlotValue{Comments: answer}
 }
 
@@ -62,3 +68,14 @@ func HasSlotValue(list []SlotValue, v SlotValue) bool {
 	return false
 }
 
+func AssertNoDupes(list []SlotValue) {
+	m := make(map[string]bool)
+	for _, v := range list {
+		s := strings.Join(v.Comments, ",")
+		if m[s] {
+			debug.PrintStack()
+			log.Fatalf("dupe in %+v", list)
+		}
+		m[s] = true
+	}
+}

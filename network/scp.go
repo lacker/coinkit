@@ -85,7 +85,8 @@ func (s *NominationState) PredictValue() SlotValue {
 		return CombineSlice(s.Z)
 	}
 	if len(s.Y) > 0 {
-		return CombineSlice(s.Y)
+		answer := CombineSlice(s.Y)
+		return answer
 	}
 	if len(s.X) > 0 {
 		return CombineSlice(s.X)
@@ -106,6 +107,12 @@ func (s *NominationState) QuorumSlice(node string) (*QuorumSlice, bool) {
 
 func (s *NominationState) PublicKey() string {
 	return s.publicKey
+}
+
+func (s *NominationState) AssertValid() {
+	AssertNoDupes(s.X)
+	AssertNoDupes(s.Y)
+	AssertNoDupes(s.Z)
 }
 
 // MaybeAdvance checks whether we should accept the nomination for this slot value,
@@ -148,7 +155,11 @@ func (s *NominationState) MaybeAdvance(v SlotValue) bool {
 		// Accept this value
 		log.Printf("%s accepts the nomination of %+v", s.publicKey, v)
 		changed = true
+		log.Printf("old s.Y: %+v", s.Y)		
+		AssertNoDupes(s.Y)
 		s.Y = append(s.Y, v)
+		log.Printf("new s.Y: %+v", s.Y)
+		AssertNoDupes(s.Y)
 	}
 
 	// We confirm once a quorum has accepted
@@ -208,7 +219,6 @@ func (s *NominationState) Handle(node string, m *NominationMessage) {
 			touched = append(touched, m.Acc[i])
 		}
 	}
-
 	for _, v := range touched {
 		s.MaybeAdvance(v)
 	}
@@ -625,6 +635,48 @@ func (s *BallotState) MaybeInitializeValue(v SlotValue) bool {
 	return true
 }
 
+// MaybeUpdateValue updates the value based on the nomination state if we still
+// have not confirmed any ballot as prepared.
+// The goal is, before we confirm any ballot as prepared we can keep updating
+// the ballot we are working on to the most recent one.
+// Returns whether anything in the ballot state changed.
+func (s *BallotState) MaybeUpdateValue(ns *NominationState) bool {
+	if s.hn > 0 {
+		// We already confirmed some ballot as prepared
+		return false
+	}
+
+	if !ns.HasNomination() {
+		// No idea how to set the value anyway
+		return false
+	}
+	
+	v := ns.PredictValue()
+
+	if s.z != nil && Equal(v, *s.z) {
+		// The new value is the same as the old one
+		return false
+	}
+
+	log.Printf("%s updating value to %+v", s.publicKey, v)
+	s.z = &v
+
+	if s.b == nil {
+		s.b = &Ballot{
+			n: 1,
+			x: v,
+		}
+	} else {
+		// TODO: this part should only happen when a timer fires, but that
+		// seems to be an optimization so I punted for now.
+		// See page 25
+		s.b.n = s.b.n + 1
+		s.b.x = v
+	}
+	
+	return true
+}
+
 func (s *BallotState) HasMessage() bool {
 	return s.b != nil
 }
@@ -769,6 +821,7 @@ func (cs *ChainState) Handle(sender string, message Message) {
 	switch m := message.(type) {
 	case *NominationMessage:
 		cs.nState.Handle(sender, m)
+		cs.bState.MaybeUpdateValue(cs.nState)
 	case *PrepareMessage:
 		cs.bState.Handle(sender, m)
 	case *ConfirmMessage:
@@ -778,5 +831,7 @@ func (cs *ChainState) Handle(sender string, message Message) {
 	default:
 		log.Printf("unrecognized message: %v", m)
 	}
+
+	cs.nState.AssertValid()
 }
 
