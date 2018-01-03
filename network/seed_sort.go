@@ -5,22 +5,21 @@ import (
 )
 
 func hashString(x string) string {
-	// TODO: implement something
+	// TODO: implement something more hashy
 	return "X" + x
 }
 
 // SeedSort sorts in a way that is repeatable depending on the seed string.
-// TODO: test
-func SeedSort(seed string, input []string{}) []string{} {
+func SeedSort(seed string, input []string) []string {
 	m := make(map[string]string)
-	keys := make([]string{})
+	keys := []string{}
 	for _, x := range input {
 		hashed := hashString(seed + x)
 		m[hashed] = x
 		keys = append(keys, hashed)
 	}
 	sort.Strings(keys)
-	answer := make([]string{})
+	answer := []string{}
 	for _, key := range keys {
 		answer = append(answer, m[key])
 	}
