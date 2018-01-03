@@ -186,6 +186,7 @@ func assertDone(chains []*ChainState, t *testing.T) {
 	}
 }
 
+// TODO: detach from global rand
 func fuzzTest(chains []*ChainState, seed int64, t *testing.T) {
 	rand.Seed(seed)
 	log.Printf("fuzz testing with seed %d", seed)
