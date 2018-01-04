@@ -1,12 +1,15 @@
 package network
 
 import (
+	"crypto/sha512"
+	"encoding/base64"
 	"sort"
 )
 
 func hashString(x string) string {
-	// TODO: implement something more hashy
-	return "X" + x
+	h := sha512.New()
+	hashBytes := h.Sum([]byte(x))
+	return base64.RawStdEncoding.EncodeToString(hashBytes)
 }
 
 // SeedSort sorts in a way that is repeatable depending on the seed string.
