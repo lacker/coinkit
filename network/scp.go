@@ -63,6 +63,10 @@ func NewNominationState(publicKey string, qs QuorumSlice) *NominationState {
 	}
 }
 
+func (s *NominationState) Logf(format string, a ...interface{}) {
+	// log.Printf(format, a...)
+}
+
 // HasNomination tells you whether this nomination state can currently send out
 // a nominate message.
 // If we have never received a nomination from a peer, and haven't had SetDefault
@@ -153,21 +157,21 @@ func (s *NominationState) MaybeAdvance(v SlotValue) bool {
 
 	if accept && !HasSlotValue(s.Y, v) {
 		// Accept this value
-		log.Printf("%s accepts the nomination of %+v", s.publicKey, v)
+		s.Logf("%s accepts the nomination of %+v", s.publicKey, v)
 		changed = true
-		log.Printf("old s.Y: %+v", s.Y)		
+		s.Logf("old s.Y: %+v", s.Y)		
 		AssertNoDupes(s.Y)
 		s.Y = append(s.Y, v)
-		log.Printf("new s.Y: %+v", s.Y)
+		s.Logf("new s.Y: %+v", s.Y)
 		AssertNoDupes(s.Y)
 	}
 
 	// We confirm once a quorum has accepted
 	if MeetsQuorum(s, accepted) {
-		log.Printf("%s confirms the nomination of %+v", s.publicKey, v)		
+		s.Logf("%s confirms the nomination of %+v", s.publicKey, v)		
 		changed = true
 		s.Z = append(s.Z, v)
-		log.Printf("new s.Z: %+v", s.Z)
+		s.Logf("new s.Z: %+v", s.Z)
 	}
 	return changed
 }
@@ -185,11 +189,11 @@ func (s *NominationState) Handle(node string, m *NominationMessage) {
 		oldLenAcc = len(old.Acc)
 	}
 	if len(m.Nom) < oldLenNom {
-		log.Printf("%s sent a stale message: %v", node, m)
+		s.Logf("%s sent a stale message: %v", node, m)
 		return
 	}
 	if len(m.Acc) < oldLenAcc {
-		log.Printf("%s sent a stale message: %v", node, m)
+		s.Logf("%s sent a stale message: %v", node, m)
 		return
 	}
 	if len(m.Nom) == oldLenNom && len(m.Acc) == oldLenAcc {
@@ -197,7 +201,7 @@ func (s *NominationState) Handle(node string, m *NominationMessage) {
 		return
 	}
 	// Update our most-recent-message
-	log.Printf("%s got nomination message from %s: %+v", s.publicKey, node, m)
+	s.Logf("%s got nomination message from %s: %+v", s.publicKey, node, m)
 	s.N[node] = m
 	s.received++
 	
@@ -208,9 +212,9 @@ func (s *NominationState) Handle(node string, m *NominationMessage) {
 
 		// If we don't have a candidate, we can support this new nomination
 		if !HasSlotValue(s.X, m.Nom[i]) {
-			log.Printf("%s supports the nomination of %+v", s.publicKey, m.Nom[i])
+			s.Logf("%s supports the nomination of %+v", s.publicKey, m.Nom[i])
 			s.X = append(s.X, m.Nom[i])
-			log.Printf("new s.X: %+v", s.X)
+			s.Logf("new s.X: %+v", s.X)
 		}
 	}
 
@@ -278,6 +282,10 @@ func NewBallotState(publicKey string, qs QuorumSlice) *BallotState {
 	}
 }
 
+func (s *BallotState) Logf(format string, a ...interface{}) {
+	log.Printf(format, a...)
+}
+
 func (s *BallotState) PublicKey() string {
 	return s.publicKey
 }
@@ -343,7 +351,7 @@ func (s *BallotState) MaybeAcceptAsPrepared(n int, x SlotValue) bool {
 		return false
 	}
 
-	log.Printf("%s accepts as prepared: %d %+v", s.publicKey, n, x)
+	s.Logf("%s accepts as prepared: %d %+v", s.publicKey, n, x)
 	
 	if s.b != nil && s.hn <= n && !Equal(s.b.x, x) {
 		// Accepting this as prepared means we have to abort b
@@ -408,7 +416,7 @@ func (s *BallotState) MaybeConfirmAsPrepared(n int, x SlotValue) bool {
 		return false
 	}
 
-	log.Printf("%s confirms as prepared: %d %+v", s.publicKey, n, x)
+	s.Logf("%s confirms as prepared: %d %+v", s.publicKey, n, x)
 	
 	// We can confirm this as prepared.
 	// Time to vote to commit it
@@ -470,7 +478,7 @@ func (s *BallotState) MaybeAcceptAsCommitted(n int, x SlotValue) bool {
 		return false
 	}
 
-	log.Printf("%s accepts as committed: %d %+v", s.publicKey, n, x)
+	s.Logf("%s accepts as committed: %d %+v", s.publicKey, n, x)
 	
 	// We accept this commit
 	s.phase = Confirm
@@ -524,7 +532,7 @@ func (s *BallotState) MaybeConfirmAsCommitted(n int, x SlotValue) bool {
 		return false
 	}
 	
-	log.Printf("%s confirms as committed: %d %+v", s.publicKey, n, x)
+	s.Logf("%s confirms as committed: %d %+v", s.publicKey, n, x)
 	
 	if s.phase == Confirm {
 		s.phase = Externalize
@@ -590,7 +598,7 @@ func (s *BallotState) Handle(node string, message BallotMessage) {
 	if ok && Compare(old, message) >= 0 {
 		return
 	}
-	log.Printf("%s got ballot message from %s: %+v", s.publicKey, node, message)
+	s.Logf("%s got ballot message from %s: %+v", s.publicKey, node, message)
 	s.received++
 	s.M[node] = message
 
@@ -658,7 +666,7 @@ func (s *BallotState) MaybeUpdateValue(ns *NominationState) bool {
 		return false
 	}
 
-	log.Printf("%s updating value to %+v", s.publicKey, v)
+	s.Logf("%s updating value to %+v", s.publicKey, v)
 	s.z = &v
 
 	if s.b == nil {

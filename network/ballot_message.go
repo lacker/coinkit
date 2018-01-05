@@ -196,7 +196,7 @@ func (m *ConfirmMessage) AcceptAsCommitted(n int, x SlotValue) bool {
 }
 
 func (m *ConfirmMessage) VoteToCommit(n int, x SlotValue) bool {
-	return false
+	return Equal(m.X, x)
 }
 
 func (m *ConfirmMessage) BallotNumber() int {
