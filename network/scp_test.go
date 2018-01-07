@@ -203,7 +203,7 @@ func fuzzTest(chains []*ChainState, seed int64, t *testing.T) {
 	}
 	if !allDone(chains) {
 		for i := 0; i < len(chains); i++ {
-			log.Printf("----------------------------------------")
+			log.Printf("--------------------------------------------------------------------------")
 			log.Printf("node %d OM: %s", i, spew.Sdump(chains[i].OutgoingMessages()))
 		}
 		t.Fatalf("fuzz testing with seed %d did not converge", seed)

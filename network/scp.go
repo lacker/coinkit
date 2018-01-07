@@ -689,6 +689,21 @@ func (s *BallotState) HasMessage() bool {
 	return s.b != nil
 }
 
+func (s *BallotState) AssertValid() {
+	if s.b != nil {
+		if s.p != nil && !Equal(s.b.x, s.p.x) && s.b.n <= s.p.n {
+			log.Printf("b: %+v", s.b)
+			log.Printf("p: %+v", s.p)
+			log.Fatalf("pointless to vote for b when p obsoletes it")
+		}
+		if s.pPrime != nil && !Equal(s.b.x, s.pPrime.x) && s.b.n <= s.pPrime.n {
+			log.Printf("b: %+v", s.b)
+			log.Printf("pPrime: %+v", s.pPrime)
+			log.Fatalf("pointless to vote for b when pPrime obsoletes it")
+		}
+	}
+}
+
 func (s *BallotState) Message(slot int, qs QuorumSlice) Message {
 	if !s.HasMessage() {
 		panic("coding error")
@@ -780,6 +795,11 @@ func NewChainState(publicKey string, members []string, threshold int) *ChainStat
 	}
 }
 
+func (cs *ChainState) AssertValid() {
+	cs.nState.AssertValid()
+	cs.bState.AssertValid()
+}
+
 // OutgoingMessages returns the outgoing messages.
 // There can be zero or one nomination messages, and zero or one ballot messages.
 func (cs *ChainState) OutgoingMessages() []Message {
@@ -840,6 +860,6 @@ func (cs *ChainState) Handle(sender string, message Message) {
 		log.Printf("unrecognized message: %v", m)
 	}
 
-	cs.nState.AssertValid()
+	cs.AssertValid()
 }
 
