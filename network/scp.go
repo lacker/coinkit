@@ -352,22 +352,21 @@ func (s *BallotState) MaybeAcceptAsPrepared(n int, x SlotValue) bool {
 	}
 
 	s.Logf("%s accepts as prepared: %d %+v", s.publicKey, n, x)
-	
-	if s.b != nil && s.b.n <= n && !Equal(s.b.x, x) {
-		// Accepting this as prepared means we have to abort b
-		// TODO: should we set b to something? Probably, to ensure ordering.
-		s.hn = 0
-		s.cn = 0
-		s.b = nil
-	}
-	
-	// p and p prime should be the top two conflicting things we accept
-	// as prepared. update them accordingly
 	ballot := &Ballot{
 		n: n,
 		x: x,
 	}
 	
+	if s.b != nil && s.b.n <= n && !Equal(s.b.x, x) {
+		// Accepting this as prepared means we have to abort b
+		// We should just switch our active ballot to this one.
+		s.hn = 0
+		s.cn = 0
+		s.b = ballot
+	}
+	
+	// p and p prime should be the top two conflicting things we accept
+	// as prepared. update them accordingly
 	if s.p == nil {
 		s.p = ballot
 	} else if Equal(s.p.x, x) {
@@ -382,7 +381,43 @@ func (s *BallotState) MaybeAcceptAsPrepared(n int, x SlotValue) bool {
 		// We already short circuited if it isn't worth bumping p prime
 		s.pPrime = ballot
 	}
+
+	// Check if accepting this prepare means that we should give up some
+	// of our votes to commit
+	if s.b != nil {
+		for s.cn != 0 && s.AcceptedAbort(s.cn, s.b.x) {
+			s.cn++
+			if s.cn > s.hn {
+				s.cn = 0
+				s.hn = 0
+			}
+		}
+	}
+	
 	return true
+}
+
+// AcceptedAbort returns whether we have already accepted an abort for the
+// ballot number and slot value provided.
+func (s *BallotState) AcceptedAbort(n int, x SlotValue) bool {
+	if s.phase != Prepare {
+		// After the prepare phase, we've accepted an abort for everything
+		// else.
+		return !Equal(x, s.b.x)
+	}
+
+	if s.p != nil && s.p.n >= n && !Equal(s.p.x, x) {
+		// we accept p is prepared, which implies we accept this abort
+		return true
+	}
+
+	if s.pPrime != nil && s.pPrime.n >= n && !Equal(s.pPrime.x, x) {
+		// we accept p' is prepared, which implies we accept this abort
+		return true
+	}
+
+	// No reason to think we accept this abort
+	return false
 }
 
 // MaybeConfirmAsPrepared returns whether anything in the ballot state changed.
@@ -394,6 +429,13 @@ func (s *BallotState) MaybeConfirmAsPrepared(n int, x SlotValue) bool {
 		// We are already past this ballot
 		return false
 	}
+
+	// If we've already accepted an abort, it's pointless to confirm this
+	// as prepared.
+	if s.AcceptedAbort(n, x) {
+		return false
+	}
+	
 	ballot := &Ballot{
 		n: n,
 		x: x,
@@ -692,20 +734,20 @@ func (s *BallotState) HasMessage() bool {
 }
 
 func (s *BallotState) AssertValid() {
-	/* XXX is this condition actually invalid?
-	if s.b != nil {
-		if s.p != nil && !Equal(s.b.x, s.p.x) && s.b.n <= s.p.n {
+	if s.b != nil && s.phase == Prepare {
+		if s.p != nil && !Equal(s.b.x, s.p.x) && s.cn != 0 && s.cn <= s.p.n {
 			log.Printf("b: %+v", s.b)
+			log.Printf("c: %d", s.cn)
 			log.Printf("p: %+v", s.p)
-			log.Fatalf("pointless to vote for b when p obsoletes it")
+			log.Fatalf("the vote to commit should have been aborted")
 		}
-		if s.pPrime != nil && !Equal(s.b.x, s.pPrime.x) && s.b.n <= s.pPrime.n {
+		if s.pPrime != nil && !Equal(s.b.x, s.pPrime.x) && s.cn != 0 && s.cn <= s.pPrime.n {
 			log.Printf("b: %+v", s.b)
+			log.Printf("c: %d", s.cn)			
 			log.Printf("pPrime: %+v", s.pPrime)
-			log.Fatalf("pointless to vote for b when pPrime obsoletes it")
+			log.Fatalf("the vote to commit should have been aborted")
 		}
 	}
-*/
 }
 
 func (s *BallotState) Message(slot int, qs QuorumSlice) Message {
