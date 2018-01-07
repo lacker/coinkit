@@ -215,7 +215,11 @@ func fuzzTest(chains []*ChainState, seed int64, t *testing.T) {
 			log.Printf("--------------------------------------------------------------------------")
 			log.Printf("node %d: %s", i, logChain(chains[i]))
 		}
-		t.Fatalf("fuzz testing with seed %d did not converge", seed)
+
+		// TODO: debug why this logic didn't get trigger earlier for case 2386
+		log.Printf("**************************************************************************")
+		chains[0].bState.SelfInvestigate()
+		t.Fatalf("fuzz testing with seed %d did not converge", seed)		
 	}
 }
 
@@ -227,7 +231,7 @@ func TestConvergence(t *testing.T) {
 
 func TestConvergenceWithFuzzing(t *testing.T) {
 	var i int64
-	for i = 0; i < 162; i++ {
+	for i = 2386; i < 2387; i++ {
 		c := cluster(4)
 		fuzzTest(c, i, t)
 	}

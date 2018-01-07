@@ -636,6 +636,14 @@ func (s *BallotState) Investigate(n int, x SlotValue) {
 	s.MaybeConfirmAsCommitted(n, x)
 }
 
+// SelfInvestigate checks whether the current ballot can be advanced
+func (s *BallotState) SelfInvestigate() {
+	if s.b == nil {
+		return
+	}
+	s.Investigate(s.b.n, s.b.x)
+}
+
 func (s *BallotState) Handle(node string, message BallotMessage) {
 	// If this message isn't new, skip it
 	old, ok := s.M[node]
@@ -648,8 +656,9 @@ func (s *BallotState) Handle(node string, message BallotMessage) {
 
 	for {
 		// Investigate all ballots whose state might be updated
-		// TODO: make sure we aren't missing ballot numbers internal to the
-		// ranges
+		// TODO: make sure we aren't missing ballot numbers, either internal to
+		// the ranges or because a confirm implies many prepares. Maybe we can
+		// make investigation be per-value rather than per-ballot?
 		// TODO: make sure a malformed message can't DDOS us here
 		switch m := message.(type) {
 		case *PrepareMessage:
