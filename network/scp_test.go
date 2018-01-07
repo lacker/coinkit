@@ -186,6 +186,15 @@ func assertDone(chains []*ChainState, t *testing.T) {
 	}
 }
 
+func logChain(chain *ChainState) string {
+	messages := chain.OutgoingMessages()
+	if len(messages) == 0 {
+		return "<no messages>"
+	}
+	message := messages[len(messages) - 1]
+	return spew.Sdump(message)
+}
+
 // TODO: detach from global rand
 func fuzzTest(chains []*ChainState, seed int64, t *testing.T) {
 	rand.Seed(seed)
@@ -204,7 +213,7 @@ func fuzzTest(chains []*ChainState, seed int64, t *testing.T) {
 	if !allDone(chains) {
 		for i := 0; i < len(chains); i++ {
 			log.Printf("--------------------------------------------------------------------------")
-			log.Printf("node %d OM: %s", i, spew.Sdump(chains[i].OutgoingMessages()))
+			log.Printf("node %d: %s", i, logChain(chains[i]))
 		}
 		t.Fatalf("fuzz testing with seed %d did not converge", seed)
 	}

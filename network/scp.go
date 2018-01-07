@@ -1,8 +1,8 @@
 package network
 
 import (
-	"fmt"
 	"log"
+	"strings"
 	"time"
 )
 
@@ -64,7 +64,7 @@ func NewNominationState(publicKey string, qs QuorumSlice) *NominationState {
 }
 
 func (s *NominationState) Logf(format string, a ...interface{}) {
-	// log.Printf(format, a...)
+	log.Printf(format, a...)
 }
 
 // HasNomination tells you whether this nomination state can currently send out
@@ -201,7 +201,7 @@ func (s *NominationState) Handle(node string, m *NominationMessage) {
 		return
 	}
 	// Update our most-recent-message
-	s.Logf("%s got nomination message from %s: %+v", s.publicKey, node, m)
+	s.Logf("\n\n%s got nomination message from %s:\n%+v", s.publicKey, node, m)
 	s.N[node] = m
 	s.received++
 	
@@ -353,9 +353,9 @@ func (s *BallotState) MaybeAcceptAsPrepared(n int, x SlotValue) bool {
 
 	s.Logf("%s accepts as prepared: %d %+v", s.publicKey, n, x)
 	
-	if s.b != nil && s.hn <= n && !Equal(s.b.x, x) {
+	if s.b != nil && s.b.n <= n && !Equal(s.b.x, x) {
 		// Accepting this as prepared means we have to abort b
-		// TODO: should we set b to something?
+		// TODO: should we set b to something? Probably, to ensure ordering.
 		s.hn = 0
 		s.cn = 0
 		s.b = nil
@@ -416,6 +416,8 @@ func (s *BallotState) MaybeConfirmAsPrepared(n int, x SlotValue) bool {
 		return false
 	}
 
+	s.Logf("s.b: %+v", s.b)
+	s.Logf("s.p: %+v", s.p)
 	s.Logf("%s confirms as prepared: %d %+v", s.publicKey, n, x)
 	
 	// We can confirm this as prepared.
@@ -598,7 +600,7 @@ func (s *BallotState) Handle(node string, message BallotMessage) {
 	if ok && Compare(old, message) >= 0 {
 		return
 	}
-	s.Logf("%s got ballot message from %s: %+v", s.publicKey, node, message)
+	s.Logf("\n\n%s got ballot message from %s:\n%+v", s.publicKey, node, message)
 	s.received++
 	s.M[node] = message
 
@@ -690,6 +692,7 @@ func (s *BallotState) HasMessage() bool {
 }
 
 func (s *BallotState) AssertValid() {
+	/* XXX is this condition actually invalid?
 	if s.b != nil {
 		if s.p != nil && !Equal(s.b.x, s.p.x) && s.b.n <= s.p.n {
 			log.Printf("b: %+v", s.b)
@@ -702,6 +705,7 @@ func (s *BallotState) AssertValid() {
 			log.Fatalf("pointless to vote for b when pPrime obsoletes it")
 		}
 	}
+*/
 }
 
 func (s *BallotState) Message(slot int, qs QuorumSlice) Message {
@@ -808,8 +812,7 @@ func (cs *ChainState) OutgoingMessages() []Message {
 	if !cs.nState.HasNomination() {
 		// There's nothing to nominate. Let's nominate something.
 		// TODO: if it's not our turn, wait instead of nominating
-		comment := fmt.Sprintf(
-			"this is %s at %s", cs.publicKey, time.Now().Format("15:04:05.00000"))
+		comment := strings.Replace(cs.publicKey, "node", "comment", 1)
 		v := MakeSlotValue(comment)
 		log.Printf("%s nominates %+v", cs.publicKey, v)
 		cs.nState.SetDefault(v)
