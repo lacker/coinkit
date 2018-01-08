@@ -64,7 +64,7 @@ func NewNominationState(publicKey string, qs QuorumSlice) *NominationState {
 }
 
 func (s *NominationState) Logf(format string, a ...interface{}) {
-	log.Printf(format, a...)
+	// log.Printf(format, a...)
 }
 
 // HasNomination tells you whether this nomination state can currently send out
@@ -237,6 +237,11 @@ type BallotState struct {
 	// The current ballot we are trying to prepare and commit.
 	b *Ballot
 
+	// The last value of b we saw during validation.
+	// This is just used to make sure the values of b are monotonically
+	// increasing, to ensure we don't vote for contradictory things.
+	last *Ballot
+	
 	// The highest two incompatible ballots that are accepted as prepared.
 	// p is the highest, pPrime the next.
 	// It's nil if there is no such ballot.
@@ -756,6 +761,16 @@ func (s *BallotState) AssertValid() {
 			log.Printf("pPrime: %+v", s.pPrime)
 			log.Fatalf("the vote to commit should have been aborted")
 		}
+	}
+
+	if s.b != nil {
+		if s.last != nil && !Equal(s.b.x, s.last.x) && s.last.n >= s.b.n {
+			log.Printf("last b: %+v", s.last)
+			log.Printf("curr b: %+v", s.b)
+			log.Fatalf("monotonicity violation")
+		}
+		
+		s.last = s.b
 	}
 }
 
