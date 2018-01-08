@@ -67,6 +67,13 @@ func (s *NominationState) Logf(format string, a ...interface{}) {
 	log.Printf(format, a...)
 }
 
+func (s *NominationState) Show() {
+	s.Logf("nState for %s:", s.publicKey)
+	s.Logf("X: %+v", s.X)
+	s.Logf("Y: %+v", s.Y)
+	s.Logf("Z: %+v", s.Z)
+}
+
 // HasNomination tells you whether this nomination state can currently send out
 // a nominate message.
 // If we have never received a nomination from a peer, and haven't had SetDefault
@@ -288,7 +295,7 @@ func NewBallotState(publicKey string, qs QuorumSlice) *BallotState {
 }
 
 func (s *BallotState) Logf(format string, a ...interface{}) {
-	log.Printf(format, a...)
+	// log.Printf(format, a...)
 }
 
 func (s *BallotState) PublicKey() string {

@@ -186,21 +186,22 @@ func assertDone(chains []*ChainState, t *testing.T) {
 	}
 }
 
-func assertNominationConverged(chains []*ChainState, message string, t *testing.T) {
+func nominationConverged(chains []*ChainState) bool {
 	var value SlotValue
 	for i, chain := range chains {
 		if !chain.nState.HasNomination() {
-			t.Fatalf("%s has no nomination", chain.publicKey)
+			return false
 		}
 		if i == 0 {
 			value = chain.nState.PredictValue()
 		} else {
 			v := chain.nState.PredictValue()
 			if !Equal(value, v) {
-				t.Fatalf("conflicting nominations, %s. chain 0 has %+v but chain %d has %+v", message, value, i, v)
+				return false
 			}
 		}
 	}
+	return true
 }
 
 func logChain(chain *ChainState) string {
@@ -227,7 +228,19 @@ func fuzzTest(chains []*ChainState, seed int64, t *testing.T) {
 			log.Printf("done round: %d", i)
 		}
 	}
-	assertNominationConverged(chains, fmt.Sprintf("seed %d", seed), t)
+
+	if !nominationConverged(chains) {
+		for i := 0; i < len(chains); i++ {
+			log.Printf("--------------------------------------------------------------------------")
+			if chains[i].nState != nil {
+				chains[i].nState.Show()
+			}
+		}
+
+		log.Printf("**************************************************************************")
+
+		t.Fatalf("fuzz testing with seed %d, nomination did not converge", seed)
+	}
 	
 	if !allDone(chains) {
 		for i := 0; i < len(chains); i++ {
@@ -237,7 +250,7 @@ func fuzzTest(chains []*ChainState, seed int64, t *testing.T) {
 
 		log.Printf("**************************************************************************")
 
-		t.Fatalf("fuzz testing with seed %d did not converge", seed)		
+		t.Fatalf("fuzz testing with seed %d, ballots did not converge", seed)		
 	}
 }
 
@@ -249,7 +262,7 @@ func TestConvergence(t *testing.T) {
 
 func TestConvergenceWithFuzzing(t *testing.T) {
 	var i int64
-	for i = 0; i < 1000; i++ {
+	for i = 186; i < 187; i++ {
 		c := cluster(4)
 		fuzzTest(c, i, t)
 	}
