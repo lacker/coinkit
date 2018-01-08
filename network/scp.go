@@ -169,6 +169,7 @@ func (s *NominationState) MaybeAdvance(v SlotValue) bool {
 		s.Logf("old s.Y: %+v", s.Y)		
 		AssertNoDupes(s.Y)
 		s.Y = append(s.Y, v)
+		accepted = append(accepted, s.publicKey)
 		s.Logf("new s.Y: %+v", s.Y)
 		AssertNoDupes(s.Y)
 	}
