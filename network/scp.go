@@ -771,7 +771,7 @@ func (s *BallotState) AssertValid() {
 		}
 	}
 
-	if s.b != nil {
+	if s.b != nil && s.phase == Prepare {
 		if s.last != nil && !Equal(s.b.x, s.last.x) && s.last.n > s.b.n {
 			log.Printf("last b: %+v", s.last)
 			log.Printf("curr b: %+v", s.b)
