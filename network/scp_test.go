@@ -186,6 +186,23 @@ func assertDone(chains []*ChainState, t *testing.T) {
 	}
 }
 
+func assertNominationConverged(chains []*ChainState, t *testing.T) {
+	var value SlotValue
+	for i, chain := range chains {
+		if !chain.nState.HasNomination() {
+			t.Fatalf("%s has no nomination", chain.publicKey)
+		}
+		if i == 0 {
+			value = chain.nState.PredictValue()
+		} else {
+			v := chain.nState.PredictValue()
+			if !Equal(value, v) {
+				t.Fatalf("conflicting nominations. chain 0 has %+v but chain %d has %+v", value, i, v)
+			}
+		}
+	}
+}
+
 func logChain(chain *ChainState) string {
 	messages := chain.OutgoingMessages()
 	if len(messages) == 0 {
@@ -216,6 +233,7 @@ func fuzzTest(chains []*ChainState, seed int64, t *testing.T) {
 			log.Printf("node %d: %s", i, logChain(chains[i]))
 		}
 
+		assertNominationConverged(chains, t)
 		log.Printf("**************************************************************************")
 
 		t.Fatalf("fuzz testing with seed %d did not converge", seed)		
@@ -230,7 +248,7 @@ func TestConvergence(t *testing.T) {
 
 func TestConvergenceWithFuzzing(t *testing.T) {
 	var i int64
-	for i = 6; i < 7; i++ {
+	for i = 13; i < 14; i++ {
 		c := cluster(4)
 		fuzzTest(c, i, t)
 	}
