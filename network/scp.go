@@ -364,7 +364,9 @@ func (s *BallotState) MaybeAcceptAsPrepared(n int, x SlotValue) bool {
 	
 	if s.b != nil && s.b.n <= n && !Equal(s.b.x, x) {
 		// Accepting this as prepared means we have to abort b
-		// We should just switch our active ballot to this one.
+		// Let's switch our active ballot to this one. It should be okay since
+		// we are accepting the abort of b, even though we may have voted
+		// for the commit of b.
 		s.hn = 0
 		s.cn = 0
 		s.b = ballot
@@ -428,6 +430,12 @@ func (s *BallotState) AcceptedAbort(n int, x SlotValue) bool {
 // MaybeConfirmAsPrepared returns whether anything in the ballot state changed.
 func (s *BallotState) MaybeConfirmAsPrepared(n int, x SlotValue) bool {
 	if s.phase != Prepare {
+		return false
+	}
+	if s.b != nil && !Equal(s.b.x, x) {
+		// We only try to confirm as prepared when it's the value we are working on
+		// Not totally clear from the paper but I believe this is implied
+		// by step (2) on pg 24
 		return false
 	}
 	if s.hn >= n {
@@ -764,7 +772,7 @@ func (s *BallotState) AssertValid() {
 	}
 
 	if s.b != nil {
-		if s.last != nil && !Equal(s.b.x, s.last.x) && s.last.n >= s.b.n {
+		if s.last != nil && !Equal(s.b.x, s.last.x) && s.last.n > s.b.n {
 			log.Printf("last b: %+v", s.last)
 			log.Printf("curr b: %+v", s.b)
 			log.Fatalf("monotonicity violation")
