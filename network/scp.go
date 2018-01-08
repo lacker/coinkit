@@ -64,7 +64,7 @@ func NewNominationState(publicKey string, qs QuorumSlice) *NominationState {
 }
 
 func (s *NominationState) Logf(format string, a ...interface{}) {
-	// log.Printf(format, a...)
+	log.Printf(format, a...)
 }
 
 // HasNomination tells you whether this nomination state can currently send out
@@ -432,12 +432,6 @@ func (s *BallotState) MaybeConfirmAsPrepared(n int, x SlotValue) bool {
 	if s.phase != Prepare {
 		return false
 	}
-	if s.b != nil && !Equal(s.b.x, x) {
-		// We only try to confirm as prepared when it's the value we are working on
-		// Not totally clear from the paper but I believe this is implied
-		// by step (2) on pg 24
-		return false
-	}
 	if s.hn >= n {
 		// We are already past this ballot
 		return false
@@ -475,15 +469,43 @@ func (s *BallotState) MaybeConfirmAsPrepared(n int, x SlotValue) bool {
 	s.Logf("s.p: %+v", s.p)
 	s.Logf("%s confirms as prepared: %d %+v", s.publicKey, n, x)
 	
-	// We can confirm this as prepared.
-	// Time to vote to commit it
+
 	if s.b != nil && !Equal(s.b.x, x) {
-		// We have to abort b
-		s.b = nil
-		s.hn = 0
-		s.cn = 0
+		// This is the awkward case, where we were just working on something
+		// conflicting.
+		if s.b.n < n {
+			// We were trying to prepare a conflicting but lower ballot.
+			// So we can just switch our vote to this one.
+			s.b = ballot
+			s.hn = n
+			s.cn = n
+			s.z = &x
+			return true
+		}
+
+		if s.hn == 0 {
+			// We were just voting to abort this ballot, but we haven't confirmed
+			// anything.
+			// We probably abandoned it too early, and there's a good chance
+			// our current ballot will not converge.
+			// We can't vote to commit anything, but let's ditch our current
+			// ballot and start preparing this value at a higher ballot number.
+			s.b = &Ballot{
+				n: s.b.n + 1,
+				x: x,
+			}
+			s.hn = 0
+			s.cn = 0
+			s.z = &x
+			return true
+		}
+		
+		// We have confirmed our ballot is prepared as well, and
+		// our ballot is higher, so we should just stick with it.
+		return false
 	}
 
+	// We can vote to commit this ballot
 	if s.b == nil {
 		// We weren't working on any ballot, but now we can work on this one
 		s.b = ballot
@@ -611,7 +633,6 @@ func (s *BallotState) MaybeConfirmAsCommitted(n int, x SlotValue) bool {
 // We bump the ballot number if the set of nodes with a higher
 // ballot number is blocking.
 // TODO: figure out what the distinction is between s.b.n and s.hn
-// TODO: figure out if s.z and s.b.x are redundant
 func (s *BallotState) MaybeNextBallot() bool {
 	if s.z == nil || s.b == nil {
 		return false
@@ -716,7 +737,8 @@ func (s *BallotState) MaybeInitializeValue(v SlotValue) bool {
 // Returns whether anything in the ballot state changed.
 func (s *BallotState) MaybeUpdateValue(ns *NominationState) bool {
 	if s.hn > 0 {
-		// We already confirmed some ballot as prepared
+		// We are voting to commit something, so we can't ditch it until
+		// we accept an abort for it.
 		return false
 	}
 
@@ -744,8 +766,10 @@ func (s *BallotState) MaybeUpdateValue(ns *NominationState) bool {
 		// TODO: this part should only happen when a timer fires, but that
 		// seems to be an optimization so I punted for now.
 		// See page 25
-		s.b.n = s.b.n + 1
-		s.b.x = v
+		s.b = &Ballot{
+			n: s.b.n + 1,
+			x: v,
+		}
 	}
 	
 	return true
@@ -756,6 +780,12 @@ func (s *BallotState) HasMessage() bool {
 }
 
 func (s *BallotState) AssertValid() {
+	if s.p != nil && s.pPrime != nil && Equal(s.p.x, s.pPrime.x) {
+		log.Printf("p: %+v", s.p)
+		log.Printf("pPrime: %+v", s.pPrime)
+		log.Fatalf("p and p prime should not be compatible")
+	}
+	
 	if s.b != nil && s.phase == Prepare {
 		if s.p != nil && !Equal(s.b.x, s.p.x) && s.cn != 0 && s.cn <= s.p.n {
 			log.Printf("b: %+v", s.b)
