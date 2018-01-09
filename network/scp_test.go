@@ -204,15 +204,6 @@ func nominationConverged(chains []*ChainState) bool {
 	return true
 }
 
-func logChain(chain *ChainState) string {
-	messages := chain.OutgoingMessages()
-	if len(messages) == 0 {
-		return "<no messages>"
-	}
-	message := messages[len(messages) - 1]
-	return spew.Sdump(message)
-}
-
 // TODO: detach from global rand
 func fuzzTest(chains []*ChainState, seed int64, t *testing.T) {
 	rand.Seed(seed)
@@ -220,7 +211,6 @@ func fuzzTest(chains []*ChainState, seed int64, t *testing.T) {
 	for i := 0; i < 10000; i++ {
 		j := rand.Intn(len(chains))
 		k := rand.Intn(len(chains))
-		log.Printf("step %d: sending %d -> %d", i, j, k)
 		send(chains[j], chains[k])
 		if allDone(chains) {
 			break
@@ -246,7 +236,9 @@ func fuzzTest(chains []*ChainState, seed int64, t *testing.T) {
 	if !allDone(chains) {
 		for i := 0; i < len(chains); i++ {
 			log.Printf("--------------------------------------------------------------------------")
-			log.Printf("node %d: %s", i, logChain(chains[i]))
+			if chains[i].bState != nil {
+				chains[i].bState.Show()
+			}
 		}
 
 		log.Printf("**************************************************************************")
@@ -262,7 +254,7 @@ func TestConvergence(t *testing.T) {
 
 func TestConvergenceWithFuzzing(t *testing.T) {
 	var i int64
-	for i = 222; i < 223; i++ {
+	for i = 0; i < 223; i++ {
 		c := cluster(4)
 		fuzzTest(c, i, t)
 	}

@@ -69,6 +69,17 @@ func gtecompat(a *Ballot, b *Ballot) bool {
 	return Equal(a.x, b.x)
 }
 
+// Whether accepting a as prepared implies accepting b is aborted
+func gteincompat(a *Ballot, b *Ballot) bool {
+	if a == nil || b == nil {
+		return false
+	}
+	if a.n < b.n {
+		return false
+	}
+	return !Equal(a.x, b.x)
+}
+
 // PrepareMessage is the first phase of the three-phase ballot protocol.
 // This message is preparing a ballot.
 // To prepare is to abort any conflicting ballots.

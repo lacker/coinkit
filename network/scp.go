@@ -306,6 +306,7 @@ func (s *BallotState) Show() {
 	log.Printf("pPrime: %+v", s.pPrime)
 	log.Printf("c: %d", s.cn)
 	log.Printf("h: %d", s.hn)
+	log.Printf("z: %+v", s.z)
 }
 
 func (s *BallotState) PublicKey() string {
@@ -384,7 +385,7 @@ func (s *BallotState) MaybeAcceptAsPrepared(n int, x SlotValue) bool {
 		// Let's switch our active ballot to this one. It should be okay since
 		// we are accepting the abort of b, even though we may have voted
 		// for the commit of b.
-		s.hn = 0
+		s.Logf("%s accepts the abort of %+v", s.b)
 		s.cn = 0
 		s.b = ballot
 	}
@@ -410,10 +411,10 @@ func (s *BallotState) MaybeAcceptAsPrepared(n int, x SlotValue) bool {
 	// of our votes to commit
 	if s.b != nil {
 		for s.cn != 0 && s.AcceptedAbort(s.cn, s.b.x) {
+			s.Logf("%s accepts the abort of %d %+v", s.cn, s.b.x)
 			s.cn++
 			if s.cn > s.hn {
 				s.cn = 0
-				s.hn = 0
 			}
 		}
 	}
@@ -450,16 +451,11 @@ func (s *BallotState) MaybeConfirmAsPrepared(n int, x SlotValue) bool {
 		return false
 	}
 	if s.hn >= n {
-		// We already confirmed a ballot as prepared that supercedes this
+		// We already confirmed a ballot as prepared that is at least
+		// as good as this one.
 		return false
 	}
 
-	// If we've already accepted an abort, it's pointless to confirm this
-	// as prepared.
-	if s.AcceptedAbort(n, x) {
-		return false
-	}
-	
 	ballot := &Ballot{
 		n: n,
 		x: x,
@@ -483,46 +479,30 @@ func (s *BallotState) MaybeConfirmAsPrepared(n int, x SlotValue) bool {
 	}
 
 	s.Logf("%s confirms as prepared: %d %+v", s.publicKey, n, x)
+
+	if s.cn > 0 && !Equal(x, s.b.x) {
+		s.Show()
+		log.Fatalf("we are voting to commit but must confirm a contradiction")
+	}
+
+	s.hn = n
+	s.z = &x
 	
 	if s.b == nil {
 		// We weren't working on any ballot, but now we can work on this one
 		s.b = ballot
-		s.cn = n
-		s.hn = n
-		s.z = &x	
-		return true
 	}
-
-	if !Equal(s.b.x, x) {
-		// This is an awkward case, where we were just working on something
-		// conflicting.
-
-		if s.b.n < n {
-			// We were trying to prepare a conflicting but lower ballot.
-			// So we can just switch our vote to this one.
-			s.b = ballot
-			s.hn = n
-			s.cn = n
-			s.z = &x
-			return true
+	
+	if s.cn == 0 && Equal(x, s.b.x) {
+		// Check if we should start voting to commit
+		if gteincompat(s.p, ballot) || gteincompat(s.pPrime, ballot) {
+			// We have already accepted the abort of this. So nope.
+		} else if s.b.n > n {
+			// We are already past this ballot number. We might have
+			// even voted to abort it. So we can't vote to commit.
+		} else {
+			s.cn = s.b.n
 		}
-
-		// We are currently trying to prepare a conflicting ballot.
-		// So we can't just switch our vote.
-		// But we do want to try for this ballot in future rounds,
-		// since it's the highest thing that has been confirmed as prepared.
-		s.hn = n
-		s.cn = 0
-		s.z = &x
-		s.Logf("in future rounds we will support %+v", s.z)
-		return true
-	}
-		
-	// We we already working on this value, so we can vote to commit this.
-	s.hn = n
-	s.z = &x
-	if s.cn == 0 {
-		s.cn = n
 	}
 	return true
 }
@@ -733,16 +713,12 @@ func (s *BallotState) MaybeInitializeValue(v SlotValue) bool {
 	return true
 }
 
-// MaybeUpdateValue updates the value if we still have not confirmed
-// any ballot as prepared.
-// If we have accepted anything as prepared, stick with the highest
-// such ballot.
-// Otherwise, look at the nomination state.
+// MaybeUpdateValue updates the value from the nomination if we are supposed to.
 // Returns whether anything in the ballot state changed.
 func (s *BallotState) MaybeUpdateValue(ns *NominationState) bool {
-	if s.hn > 0 {
-		// We already have confirmed s.z is prepared, so we won't
-		// switch the value unless it gets aborted.
+	if s.hn != 0 {
+		// While we have a confirmed prepared ballot, we don't
+		// override it based on nominations.
 		return false
 	}
 
@@ -757,7 +733,7 @@ func (s *BallotState) MaybeUpdateValue(ns *NominationState) bool {
 		return false
 	}
 
-	s.Logf("%s updating value to %+v", s.publicKey, v)
+	// s.Logf("%s updating value to %+v", s.publicKey, v)
 	s.z = &v
 
 	if s.b == nil {
@@ -773,7 +749,7 @@ func (s *BallotState) MaybeUpdateValue(ns *NominationState) bool {
 			n: s.b.n + 1,
 			x: v,
 		}
-		s.Logf("new value, bumping the ballot to %+v", s.b)
+		// s.Logf("new value, bumping the ballot to %+v", s.b)
 	}
 	
 	return true
@@ -784,12 +760,17 @@ func (s *BallotState) HasMessage() bool {
 }
 
 func (s *BallotState) AssertValid() {
+	if s.cn > s.hn {
+		s.Show()
+		log.Fatalf("c should be <= h")
+	}
+	
 	if s.p != nil && s.pPrime != nil && Equal(s.p.x, s.pPrime.x) {
 		log.Printf("p: %+v", s.p)
 		log.Printf("pPrime: %+v", s.pPrime)
 		log.Fatalf("p and p prime should not be compatible")
 	}
-	
+
 	if s.b != nil && s.phase == Prepare {
 		if s.p != nil && !Equal(s.b.x, s.p.x) && s.cn != 0 && s.cn <= s.p.n {
 			log.Printf("b: %+v", s.b)
