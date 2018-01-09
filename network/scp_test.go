@@ -262,7 +262,7 @@ func TestConvergence(t *testing.T) {
 
 func TestConvergenceWithFuzzing(t *testing.T) {
 	var i int64
-	for i = 0; i < 10; i++ {
+	for i = 222; i < 223; i++ {
 		c := cluster(4)
 		fuzzTest(c, i, t)
 	}
