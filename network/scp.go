@@ -489,7 +489,7 @@ func (s *BallotState) MaybeConfirmAsPrepared(n int, x SlotValue) bool {
 			s.cn = s.b.n
 		}
 	}
-	s.Show()
+
 	return true
 }
 
@@ -626,6 +626,12 @@ func (s *BallotState) MaybeNextBallot() bool {
 	}
 	s.Logf("our old ballot %+v cannot pass, bump up to %+v", s.b, b)
 	s.b = b
+	if s.cn == 0 && s.hn >= s.b.n && !s.AcceptedAbort(s.hn, s.b.x) {
+		// We have just switched our ballot to something we can
+		// immediately vote to commit
+		s.cn = s.b.n
+	}
+
 	return true
 }
 
