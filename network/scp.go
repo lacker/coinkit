@@ -385,7 +385,7 @@ func (s *BallotState) MaybeAcceptAsPrepared(n int, x SlotValue) bool {
 		// Let's switch our active ballot to this one. It should be okay since
 		// we are accepting the abort of b, even though we may have voted
 		// for the commit of b.
-		s.Logf("%s accepts the abort of %+v", s.b)
+		s.Logf("%s accepts the abort of %+v", s.publicKey, s.b)
 		s.cn = 0
 		s.b = ballot
 	}
