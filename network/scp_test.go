@@ -252,9 +252,10 @@ func TestConvergence(t *testing.T) {
 	assertDone(c, t)
 }
 
+// Worked up to 100k on Jan 9, commit e9eb4ace
 func TestConvergenceWithFuzzing(t *testing.T) {
 	var i int64
-	for i = 0; i < 3800; i++ {
+	for i = 0; i < 100; i++ {
 		c := cluster(4)
 		fuzzTest(c, i, t)
 	}
