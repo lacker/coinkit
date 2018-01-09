@@ -57,7 +57,7 @@ func (p *Peer) sendForever() {
 			if err == nil {
 				break
 			}
-			log.Print("did not receive an ok: ", err)
+			log.Printf("did not receive an ok from port %d: %+v", p.port, err)
 			p.disconnect()
 		}
 	}

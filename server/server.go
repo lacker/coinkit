@@ -30,6 +30,8 @@ type Server struct {
 	peers []*network.Peer
 	info map[string]*PeerInfo
 	state *network.ChainState
+	outgoing []network.Message
+	inbox chan *auth.SignedMessage
 }
 
 func NewServer(c *Config) *Server {
@@ -47,11 +49,13 @@ func NewServer(c *Config) *Server {
 		peers: peers,
 		info: make(map[string]*PeerInfo),
 		state: state,
+		outgoing: state.OutgoingMessages(),
+		inbox: make(chan *auth.SignedMessage),
 	}
 }
 
-// Handles an incoming connection
-// TODO: put the data logic in the core loop to avoid parallelism bugs
+// Handles an incoming connection.
+// This is likely to include many messages, all separated by endlines.
 func (s *Server) handleConnection(conn net.Conn) {
 	for {
 		data, err := bufio.NewReader(conn).ReadString('\n')
@@ -59,6 +63,7 @@ func (s *Server) handleConnection(conn net.Conn) {
 			conn.Close()
 			break
 		}
+
 		// Chop the newline
 		serialized := data[:len(data)-1]
 		sm, err := auth.NewSignedMessageFromSerialized(serialized)
@@ -78,34 +83,43 @@ func (s *Server) handleConnection(conn net.Conn) {
 			info = NewPeerInfo(sm.Signer())
 			s.info[info.publicKey] = info
 		}
+
+		// Send this message to the processing goroutine
+		s.inbox <- sm
 		
-		switch m := sm.Message().(type) {
-		case *network.UptimeMessage:
-			if m.Uptime > info.uptime {
-				// As it should be
-				info.uptime = m.Uptime
-			} else if m.Uptime == info.uptime {
-				log.Printf("duplicate message for uptime %d from %s",
-					info.uptime, info.publicKey)
-			} else {
-				log.Printf("node %s appears to have restarted", info.publicKey)
-			}
-		case *network.NominationMessage:
-			s.state.Handle(info.publicKey, m)
-		case *network.PrepareMessage:
-			s.state.Handle(info.publicKey, m)
-		case *network.ConfirmMessage:
-			s.state.Handle(info.publicKey, m)
-		case *network.ExternalizeMessage:
-			s.state.Handle(info.publicKey, m)
-		default:
-			log.Printf("could not handle message: %s", network.EncodeMessage(m))
-		}
-				
 		fmt.Fprintf(conn, "ok\n")
 	}
 }
 
+// handleMessage should only be called by a single goroutine, because the
+// state objects aren't threadsafe.
+// Caller should be validating the signature
+func (s *Server) handleMessage(sm *auth.SignedMessage) {
+	switch m := sm.Message().(type) {
+	case *network.NominationMessage:
+		s.state.Handle(sm.Signer(), m)
+	case *network.PrepareMessage:
+		s.state.Handle(sm.Signer(), m)
+	case *network.ConfirmMessage:
+		s.state.Handle(sm.Signer(), m)
+	case *network.ExternalizeMessage:
+		s.state.Handle(sm.Signer(), m)
+	default:
+		log.Printf("could not handle message: %s", network.EncodeMessage(m))
+		break
+	}
+	
+	s.outgoing = s.state.OutgoingMessages()
+}
+
+func (s *Server) handleMessagesForever() {
+	for {
+		m := <-s.inbox
+		s.handleMessage(m)
+	}
+}
+
+// listen() runs a server that spawns a goroutine for each client that connects
 func (s *Server) listen() {
 	log.Printf("listening on port %d", s.port)
 	ln, err := net.Listen("tcp", fmt.Sprintf("localhost:%d", s.port))
@@ -130,12 +144,16 @@ func (s *Server) broadcast(m network.Message) {
 	}
 }
 
+// ServeForever spawns off all the goroutines
 func (s *Server) ServeForever() {
+	go s.handleMessagesForever()
 	go s.listen()
 
 	for {
 		time.Sleep(time.Second * time.Duration(5 + rand.Float64()))
-		messages := s.state.OutgoingMessages()
+		// Don't use s.outgoing directly in case the listen() goroutine
+		// modifies it while we iterate on it
+		messages := s.outgoing
 		for _, message := range messages {
 			s.broadcast(message)
 		}
