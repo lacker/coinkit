@@ -435,9 +435,13 @@ func (s *BallotState) MaybeConfirmAsPrepared(n int, x SlotValue) bool {
 	if s.phase != Prepare {
 		return false
 	}
-	if s.hn >= n {
-		// We already confirmed a ballot as prepared that is at least
-		// as good as this one.
+	if s.hn > n {
+		// We already confirmed a ballot as prepared that is better than
+		// this one.
+		return false
+	}
+	if s.hn == n && Equal(*s.z, x) {
+		// We already confirmed this ballot as prepared.
 		return false
 	}
 
@@ -465,6 +469,18 @@ func (s *BallotState) MaybeConfirmAsPrepared(n int, x SlotValue) bool {
 
 	s.Logf("%s confirms as prepared: %d %+v", s.publicKey, n, x)
 
+	if s.hn == n && !Equal(*s.z, x) {
+		// We have two equally high ballots and they are both
+		// confirmed as prepared. This means that every ballot is
+		// prepared at this ballot number, and we'll have to go
+		// to a future ballot.
+		s.Logf("confirmed abort of all ballots with number %d", n)
+		s.cn = 0
+		s.hn = 0
+		s.z = nil
+		return true
+	}
+	
 	if s.cn > 0 && !Equal(x, s.b.x) {
 		s.Show()
 		log.Fatalf("we are voting to commit but must confirm a contradiction")
@@ -639,6 +655,9 @@ func (s *BallotState) MaybeNextBallot() bool {
 // See the handling algorithm on page 24 of the Mazieres paper.
 // The investigate method does steps 1-8
 func (s *BallotState) Investigate(n int, x SlotValue) {
+	if n < 1 {
+		return
+	}
 	s.MaybeAcceptAsPrepared(n, x)
 	s.MaybeConfirmAsPrepared(n, x)
 	s.MaybeAcceptAsCommitted(n, x)
