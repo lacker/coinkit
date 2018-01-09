@@ -64,7 +64,7 @@ func NewNominationState(publicKey string, qs QuorumSlice) *NominationState {
 }
 
 func (s *NominationState) Logf(format string, a ...interface{}) {
-	log.Printf(format, a...)
+	// log.Printf(format, a...)
 }
 
 func (s *NominationState) Show() {
@@ -296,7 +296,16 @@ func NewBallotState(publicKey string, qs QuorumSlice) *BallotState {
 }
 
 func (s *BallotState) Logf(format string, a ...interface{}) {
-	// log.Printf(format, a...)
+	log.Printf(format, a...)
+}
+
+func (s *BallotState) Show() {
+	log.Printf("bState for %s:", s.publicKey)
+	log.Printf("b: %+v", s.b)
+	log.Printf("p: %+v", s.p)
+	log.Printf("pPrime: %+v", s.pPrime)
+	log.Printf("c: %d", s.cn)
+	log.Printf("h: %d", s.hn)
 }
 
 func (s *BallotState) PublicKey() string {
@@ -388,7 +397,7 @@ func (s *BallotState) MaybeAcceptAsPrepared(n int, x SlotValue) bool {
 		if n <= s.p.n {
 			log.Fatal("should have short circuited already")
 		}
-		s.p.n = n
+		s.p = ballot
 	} else if n >= s.p.n {
 		s.pPrime = s.p
 		s.p = ballot
@@ -408,7 +417,7 @@ func (s *BallotState) MaybeAcceptAsPrepared(n int, x SlotValue) bool {
 			}
 		}
 	}
-	
+
 	return true
 }
 
@@ -473,8 +482,6 @@ func (s *BallotState) MaybeConfirmAsPrepared(n int, x SlotValue) bool {
 		return false
 	}
 
-	s.Logf("s.b: %+v", s.b)
-	s.Logf("s.p: %+v", s.p)
 	s.Logf("%s confirms as prepared: %d %+v", s.publicKey, n, x)
 	
 
@@ -513,21 +520,30 @@ func (s *BallotState) MaybeConfirmAsPrepared(n int, x SlotValue) bool {
 		return false
 	}
 
-	// We can vote to commit this ballot
 	if s.b == nil {
 		// We weren't working on any ballot, but now we can work on this one
 		s.b = ballot
 		s.hn = n
 		s.cn = n
 		s.z = &x
-	} else {
-		// We were either working on a lower number, or had not confirmed
-		// any numbers as prepared.
-		// So bump the range
-		s.hn = n
-		if s.cn == 0 {
-			s.cn = n
-		}
+		return true
+	}
+
+	if n < s.b.n {
+		// This is a bit awkward - we have already moved beyond this ballot.
+		// We can't start voting to commit this, because we may have previously
+		// voted to abort it.
+		// I think we just have to do nothing here, and wait for the other nodes
+		// to catch up to our ballot.
+		return false
+	}
+	
+	// We were either working on a lower number, or had not confirmed
+	// any numbers as prepared.
+	// So bump the range
+	s.hn = n
+	if s.cn == 0 {
+		s.cn = n
 	}
 	return true
 }
@@ -664,7 +680,10 @@ func (s *BallotState) MaybeNextBallot() bool {
 	}
 
 	// s.z and s.b.x should be equivalent here
-	s.b.n++
+	s.b = &Ballot{
+		n: s.b.n + 1,
+		x: s.b.x,
+	}
 	return true
 }
 
