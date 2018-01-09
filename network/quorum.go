@@ -29,7 +29,7 @@ func (qs *QuorumSlice) atLeast(nodes []string, t int) bool {
 }
 
 func (qs *QuorumSlice) BlockedBy(nodes []string) bool {
-	return qs.atLeast(nodes, len(qs.Members) - qs.Threshold + 1)
+	return qs.atLeast(nodes, len(qs.Members)-qs.Threshold+1)
 }
 
 func (qs *QuorumSlice) SatisfiedWith(nodes []string) bool {

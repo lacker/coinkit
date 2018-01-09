@@ -1,7 +1,6 @@
 package network
 
-import (
-)
+import ()
 
 // See page 23 of the protocol paper for a description of balloting.
 type BallotMessage interface {
@@ -39,6 +38,7 @@ type BallotMessage interface {
 // Invalid is 0 so that if we inadvertently create a new message the wrong way and
 // leave things zeroed it will be obviously an invalid phase
 type Phase int
+
 const (
 	Invalid Phase = iota
 	Prepare
@@ -88,7 +88,7 @@ func gteincompat(a *Ballot, b *Ballot) bool {
 type PrepareMessage struct {
 	// T is Prepare for a PrepareMessage
 	T Phase
-	
+
 	// What slot we are preparing ballots for
 	I int
 
@@ -178,7 +178,7 @@ func (m *PrepareMessage) BallotNumber() int {
 type ConfirmMessage struct {
 	// T is Confirm for a ConfirmMessage
 	T Phase
-	
+
 	// What slot we are confirming ballots for
 	I int
 
@@ -239,7 +239,7 @@ func (m *ConfirmMessage) BallotNumber() int {
 type ExternalizeMessage struct {
 	// T is Externalize for an ExternalizeMessage
 	T Phase
-	
+
 	// What slot we are externalizing
 	I int
 
@@ -349,7 +349,7 @@ func Compare(ballot1 BallotMessage, ballot2 BallotMessage) int {
 		if b1.Hn > b2.Hn {
 			return 1
 		}
-		return 0		
+		return 0
 	case *ExternalizeMessage:
 		b2 := ballot2.(*ExternalizeMessage)
 		if b1.Hn < b2.Hn {
@@ -358,7 +358,7 @@ func Compare(ballot1 BallotMessage, ballot2 BallotMessage) int {
 		if b1.Hn > b2.Hn {
 			return 1
 		}
-		return 0		
+		return 0
 	default:
 		panic("programming error")
 	}

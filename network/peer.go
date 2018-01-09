@@ -7,9 +7,9 @@ import "net"
 import "time"
 
 type Peer struct {
-	port int
-	conn net.Conn
-	outbox chan string
+	port      int
+	conn      net.Conn
+	outbox    chan string
 	connected bool
 }
 
@@ -48,7 +48,7 @@ func (p *Peer) sendForever() {
 		for {
 			p.connect()
 			// log.Printf("sending message: %s", message)
-			fmt.Fprintf(p.conn, message + "\n")
+			fmt.Fprintf(p.conn, message+"\n")
 
 			// If we get an ok, great.
 			// If we don't get an ok, disconnect and try again.
@@ -87,6 +87,6 @@ func NewPeer(port int) *Peer {
 	// outbox has a buffer of buflen outgoing messages
 	buflen := 1
 	p := &Peer{port: port, outbox: make(chan string, buflen)}
-	go p.sendForever();
+	go p.sendForever()
 	return p
 }

@@ -20,7 +20,7 @@ type NominationMessage struct {
 
 	// The values we have accepted as nominated
 	Acc []SlotValue
-	
+
 	D QuorumSlice
 }
 
@@ -54,12 +54,12 @@ type NominationState struct {
 
 func NewNominationState(publicKey string, qs QuorumSlice) *NominationState {
 	return &NominationState{
-		X: make([]SlotValue, 0),
-		Y: make([]SlotValue, 0),
-		Z: make([]SlotValue, 0),
-		N: make(map[string]*NominationMessage),
+		X:         make([]SlotValue, 0),
+		Y:         make([]SlotValue, 0),
+		Z:         make([]SlotValue, 0),
+		N:         make(map[string]*NominationMessage),
 		publicKey: publicKey,
-		D: qs,
+		D:         qs,
 	}
 }
 
@@ -135,8 +135,8 @@ func (s *NominationState) MaybeAdvance(v SlotValue) bool {
 		// We already confirmed this, so we can't do anything more
 		return false
 	}
-	
-	changed := false	
+
+	changed := false
 	votedOrAccepted := []string{}
 	accepted := []string{}
 	if HasSlotValue(s.X, v) {
@@ -166,7 +166,7 @@ func (s *NominationState) MaybeAdvance(v SlotValue) bool {
 		// Accept this value
 		s.Logf("%s accepts the nomination of %+v", s.publicKey, v)
 		changed = true
-		s.Logf("old s.Y: %+v", s.Y)		
+		s.Logf("old s.Y: %+v", s.Y)
 		AssertNoDupes(s.Y)
 		s.Y = append(s.Y, v)
 		accepted = append(accepted, s.publicKey)
@@ -176,7 +176,7 @@ func (s *NominationState) MaybeAdvance(v SlotValue) bool {
 
 	// We confirm once a quorum has accepted
 	if MeetsQuorum(s, accepted) {
-		s.Logf("%s confirms the nomination of %+v", s.publicKey, v)		
+		s.Logf("%s confirms the nomination of %+v", s.publicKey, v)
 		changed = true
 		s.Z = append(s.Z, v)
 		s.Logf("new s.Z: %+v", s.Z)
@@ -212,7 +212,7 @@ func (s *NominationState) Handle(node string, m *NominationMessage) {
 	s.Logf("\n\n%s got nomination message from %s:\n%+v", s.publicKey, node, m)
 	s.N[node] = m
 	s.received++
-	
+
 	for i := oldLenNom; i < len(m.Nom); i++ {
 		if !HasSlotValue(touched, m.Nom[i]) {
 			touched = append(touched, m.Nom[i])
@@ -241,7 +241,7 @@ func (s *NominationState) Handle(node string, m *NominationMessage) {
 type BallotState struct {
 	// What phase of balloting we are in
 	phase Phase
-	
+
 	// The current ballot we are trying to prepare and commit.
 	b *Ballot
 
@@ -249,11 +249,11 @@ type BallotState struct {
 	// This is just used to make sure the values of b are monotonically
 	// increasing, to ensure we don't vote for contradictory things.
 	last *Ballot
-	
+
 	// The highest two incompatible ballots that are accepted as prepared.
 	// p is the highest, pPrime the next.
 	// It's nil if there is no such ballot.
-	p *Ballot
+	p      *Ballot
 	pPrime *Ballot
 
 	// [cn, hn] defines a range of ballot numbers that defines a range of
@@ -271,7 +271,7 @@ type BallotState struct {
 	// The value to use in the next ballot, if this ballot fails.
 	// We may have no idea what value we would use. In that case, z is nil.
 	z *SlotValue
-	
+
 	// The latest PrepareMessage, ConfirmMessage, or ExternalizeMessage from
 	// each peer
 	M map[string]BallotMessage
@@ -288,10 +288,10 @@ type BallotState struct {
 
 func NewBallotState(publicKey string, qs QuorumSlice) *BallotState {
 	return &BallotState{
-		phase: Prepare,
-		M: make(map[string]BallotMessage),
+		phase:     Prepare,
+		M:         make(map[string]BallotMessage),
 		publicKey: publicKey,
-		D: qs,
+		D:         qs,
 	}
 }
 
@@ -347,7 +347,7 @@ func (s *BallotState) MaybeAcceptAsPrepared(n int, x SlotValue) bool {
 		// accepted
 		return false
 	}
-	
+
 	// The rules for accepting are, if a quorum has voted or accepted,
 	// we can accept.
 	// Or, if a local blocking set has accepted, we can accept.
@@ -449,7 +449,7 @@ func (s *BallotState) MaybeConfirmAsPrepared(n int, x SlotValue) bool {
 		n: n,
 		x: x,
 	}
-	
+
 	// We confirm when a quorum accepts as prepared
 	accepted := []string{}
 	if gtecompat(s.p, ballot) || gtecompat(s.pPrime, ballot) {
@@ -480,7 +480,7 @@ func (s *BallotState) MaybeConfirmAsPrepared(n int, x SlotValue) bool {
 		s.z = nil
 		return true
 	}
-	
+
 	if s.cn > 0 && !Equal(x, s.b.x) {
 		s.Show()
 		log.Fatalf("we are voting to commit but must confirm a contradiction")
@@ -488,12 +488,12 @@ func (s *BallotState) MaybeConfirmAsPrepared(n int, x SlotValue) bool {
 
 	s.hn = n
 	s.z = &x
-	
+
 	if s.b == nil {
 		// We weren't working on any ballot, but now we can work on this one
 		s.b = ballot
 	}
-	
+
 	if s.cn == 0 && Equal(x, s.b.x) {
 		// Check if we should start voting to commit
 		if gteincompat(s.p, ballot) || gteincompat(s.pPrime, ballot) {
@@ -543,7 +543,7 @@ func (s *BallotState) MaybeAcceptAsCommitted(n int, x SlotValue) bool {
 	}
 
 	s.Logf("%s accepts as committed: %d %+v", s.publicKey, n, x)
-	
+
 	// We accept this commit
 	s.phase = Confirm
 	if s.b == nil || !Equal(s.b.x, x) {
@@ -575,7 +575,7 @@ func (s *BallotState) MaybeConfirmAsCommitted(n int, x SlotValue) bool {
 	if s.b == nil || !Equal(s.b.x, x) {
 		return false
 	}
-	
+
 	accepted := []string{}
 	if s.phase == Confirm {
 		if s.cn <= n && n <= s.hn {
@@ -595,9 +595,9 @@ func (s *BallotState) MaybeConfirmAsCommitted(n int, x SlotValue) bool {
 	if !MeetsQuorum(s, accepted) {
 		return false
 	}
-	
+
 	s.Logf("%s confirms as committed: %d %+v", s.publicKey, n, x)
-	
+
 	if s.phase == Confirm {
 		s.phase = Externalize
 		s.cn = n
@@ -762,7 +762,7 @@ func (s *BallotState) MaybeUpdateValue(ns *NominationState) bool {
 		}
 		// s.Logf("new value, bumping the ballot to %+v", s.b)
 	}
-	
+
 	return true
 }
 
@@ -775,7 +775,7 @@ func (s *BallotState) AssertValid() {
 		s.Show()
 		log.Fatalf("c should be <= h")
 	}
-	
+
 	if s.p != nil && s.pPrime != nil && Equal(s.p.x, s.pPrime.x) {
 		log.Printf("p: %+v", s.p)
 		log.Printf("pPrime: %+v", s.pPrime)
@@ -792,7 +792,7 @@ func (s *BallotState) AssertValid() {
 		}
 		if s.pPrime != nil && !Equal(s.b.x, s.pPrime.x) && s.cn != 0 && s.hn <= s.pPrime.n {
 			log.Printf("b: %+v", s.b)
-			log.Printf("c: %d", s.cn)			
+			log.Printf("c: %d", s.cn)
 			log.Printf("h: %d", s.hn)
 			log.Printf("pPrime: %+v", s.pPrime)
 			log.Fatalf("the vote to commit should have been aborted")
@@ -805,7 +805,7 @@ func (s *BallotState) AssertValid() {
 			log.Printf("curr b: %+v", s.b)
 			log.Fatalf("monotonicity violation")
 		}
-		
+
 		s.last = s.b
 	}
 }
@@ -818,13 +818,13 @@ func (s *BallotState) Message(slot int, qs QuorumSlice) Message {
 	switch s.phase {
 	case Prepare:
 		m := &PrepareMessage{
-			T: Prepare,
-			I: slot,
+			T:  Prepare,
+			I:  slot,
 			Bn: s.b.n,
 			Bx: s.b.x,
 			Cn: s.cn,
 			Hn: s.hn,
-			D: qs,
+			D:  qs,
 		}
 		if s.p != nil {
 			m.Pn = s.p.n
@@ -838,12 +838,12 @@ func (s *BallotState) Message(slot int, qs QuorumSlice) Message {
 
 	case Confirm:
 		m := &ConfirmMessage{
-			T: Confirm,
-			I: slot,
-			X: s.b.x,
+			T:  Confirm,
+			I:  slot,
+			X:  s.b.x,
 			Cn: s.cn,
 			Hn: s.hn,
-			D: qs,
+			D:  qs,
 		}
 		if s.p != nil {
 			m.Pn = s.p.n
@@ -852,12 +852,12 @@ func (s *BallotState) Message(slot int, qs QuorumSlice) Message {
 
 	case Externalize:
 		return &ExternalizeMessage{
-			T: Externalize,
-			I: slot,
-			X: s.b.x,
+			T:  Externalize,
+			I:  slot,
+			X:  s.b.x,
 			Cn: s.cn,
 			Hn: s.hn,
-			D: qs,
+			D:  qs,
 		}
 	}
 
@@ -870,7 +870,7 @@ type ChainState struct {
 
 	// The time we started working on this slot
 	start time.Time
-	
+
 	// Values for past slots that have already achieved consensus
 	values map[int]SlotValue
 
@@ -887,16 +887,16 @@ type ChainState struct {
 func NewChainState(publicKey string, members []string, threshold int) *ChainState {
 	log.Printf("I am %s", publicKey)
 	qs := QuorumSlice{
-		Members: members,
+		Members:   members,
 		Threshold: threshold,
 	}
 	return &ChainState{
-		slot: 1,
-		start: time.Now(),
-		values: make(map[int]SlotValue),
-		nState: NewNominationState(publicKey, qs),
-		bState: NewBallotState(publicKey, qs),
-		D: qs,
+		slot:      1,
+		start:     time.Now(),
+		values:    make(map[int]SlotValue),
+		nState:    NewNominationState(publicKey, qs),
+		bState:    NewBallotState(publicKey, qs),
+		D:         qs,
 		publicKey: publicKey,
 	}
 }
@@ -921,10 +921,10 @@ func (cs *ChainState) OutgoingMessages() []Message {
 	}
 
 	answer = append(answer, &NominationMessage{
-		I: cs.slot,
+		I:   cs.slot,
 		Nom: cs.nState.X,
 		Acc: cs.nState.Y,
-		D: cs.D,
+		D:   cs.D,
 	})
 
 	// If we aren't working on any ballot, but we do have a nomination, we can
@@ -932,7 +932,7 @@ func (cs *ChainState) OutgoingMessages() []Message {
 	if cs.nState.HasNomination() && cs.bState.z == nil {
 		cs.bState.MaybeInitializeValue(cs.nState.PredictValue())
 	}
-	
+
 	if cs.bState.HasMessage() {
 		answer = append(answer, cs.bState.Message(cs.slot, cs.D))
 	}
@@ -967,4 +967,3 @@ func (cs *ChainState) Handle(sender string, message Message) {
 
 	cs.AssertValid()
 }
-

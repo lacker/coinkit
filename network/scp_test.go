@@ -35,14 +35,14 @@ func TestSolipsistQuorum(t *testing.T) {
 func TestNominationMessage(t *testing.T) {
 	v := MakeSlotValue("hello")
 	D := QuorumSlice{
-		Members: []string{"foo", "bar", "baz", "qux"},
+		Members:   []string{"foo", "bar", "baz", "qux"},
 		Threshold: 3,
 	}
 	m := &NominationMessage{
-		I: 1,
+		I:   1,
 		Nom: []SlotValue{v},
 		Acc: []SlotValue{v},
-		D: D,
+		D:   D,
 	}
 	s := EncodeMessage(m)
 	_, err := DecodeMessage(s)
@@ -154,7 +154,7 @@ func converge(chains []*ChainState) {
 
 // Makes a cluster that requires a consensus of more than two thirds.
 func cluster(size int) []*ChainState {
-	threshold := 2 * size / 3 + 1
+	threshold := 2*size/3 + 1
 	names := []string{}
 	for i := 0; i < size; i++ {
 		names = append(names, fmt.Sprintf("node%d", i))
@@ -215,7 +215,7 @@ func fuzzTest(chains []*ChainState, seed int64, t *testing.T) {
 		if allDone(chains) {
 			break
 		}
-		if i % 1000 == 0 {
+		if i%1000 == 0 {
 			log.Printf("done round: %d", i)
 		}
 	}
@@ -232,7 +232,7 @@ func fuzzTest(chains []*ChainState, seed int64, t *testing.T) {
 
 		t.Fatalf("fuzz testing with seed %d, nomination did not converge", seed)
 	}
-	
+
 	if !allDone(chains) {
 		for i := 0; i < len(chains); i++ {
 			log.Printf("--------------------------------------------------------------------------")
@@ -242,7 +242,7 @@ func fuzzTest(chains []*ChainState, seed int64, t *testing.T) {
 		}
 
 		log.Printf("**************************************************************************")
-		t.Fatalf("fuzz testing with seed %d, ballots did not converge", seed)		
+		t.Fatalf("fuzz testing with seed %d, ballots did not converge", seed)
 	}
 }
 
