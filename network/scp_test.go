@@ -251,7 +251,7 @@ func TestBasicConvergence(t *testing.T) {
 	assertDone(c, t)
 }
 
-// Worked up to 100k on Jan 9, commit e9eb4ace
+// Worked up to 100k
 func TestFullCluster(t *testing.T) {
 	var i int64
 	for i = 0; i < 100; i++ {
@@ -260,9 +260,10 @@ func TestFullCluster(t *testing.T) {
 	}
 }
 
+// Worked up to 100k
 func TestOneNodeKnockedOut(t *testing.T) {
 	var i int64
-	for i = 0; i < 10; i++ {
+	for i = 0; i < 100; i++ {
 		c := cluster(4)
 		knockout := c[0:3]
 		fuzzTest(knockout, i, t)
