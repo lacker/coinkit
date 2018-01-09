@@ -276,6 +276,10 @@ type BallotState struct {
 	// each peer
 	M map[string]BallotMessage
 
+	// How many duplicate messages we received from each peer
+	// Used like a timer to guess when we should advance rounds
+	stale map[string]int
+	
 	// Who we are
 	publicKey string
 
@@ -291,6 +295,7 @@ func NewBallotState(publicKey string, qs QuorumSlice) *BallotState {
 		phase:     Prepare,
 		M:         make(map[string]BallotMessage),
 		publicKey: publicKey,
+	    stale:     make(map[string]int),
 		D:         qs,
 	}
 }
@@ -614,10 +619,32 @@ func (s *BallotState) MaybeConfirmAsCommitted(n int, x SlotValue) bool {
 	return true
 }
 
-// Returns whether we needed to bump the ballot number.
+// GoToNextBallot returns whether we could actually go to the next ballot.
+func (s *BallotState) GoToNextBallot() bool {
+	if s.z == nil {
+		// We don't have a candidate value so we can't go to the next ballot
+		return false
+	}
+	
+	// Use s.z for the next ballot
+	b := &Ballot{
+		n: s.b.n + 1,
+		x: *s.z,
+	}
+	
+	s.b = b
+	if s.cn == 0 && s.hn >= s.b.n && !s.AcceptedAbort(s.hn, s.b.x) {
+		// With the new ballot, we can immediately vote to commit
+		s.cn = s.b.n
+	}
+
+	return true
+}
+
+// CheckForBlockedBallot returns whether we ended up changing the state.
 // We bump the ballot number if the set of nodes that could never vote
-// for our ballot is blocking.
-func (s *BallotState) MaybeNextBallot() bool {
+// for our ballot is blocking, and we have a candidate value.
+func (s *BallotState) CheckForBlockedBallot() bool {
 	if s.z == nil || s.b == nil {
 		return false
 	}
@@ -635,20 +662,49 @@ func (s *BallotState) MaybeNextBallot() bool {
 		return false
 	}
 
-	// Use s.z for the next ballot
-	b := &Ballot{
-		n: s.b.n + 1,
-		x: *s.z,
-	}
-	s.Logf("our old ballot %+v cannot pass, bump up to %+v", s.b, b)
-	s.b = b
-	if s.cn == 0 && s.hn >= s.b.n && !s.AcceptedAbort(s.hn, s.b.x) {
-		// We have just switched our ballot to something we can
-		// immediately vote to commit
-		s.cn = s.b.n
+	return s.GoToNextBallot()
+}
+
+// HandleTimerTick returns whether we ended up changing the ballot state.
+// The assumption is that the system is stuck on some ballot, and we should
+// proceed to the next ballot if this could be the stuck one.
+func (s *BallotState) HandleTimerTick() bool {
+	if s.z == nil || s.b == nil {
+		return false
 	}
 
-	return true
+	// Nodes that are behind us in balloting
+	behind := []string{}
+
+	for node, m := range s.M {
+		if m.BallotNumber() < s.b.n {
+			behind = append(behind, node)
+		}
+	}
+
+	if s.D.BlockedBy(behind) {
+		// Our ballot is blocked because other nodes are behind it.
+		// We should wait for them to catch up rather than advancing further.
+		return false
+	}
+
+	return s.GoToNextBallot()
+}
+
+// CheckIfStale is a heuristic to guess whether the network is blocked.
+// This behavior should not affect correctness, except that if it is
+// too aggressive the network may not converge.
+func (s *BallotState) CheckIfStale() {
+	stale := []string{s.publicKey}
+	for node, staleCount := range s.stale {
+		if staleCount >= 3 {
+			stale = append(stale, node)
+		}
+	}
+	if MeetsQuorum(s, stale) {
+		s.stale = make(map[string]int)
+		s.HandleTimerTick()
+	}
 }
 
 // Update the stage of this ballot as needed
@@ -676,10 +732,13 @@ func (s *BallotState) Handle(node string, message BallotMessage) {
 	// If this message isn't new, skip it
 	old, ok := s.M[node]
 	if ok && Compare(old, message) >= 0 {
+		s.stale[node]++
+		s.CheckIfStale()
 		return
 	}
 	s.Logf("\n\n%s got ballot message from %s:\n%+v", s.publicKey, node, message)
 	s.received++
+	s.stale[node] = 0
 	s.M[node] = message
 
 	for {
@@ -702,7 +761,7 @@ func (s *BallotState) Handle(node string, message BallotMessage) {
 		}
 
 		// Step 9 of the processing algorithm
-		if !s.MaybeNextBallot() {
+		if !s.CheckForBlockedBallot() {
 			break
 		}
 	}
@@ -966,4 +1025,8 @@ func (cs *ChainState) Handle(sender string, message Message) {
 	}
 
 	cs.AssertValid()
+}
+
+func (cs *ChainState) HandleTimerTick() {
+	cs.bState.HandleTimerTick()
 }

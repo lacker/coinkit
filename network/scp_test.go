@@ -204,7 +204,6 @@ func nominationConverged(chains []*ChainState) bool {
 	return true
 }
 
-// TODO: detach from global rand
 func fuzzTest(chains []*ChainState, seed int64, t *testing.T) {
 	rand.Seed(seed)
 	log.Printf("fuzz testing with seed %d", seed)
@@ -246,17 +245,26 @@ func fuzzTest(chains []*ChainState, seed int64, t *testing.T) {
 	}
 }
 
-func TestConvergence(t *testing.T) {
+func TestBasicConvergence(t *testing.T) {
 	c := cluster(4)
 	converge(c)
 	assertDone(c, t)
 }
 
 // Worked up to 100k on Jan 9, commit e9eb4ace
-func TestConvergenceWithFuzzing(t *testing.T) {
+func TestFullCluster(t *testing.T) {
 	var i int64
 	for i = 0; i < 100; i++ {
 		c := cluster(4)
 		fuzzTest(c, i, t)
+	}
+}
+
+func TestOneNodeKnockedOut(t *testing.T) {
+	var i int64
+	for i = 0; i < 10; i++ {
+		c := cluster(4)
+		knockout := c[0:3]
+		fuzzTest(knockout, i, t)
 	}
 }
