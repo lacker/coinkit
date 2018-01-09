@@ -29,6 +29,10 @@ type BallotMessage interface {
 	// The highest ballot number this node is voting for
 	// Used to decide when we should start going to a higher number
 	BallotNumber() int
+
+	// CouldEverVoteFor tells whether this node could ever have this
+	// ballot as its active ballot
+	CouldEverVoteFor(n int, x SlotValue) bool
 }
 
 // Ballot phases
@@ -137,6 +141,18 @@ func (m *PrepareMessage) VoteToCommit(n int, x SlotValue) bool {
 	return m.Cn <= n && n <= m.Hn
 }
 
+func (m *PrepareMessage) CouldEverVoteFor(n int, x SlotValue) bool {
+	if m.Bn > n {
+		// Ballots don't go backwards
+		return false
+	}
+	if m.Bn == n && !Equal(m.Bx, x) {
+		// This message is currently voting *against*
+		return false
+	}
+	return true
+}
+
 func (m *PrepareMessage) BallotNumber() int {
 	return m.Bn
 }
@@ -199,6 +215,10 @@ func (m *ConfirmMessage) VoteToCommit(n int, x SlotValue) bool {
 	return Equal(m.X, x)
 }
 
+func (m *ConfirmMessage) CouldEverVoteFor(n int, x SlotValue) bool {
+	return Equal(x, m.X)
+}
+
 func (m *ConfirmMessage) BallotNumber() int {
 	return m.Hn
 }
@@ -251,6 +271,10 @@ func (m *ExternalizeMessage) AcceptAsCommitted(n int, x SlotValue) bool {
 
 func (m *ExternalizeMessage) VoteToCommit(n int, x SlotValue) bool {
 	return false
+}
+
+func (m *ExternalizeMessage) CouldEverVoteFor(n int, x SlotValue) bool {
+	return Equal(x, m.X)
 }
 
 func (m *ExternalizeMessage) BallotNumber() int {

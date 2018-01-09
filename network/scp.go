@@ -450,7 +450,7 @@ func (s *BallotState) MaybeConfirmAsPrepared(n int, x SlotValue) bool {
 		return false
 	}
 	if s.hn >= n {
-		// We are already past this ballot
+		// We already confirmed a ballot as prepared that supercedes this
 		return false
 	}
 
@@ -484,10 +484,19 @@ func (s *BallotState) MaybeConfirmAsPrepared(n int, x SlotValue) bool {
 
 	s.Logf("%s confirms as prepared: %d %+v", s.publicKey, n, x)
 	
+	if s.b == nil {
+		// We weren't working on any ballot, but now we can work on this one
+		s.b = ballot
+		s.cn = n
+		s.hn = n
+		s.z = &x	
+		return true
+	}
 
-	if s.b != nil && !Equal(s.b.x, x) {
-		// This is the awkward case, where we were just working on something
+	if !Equal(s.b.x, x) {
+		// This is an awkward case, where we were just working on something
 		// conflicting.
+
 		if s.b.n < n {
 			// We were trying to prepare a conflicting but lower ballot.
 			// So we can just switch our vote to this one.
@@ -498,50 +507,20 @@ func (s *BallotState) MaybeConfirmAsPrepared(n int, x SlotValue) bool {
 			return true
 		}
 
-		if s.hn == 0 {
-			// We were just voting to abort this ballot, but we haven't confirmed
-			// anything.
-			// We probably abandoned it too early, and there's a good chance
-			// our current ballot will not converge.
-			// We can't vote to commit anything, but let's ditch our current
-			// ballot and start preparing this value at a higher ballot number.
-			s.b = &Ballot{
-				n: s.b.n + 1,
-				x: x,
-			}
-			s.hn = 0
-			s.cn = 0
-			s.z = &x
-			return true
-		}
-		
-		// We have confirmed our ballot is prepared as well, and
-		// our ballot is higher, so we should just stick with it.
-		return false
-	}
-
-	if s.b == nil {
-		// We weren't working on any ballot, but now we can work on this one
-		s.b = ballot
+		// We are currently trying to prepare a conflicting ballot.
+		// So we can't just switch our vote.
+		// But we do want to try for this ballot in future rounds,
+		// since it's the highest thing that has been confirmed as prepared.
 		s.hn = n
-		s.cn = n
+		s.cn = 0
 		s.z = &x
+		s.Logf("in future rounds we will support %+v", s.z)
 		return true
 	}
-
-	if n < s.b.n {
-		// This is a bit awkward - we have already moved beyond this ballot.
-		// We can't start voting to commit this, because we may have previously
-		// voted to abort it.
-		// I think we just have to do nothing here, and wait for the other nodes
-		// to catch up to our ballot.
-		return false
-	}
-	
-	// We were either working on a lower number, or had not confirmed
-	// any numbers as prepared.
-	// So bump the range
+		
+	// We we already working on this value, so we can vote to commit this.
 	s.hn = n
+	s.z = &x
 	if s.cn == 0 {
 		s.cn = n
 	}
@@ -654,36 +633,33 @@ func (s *BallotState) MaybeConfirmAsCommitted(n int, x SlotValue) bool {
 }
 
 // Returns whether we needed to bump the ballot number.
-// We bump the ballot number if the set of nodes with a higher
-// ballot number is blocking.
-// TODO: figure out what the distinction is between s.b.n and s.hn
+// We bump the ballot number if the set of nodes that could never vote
+// for our ballot is blocking.
 func (s *BallotState) MaybeNextBallot() bool {
 	if s.z == nil || s.b == nil {
 		return false
 	}
-	
-	// Nodes with a higher ballot number
-	higher := []string{}
-	current := 0
-	if s.b != nil {
-		current = s.b.n
-	}
+
+	// Nodes that could never vote for our ballot
+	blockers := []string{}
 
 	for node, m := range s.M {
-		if m.BallotNumber() > current {
-			higher = append(higher, node)
+		if !m.CouldEverVoteFor(s.b.n, s.b.x) {
+			blockers = append(blockers, node)
 		}
 	}
 
-	if !s.D.BlockedBy(higher) {
+	if !s.D.BlockedBy(blockers) {
 		return false
 	}
 
-	// s.z and s.b.x should be equivalent here
-	s.b = &Ballot{
+	// Use s.z for the next ballot
+	b := &Ballot{
 		n: s.b.n + 1,
-		x: s.b.x,
+		x: *s.z,
 	}
+	s.Logf("our old ballot %+v cannot pass, bump up to %+v", s.b, b)
+	s.b = b
 	return true
 }
 
@@ -757,23 +733,23 @@ func (s *BallotState) MaybeInitializeValue(v SlotValue) bool {
 	return true
 }
 
-// MaybeUpdateValue updates the value based on the nomination state if we still
-// have not confirmed any ballot as prepared.
-// The goal is, before we confirm any ballot as prepared we can keep updating
-// the ballot we are working on to the most recent one.
+// MaybeUpdateValue updates the value if we still have not confirmed
+// any ballot as prepared.
+// If we have accepted anything as prepared, stick with the highest
+// such ballot.
+// Otherwise, look at the nomination state.
 // Returns whether anything in the ballot state changed.
 func (s *BallotState) MaybeUpdateValue(ns *NominationState) bool {
 	if s.hn > 0 {
-		// We are voting to commit something, so we can't ditch it until
-		// we accept an abort for it.
+		// We already have confirmed s.z is prepared, so we won't
+		// switch the value unless it gets aborted.
 		return false
 	}
 
 	if !ns.HasNomination() {
-		// No idea how to set the value anyway
+		// No idea how to set the value
 		return false
 	}
-	
 	v := ns.PredictValue()
 
 	if s.z != nil && Equal(v, *s.z) {
@@ -790,13 +766,14 @@ func (s *BallotState) MaybeUpdateValue(ns *NominationState) bool {
 			x: v,
 		}
 	} else {
-		// TODO: this part should only happen when a timer fires, but that
+		// TODO: in the paper this part only happens when a timer fires, but that
 		// seems to be an optimization so I punted for now.
 		// See page 25
 		s.b = &Ballot{
 			n: s.b.n + 1,
 			x: v,
 		}
+		s.Logf("new value, bumping the ballot to %+v", s.b)
 	}
 	
 	return true
