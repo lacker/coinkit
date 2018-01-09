@@ -38,7 +38,9 @@ go run main.go 3
 
 You can run just three out of the four if you so desire.
 
-TODO: describe how much is expected to work
+Currently, the nodes will start off in conflict and then operate the SCP to achieve consensus on a single block. It does not yet chain blocks together into a blockchain. You can tell it is done with a block when it logs that it is "confirmed as committed".
+
+TODO: add more features
 
 There is an artificial ~5 second pause between messages, set in `server.go`, to make
 it simpler to see what is going on.
