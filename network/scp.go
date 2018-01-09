@@ -379,17 +379,7 @@ func (s *BallotState) MaybeAcceptAsPrepared(n int, x SlotValue) bool {
 		n: n,
 		x: x,
 	}
-	
-	if s.b != nil && s.b.n <= n && !Equal(s.b.x, x) {
-		// Accepting this as prepared means we have to abort b
-		// Let's switch our active ballot to this one. It should be okay since
-		// we are accepting the abort of b, even though we may have voted
-		// for the commit of b.
-		s.Logf("%s accepts the abort of %+v", s.publicKey, s.b)
-		s.cn = 0
-		s.b = ballot
-	}
-	
+
 	// p and p prime should be the top two conflicting things we accept
 	// as prepared. update them accordingly
 	if s.p == nil {
@@ -407,16 +397,11 @@ func (s *BallotState) MaybeAcceptAsPrepared(n int, x SlotValue) bool {
 		s.pPrime = ballot
 	}
 
-	// Check if accepting this prepare means that we should give up some
-	// of our votes to commit
-	if s.b != nil {
-		for s.cn != 0 && s.AcceptedAbort(s.cn, s.b.x) {
-			s.Logf("%s accepts the abort of %d %+v", s.cn, s.b.x)
-			s.cn++
-			if s.cn > s.hn {
-				s.cn = 0
-			}
-		}
+	// Check if accepting this prepare means that we should abort our
+	// votes to commit
+	if s.cn != 0 && s.hn != 0 && s.AcceptedAbort(s.hn, s.b.x) {
+		s.Logf("%s accepts the abort of %d %+v", s.hn, s.b.x)
+		s.cn = 0
 	}
 
 	return true
@@ -504,6 +489,7 @@ func (s *BallotState) MaybeConfirmAsPrepared(n int, x SlotValue) bool {
 			s.cn = s.b.n
 		}
 	}
+	s.Show()
 	return true
 }
 
@@ -772,15 +758,17 @@ func (s *BallotState) AssertValid() {
 	}
 
 	if s.b != nil && s.phase == Prepare {
-		if s.p != nil && !Equal(s.b.x, s.p.x) && s.cn != 0 && s.cn <= s.p.n {
+		if s.p != nil && !Equal(s.b.x, s.p.x) && s.cn != 0 && s.hn <= s.p.n {
 			log.Printf("b: %+v", s.b)
 			log.Printf("c: %d", s.cn)
+			log.Printf("h: %d", s.hn)
 			log.Printf("p: %+v", s.p)
 			log.Fatalf("the vote to commit should have been aborted")
 		}
-		if s.pPrime != nil && !Equal(s.b.x, s.pPrime.x) && s.cn != 0 && s.cn <= s.pPrime.n {
+		if s.pPrime != nil && !Equal(s.b.x, s.pPrime.x) && s.cn != 0 && s.hn <= s.pPrime.n {
 			log.Printf("b: %+v", s.b)
 			log.Printf("c: %d", s.cn)			
+			log.Printf("h: %d", s.hn)
 			log.Printf("pPrime: %+v", s.pPrime)
 			log.Fatalf("the vote to commit should have been aborted")
 		}
