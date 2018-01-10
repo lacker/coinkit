@@ -25,14 +25,6 @@ func DecodeMessage(encoded string) (Message, error) {
 	if err != nil {
 		return nil, err
 	}
-	if _, ok := m["Uptime"]; ok {
-		message := new(UptimeMessage)
-		err := json.Unmarshal(b, &message)
-		if err != nil {
-			return nil, err
-		}
-		return message, nil
-	}
 	if _, ok := m["Acc"]; ok {
 		message := new(NominationMessage)
 		err := json.Unmarshal(b, &message)
@@ -74,12 +66,4 @@ func DecodeMessage(encoded string) (Message, error) {
 		}
 	}
 	return nil, errors.New("unrecognized message format")
-}
-
-type UptimeMessage struct {
-	Uptime int
-}
-
-func (m *UptimeMessage) MessageType() string {
-	return "Uptime"
 }

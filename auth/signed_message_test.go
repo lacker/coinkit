@@ -8,7 +8,11 @@ import (
 )
 
 func TestSignedMessage(t *testing.T) {
-	m := &network.UptimeMessage{Uptime: 1337}
+	m := &network.NominationMessage{
+		I: 1,
+		Nom: []network.SlotValue{},
+		Acc: []network.SlotValue{},
+	}
 	kp := NewKeyPairFromSecretPhrase("foo")
 	sm := NewSignedMessage(kp, m)
 	str := sm.Serialize()
