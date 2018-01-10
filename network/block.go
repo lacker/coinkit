@@ -34,13 +34,9 @@ type Block struct {
 	publicKey string
 }
 
-func NewBlock(publicKey string, members []string, threshold int) *Block {
-	qs := QuorumSlice{
-		Members:   members,
-		Threshold: threshold,
-	}
+func NewBlock(publicKey string, qs QuorumSlice, slot int) *Block {
 	return &Block{
-		slot:      1,
+		slot:      slot,
 		start:     time.Now(),
 		nState:    NewNominationState(publicKey, qs),
 		bState:    NewBallotState(publicKey, qs),
@@ -98,7 +94,6 @@ func (b *Block) OutgoingMessages() []Message {
 	return answer
 }
 
-// Done returns whether this chain has externalized all the slots it is working on.
 func (b *Block) Done() bool {
 	return b.external != nil
 }

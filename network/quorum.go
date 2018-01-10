@@ -12,6 +12,13 @@ type QuorumSlice struct {
 	Threshold int
 }
 
+func MakeQuorumSlice(members []string, threshold int) QuorumSlice {
+	return QuorumSlice{
+		Members: members,
+		Threshold: threshold,
+	}
+}
+
 func (qs *QuorumSlice) atLeast(nodes []string, t int) bool {
 	count := 0
 	for _, member := range qs.Members {

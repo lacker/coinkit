@@ -24,3 +24,6 @@ func (m *NominationMessage) MessageType() string {
 	return "Nomination"
 }
 
+func (m *NominationMessage) Slot() int {
+	return m.I
+}

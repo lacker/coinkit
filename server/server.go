@@ -41,7 +41,8 @@ func NewServer(c *Config) *Server {
 		peers = append(peers, network.NewPeer(p))
 	}
 
-	block := network.NewBlock(c.KeyPair.PublicKey(), c.Members, c.Threshold)
+	qs := network.MakeQuorumSlice(c.Members, c.Threshold)
+	block := network.NewBlock(c.KeyPair.PublicKey(), qs, 1)
 	
 	return &Server{
 		port: c.Port,

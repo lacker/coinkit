@@ -10,7 +10,7 @@ import (
 )
 
 func TestSolipsistQuorum(t *testing.T) {
-	s := NewBlock("foo", []string{"foo"}, 1)
+	s := NewBlock("foo", MakeQuorumSlice([]string{"foo"}, 1), 1)
 	if !MeetsQuorum(s.nState, []string{"foo"}) {
 		t.Fatal("foo should meet the quorum")
 	}
@@ -40,10 +40,11 @@ func TestNominationMessage(t *testing.T) {
 
 func TestConsensus(t *testing.T) {
 	members := []string{"amy", "bob", "cal", "dan"}
-	amy := NewBlock("amy", members, 3)
-	bob := NewBlock("bob", members, 3)
-	cal := NewBlock("cal", members, 3)
-	dan := NewBlock("dan", members, 3)
+	qs := MakeQuorumSlice(members, 3)
+	amy := NewBlock("amy", qs, 1)
+	bob := NewBlock("bob", qs, 1)
+	cal := NewBlock("cal", qs, 1)
+	dan := NewBlock("dan", qs, 1)
 
 	// Let everyone receive an initial nomination from Amy
 	a := amy.OutgoingMessages()[0]
@@ -147,8 +148,9 @@ func cluster(size int) []*Block {
 		names = append(names, fmt.Sprintf("node%d", i))
 	}
 	blocks := []*Block{}
+	qs := MakeQuorumSlice(names, threshold)
 	for _, name := range names {
-		block := NewBlock(name, names, threshold)
+		block := NewBlock(name, qs, 1)
 		blocks = append(blocks, block)
 	}
 	return blocks

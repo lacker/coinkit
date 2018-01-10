@@ -7,6 +7,7 @@ type BallotMessage interface {
 	QuorumSlice() QuorumSlice
 	Phase() Phase
 	MessageType() string
+	Slot() int	
 
 	// AcceptAsPrepared tells whether this message implies that the sender
 	// accepts this ballot as prepared
@@ -168,6 +169,10 @@ func (m *PrepareMessage) BallotNumber() int {
 	return m.Bn
 }
 
+func (m *PrepareMessage) Slot() int {
+	return m.I
+}
+
 // ConfirmMessage is the second phase of the three-phase ballot protocol
 // "Confirm" seems like a bad name for this phase, it seems like it should be
 // named "Commit". Because you are also confirming as part of nominate and prepare.
@@ -234,6 +239,10 @@ func (m *ConfirmMessage) BallotNumber() int {
 	return m.Hn
 }
 
+func (m *ConfirmMessage) Slot() int {
+	return m.I
+}
+
 // ExternalizeMessage is the third phase of the three-phase ballot protocol
 // Sent after we have confirmed a commit.
 type ExternalizeMessage struct {
@@ -290,6 +299,10 @@ func (m *ExternalizeMessage) CouldEverVoteFor(n int, x SlotValue) bool {
 
 func (m *ExternalizeMessage) BallotNumber() int {
 	return m.Hn
+}
+
+func (m *ExternalizeMessage) Slot() int {
+	return m.I
 }
 
 // Compare returns -1 if ballot1 < ballot2
