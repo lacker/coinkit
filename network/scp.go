@@ -11,23 +11,6 @@ import (
 // When there are frustrating single-letter variable names, it's because we are
 // making the names line up with the protocol paper.
 
-type NominationMessage struct {
-	// What slot we are nominating values for
-	I int
-
-	// The values we have voted to nominate
-	Nom []SlotValue
-
-	// The values we have accepted as nominated
-	Acc []SlotValue
-
-	D QuorumSlice
-}
-
-func (m *NominationMessage) MessageType() string {
-	return "Nomination"
-}
-
 // See page 21 of the protocol paper for more detail here.
 type NominationState struct {
 	// The values we have voted to nominate
