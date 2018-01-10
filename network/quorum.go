@@ -1,5 +1,9 @@
 package network
 
+import (
+	"fmt"
+)
+
 type QuorumSlice struct {
 	// Members is a list of public keys for nodes that occur in the quorum slice.
 	// Members must be unique.
@@ -41,6 +45,19 @@ func (qs *QuorumSlice) BlockedBy(nodes []string) bool {
 
 func (qs *QuorumSlice) SatisfiedWith(nodes []string) bool {
 	return qs.atLeast(nodes, qs.Threshold)
+}
+
+// Makes data for a test quorum slice that requires a consensus of more
+// than two thirds of the given size.
+// Also returns a list of all node names.
+func MakeTestQuorumSlice(size int) (QuorumSlice, []string) {
+	threshold := 2*size/3 + 1
+	names := []string{}
+	for i := 0; i < size; i++ {
+		names = append(names, fmt.Sprintf("node%d", i))
+	}
+	qs := MakeQuorumSlice(names, threshold)
+	return qs, names
 }
 
 type QuorumFinder interface {

@@ -1,7 +1,6 @@
 package network
 
 import (
-	"fmt"
 	"log"
 	"math/rand"
 	"testing"
@@ -106,17 +105,13 @@ func rsum(blocks []*Block) int {
 }
 
 // Simulate the pending messages being sent from source to target
-func send(source *Block, target *Block) {
+func blockSend(source *Block, target *Block) {
 	if source == target {
 		return
 	}
 	messages := source.OutgoingMessages()
 	for _, message := range messages {
-		encoded := EncodeMessage(message)
-		m, err := DecodeMessage(encoded)
-		if err != nil {
-			log.Fatal("decoding error:", err)
-		}
+		m := EncodeThenDecode(message)
 		target.Handle(source.publicKey, m)
 	}
 }
@@ -131,7 +126,7 @@ func converge(blocks []*Block) {
 		initial := rsum(blocks)
 		for _, source := range blocks {
 			for _, target := range blocks {
-				send(source, target)
+				blockSend(source, target)
 			}
 		}
 		if rsum(blocks) == initial {
@@ -141,17 +136,11 @@ func converge(blocks []*Block) {
 }
 
 // Makes a cluster that requires a consensus of more than two thirds.
-func cluster(size int) []*Block {
-	threshold := 2*size/3 + 1
-	names := []string{}
-	for i := 0; i < size; i++ {
-		names = append(names, fmt.Sprintf("node%d", i))
-	}
+func blockCluster(size int) []*Block {
+	qs, names := MakeTestQuorumSlice(size)
 	blocks := []*Block{}
-	qs := MakeQuorumSlice(names, threshold)
 	for _, name := range names {
-		block := NewBlock(name, qs, 1)
-		blocks = append(blocks, block)
+		blocks = append(blocks, NewBlock(name, qs, 1))
 	}
 	return blocks
 }
@@ -193,13 +182,13 @@ func nominationConverged(blocks []*Block) bool {
 	return true
 }
 
-func fuzzTest(blocks []*Block, seed int64, t *testing.T) {
+func blockFuzzTest(blocks []*Block, seed int64, t *testing.T) {
 	rand.Seed(seed)
-	log.Printf("fuzz testing with seed %d", seed)
+	log.Printf("fuzz testing blocks with seed %d", seed)
 	for i := 0; i < 10000; i++ {
 		j := rand.Intn(len(blocks))
 		k := rand.Intn(len(blocks))
-		send(blocks[j], blocks[k])
+		blockSend(blocks[j], blocks[k])
 		if allDone(blocks) {
 			break
 		}
@@ -235,26 +224,26 @@ func fuzzTest(blocks []*Block, seed int64, t *testing.T) {
 }
 
 func TestBasicConvergence(t *testing.T) {
-	c := cluster(4)
+	c := blockCluster(4)
 	converge(c)
 	assertDone(c, t)
 }
 
 // Worked up to 100k
-func TestFullCluster(t *testing.T) {
+func TestBlockFullCluster(t *testing.T) {
 	var i int64
 	for i = 0; i < 100; i++ {
-		c := cluster(4)
-		fuzzTest(c, i, t)
+		c := blockCluster(4)
+		blockFuzzTest(c, i, t)
 	}
 }
 
 // Worked up to 100k
-func TestOneNodeKnockedOut(t *testing.T) {
+func TestBlockOneNodeKnockedOut(t *testing.T) {
 	var i int64
 	for i = 0; i < 100; i++ {
-		c := cluster(4)
+		c := blockCluster(4)
 		knockout := c[0:3]
-		fuzzTest(knockout, i, t)
+		blockFuzzTest(knockout, i, t)
 	}
 }

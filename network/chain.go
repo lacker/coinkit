@@ -20,11 +20,13 @@ type Chain struct {
 	publicKey string
 }
 
-// Handle handles an incoming message
-func (c *Chain) Handle(sender string, message Message) {
+// Handle handles an incoming message.
+// It may return a message to be sent back to the original sender, or it may
+// just return nil if it has no particular response.
+func (c *Chain) Handle(sender string, message Message) Message {
 	if sender == c.publicKey {
 		// It's one of our own returning to us, we can ignore it
-		return
+		return nil
 	}
 
 	slot := message.Slot()
@@ -39,14 +41,24 @@ func (c *Chain) Handle(sender string, message Message) {
 			c.history[slot] = c.current
 			c.current = NewBlock(c.publicKey, c.D, slot + 1)
 		}
-		return
+		return nil
 	}
 
 	block, ok := c.history[slot]
 	if !ok {
 		// We aren't working on this slot, ignore
-		return
+		return nil
 	}
 
 	block.Handle(sender, message)
+	return nil
+}
+
+func NewEmptyChain(publicKey string, qs QuorumSlice) *Chain {
+	return &Chain{
+		current: NewBlock(publicKey, qs, 1),
+		history: make(map[int]*Block),
+		D: qs,
+		publicKey: publicKey,
+	}
 }

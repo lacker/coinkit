@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"log"
 )
 
 type Message interface {
@@ -69,4 +70,14 @@ func DecodeMessage(encoded string) (Message, error) {
 		}
 	}
 	return nil, errors.New("unrecognized message format")
+}
+
+// Useful for simulating a network transit
+func EncodeThenDecode(message Message) Message {
+	encoded := EncodeMessage(message)
+	m, err := DecodeMessage(encoded)
+	if err != nil {
+		log.Fatal("encode-then-decode error:", err)
+	}
+	return m
 }
