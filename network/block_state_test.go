@@ -4,23 +4,10 @@ import (
 	"fmt"
 	"log"
 	"math/rand"
-	"strings"
 	"testing"
 
 	"github.com/davecgh/go-spew/spew"
 )
-
-func TestCombineSlotValues(t *testing.T) {
-	a := MakeSlotValue("foo")
-	b := MakeSlotValue("bar")
-	c := MakeSlotValue("baz")
-	d := Combine(a, b)
-	e := Combine(d, c)
-	if strings.Join(e.Comments, ",") != "bar,baz,foo" {
-		t.Fatal("a is", a)
-		t.Fatal("e is", e)
-	}
-}
 
 func TestSolipsistQuorum(t *testing.T) {
 	s := NewChainState("foo", []string{"foo"}, 1)
