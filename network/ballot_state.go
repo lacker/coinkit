@@ -638,7 +638,7 @@ func (s *BallotState) AssertValid() {
 	}
 }
 
-func (s *BallotState) Message(slot int, qs QuorumSlice) Message {
+func (s *BallotState) Message(slot int, qs QuorumSlice) BallotMessage {
 	if !s.HasMessage() {
 		panic("coding error")
 	}

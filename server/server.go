@@ -29,7 +29,7 @@ type Server struct {
 	keyPair *auth.KeyPair
 	peers []*network.Peer
 	info map[string]*PeerInfo
-	state *network.ChainState
+	block *network.Block
 	outgoing []network.Message
 	inbox chan *auth.SignedMessage
 }
@@ -41,15 +41,15 @@ func NewServer(c *Config) *Server {
 		peers = append(peers, network.NewPeer(p))
 	}
 
-	state := network.NewChainState(c.KeyPair.PublicKey(), c.Members, c.Threshold)
+	block := network.NewBlock(c.KeyPair.PublicKey(), c.Members, c.Threshold)
 	
 	return &Server{
 		port: c.Port,
 		keyPair: c.KeyPair,
 		peers: peers,
 		info: make(map[string]*PeerInfo),
-		state: state,
-		outgoing: state.OutgoingMessages(),
+		block: block,
+		outgoing: block.OutgoingMessages(),
 		inbox: make(chan *auth.SignedMessage),
 	}
 }
@@ -92,24 +92,24 @@ func (s *Server) handleConnection(conn net.Conn) {
 }
 
 // handleMessage should only be called by a single goroutine, because the
-// state objects aren't threadsafe.
+// block objects aren't threadsafe.
 // Caller should be validating the signature
 func (s *Server) handleMessage(sm *auth.SignedMessage) {
 	switch m := sm.Message().(type) {
 	case *network.NominationMessage:
-		s.state.Handle(sm.Signer(), m)
+		s.block.Handle(sm.Signer(), m)
 	case *network.PrepareMessage:
-		s.state.Handle(sm.Signer(), m)
+		s.block.Handle(sm.Signer(), m)
 	case *network.ConfirmMessage:
-		s.state.Handle(sm.Signer(), m)
+		s.block.Handle(sm.Signer(), m)
 	case *network.ExternalizeMessage:
-		s.state.Handle(sm.Signer(), m)
+		s.block.Handle(sm.Signer(), m)
 	default:
 		log.Printf("could not handle message: %s", network.EncodeMessage(m))
 		break
 	}
 	
-	s.outgoing = s.state.OutgoingMessages()
+	s.outgoing = s.block.OutgoingMessages()
 }
 
 func (s *Server) handleMessagesForever() {

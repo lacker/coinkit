@@ -10,7 +10,7 @@ import (
 )
 
 func TestSolipsistQuorum(t *testing.T) {
-	s := NewChainState("foo", []string{"foo"}, 1)
+	s := NewBlock("foo", []string{"foo"}, 1)
 	if !MeetsQuorum(s.nState, []string{"foo"}) {
 		t.Fatal("foo should meet the quorum")
 	}
@@ -40,10 +40,10 @@ func TestNominationMessage(t *testing.T) {
 
 func TestConsensus(t *testing.T) {
 	members := []string{"amy", "bob", "cal", "dan"}
-	amy := NewChainState("amy", members, 3)
-	bob := NewChainState("bob", members, 3)
-	cal := NewChainState("cal", members, 3)
-	dan := NewChainState("dan", members, 3)
+	amy := NewBlock("amy", members, 3)
+	bob := NewBlock("bob", members, 3)
+	cal := NewBlock("cal", members, 3)
+	dan := NewBlock("dan", members, 3)
 
 	// Let everyone receive an initial nomination from Amy
 	a := amy.OutgoingMessages()[0]
@@ -94,18 +94,18 @@ func TestConsensus(t *testing.T) {
 	}
 }
 
-// Sum of received values for all the chains
-func rsum(chains []*ChainState) int {
+// Sum of received values for all the blocks
+func rsum(blocks []*Block) int {
 	answer := 0
-	for _, chain := range chains {
-		answer += chain.nState.received
-		answer += chain.bState.received
+	for _, block := range blocks {
+		answer += block.nState.received
+		answer += block.bState.received
 	}
 	return answer
 }
 
 // Simulate the pending messages being sent from source to target
-func send(source *ChainState, target *ChainState) {
+func send(source *Block, target *Block) {
 	if source == target {
 		return
 	}
@@ -120,69 +120,69 @@ func send(source *ChainState, target *ChainState) {
 	}
 }
 
-// Have the chains send messages back and forth until they are making no more
+// Have the blocks send messages back and forth until they are making no more
 // progress
-func converge(chains []*ChainState) {
+func converge(blocks []*Block) {
 	i := 0
 	for {
 		i++
 		log.Printf("Pass %d", i)
-		initial := rsum(chains)
-		for _, source := range chains {
-			for _, target := range chains {
+		initial := rsum(blocks)
+		for _, source := range blocks {
+			for _, target := range blocks {
 				send(source, target)
 			}
 		}
-		if rsum(chains) == initial {
+		if rsum(blocks) == initial {
 			break
 		}
 	}
 }
 
 // Makes a cluster that requires a consensus of more than two thirds.
-func cluster(size int) []*ChainState {
+func cluster(size int) []*Block {
 	threshold := 2*size/3 + 1
 	names := []string{}
 	for i := 0; i < size; i++ {
 		names = append(names, fmt.Sprintf("node%d", i))
 	}
-	chains := []*ChainState{}
+	blocks := []*Block{}
 	for _, name := range names {
-		chain := NewChainState(name, names, threshold)
-		chains = append(chains, chain)
+		block := NewBlock(name, names, threshold)
+		blocks = append(blocks, block)
 	}
-	return chains
+	return blocks
 }
 
-func allDone(chains []*ChainState) bool {
-	for _, chain := range chains {
-		if !chain.Done() {
+func allDone(blocks []*Block) bool {
+	for _, block := range blocks {
+		if !block.Done() {
 			return false
 		}
 	}
 	return true
 }
 
-// assertDone verifies that every chain has externalized all its slots
-func assertDone(chains []*ChainState, t *testing.T) {
-	for _, chain := range chains {
-		if !chain.Done() {
+// assertDone verifies that every block has gotten to externalize
+func assertDone(blocks []*Block, t *testing.T) {
+	for _, block := range blocks {
+		if !block.Done() {
 			t.Fatalf("%s is not externalizing: %s",
-				chain.publicKey, spew.Sdump(chain))
+				block.publicKey, spew.Sdump(block))
 		}
 	}
 }
 
-func nominationConverged(chains []*ChainState) bool {
+func nominationConverged(blocks []*Block) bool {
 	var value SlotValue
-	for i, chain := range chains {
-		if !chain.nState.HasNomination() {
+	for i, block := range blocks {
+		if !block.nState.HasNomination() {
 			return false
 		}
 		if i == 0 {
-			value = chain.nState.PredictValue()
+			value = block.nState.PredictValue()
 		} else {
-			v := chain.nState.PredictValue()
+			v := block.nState.PredictValue()
 			if !Equal(value, v) {
 				return false
 			}
@@ -191,14 +191,14 @@ func nominationConverged(chains []*ChainState) bool {
 	return true
 }
 
-func fuzzTest(chains []*ChainState, seed int64, t *testing.T) {
+func fuzzTest(blocks []*Block, seed int64, t *testing.T) {
 	rand.Seed(seed)
 	log.Printf("fuzz testing with seed %d", seed)
 	for i := 0; i < 10000; i++ {
-		j := rand.Intn(len(chains))
-		k := rand.Intn(len(chains))
-		send(chains[j], chains[k])
-		if allDone(chains) {
+		j := rand.Intn(len(blocks))
+		k := rand.Intn(len(blocks))
+		send(blocks[j], blocks[k])
+		if allDone(blocks) {
 			break
 		}
 		if i%1000 == 0 {
@@ -206,11 +206,11 @@ func fuzzTest(chains []*ChainState, seed int64, t *testing.T) {
 		}
 	}
 
-	if !nominationConverged(chains) {
-		for i := 0; i < len(chains); i++ {
+	if !nominationConverged(blocks) {
+		for i := 0; i < len(blocks); i++ {
 			log.Printf("--------------------------------------------------------------------------")
-			if chains[i].nState != nil {
-				chains[i].nState.Show()
+			if blocks[i].nState != nil {
+				blocks[i].nState.Show()
 			}
 		}
 
@@ -219,11 +219,11 @@ func fuzzTest(chains []*ChainState, seed int64, t *testing.T) {
 		t.Fatalf("fuzz testing with seed %d, nomination did not converge", seed)
 	}
 
-	if !allDone(chains) {
-		for i := 0; i < len(chains); i++ {
+	if !allDone(blocks) {
+		for i := 0; i < len(blocks); i++ {
 			log.Printf("--------------------------------------------------------------------------")
-			if chains[i].bState != nil {
-				chains[i].bState.Show()
+			if blocks[i].bState != nil {
+				blocks[i].bState.Show()
 			}
 		}
 
