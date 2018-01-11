@@ -62,3 +62,15 @@ func NewEmptyChain(publicKey string, qs QuorumSlice) *Chain {
 		publicKey: publicKey,
 	}
 }
+
+func (c *Chain) OutgoingMessages() []Message {
+	answer := c.current.OutgoingMessages()
+
+	prev := c.history[c.current.slot-1]
+	if prev != nil {
+		// We also send out the externalize data for the previous block
+		answer = append(answer, prev.OutgoingMessages()...)
+	}
+
+	return answer
+}
