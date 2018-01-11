@@ -64,7 +64,7 @@ func progress(chains []*Chain) int {
 			minSlot = chains[i].current.slot
 		}
 	}
-	return minSlot
+	return minSlot - 1
 }
 
 func chainFuzzTest(chains []*Chain, seed int64, t *testing.T) {
