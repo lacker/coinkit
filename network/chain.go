@@ -46,14 +46,13 @@ func (c *Chain) Handle(sender string, message Message) Message {
 		return nil
 	}
 
-	block, ok := c.history[slot]
-	if !ok {
-		// We aren't working on this slot, ignore
-		return nil
-	}
-
-	block.Handle(sender, message)
+	// This message is for an old block
+	// TODO: send back an ExternalizeMessage
 	return nil
+}
+
+func (c *Chain) AssertValid() {
+	c.current.AssertValid()
 }
 
 func NewEmptyChain(publicKey string, qs QuorumSlice) *Chain {

@@ -94,7 +94,7 @@ func chainFuzzTest(chains []*Chain, seed int64, t *testing.T) {
 
 func TestChainFullCluster(t *testing.T) {
 	var i int64
-	for i = 1513; i < 1514; i++ {
+	for i = 0; i < 10; i++ {
 		c := chainCluster(4)
 		chainFuzzTest(c, i, t)
 	}

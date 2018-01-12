@@ -48,6 +48,10 @@ func NewBlock(publicKey string, qs QuorumSlice, slot int) *Block {
 func (block *Block) AssertValid() {
 	block.nState.AssertValid()
 	block.bState.AssertValid()
+	if block.bState.phase == Externalize && block.external == nil {
+		block.bState.Show()
+		log.Fatalf("this block has externalized but block.external is not set")
+	}
 }
 
 // OutgoingMessages returns the outgoing messages.
@@ -84,10 +88,6 @@ func (b *Block) OutgoingMessages() []Message {
 
 	if b.bState.HasMessage() {
 		m := b.bState.Message(b.slot, b.D)
-		if m.Phase() == Externalize {
-			b.external = m.(*ExternalizeMessage)
-			return []Message{b.external}
-		}
 		answer = append(answer, m)
 	}
 
@@ -118,6 +118,10 @@ func (b *Block) Handle(sender string, message Message) {
 		log.Printf("unrecognized message: %v", m)
 	}
 
+	if b.bState.phase == Externalize && b.external == nil {
+		b.external = b.bState.Message(b.slot, b.D).(*ExternalizeMessage)
+	}
+	
 	b.AssertValid()
 }
 
