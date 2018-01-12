@@ -2,6 +2,8 @@ package network
 
 import (
 	"log"
+
+	"github.com/davecgh/go-spew/spew"	
 )
 
 // Chain creates the blockchain, one Block at a time.
@@ -73,4 +75,17 @@ func (c *Chain) OutgoingMessages() []Message {
 	}
 
 	return answer
+}
+
+func LogChains(chains []*Chain) {
+	for _, chain := range chains {
+		log.Printf("--------------------------------------------------------------------------")
+		log.Printf("%s is working on slot %d", chain.publicKey, chain.current.slot)
+		if chain.current.bState != nil {
+			chain.current.bState.Show()
+		} else {
+			log.Printf("spew: %s", spew.Sdump(chain))
+		}
+	}
+	log.Printf("**************************************************************************")
 }

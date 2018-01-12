@@ -75,6 +75,9 @@ func (s *BallotState) Logf(format string, a ...interface{}) {
 
 func (s *BallotState) Show() {
 	log.Printf("bState for %s:", s.publicKey)
+	if s.phase != Prepare {
+		log.Printf("phase: %s", s.phase)
+	}
 	log.Printf("b: %+v", s.b)
 	log.Printf("p: %+v", s.p)
 	log.Printf("pPrime: %+v", s.pPrime)

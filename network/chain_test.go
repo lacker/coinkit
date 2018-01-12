@@ -79,11 +79,12 @@ func chainFuzzTest(chains []*Chain, seed int64, t *testing.T) {
 			break
 		}
 		if i%1000 == 0 {
-			log.Printf("done round: %d", i)
+			log.Printf("done round: %d ************************************", i)
 		}
 	}
 
 	if progress(chains) < limit {
+		LogChains(chains)
 		t.Fatalf("with seed %d, we only externalized %d blocks",
 			seed, progress(chains))
 	}
@@ -91,9 +92,9 @@ func chainFuzzTest(chains []*Chain, seed int64, t *testing.T) {
 	checkProgress(chains, 10, t)
 }
 
-func TestFullCluster(t *testing.T) {
+func TestChainFullCluster(t *testing.T) {
 	var i int64
-	for i = 0; i < 10; i++ {
+	for i = 1513; i < 1514; i++ {
 		c := chainCluster(4)
 		chainFuzzTest(c, i, t)
 	}

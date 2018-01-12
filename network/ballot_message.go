@@ -1,6 +1,8 @@
 package network
 
-import ()
+import (
+	"fmt"
+)
 
 // See page 23 of the protocol paper for a description of balloting.
 type BallotMessage interface {
@@ -46,6 +48,21 @@ const (
 	Confirm
 	Externalize
 )
+
+func (p Phase) String() string {
+	switch p {
+	case Invalid:
+		return "Invalid"
+	case Prepare:
+		return "Prepare"
+	case Confirm:
+		return "Confirm"
+	case Externalize:
+		return "Externalize"
+	default:
+		panic(fmt.Sprintf("unknown phase: %+v", p))
+	}
+}
 
 type Ballot struct {
 	// An increasing counter, n >= 1, to ensure we can always have more ballots
