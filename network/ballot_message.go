@@ -32,8 +32,9 @@ type BallotMessage interface {
 	// Used to decide when we should start going to a higher number
 	BallotNumber() int
 
-	// CouldEverVoteFor tells whether this node could ever have this
-	// ballot as its active ballot
+	// CouldEverVoteFor tells whether the node that sent this message
+	// could ever have this ballot as its active ballot
+	// TODO: what does this mean exactly for confirm and externalize?
 	CouldEverVoteFor(n int, x SlotValue) bool
 }
 
