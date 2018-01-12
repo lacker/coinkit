@@ -47,7 +47,19 @@ func (c *Chain) Handle(sender string, message Message) Message {
 	}
 
 	// This message is for an old block
-	// TODO: send back an ExternalizeMessage
+	if _, ok := message.(*ExternalizeMessage); ok {
+		// The sender is done with this block and so are we
+		return nil
+    }
+
+	// The sender needs our help with an old block
+	oldBlock := c.history[slot]
+	if oldBlock != nil {
+		log.Printf("%s sends back %+v", c.publicKey, oldBlock.external)
+		return oldBlock.external
+	}
+	
+	// We can't help the sender catch up
 	return nil
 }
 
