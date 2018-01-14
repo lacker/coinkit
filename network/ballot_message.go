@@ -329,7 +329,7 @@ func (m *ExternalizeMessage) VoteToPrepare(n int, x SlotValue) bool {
 }
 
 func (m *ExternalizeMessage) AcceptAsCommitted(n int, x SlotValue) bool {
-	return Equal(x, m.X) && m.Cn <= n && n <= m.Hn
+	return Equal(x, m.X) && m.Cn <= n
 }
 
 func (m *ExternalizeMessage) VoteToCommit(n int, x SlotValue) bool {
