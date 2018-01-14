@@ -36,6 +36,10 @@ type BallotMessage interface {
 	// could ever have this ballot as its active ballot
 	// TODO: what does this mean exactly for confirm and externalize?
 	CouldEverVoteFor(n int, x SlotValue) bool
+
+	// RelevantRange returns the range of ballots that this message specifically
+	// provides information for.
+	RelevantRange(x SlotValue) (int, int)
 }
 
 // Ballot phases
@@ -183,6 +187,20 @@ func (m *PrepareMessage) CouldEverVoteFor(n int, x SlotValue) bool {
 	return true
 }
 
+func (m *PrepareMessage) RelevantRange(x SlotValue) (int, int) {
+	min, max := 0, 0
+	if Equal(x, m.Bx) {
+		min, max = MakeRange(m.Bn, m.Cn, m.Hn)
+	}
+	if Equal(x, m.Px) {
+		min, max = RangeUnion(min, max, m.Pn, m.Pn)
+	}
+	if Equal(x, m.Ppx) {
+		min, max = RangeUnion(min, max, m.Ppn, m.Ppn)
+	}
+	return min, max
+}
+
 func (m *PrepareMessage) BallotNumber() int {
 	return m.Bn
 }
@@ -253,6 +271,13 @@ func (m *ConfirmMessage) CouldEverVoteFor(n int, x SlotValue) bool {
 	return Equal(x, m.X)
 }
 
+func (m *ConfirmMessage) RelevantRange(x SlotValue) (int, int) {
+	if Equal(x, m.X) {
+		return MakeRange(m.Pn, m.Cn, m.Hn)
+	}
+	return 0, 0
+}
+
 func (m *ConfirmMessage) BallotNumber() int {
 	return m.Hn
 }
@@ -313,6 +338,13 @@ func (m *ExternalizeMessage) VoteToCommit(n int, x SlotValue) bool {
 
 func (m *ExternalizeMessage) CouldEverVoteFor(n int, x SlotValue) bool {
 	return Equal(x, m.X)
+}
+
+func (m *ExternalizeMessage) RelevantRange(x SlotValue) (int, int) {
+	if Equal(x, m.X) {
+		return MakeRange(m.Cn, m.Hn)
+	}
+	return 0, 0
 }
 
 func (m *ExternalizeMessage) BallotNumber() int {

@@ -482,7 +482,7 @@ func (s *BallotState) CheckIfStale() {
 // Update the stage of this ballot as needed
 // See the handling algorithm on page 24 of the Mazieres paper.
 // The investigate method does steps 1-8
-func (s *BallotState) Investigate(n int, x SlotValue) {
+func (s *BallotState) InvestigateBallot(n int, x SlotValue) {
 	if n < 1 {
 		return
 	}
@@ -492,12 +492,45 @@ func (s *BallotState) Investigate(n int, x SlotValue) {
 	s.MaybeConfirmAsCommitted(n, x)
 }
 
+// RelevantRange returns the range of ballots that at least one of our
+// peers is talking about, for this slot value.
+func (s *BallotState) RelevantRange(x SlotValue) (int, int) {
+	min, max := 0, 0
+	for _, message := range s.M {
+		a, b := message.RelevantRange(x)
+		min, max = RangeUnion(min, max, a, b) 
+	}
+	return min, max
+}
+
+// InvestigateValue checks if any information can be updated for this value.
+func (s *BallotState) InvestigateValue(x SlotValue) {
+	min, max := s.RelevantRange(x)
+	for i := min; i <= max; i++ {
+		s.InvestigateBallot(i, x)
+	}
+}
+
+func (s *BallotState) InvestigateValues(values ...SlotValue) {
+	done := []SlotValue{}
+	for _, value := range values {
+		if HasSlotValue(done, value) {
+			continue
+		}
+		s.InvestigateValue(value)
+		done = append(done, value)
+	}
+}
+
 // SelfInvestigate checks whether the current ballot can be advanced
+// Useful for debugging, not so useful for the standard algorithm because
+// it tends to miss cases where things can be advanced that aren't our
+// current ballot.
 func (s *BallotState) SelfInvestigate() {
 	if s.b == nil {
 		return
 	}
-	s.Investigate(s.b.n, s.b.x)
+	s.InvestigateBallot(s.b.n, s.b.x)
 }
 
 func (s *BallotState) Handle(node string, message BallotMessage) {
@@ -515,21 +548,14 @@ func (s *BallotState) Handle(node string, message BallotMessage) {
 
 	for {
 		// Investigate all ballots whose state might be updated
-		// TODO: make sure we aren't missing ballot numbers, either internal to
-		// the ranges or because a confirm implies many prepares. Maybe we can
-		// make investigation be per-value rather than per-ballot?
 		// TODO: make sure a malformed message can't DDOS us here
 		switch m := message.(type) {
 		case *PrepareMessage:
-			s.Investigate(m.Bn, m.Bx)
-			s.Investigate(m.Pn, m.Px)
-			s.Investigate(m.Ppn, m.Ppx)
+			s.InvestigateValues(m.Bx, m.Px, m.Ppx)
 		case *ConfirmMessage:
-			s.Investigate(m.Hn, m.X)
+			s.InvestigateValue(m.X)
 		case *ExternalizeMessage:
-			for i := m.Cn; i <= m.Hn; i++ {
-				s.Investigate(i, m.X)
-			}
+			s.InvestigateValue(m.X)
 		}
 
 		// Step 9 of the processing algorithm
