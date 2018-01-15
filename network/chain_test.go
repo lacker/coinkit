@@ -92,10 +92,20 @@ func chainFuzzTest(chains []*Chain, seed int64, t *testing.T) {
 	checkProgress(chains, 10, t)
 }
 
+// TODO: flesh out
 func TestChainFullCluster(t *testing.T) {
 	var i int64
 	for i = 7917; i < 7918; i++ {
 		c := chainCluster(4)
 		chainFuzzTest(c, i, t)
+	}
+}
+
+func TestChainOneNodeKnockedOut(t *testing.T) {
+	var i int64
+	for i = 0; i < 100; i++ {
+		c := chainCluster(4)
+		knockout := c[0:3]
+		chainFuzzTest(knockout, i, t)
 	}
 }
