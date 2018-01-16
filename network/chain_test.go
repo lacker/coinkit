@@ -101,10 +101,10 @@ func TestChainFullCluster(t *testing.T) {
 	}
 }
 
-// Should work to 10k - TODO retest
+// Should work to 10k
 func TestChainOneNodeKnockedOut(t *testing.T) {
 	var i int64
-	for i = 0; i < 273; i++ {
+	for i = 0; i < 100; i++ {
 		c := chainCluster(4)
 		knockout := c[0:3]
 		chainFuzzTest(knockout, i, t)

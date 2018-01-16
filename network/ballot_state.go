@@ -410,9 +410,15 @@ func (s *BallotState) MaybeConfirmAsCommitted(n int, x SlotValue) bool {
 
 // GoToNextBallot returns whether we could actually go to the next ballot.
 func (s *BallotState) GoToNextBallot() bool {
-	b := &Ballot{
-		n: s.b.n + 1,
+	b := &Ballot{}
+	
+	if s.b == nil {
+		// Start with ballot 1
+		b.n = 1
+	} else {
+		b.n = s.b.n + 1
 	}
+	
 	if s.z != nil {
 		b.x = *s.z
 	} else {

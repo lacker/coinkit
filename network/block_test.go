@@ -229,7 +229,7 @@ func TestBasicConvergence(t *testing.T) {
 	assertDone(c, t)
 }
 
-// Should work to 100k TODO
+// Should work to 100k
 func TestBlockFullCluster(t *testing.T) {
 	var i int64
 	for i = 0; i < 100; i++ {
@@ -238,7 +238,7 @@ func TestBlockFullCluster(t *testing.T) {
 	}
 }
 
-// Should work to 100k TODO
+// Should work to 100k
 func TestBlockOneNodeKnockedOut(t *testing.T) {
 	var i int64
 	for i = 0; i < 100; i++ {
