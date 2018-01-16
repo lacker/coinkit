@@ -597,23 +597,6 @@ func (s *BallotState) Handle(node string, message BallotMessage) {
 	}
 }
 
-// MaybeInitializeValue initializes the value if it doesn't already have a value,
-// and returns whether anything in the ballot state changed.
-// TODO: see if this can be refactored away
-func (s *BallotState) MaybeInitializeValue(v SlotValue) bool {
-	if s.z != nil {
-		return false
-	}
-	s.z = &v
-	if s.b == nil {
-		s.b = &Ballot{
-			n: 1,
-			x: v,
-		}
-	}
-	return true
-}
-
 // MaybeUpdateValue updates the value from the nomination if we are supposed to.
 // Returns whether anything in the ballot state changed.
 // TODO: see if this can be refactored away
