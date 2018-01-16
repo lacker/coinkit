@@ -94,6 +94,13 @@ func (s *BallotState) Show() {
 	log.Printf("c: %d", s.cn)
 	log.Printf("h: %d", s.hn)
 	log.Printf("z: %+v", s.z)
+	if s.z == nil {
+		if !s.nState.HasNomination() {
+			log.Printf("no candidate value")
+		} else {
+			log.Printf("candidate: %+v", s.nState.PredictValue())
+		}
+	}
 }
 
 func (s *BallotState) PublicKey() string {
@@ -442,7 +449,7 @@ func (s *BallotState) GoToNextBallot() bool {
 // We bump the ballot number if the set of nodes that could never vote
 // for our ballot is blocking, and we have a candidate value.
 func (s *BallotState) CheckForBlockedBallot() bool {
-	if s.z == nil || s.b == nil {
+	if s.b == nil {
 		return false
 	}
 
@@ -466,7 +473,7 @@ func (s *BallotState) CheckForBlockedBallot() bool {
 // The assumption is that the system is stuck on some ballot, and we should
 // proceed to the next ballot if this could be the stuck one.
 func (s *BallotState) HandleTimerTick() bool {
-	if s.z == nil || s.b == nil {
+	if s.b == nil {
 		return false
 	}
 
@@ -489,8 +496,8 @@ func (s *BallotState) HandleTimerTick() bool {
 }
 
 // CheckIfStale is a heuristic to guess whether the network is blocked.
-// This behavior should not affect correctness, except that if it is
-// too aggressive the network may not converge.
+// We do rely on this heuristic being neither too aggressive nor too conservative
+// for values to converge.
 func (s *BallotState) CheckIfStale() {
 	stale := []string{s.publicKey}
 	for node, staleCount := range s.stale {

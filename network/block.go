@@ -81,10 +81,9 @@ func (b *Block) OutgoingMessages() []Message {
 		D:   b.D,
 	})
 
-	// If we aren't working on any ballot, but we do have a nomination, we can
-	// optimistically start working on that ballot
-	if b.nState.HasNomination() && b.bState.z == nil {
-		b.bState.MaybeInitializeValue(b.nState.PredictValue())
+	// If we aren't working on any ballot, try to start working on a ballot
+	if b.bState.b == nil {
+		b.bState.GoToNextBallot()
 	}
 
 	if b.bState.HasMessage() {
