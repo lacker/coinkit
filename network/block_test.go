@@ -183,7 +183,7 @@ func nominationConverged(blocks []*Block) bool {
 }
 
 func blockFuzzTest(blocks []*Block, seed int64, t *testing.T) {
-	rand.Seed(seed)
+	rand.Seed(seed ^ 12345689)
 	log.Printf("fuzz testing blocks with seed %d", seed)
 	for i := 0; i < 10000; i++ {
 		j := rand.Intn(len(blocks))
@@ -229,7 +229,7 @@ func TestBasicConvergence(t *testing.T) {
 	assertDone(c, t)
 }
 
-// Worked up to 100k
+// Should work to 100k TODO
 func TestBlockFullCluster(t *testing.T) {
 	var i int64
 	for i = 0; i < 100; i++ {
@@ -238,7 +238,7 @@ func TestBlockFullCluster(t *testing.T) {
 	}
 }
 
-// Worked up to 100k
+// Should work to 100k TODO
 func TestBlockOneNodeKnockedOut(t *testing.T) {
 	var i int64
 	for i = 0; i < 100; i++ {

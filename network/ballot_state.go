@@ -25,20 +25,26 @@ type BallotState struct {
 	p      *Ballot
 	pPrime *Ballot
 
-	// [cn, hn] defines a range of ballot numbers that defines a range of
-	// b-compatible ballots.
-	// [0, 0] is the invalid range, rather than [0], since 0 is an invalid ballot
-	// number.
+	// cn and hn are two weird numbers that are best understood, sadly, by
+	// reading the SCP paper.
+	// When cn and hn are both > 0, it indicated a range.
 	// In the Prepare phase, this is the range we have voted to commit (which
 	// we do when we can confirm the ballot is prepared) but that we have not
 	// aborted.
 	// In the Confirm phase, this is the range we have accepted a commit.
 	// In the Externalize phase, this is the range we have confirmed a commit.
+	// When cn and hn are both = 0, it means we haven't confirmed any preps.
+	// When cn = 0 and hn > 0, it means we did confirm a prepare, but it
+	// later got aborted, so now it's only useful to figure out what
+	// value to use on subsequent ballots.
 	cn int
 	hn int
 
 	// The value to use in the next ballot, if this ballot fails.
-	// We may have no idea what value we would use. In that case, z is nil.
+	// This is the highest ballot that we have confirmed as prepared,
+	// if that value is unique.
+	// If that rule does not provide us a value, we should defer to the
+	// nomination state, and z is nil.
 	z *SlotValue
 
 	// The latest PrepareMessage, ConfirmMessage, or ExternalizeMessage from
@@ -57,15 +63,19 @@ type BallotState struct {
 
 	// The number of non-duplicate messages this state has processed
 	received int
+
+	// The nomination state
+	nState *NominationState
 }
 
-func NewBallotState(publicKey string, qs QuorumSlice) *BallotState {
+func NewBallotState(publicKey string, qs QuorumSlice, nState *NominationState) *BallotState {
 	return &BallotState{
 		phase:     Prepare,
 		M:         make(map[string]BallotMessage),
 		publicKey: publicKey,
 	    stale:     make(map[string]int),
 		D:         qs,
+		nState:    nState,
 	}
 }
 
@@ -217,9 +227,16 @@ func (s *BallotState) MaybeConfirmAsPrepared(n int, x SlotValue) bool {
 		// this one.
 		return false
 	}
-	if s.hn == n && Equal(*s.z, x) {
-		// We already confirmed this ballot as prepared.
-		return false
+	if s.hn == n {
+		if s.z == nil {
+			// We have confirmed the abort of every ballot in this
+			// round of voting, so there's no point in proceeding.
+			return false
+		}
+		if Equal(*s.z, x) {
+			// We already confirmed this ballot as prepared.
+			return false
+		}
 	}
 
 	ballot := &Ballot{
@@ -245,15 +262,14 @@ func (s *BallotState) MaybeConfirmAsPrepared(n int, x SlotValue) bool {
 	}
 
 	s.Logf("%s confirms as prepared: %d %+v", s.publicKey, n, x)
-
+	
 	if s.hn == n && !Equal(*s.z, x) {
 		// We have two equally high ballots and they are both
 		// confirmed as prepared. This means that every ballot is
-		// prepared at this ballot number, and we'll have to go
+		// both prepared and aborted at this ballot number, and we'll have to go
 		// to a future ballot.
 		s.Logf("confirmed abort of all ballots with number %d", n)
 		s.cn = 0
-		s.hn = 0
 		s.z = nil
 		return true
 	}
@@ -263,6 +279,7 @@ func (s *BallotState) MaybeConfirmAsPrepared(n int, x SlotValue) bool {
 		log.Fatalf("we are voting to commit but must confirm a contradiction")
 	}
 
+	// This value is now our default for future rounds
 	s.hn = n
 	s.z = &x
 
@@ -393,15 +410,17 @@ func (s *BallotState) MaybeConfirmAsCommitted(n int, x SlotValue) bool {
 
 // GoToNextBallot returns whether we could actually go to the next ballot.
 func (s *BallotState) GoToNextBallot() bool {
-	if s.z == nil {
-		// We don't have a candidate value so we can't go to the next ballot
-		return false
-	}
-	
-	// Use s.z for the next ballot
 	b := &Ballot{
 		n: s.b.n + 1,
-		x: *s.z,
+	}
+	if s.z != nil {
+		b.x = *s.z
+	} else {
+		if !s.nState.HasNomination() {
+			// We don't have a candidate value so we can't go to the next ballot
+			return false
+		}
+		b.x = s.nState.PredictValue()
 	}
 	
 	s.b = b
@@ -567,6 +586,7 @@ func (s *BallotState) Handle(node string, message BallotMessage) {
 
 // MaybeInitializeValue initializes the value if it doesn't already have a value,
 // and returns whether anything in the ballot state changed.
+// TODO: see if this can be refactored away
 func (s *BallotState) MaybeInitializeValue(v SlotValue) bool {
 	if s.z != nil {
 		return false
@@ -583,6 +603,7 @@ func (s *BallotState) MaybeInitializeValue(v SlotValue) bool {
 
 // MaybeUpdateValue updates the value from the nomination if we are supposed to.
 // Returns whether anything in the ballot state changed.
+// TODO: see if this can be refactored away
 func (s *BallotState) MaybeUpdateValue(ns *NominationState) bool {
 	if s.hn != 0 {
 		// While we have a confirmed prepared ballot, we don't

@@ -69,7 +69,7 @@ func progress(chains []*Chain) int {
 
 func chainFuzzTest(chains []*Chain, seed int64, t *testing.T) {
 	limit := 10
-	rand.Seed(seed)
+	rand.Seed(seed ^ 4637284637824)
 	log.Printf("fuzz testing chains with seed %d", seed)
 	for i := 0; i <= 10000; i++ {
 		j := rand.Intn(len(chains))
@@ -92,18 +92,19 @@ func chainFuzzTest(chains []*Chain, seed int64, t *testing.T) {
 	checkProgress(chains, 10, t)
 }
 
-// TODO: flesh out
+// Should work to 10k
 func TestChainFullCluster(t *testing.T) {
 	var i int64
-	for i = 7917; i < 7918; i++ {
+	for i = 0; i < 100; i++ {
 		c := chainCluster(4)
 		chainFuzzTest(c, i, t)
 	}
 }
 
+// Should work to 10k - TODO retest
 func TestChainOneNodeKnockedOut(t *testing.T) {
 	var i int64
-	for i = 0; i < 100; i++ {
+	for i = 0; i < 273; i++ {
 		c := chainCluster(4)
 		knockout := c[0:3]
 		chainFuzzTest(knockout, i, t)

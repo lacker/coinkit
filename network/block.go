@@ -35,11 +35,12 @@ type Block struct {
 }
 
 func NewBlock(publicKey string, qs QuorumSlice, slot int) *Block {
+	nState := NewNominationState(publicKey, qs)
 	return &Block{
 		slot:      slot,
 		start:     time.Now(),
-		nState:    NewNominationState(publicKey, qs),
-		bState:    NewBallotState(publicKey, qs),
+		nState:    nState,
+		bState:    NewBallotState(publicKey, qs, nState),
 		D:         qs,
 		publicKey: publicKey,
 	}
