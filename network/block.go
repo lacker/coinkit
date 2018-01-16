@@ -107,7 +107,6 @@ func (b *Block) Handle(sender string, message Message) {
 	switch m := message.(type) {
 	case *NominationMessage:
 		b.nState.Handle(sender, m)
-		b.bState.MaybeUpdateValue(b.nState)
 	case *PrepareMessage:
 		b.bState.Handle(sender, m)
 	case *ConfirmMessage:

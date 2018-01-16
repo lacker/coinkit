@@ -597,49 +597,6 @@ func (s *BallotState) Handle(node string, message BallotMessage) {
 	}
 }
 
-// MaybeUpdateValue updates the value from the nomination if we are supposed to.
-// Returns whether anything in the ballot state changed.
-// TODO: see if this can be refactored away
-func (s *BallotState) MaybeUpdateValue(ns *NominationState) bool {
-	if s.hn != 0 {
-		// While we have a confirmed prepared ballot, we don't
-		// override it based on nominations.
-		return false
-	}
-
-	if !ns.HasNomination() {
-		// No idea how to set the value
-		return false
-	}
-	v := ns.PredictValue()
-
-	if s.z != nil && Equal(v, *s.z) {
-		// The new value is the same as the old one
-		return false
-	}
-
-	// s.Logf("%s updating value to %+v", s.publicKey, v)
-	s.z = &v
-
-	if s.b == nil {
-		s.b = &Ballot{
-			n: 1,
-			x: v,
-		}
-	} else {
-		// TODO: in the paper this part only happens when a timer fires, but that
-		// seems to be an optimization so I punted for now.
-		// See page 25
-		s.b = &Ballot{
-			n: s.b.n + 1,
-			x: v,
-		}
-		// s.Logf("new value, bumping the ballot to %+v", s.b)
-	}
-
-	return true
-}
-
 func (s *BallotState) HasMessage() bool {
 	return s.b != nil
 }
