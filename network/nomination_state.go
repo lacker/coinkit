@@ -27,9 +27,19 @@ type NominationState struct {
 
 	// The number of non-duplicate messages this state has processed
 	received int
+
+	// The hash of the previous block, used to pseudorandomly determine
+	// which node should heuristically start nominations
+	prevHash string
+
+	// A list of the nodes in priority order for who should initiate the
+	// nomination
+	priority []string
 }
 
-func NewNominationState(publicKey string, qs QuorumSlice) *NominationState {
+func NewNominationState(
+	publicKey string, qs QuorumSlice, prevHash string) *NominationState {
+
 	return &NominationState{
 		X:         make([]SlotValue, 0),
 		Y:         make([]SlotValue, 0),
@@ -37,7 +47,9 @@ func NewNominationState(publicKey string, qs QuorumSlice) *NominationState {
 		N:         make(map[string]*NominationMessage),
 		publicKey: publicKey,
 		D:         qs,
-	}
+		prevHash:  prevHash,
+		priority:  SeedSort(prevHash, qs.Members),
+	}	
 }
 
 func (s *NominationState) Logf(format string, a ...interface{}) {

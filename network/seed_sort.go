@@ -13,6 +13,7 @@ func HashString(x string) string {
 }
 
 // SeedSort sorts in a way that is repeatable depending on the seed string.
+// Does not mutate input
 func SeedSort(seed string, input []string) []string {
 	m := make(map[string]string)
 	keys := []string{}

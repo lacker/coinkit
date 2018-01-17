@@ -42,7 +42,7 @@ func NewServer(c *Config) *Server {
 	}
 
 	qs := network.MakeQuorumSlice(c.Members, c.Threshold)
-	block := network.NewBlock(c.KeyPair.PublicKey(), qs, 1)
+	block := network.NewBlock(c.KeyPair.PublicKey(), qs, 1, "")
 	
 	return &Server{
 		port: c.Port,

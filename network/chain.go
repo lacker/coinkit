@@ -40,8 +40,9 @@ func (c *Chain) Handle(sender string, message Message) Message {
 		c.current.Handle(sender, message)
 		if c.current.Done() {
 			// This block is done, let's move on to the next one
+			prevHash := c.current.external.X.Hash()
 			c.history[slot] = c.current
-			c.current = NewBlock(c.publicKey, c.D, slot + 1)
+			c.current = NewBlock(c.publicKey, c.D, slot + 1, prevHash)
 		}
 		return nil
 	}
@@ -69,7 +70,7 @@ func (c *Chain) AssertValid() {
 
 func NewEmptyChain(publicKey string, qs QuorumSlice) *Chain {
 	return &Chain{
-		current: NewBlock(publicKey, qs, 1),
+		current: NewBlock(publicKey, qs, 1, ""),
 		history: make(map[int]*Block),
 		D: qs,
 		publicKey: publicKey,
@@ -86,6 +87,10 @@ func (c *Chain) OutgoingMessages() []Message {
 	}
 
 	return answer
+}
+
+func (c *Chain) HandleTimerTick() {
+	c.current.HandleTimerTick()
 }
 
 func LogChains(chains []*Chain) {

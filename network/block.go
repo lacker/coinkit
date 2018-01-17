@@ -27,6 +27,9 @@ type Block struct {
 	// to catch up old nodes.
 	external *ExternalizeMessage
 
+	// The hash of the previous block, or "" if this is the first one
+	prevHash string
+	
 	// Who we care about
 	D QuorumSlice
 
@@ -34,13 +37,14 @@ type Block struct {
 	publicKey string
 }
 
-func NewBlock(publicKey string, qs QuorumSlice, slot int) *Block {
-	nState := NewNominationState(publicKey, qs)
+func NewBlock(publicKey string, qs QuorumSlice, slot int, prevHash string) *Block {
+	nState := NewNominationState(publicKey, qs, prevHash)
 	return &Block{
 		slot:      slot,
 		start:     time.Now(),
 		nState:    nState,
 		bState:    NewBallotState(publicKey, qs, nState),
+		prevHash:  prevHash,
 		D:         qs,
 		publicKey: publicKey,
 	}

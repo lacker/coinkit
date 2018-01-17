@@ -507,7 +507,7 @@ func (s *BallotState) CheckIfStale() {
 	}
 	if MeetsQuorum(s, stale) {
 		s.stale = make(map[string]int)
-		s.HandleTimerTick()
+ 		s.HandleTimerTick()
 	}
 }
 

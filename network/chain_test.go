@@ -71,7 +71,7 @@ func chainFuzzTest(chains []*Chain, seed int64, t *testing.T) {
 	limit := 10
 	rand.Seed(seed ^ 4637284637824)
 	log.Printf("fuzz testing chains with seed %d", seed)
-	for i := 0; i <= 10000; i++ {
+	for i := 1; i <= 10000; i++ {
 		j := rand.Intn(len(chains))
 		k := rand.Intn(len(chains))
 		chainSend(chains[j], chains[k])
