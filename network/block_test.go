@@ -156,7 +156,7 @@ func nominationConverged(blocks []*Block) bool {
 }
 
 func blockFuzzTest(blocks []*Block, seed int64, t *testing.T) {
-	rand.Seed(seed ^ 12345689)
+	rand.Seed(seed ^ 1234569)
 	log.Printf("fuzz testing blocks with seed %d", seed)
 	for i := 0; i < 10000; i++ {
 		j := rand.Intn(len(blocks))
