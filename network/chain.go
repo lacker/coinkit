@@ -40,6 +40,7 @@ func (c *Chain) Handle(sender string, message Message) Message {
 		c.current.Handle(sender, message)
 		if c.current.Done() {
 			// This block is done, let's move on to the next one
+			log.Printf("%s is advancing to slot %d", c.publicKey, slot + 1)
 			prevHash := c.current.external.X.Hash()
 			c.history[slot] = c.current
 			c.current = NewBlock(c.publicKey, c.D, slot + 1, prevHash)

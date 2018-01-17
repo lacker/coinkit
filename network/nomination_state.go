@@ -1,6 +1,7 @@
 package network
 
 import (
+	"log"
 )
 
 // The nomination state for the Stellar Consensus Protocol.
@@ -53,7 +54,7 @@ func NewNominationState(
 }
 
 func (s *NominationState) Logf(format string, a ...interface{}) {
-	// log.Printf(format, a...)
+	log.Printf(format, a...)
 }
 
 func (s *NominationState) Show() {

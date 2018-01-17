@@ -163,7 +163,7 @@ func blockFuzzTest(blocks []*Block, seed int64, t *testing.T) {
 		k := rand.Intn(len(blocks))
 		blockSend(blocks[j], blocks[k])
 		if allDone(blocks) {
-			break
+			return
 		}
 		if i%1000 == 0 {
 			log.Printf("done round: %d", i)
@@ -171,6 +171,7 @@ func blockFuzzTest(blocks []*Block, seed int64, t *testing.T) {
 	}
 
 	if !nominationConverged(blocks) {
+		log.Printf("nomination did not converge")
 		for i := 0; i < len(blocks); i++ {
 			log.Printf("--------------------------------------------------------------------------")
 			if blocks[i].nState != nil {
@@ -183,17 +184,16 @@ func blockFuzzTest(blocks []*Block, seed int64, t *testing.T) {
 		t.Fatalf("fuzz testing with seed %d, nomination did not converge", seed)
 	}
 
-	if !allDone(blocks) {
-		for i := 0; i < len(blocks); i++ {
-			log.Printf("--------------------------------------------------------------------------")
-			if blocks[i].bState != nil {
-				blocks[i].bState.Show()
-			}
+	log.Printf("balloting did not converge")		
+	for i := 0; i < len(blocks); i++ {
+		log.Printf("--------------------------------------------------------------------------")
+		if blocks[i].bState != nil {
+			blocks[i].bState.Show()
 		}
-
-		log.Printf("**************************************************************************")
-		t.Fatalf("fuzz testing with seed %d, ballots did not converge", seed)
 	}
+
+	log.Printf("**************************************************************************")
+	t.Fatalf("fuzz testing with seed %d, ballots did not converge", seed)
 }
 
 // Should work to 100k
