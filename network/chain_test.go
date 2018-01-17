@@ -95,7 +95,7 @@ func chainFuzzTest(chains []*Chain, seed int64, t *testing.T) {
 // Should work to 10k
 func TestChainFullCluster(t *testing.T) {
 	var i int64
-	for i = 0; i < 100; i++ {
+	for i = 0; i < 10; i++ {
 		c := chainCluster(4)
 		chainFuzzTest(c, i, t)
 	}
@@ -104,7 +104,7 @@ func TestChainFullCluster(t *testing.T) {
 // Should work to 10k
 func TestChainOneNodeKnockedOut(t *testing.T) {
 	var i int64
-	for i = 0; i < 100; i++ {
+	for i = 0; i < 10; i++ {
 		c := chainCluster(4)
 		knockout := c[0:3]
 		chainFuzzTest(knockout, i, t)

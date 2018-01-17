@@ -61,9 +61,6 @@ type BallotState struct {
 	// Who we listen to for quorum
 	D QuorumSlice
 
-	// The number of non-duplicate messages this state has processed
-	received int
-
 	// The nomination state
 	nState *NominationState
 }
@@ -578,7 +575,6 @@ func (s *BallotState) Handle(node string, message BallotMessage) {
 		return
 	}
 	s.Logf("\n\n%s got ballot message from %s:\n%+v", s.publicKey, node, message)
-	s.received++
 	s.stale[node] = 0
 	s.M[node] = message
 

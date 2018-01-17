@@ -25,16 +25,16 @@ type NominationState struct {
 	// Who we listen to for quorum
 	D QuorumSlice
 
-	// The number of non-duplicate messages this state has processed
+	// The number of messages this state has processed
 	received int
 
 	// The hash of the previous block, used to pseudorandomly determine
 	// which node should heuristically start nominations
 	prevHash string
 
-	// A list of the nodes in priority order for who should initiate the
-	// nomination
-	priority []string
+	// Which priority we think we are for creating a nomination
+	// 0 is the first priority
+	priority int
 }
 
 func NewNominationState(
@@ -48,7 +48,7 @@ func NewNominationState(
 		publicKey: publicKey,
 		D:         qs,
 		prevHash:  prevHash,
-		priority:  SeedSort(prevHash, qs.Members),
+		priority:  SeedPriority(prevHash, qs.Members, publicKey),
 	}	
 }
 
@@ -71,7 +71,17 @@ func (s *NominationState) HasNomination() bool {
 	return len(s.X) > 0
 }
 
-func (s *NominationState) SetDefault(v SlotValue) {
+// WantsToNominateNewValue is a heuristic. If we already have some value, we don't
+// want to nominate a new one. We also want to wait some time, according to our
+// priority, before we are willing to make a nomination.
+func (s *NominationState) WantsToNominateNewValue() bool {
+	if len(s.X) > 0 {
+		return false
+	}
+	return s.D.Threshold * s.priority <= s.received
+}
+
+func (s *NominationState) NominateNewValue(v SlotValue) {
 	if s.HasNomination() {
 		// We already have something to nominate
 		return
@@ -175,6 +185,8 @@ func (s *NominationState) MaybeAdvance(v SlotValue) bool {
 
 // Handles an incoming nomination message from a peer node
 func (s *NominationState) Handle(node string, m *NominationMessage) {
+	s.received++
+	
 	// What nodes we have seen new information about
 	touched := []SlotValue{}
 
@@ -200,7 +212,6 @@ func (s *NominationState) Handle(node string, m *NominationMessage) {
 	// Update our most-recent-message
 	s.Logf("\n\n%s got nomination message from %s:\n%+v", s.publicKey, node, m)
 	s.N[node] = m
-	s.received++
 
 	for i := oldLenNom; i < len(m.Nom); i++ {
 		if !HasSlotValue(touched, m.Nom[i]) {
@@ -225,4 +236,11 @@ func (s *NominationState) Handle(node string, m *NominationMessage) {
 	}
 }
 
-
+func (s *NominationState) Message(slot int, qs QuorumSlice) *NominationMessage {
+	return &NominationMessage{
+		I:   slot,
+		Nom: s.X,
+		Acc: s.Y,
+		D:   qs,
+	}
+}

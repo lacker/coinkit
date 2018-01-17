@@ -46,7 +46,9 @@ func TestConsensus(t *testing.T) {
 	dan := NewBlock("dan", qs, 1, "")
 
 	// Let everyone receive an initial nomination from Amy
+	amy.nState.NominateNewValue(MakeSlotValue("hello its amy"))
 	a := amy.OutgoingMessages()[0]
+	
 	bob.Handle("amy", a)
 	if len(bob.nState.N) != 1 {
 		t.Fatal("len(bob.nState.N) != 1")
@@ -94,16 +96,6 @@ func TestConsensus(t *testing.T) {
 	}
 }
 
-// Sum of received values for all the blocks
-func rsum(blocks []*Block) int {
-	answer := 0
-	for _, block := range blocks {
-		answer += block.nState.received
-		answer += block.bState.received
-	}
-	return answer
-}
-
 // Simulate the pending messages being sent from source to target
 func blockSend(source *Block, target *Block) {
 	if source == target {
@@ -113,25 +105,6 @@ func blockSend(source *Block, target *Block) {
 	for _, message := range messages {
 		m := EncodeThenDecode(message)
 		target.Handle(source.publicKey, m)
-	}
-}
-
-// Have the blocks send messages back and forth until they are making no more
-// progress
-func converge(blocks []*Block) {
-	i := 0
-	for {
-		i++
-		log.Printf("Pass %d", i)
-		initial := rsum(blocks)
-		for _, source := range blocks {
-			for _, target := range blocks {
-				blockSend(source, target)
-			}
-		}
-		if rsum(blocks) == initial {
-			break
-		}
 	}
 }
 
@@ -221,12 +194,6 @@ func blockFuzzTest(blocks []*Block, seed int64, t *testing.T) {
 		log.Printf("**************************************************************************")
 		t.Fatalf("fuzz testing with seed %d, ballots did not converge", seed)
 	}
-}
-
-func TestBasicConvergence(t *testing.T) {
-	c := blockCluster(4)
-	converge(c)
-	assertDone(c, t)
 }
 
 // Should work to 100k

@@ -29,3 +29,14 @@ func SeedSort(seed string, input []string) []string {
 	}
 	return answer
 }
+
+// SeedPriority returns the index of node in the seed-sorted list
+func SeedPriority(seed string, input []string, node string) int {
+	sorted := SeedSort(seed, input)
+	for i, value := range sorted {
+		if value == node {
+			return i
+		}
+	}
+	panic("we have no seed priority")
+}
