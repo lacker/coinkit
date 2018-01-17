@@ -34,7 +34,6 @@ type BallotMessage interface {
 
 	// CouldEverVoteFor tells whether the node that sent this message
 	// could ever have this ballot as its active ballot
-	// TODO: what does this mean exactly for confirm and externalize?
 	CouldEverVoteFor(n int, x SlotValue) bool
 
 	// RelevantRange returns the range of ballots that this message specifically

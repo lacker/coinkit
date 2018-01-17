@@ -68,6 +68,10 @@ func HasSlotValue(list []SlotValue, v SlotValue) bool {
 	return false
 }
 
+func (v SlotValue) Hash() string {
+	return HashString(strings.Join(v.Comments, ","))
+}
+
 func AssertNoDupes(list []SlotValue) {
 	m := make(map[string]bool)
 	for _, v := range list {

@@ -6,7 +6,7 @@ import (
 	"sort"
 )
 
-func hashString(x string) string {
+func HashString(x string) string {
 	h := sha512.New()
 	hashBytes := h.Sum([]byte(x))
 	return base64.RawStdEncoding.EncodeToString(hashBytes)
@@ -17,7 +17,7 @@ func SeedSort(seed string, input []string) []string {
 	m := make(map[string]string)
 	keys := []string{}
 	for _, x := range input {
-		hashed := hashString(seed + x)
+		hashed := HashString(seed + x)
 		m[hashed] = x
 		keys = append(keys, hashed)
 	}

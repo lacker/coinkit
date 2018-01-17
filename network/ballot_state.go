@@ -537,6 +537,10 @@ func (s *BallotState) RelevantRange(x SlotValue) (int, int) {
 
 // InvestigateValue checks if any information can be updated for this value.
 func (s *BallotState) InvestigateValue(x SlotValue) {
+	// We could get DOS'd here.
+	// TODO: do something intelligent if RelevantRange is too large.
+	// For example, we could only investigate ballots that have a blocking
+	// set that mentions something about them.
 	min, max := s.RelevantRange(x)
 	for i := min; i <= max; i++ {
 		s.InvestigateBallot(i, x)
@@ -580,7 +584,6 @@ func (s *BallotState) Handle(node string, message BallotMessage) {
 
 	for {
 		// Investigate all ballots whose state might be updated
-		// TODO: make sure a malformed message can't DDOS us here
 		switch m := message.(type) {
 		case *PrepareMessage:
 			s.InvestigateValues(m.Bx, m.Px, m.Ppx)
