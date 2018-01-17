@@ -6,7 +6,7 @@ import (
 	"github.com/davecgh/go-spew/spew"	
 )
 
-// Chain creates the blockchain, one Block at a time.
+// Chain creates the blockchain, gaining consensus on one Block at a time.
 type Chain struct {
 	// The block we are currently working on
 	current *Block
