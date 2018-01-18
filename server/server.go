@@ -29,7 +29,7 @@ type Server struct {
 	keyPair *auth.KeyPair
 	peers []*network.Peer
 	info map[string]*PeerInfo
-	block *network.Block
+	chain *network.Chain
 	outgoing []network.Message
 	inbox chan *auth.SignedMessage
 }
@@ -42,15 +42,15 @@ func NewServer(c *Config) *Server {
 	}
 
 	qs := network.MakeQuorumSlice(c.Members, c.Threshold)
-	block := network.NewBlock(c.KeyPair.PublicKey(), qs, 1, "")
+	chain := network.NewEmptyChain(c.KeyPair.PublicKey(), qs)
 	
 	return &Server{
 		port: c.Port,
 		keyPair: c.KeyPair,
 		peers: peers,
 		info: make(map[string]*PeerInfo),
-		block: block,
-		outgoing: block.OutgoingMessages(),
+		chain: chain,
+		outgoing: chain.OutgoingMessages(),
 		inbox: make(chan *auth.SignedMessage),
 	}
 }
@@ -93,24 +93,24 @@ func (s *Server) handleConnection(conn net.Conn) {
 }
 
 // handleMessage should only be called by a single goroutine, because the
-// block objects aren't threadsafe.
+// chain objects aren't threadsafe.
 // Caller should be validating the signature
 func (s *Server) handleMessage(sm *auth.SignedMessage) {
 	switch m := sm.Message().(type) {
 	case *network.NominationMessage:
-		s.block.Handle(sm.Signer(), m)
+		s.chain.Handle(sm.Signer(), m)
 	case *network.PrepareMessage:
-		s.block.Handle(sm.Signer(), m)
+		s.chain.Handle(sm.Signer(), m)
 	case *network.ConfirmMessage:
-		s.block.Handle(sm.Signer(), m)
+		s.chain.Handle(sm.Signer(), m)
 	case *network.ExternalizeMessage:
-		s.block.Handle(sm.Signer(), m)
+		s.chain.Handle(sm.Signer(), m)
 	default:
 		log.Printf("could not handle message: %s", network.EncodeMessage(m))
 		break
 	}
 	
-	s.outgoing = s.block.OutgoingMessages()
+	s.outgoing = s.chain.OutgoingMessages()
 }
 
 func (s *Server) handleMessagesForever() {
@@ -151,7 +151,7 @@ func (s *Server) ServeForever() {
 	go s.listen()
 
 	for {
-		time.Sleep(time.Second * time.Duration(5 + rand.Float64()))
+		time.Sleep(time.Second * time.Duration(1 + rand.Float64()))
 		// Don't use s.outgoing directly in case the listen() goroutine
 		// modifies it while we iterate on it
 		messages := s.outgoing

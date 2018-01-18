@@ -1,7 +1,7 @@
 # coinkit
 Tools for making cryptocurrency stuff.
 
-This runs a server that will obey the Stellar Consensus Protocol, aka SCP. See:
+This runs a server that creates a blockchain using the Stellar Consensus Protocol, aka SCP. See:
 
 https://www.stellar.org/papers/stellar-consensus-protocol.pdf 
 
@@ -38,9 +38,12 @@ go run main.go 3
 
 You can run just three out of the four if you so desire.
 
-Currently, the nodes will start off in conflict and then operate the SCP to achieve consensus on a single block. It does not yet chain blocks together into a blockchain. You can tell it is done with a block when it logs that it is "confirmed as committed".
+The nodes will start at the genesis block and proceed through the blockchain.
+When it says "advancing to slot X" that indicates it has finished consensus on
+a block and is moving to the next one. Other log messages indicate various
+phases of this process.
 
 TODO: add more features
 
-There is an artificial ~5 second pause between messages, set in `server.go`, to make
-it simpler to see what is going on.
+There is an artificial 1-2 second pause between messages, set in `server.go`, to
+make it simpler to see what is going on.
