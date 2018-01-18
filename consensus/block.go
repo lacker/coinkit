@@ -1,9 +1,11 @@
-package network
+package consensus
 
 import (
 	"log"
 	"strings"
 	"time"
+
+	"coinkit/util"
 )
 
 // Block implements the convergence algorithm for a single block,
@@ -63,13 +65,13 @@ func (block *Block) AssertValid() {
 
 // OutgoingMessages returns the outgoing messages.
 // There can be zero or one nomination messages, and zero or one ballot messages.
-func (b *Block) OutgoingMessages() []Message {
+func (b *Block) OutgoingMessages() []util.Message {
 	if b.external != nil {
 		// This block is already externalized
-		return []Message{b.external}
+		return []util.Message{b.external}
 	}
 	
-	answer := []Message{b.nState.Message(b.slot, b.D)}
+	answer := []util.Message{b.nState.Message(b.slot, b.D)}
 
 	// If we aren't working on any ballot, try to start working on a ballot
 	if b.bState.b == nil {
@@ -98,7 +100,7 @@ func (b *Block) MaybeNominateNewValue() {
 }
 
 // Handle handles an incoming message
-func (b *Block) Handle(sender string, message Message) {
+func (b *Block) Handle(sender string, message util.Message) {
 	if sender == b.publicKey {
 		// It's one of our own returning to us, we can ignore it
 		return

@@ -5,16 +5,12 @@ import (
 	"errors"
 	"fmt"
 	"log"
+
+	"coinkit/consensus"
+	"coinkit/util"
 )
 
-type Message interface {
-	MessageType() string
-
-	// Slot() returns 0 if the message doesn't relate to a particular slot
-	Slot() int
-}
-
-func EncodeMessage(m Message) string {
+func EncodeMessage(m util.Message) string {
 	b, err := json.Marshal(m)
 	if err != nil {
 		panic(err)
@@ -22,7 +18,7 @@ func EncodeMessage(m Message) string {
 	return string(b)
 }
 
-func DecodeMessage(encoded string) (Message, error) {
+func DecodeMessage(encoded string) (util.Message, error) {
 	b := []byte(encoded)
 	var m map[string]interface{}
 	err := json.Unmarshal(b, &m)
@@ -30,7 +26,7 @@ func DecodeMessage(encoded string) (Message, error) {
 		return nil, err
 	}
 	if _, ok := m["Acc"]; ok {
-		message := new(NominationMessage)
+		message := new(consensus.NominationMessage)
 		err := json.Unmarshal(b, &message)
 		if err != nil {
 			return nil, err
@@ -40,23 +36,23 @@ func DecodeMessage(encoded string) (Message, error) {
 	if messageType, ok := m["T"]; ok {
 		switch mt := messageType.(type) {
 		case float64:
-			switch Phase(mt) {
-			case Prepare:
-				message := new(PrepareMessage)
+			switch consensus.Phase(mt) {
+			case consensus.Prepare:
+				message := new(consensus.PrepareMessage)
 				err := json.Unmarshal(b, &message)
 				if err != nil {
 					return nil, err
 				}
 				return message, nil
-			case Confirm:
-				message := new(ConfirmMessage)
+			case consensus.Confirm:
+				message := new(consensus.ConfirmMessage)
 				err := json.Unmarshal(b, &message)
 				if err != nil {
 					return nil, err
 				}
 				return message, nil
-			case Externalize:
-				message := new(ExternalizeMessage)
+			case consensus.Externalize:
+				message := new(consensus.ExternalizeMessage)
 				err := json.Unmarshal(b, &message)
 				if err != nil {
 					return nil, err
@@ -73,7 +69,7 @@ func DecodeMessage(encoded string) (Message, error) {
 }
 
 // Useful for simulating a network transit
-func EncodeThenDecode(message Message) Message {
+func EncodeThenDecode(message util.Message) util.Message {
 	encoded := EncodeMessage(message)
 	m, err := DecodeMessage(encoded)
 	if err != nil {

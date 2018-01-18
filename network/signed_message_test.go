@@ -1,19 +1,20 @@
-package auth
+package network
 
 import (
 	"log"
 	"testing"
 
-	"coinkit/network"
+	"coinkit/consensus"
+	"coinkit/util"
 )
 
 func TestSignedMessage(t *testing.T) {
-	m := &network.NominationMessage{
+	m := &consensus.NominationMessage{
 		I: 1,
-		Nom: []network.SlotValue{},
-		Acc: []network.SlotValue{},
+		Nom: []consensus.SlotValue{},
+		Acc: []consensus.SlotValue{},
 	}
-	kp := NewKeyPairFromSecretPhrase("foo")
+	kp := util.NewKeyPairFromSecretPhrase("foo")
 	sm := NewSignedMessage(kp, m)
 	str := sm.Serialize()
 	sm2, err := NewSignedMessageFromSerialized(str)

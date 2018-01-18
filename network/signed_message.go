@@ -1,22 +1,22 @@
-package auth
+package network
 
 import (
 	"errors"
 	"fmt"
 	"strings"
 
-	"coinkit/network"
+	"coinkit/util"
 )
 
 type SignedMessage struct {
-	message network.Message
+	message util.Message
 	messageString string
 	signer string
 	signature string
 }
 
-func NewSignedMessage(kp *KeyPair, message network.Message) *SignedMessage {
-	ms := network.EncodeMessage(message)
+func NewSignedMessage(kp *util.KeyPair, message util.Message) *SignedMessage {
+	ms := EncodeMessage(message)
 	return &SignedMessage{
 		message: message,
 		messageString: ms,
@@ -25,7 +25,7 @@ func NewSignedMessage(kp *KeyPair, message network.Message) *SignedMessage {
 	}
 }
 
-func (sm *SignedMessage) Message() network.Message {
+func (sm *SignedMessage) Message() util.Message {
 	return sm.message
 }
 
@@ -46,10 +46,10 @@ func NewSignedMessageFromSerialized(serialized string) (*SignedMessage, error) {
 	if version != "e" {
 		return nil, errors.New("unrecognized version")
 	}
-	if !Verify(signer, ms, signature) {
+	if !util.Verify(signer, ms, signature) {
 		return nil, errors.New("signature failed verification")
 	}
-	m, err := network.DecodeMessage(ms)
+	m, err := DecodeMessage(ms)
 	if err != nil {
 		return nil, err
 	}

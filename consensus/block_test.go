@@ -1,4 +1,4 @@
-package network
+package consensus
 
 import (
 	"log"
@@ -15,25 +15,6 @@ func TestSolipsistQuorum(t *testing.T) {
 	}
 	if MeetsQuorum(s.nState, []string{"bar"}) {
 		t.Fatal("bar should not meet the quorum")
-	}
-}
-
-func TestNominationMessage(t *testing.T) {
-	v := MakeSlotValue("hello")
-	D := QuorumSlice{
-		Members:   []string{"foo", "bar", "baz", "qux"},
-		Threshold: 3,
-	}
-	m := &NominationMessage{
-		I:   1,
-		Nom: []SlotValue{v},
-		Acc: []SlotValue{v},
-		D:   D,
-	}
-	s := EncodeMessage(m)
-	_, err := DecodeMessage(s)
-	if err != nil {
-		t.Fatal("could not decode message: %v", err)
 	}
 }
 
@@ -103,8 +84,7 @@ func blockSend(source *Block, target *Block) {
 	}
 	messages := source.OutgoingMessages()
 	for _, message := range messages {
-		m := EncodeThenDecode(message)
-		target.Handle(source.publicKey, m)
+		target.Handle(source.publicKey, message)
 	}
 }
 

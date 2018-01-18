@@ -1,11 +1,11 @@
-package server
+package network
 
 import (
 	"fmt"
 	"log"
 	"math"
 	
-	"coinkit/auth"
+	"coinkit/util"
 )
 
 const (
@@ -21,15 +21,15 @@ type Config struct {
 	PeerPorts []int
 
 	// Our own identity
-	KeyPair *auth.KeyPair
+	KeyPair *util.KeyPair
 
 	// Defining our quorum
 	Members []string
 	Threshold int
 }
 
-func LocalKeyPair(arg int) *auth.KeyPair {
-	return auth.NewKeyPairFromSecretPhrase(fmt.Sprintf("localnet node %d", arg))
+func LocalKeyPair(arg int) *util.KeyPair {
+	return util.NewKeyPairFromSecretPhrase(fmt.Sprintf("localnet node %d", arg))
 }
 
 func NewLocalConfig(arg int) *Config {

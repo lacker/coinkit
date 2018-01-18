@@ -1,4 +1,4 @@
-package network
+package consensus
 
 import (
 	"crypto/sha512"

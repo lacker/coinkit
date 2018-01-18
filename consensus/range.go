@@ -1,4 +1,4 @@
-package network
+package consensus
 
 // Simple utilities for dealing with ranges of numbers
 // In general, ranges are inclusive of their endpoints and 0, 0 is

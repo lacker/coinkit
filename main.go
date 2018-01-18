@@ -5,7 +5,7 @@ import (
 	"os"
 	"strconv"
 
-	"coinkit/server"
+	"coinkit/network"
 )
 
 func main() {
@@ -17,8 +17,8 @@ func main() {
 		log.Fatal(err)
 	}
 
-	config := server.NewLocalConfig(arg)
+	config := network.NewLocalConfig(arg)
 	
-	s := server.NewServer(config)
+	s := network.NewServer(config)
 	s.ServeForever()
 }

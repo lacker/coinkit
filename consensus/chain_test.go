@@ -1,4 +1,4 @@
-package network
+package consensus
 
 import (
 	"log"
@@ -12,12 +12,10 @@ func chainSend(source *Chain, target *Chain) {
 		return
 	}
 	messages := source.OutgoingMessages()
-	for _, message := range messages {
-		m := EncodeThenDecode(message)
+	for _, m := range messages {
 		response := target.Handle(source.publicKey, m)
 		if response != nil {
-			r := EncodeThenDecode(response)
-			x := source.Handle(target.publicKey, r)
+			x := source.Handle(target.publicKey, response)
 			if x != nil {
 				log.Fatal("infinite response loop")
 			}

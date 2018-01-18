@@ -1,9 +1,11 @@
-package network
+package consensus
 
 import (
 	"log"
 
-	"github.com/davecgh/go-spew/spew"	
+	"github.com/davecgh/go-spew/spew"
+
+	"coinkit/util"
 )
 
 // Chain creates the blockchain, gaining consensus on one Block at a time.
@@ -25,7 +27,7 @@ type Chain struct {
 // Handle handles an incoming message.
 // It may return a message to be sent back to the original sender, or it may
 // just return nil if it has no particular response.
-func (c *Chain) Handle(sender string, message Message) Message {
+func (c *Chain) Handle(sender string, message util.Message) util.Message {
 	if sender == c.publicKey {
 		// It's one of our own returning to us, we can ignore it
 		return nil
@@ -78,7 +80,7 @@ func NewEmptyChain(publicKey string, qs QuorumSlice) *Chain {
 	}
 }
 
-func (c *Chain) OutgoingMessages() []Message {
+func (c *Chain) OutgoingMessages() []util.Message {
 	answer := c.current.OutgoingMessages()
 
 	prev := c.history[c.current.slot-1]

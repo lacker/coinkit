@@ -1,4 +1,4 @@
-package server
+package network
 
 import (
 	"bufio"
@@ -8,8 +8,8 @@ import (
 	"net"
 	"time"
 
-	"coinkit/auth"
-	"coinkit/network"
+	"coinkit/consensus"
+	"coinkit/util"
 )
 
 type PeerInfo struct {
@@ -26,23 +26,23 @@ func NewPeerInfo(publicKey string) *PeerInfo {
 
 type Server struct {
 	port int
-	keyPair *auth.KeyPair
-	peers []*network.Peer
+	keyPair *util.KeyPair
+	peers []*Peer
 	info map[string]*PeerInfo
-	chain *network.Chain
-	outgoing []network.Message
-	inbox chan *auth.SignedMessage
+	chain *consensus.Chain
+	outgoing []util.Message
+	inbox chan *SignedMessage
 }
 
 func NewServer(c *Config) *Server {
-	var peers []*network.Peer
+	var peers []*Peer
 	log.Printf("config has peers: %v", c.PeerPorts)
 	for _, p := range c.PeerPorts {
-		peers = append(peers, network.NewPeer(p))
+		peers = append(peers, NewPeer(p))
 	}
 
-	qs := network.MakeQuorumSlice(c.Members, c.Threshold)
-	chain := network.NewEmptyChain(c.KeyPair.PublicKey(), qs)
+	qs := consensus.MakeQuorumSlice(c.Members, c.Threshold)
+	chain := consensus.NewEmptyChain(c.KeyPair.PublicKey(), qs)
 	
 	return &Server{
 		port: c.Port,
@@ -51,7 +51,7 @@ func NewServer(c *Config) *Server {
 		info: make(map[string]*PeerInfo),
 		chain: chain,
 		outgoing: chain.OutgoingMessages(),
-		inbox: make(chan *auth.SignedMessage),
+		inbox: make(chan *SignedMessage),
 	}
 }
 
@@ -67,7 +67,7 @@ func (s *Server) handleConnection(conn net.Conn) {
 
 		// Chop the newline
 		serialized := data[:len(data)-1]
-		sm, err := auth.NewSignedMessageFromSerialized(serialized)
+		sm, err := NewSignedMessageFromSerialized(serialized)
 		if err != nil {
 			// The signature isn't valid.
 			// Maybe the message got chopped off? Maybe they are bad guys?
@@ -95,21 +95,8 @@ func (s *Server) handleConnection(conn net.Conn) {
 // handleMessage should only be called by a single goroutine, because the
 // chain objects aren't threadsafe.
 // Caller should be validating the signature
-func (s *Server) handleMessage(sm *auth.SignedMessage) {
-	switch m := sm.Message().(type) {
-	case *network.NominationMessage:
-		s.chain.Handle(sm.Signer(), m)
-	case *network.PrepareMessage:
-		s.chain.Handle(sm.Signer(), m)
-	case *network.ConfirmMessage:
-		s.chain.Handle(sm.Signer(), m)
-	case *network.ExternalizeMessage:
-		s.chain.Handle(sm.Signer(), m)
-	default:
-		log.Printf("could not handle message: %s", network.EncodeMessage(m))
-		break
-	}
-	
+func (s *Server) handleMessage(sm *SignedMessage) {
+	s.chain.Handle(sm.Signer(), sm.message)
 	s.outgoing = s.chain.OutgoingMessages()
 }
 
@@ -136,8 +123,8 @@ func (s *Server) listen() {
 	}
 }
 
-func (s *Server) broadcast(m network.Message) {
-	sm := auth.NewSignedMessage(s.keyPair, m)
+func (s *Server) broadcast(m util.Message) {
+	sm := NewSignedMessage(s.keyPair, m)
 	line := sm.Serialize()
 	// log.Printf("sending %d bytes of data: [%s]", len(line), line)
 	for _, peer := range s.peers {
