@@ -1,6 +1,7 @@
 package consensus
 
 import (
+	"coinkit/util"
 )
 
 // The nomination message format of the Stellar Consensus Protocol.
@@ -21,9 +22,13 @@ type NominationMessage struct {
 }
 
 func (m *NominationMessage) MessageType() string {
-	return "Nomination"
+	return "N"
 }
 
 func (m *NominationMessage) Slot() int {
 	return m.I
+}
+
+func init() {
+	util.RegisterMessageType(&NominationMessage{})
 }

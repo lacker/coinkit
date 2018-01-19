@@ -2,6 +2,8 @@ package consensus
 
 import (
 	"fmt"
+
+	"coinkit/util"
 )
 
 // See page 23 of the protocol paper for a description of balloting.
@@ -145,7 +147,7 @@ func (m *PrepareMessage) Phase() Phase {
 }
 
 func (m *PrepareMessage) MessageType() string {
-	return "Prepare"
+	return "P"
 }
 
 func (m *PrepareMessage) AcceptAsPrepared(n int, x SlotValue) bool {
@@ -247,7 +249,7 @@ func (m *ConfirmMessage) Phase() Phase {
 }
 
 func (m *ConfirmMessage) MessageType() string {
-	return "Confirm"
+	return "C"
 }
 
 func (m *ConfirmMessage) AcceptAsPrepared(n int, x SlotValue) bool {
@@ -316,7 +318,7 @@ func (m *ExternalizeMessage) Phase() Phase {
 }
 
 func (m *ExternalizeMessage) MessageType() string {
-	return "Externalize"
+	return "E"
 }
 
 func (m *ExternalizeMessage) AcceptAsPrepared(n int, x SlotValue) bool {
@@ -424,4 +426,10 @@ func Compare(ballot1 BallotMessage, ballot2 BallotMessage) int {
 	default:
 		panic("programming error")
 	}
+}
+
+func init() {
+	util.RegisterMessageType(&PrepareMessage{})
+	util.RegisterMessageType(&ConfirmMessage{})
+	util.RegisterMessageType(&ExternalizeMessage{})
 }
