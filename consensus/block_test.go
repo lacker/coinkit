@@ -5,6 +5,8 @@ import (
 	"math/rand"
 	"testing"
 
+	"coinkit/util"
+	
 	"github.com/davecgh/go-spew/spew"
 )
 
@@ -84,7 +86,8 @@ func blockSend(source *Block, target *Block) {
 	}
 	messages := source.OutgoingMessages()
 	for _, message := range messages {
-		target.Handle(source.publicKey, message)
+		m := util.EncodeThenDecode(message)
+		target.Handle(source.publicKey, m)
 	}
 }
 

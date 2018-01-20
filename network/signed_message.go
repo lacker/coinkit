@@ -16,7 +16,7 @@ type SignedMessage struct {
 }
 
 func NewSignedMessage(kp *util.KeyPair, message util.Message) *SignedMessage {
-	ms := EncodeMessage(message)
+	ms := util.EncodeMessage(message)
 	return &SignedMessage{
 		message: message,
 		messageString: ms,
@@ -49,7 +49,7 @@ func NewSignedMessageFromSerialized(serialized string) (*SignedMessage, error) {
 	if !util.Verify(signer, ms, signature) {
 		return nil, errors.New("signature failed verification")
 	}
-	m, err := DecodeMessage(ms)
+	m, err := util.DecodeMessage(ms)
 	if err != nil {
 		return nil, err
 	}

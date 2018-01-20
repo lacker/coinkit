@@ -5,7 +5,7 @@ import (
 )
 
 type TestingMessage struct {
-	number int
+	Number int
 }
 
 func (m *TestingMessage) Slot() int {
@@ -21,5 +21,9 @@ func init() {
 }
 
 func TestMessageEncoding(t *testing.T) {
-
+	m := &TestingMessage{Number: 7}
+	m2 := EncodeThenDecode(m).(*TestingMessage)
+	if m2.Number != 7 {
+		t.Fatalf("m2.Number turned into %d", m2.Number)
+	}
 }

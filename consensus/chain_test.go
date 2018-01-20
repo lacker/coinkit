@@ -4,6 +4,8 @@ import (
 	"log"
 	"math/rand"
 	"testing"
+
+	"coinkit/util"
 )
 
 // Simulate the sending of messages from source to target
@@ -12,7 +14,8 @@ func chainSend(source *Chain, target *Chain) {
 		return
 	}
 	messages := source.OutgoingMessages()
-	for _, m := range messages {
+	for _, message := range messages {
+		m := util.EncodeThenDecode(message)
 		response := target.Handle(source.publicKey, m)
 		if response != nil {
 			x := source.Handle(target.publicKey, response)
