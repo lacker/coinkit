@@ -110,9 +110,6 @@ func gteincompat(a *Ballot, b *Ballot) bool {
 // This message is voting to prepare b, and also informing the receiver that
 // we have accepted that both p and p prime have already been prepared.
 type PrepareMessage struct {
-	// T is Prepare for a PrepareMessage
-	T Phase
-
 	// What slot we are preparing ballots for
 	I int
 
@@ -140,9 +137,6 @@ func (m *PrepareMessage) QuorumSlice() QuorumSlice {
 }
 
 func (m *PrepareMessage) Phase() Phase {
-	if m.T != Prepare {
-		panic("m.T != Prepare")
-	}
 	return Prepare
 }
 
@@ -218,9 +212,6 @@ func (m *PrepareMessage) Slot() int {
 // The consensus can still get borked at this phase if we don't get a
 // quorum confirming.
 type ConfirmMessage struct {
-	// T is Confirm for a ConfirmMessage
-	T Phase
-
 	// What slot we are confirming ballots for
 	I int
 
@@ -242,9 +233,6 @@ func (m *ConfirmMessage) QuorumSlice() QuorumSlice {
 }
 
 func (m *ConfirmMessage) Phase() Phase {
-	if m.T != Confirm {
-		panic("m.T != Confirm")
-	}
 	return Confirm
 }
 
@@ -290,9 +278,6 @@ func (m *ConfirmMessage) Slot() int {
 // ExternalizeMessage is the third phase of the three-phase ballot protocol
 // Sent after we have confirmed a commit.
 type ExternalizeMessage struct {
-	// T is Externalize for an ExternalizeMessage
-	T Phase
-
 	// What slot we are externalizing
 	I int
 
@@ -311,9 +296,6 @@ func (m *ExternalizeMessage) QuorumSlice() QuorumSlice {
 }
 
 func (m *ExternalizeMessage) Phase() Phase {
-	if m.T != Externalize {
-		panic("m.T != Externalize")
-	}
 	return Externalize
 }
 

@@ -648,7 +648,6 @@ func (s *BallotState) Message(slot int, qs QuorumSlice) BallotMessage {
 	switch s.phase {
 	case Prepare:
 		m := &PrepareMessage{
-			T:  Prepare,
 			I:  slot,
 			Bn: s.b.n,
 			Bx: s.b.x,
@@ -668,7 +667,6 @@ func (s *BallotState) Message(slot int, qs QuorumSlice) BallotMessage {
 
 	case Confirm:
 		m := &ConfirmMessage{
-			T:  Confirm,
 			I:  slot,
 			X:  s.b.x,
 			Cn: s.cn,
@@ -682,7 +680,6 @@ func (s *BallotState) Message(slot int, qs QuorumSlice) BallotMessage {
 
 	case Externalize:
 		return &ExternalizeMessage{
-			T:  Externalize,
 			I:  slot,
 			X:  s.b.x,
 			Cn: s.cn,
