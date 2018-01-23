@@ -2,6 +2,7 @@ package currency
 
 import (
 	"encoding/json"
+	"log"
 	
 	"coinkit/util"
 )
@@ -57,4 +58,24 @@ func (s *SignedTransaction) Verify() bool {
 		return false
 	}
 	return util.Verify(s.Transaction.From, string(bytes), s.Signature)
+}
+
+// Sort message so they are higher fees first.
+func (t *Transaction) OrderedBefore(other *Transaction) bool {
+	if other == nil {
+		log.Fatal("cannot compare nil transaction message")
+	}
+	if t.Fee > other.Fee {
+		return true
+	}
+	if t.Fee < other.Fee {
+		return false
+	}
+
+	// Ties are ok
+	return false
+}
+
+func (s *SignedTransaction) OrderedBefore(other *SignedTransaction) bool {
+	return s.Transaction.OrderedBefore(other.Transaction)
 }
