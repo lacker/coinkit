@@ -31,7 +31,7 @@ type Server struct {
 	info map[string]*PeerInfo
 	chain *consensus.Chain
 	outgoing []util.Message
-	inbox chan *SignedMessage
+	inbox chan *util.SignedMessage
 }
 
 func NewServer(c *Config) *Server {
@@ -51,7 +51,7 @@ func NewServer(c *Config) *Server {
 		info: make(map[string]*PeerInfo),
 		chain: chain,
 		outgoing: chain.OutgoingMessages(),
-		inbox: make(chan *SignedMessage),
+		inbox: make(chan *util.SignedMessage),
 	}
 }
 
@@ -67,7 +67,7 @@ func (s *Server) handleConnection(conn net.Conn) {
 
 		// Chop the newline
 		serialized := data[:len(data)-1]
-		sm, err := NewSignedMessageFromSerialized(serialized)
+		sm, err := util.NewSignedMessageFromSerialized(serialized)
 		if err != nil {
 			// The signature isn't valid.
 			// Maybe the message got chopped off? Maybe they are bad guys?
@@ -95,8 +95,8 @@ func (s *Server) handleConnection(conn net.Conn) {
 // handleMessage should only be called by a single goroutine, because the
 // chain objects aren't threadsafe.
 // Caller should be validating the signature
-func (s *Server) handleMessage(sm *SignedMessage) {
-	s.chain.Handle(sm.Signer(), sm.message)
+func (s *Server) handleMessage(sm *util.SignedMessage) {
+	s.chain.Handle(sm.Signer(), sm.Message())
 	s.outgoing = s.chain.OutgoingMessages()
 }
 
@@ -124,7 +124,7 @@ func (s *Server) listen() {
 }
 
 func (s *Server) broadcast(m util.Message) {
-	sm := NewSignedMessage(s.keyPair, m)
+	sm := util.NewSignedMessage(s.keyPair, m)
 	line := sm.Serialize()
 	// log.Printf("sending %d bytes of data: [%s]", len(line), line)
 	for _, peer := range s.peers {
