@@ -27,7 +27,7 @@ func (m *TransactionMessage) MessageType() string {
 // Orders the transactions
 func NewTransactionMessage(ts ...*SignedTransaction) *TransactionMessage {
 	sort.Slice(ts, func(i, j int) bool {
-		return ts[i].OrderedBefore(ts[j])
+		return HighestPriorityFirst(ts[i], ts[j]) < 0
 	})
 
 	return &TransactionMessage{

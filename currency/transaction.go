@@ -2,7 +2,6 @@ package currency
 
 import (
 	"encoding/json"
-	"log"
 	
 	"coinkit/util"
 )
@@ -60,22 +59,29 @@ func (s *SignedTransaction) Verify() bool {
 	return util.Verify(s.Transaction.From, string(bytes), s.Signature)
 }
 
-// Sort message so they are higher fees first.
-func (t *Transaction) OrderedBefore(other *Transaction) bool {
-	if other == nil {
-		log.Fatal("cannot compare nil transaction message")
-	}
-	if t.Fee > other.Fee {
-		return true
-	}
-	if t.Fee < other.Fee {
-		return false
-	}
+// HighestPriorityFirst is a comparator in the emirpasic/gods comparator style.
+// Negative return indicates a < b
+// Positive return indicates a > b
+// Comparison indicates overall "priority" putting the highest priority first.
+// This means that when a has a higher fee than b, a < b.
+func HighestPriorityFirst (a, b interface{}) int {
+	s1 := a.(*SignedTransaction)
+	s2 := b.(*SignedTransaction)
 
-	// Ties are ok
-	return false
+	switch {
+	case s1.Transaction.Fee > s2.Transaction.Fee:
+		// s1 is higher priority. so a < b
+		return -1
+	case s1.Transaction.Fee < s2.Transaction.Fee:
+		return 1
+	case s1.Signature < s2.Signature:
+		// s1 is higher priority
+		return -1
+	case s1.Signature > s2.Signature:
+		return 1
+	default:
+		return 0
+	}
 }
 
-func (s *SignedTransaction) OrderedBefore(other *SignedTransaction) bool {
-	return s.Transaction.OrderedBefore(other.Transaction)
-}
+
