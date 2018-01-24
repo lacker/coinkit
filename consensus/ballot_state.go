@@ -126,10 +126,10 @@ func (s *BallotState) MaybeAcceptAsPrepared(n int, x SlotValue) bool {
 	}
 
 	// Check if we already accept this as prepared
-	if s.p != nil && s.p.n >= n && Equal(s.p.x, x) {
+	if s.p != nil && s.p.n >= n && s.p.x == x {
 		return false
 	}
-	if s.pPrime != nil && s.pPrime.n >= n && Equal(s.pPrime.x, x) {
+	if s.pPrime != nil && s.pPrime.n >= n && s.pPrime.x == x {
 		return false
 	}
 
@@ -144,7 +144,7 @@ func (s *BallotState) MaybeAcceptAsPrepared(n int, x SlotValue) bool {
 	// Or, if a local blocking set has accepted, we can accept.
 	votedOrAccepted := []string{}
 	accepted := []string{}
-	if s.b != nil && s.b.n >= n && Equal(s.b.x, x) {
+	if s.b != nil && s.b.n >= n && s.b.x == x {
 		// We have voted for this
 		votedOrAccepted = append(votedOrAccepted, s.publicKey)
 	}
@@ -175,7 +175,7 @@ func (s *BallotState) MaybeAcceptAsPrepared(n int, x SlotValue) bool {
 	// as prepared. update them accordingly
 	if s.p == nil {
 		s.p = ballot
-	} else if Equal(s.p.x, x) {
+	} else if s.p.x == x {
 		if n <= s.p.n {
 			log.Fatal("should have short circuited already")
 		}
@@ -204,15 +204,15 @@ func (s *BallotState) AcceptedAbort(n int, x SlotValue) bool {
 	if s.phase != Prepare {
 		// After the prepare phase, we've accepted an abort for everything
 		// else.
-		return !Equal(x, s.b.x)
+		return x != s.b.x
 	}
 
-	if s.p != nil && s.p.n >= n && !Equal(s.p.x, x) {
+	if s.p != nil && s.p.n >= n && s.p.x != x {
 		// we accept p is prepared, which implies we accept this abort
 		return true
 	}
 
-	if s.pPrime != nil && s.pPrime.n >= n && !Equal(s.pPrime.x, x) {
+	if s.pPrime != nil && s.pPrime.n >= n && s.pPrime.x != x {
 		// we accept p' is prepared, which implies we accept this abort
 		return true
 	}
@@ -237,7 +237,7 @@ func (s *BallotState) MaybeConfirmAsPrepared(n int, x SlotValue) bool {
 			// round of voting, so there's no point in proceeding.
 			return false
 		}
-		if Equal(*s.z, x) {
+		if *s.z == x {
 			// We already confirmed this ballot as prepared.
 			return false
 		}
@@ -267,7 +267,7 @@ func (s *BallotState) MaybeConfirmAsPrepared(n int, x SlotValue) bool {
 
 	s.Logf("%s confirms as prepared: %d %+v", s.publicKey, n, x)
 	
-	if s.hn == n && !Equal(*s.z, x) {
+	if s.hn == n && *s.z != x {
 		// We have two equally high ballots and they are both
 		// confirmed as prepared. This means that every ballot is
 		// both prepared and aborted at this ballot number, and we'll have to go
@@ -278,7 +278,7 @@ func (s *BallotState) MaybeConfirmAsPrepared(n int, x SlotValue) bool {
 		return true
 	}
 
-	if s.cn > 0 && !Equal(x, s.b.x) {
+	if s.cn > 0 && x != s.b.x {
 		s.Show()
 		log.Fatalf("we are voting to commit but must confirm a contradiction")
 	}
@@ -292,7 +292,7 @@ func (s *BallotState) MaybeConfirmAsPrepared(n int, x SlotValue) bool {
 		s.b = ballot
 	}
 
-	if s.cn == 0 && Equal(x, s.b.x) {
+	if s.cn == 0 && x == s.b.x {
 		// Check if we should start voting to commit
 		if gteincompat(s.p, ballot) || gteincompat(s.pPrime, ballot) {
 			// We have already accepted the abort of this. So nope.
@@ -321,7 +321,7 @@ func (s *BallotState) MaybeAcceptAsCommitted(n int, x SlotValue) bool {
 	accepted := []string{}
 
 	if s.phase == Prepare && s.b != nil &&
-		Equal(s.b.x, x) && s.cn != 0 && s.cn <= n && n <= s.hn {
+		s.b.x == x && s.cn != 0 && s.cn <= n && n <= s.hn {
 		// We vote to commit this
 		votedOrAccepted = append(votedOrAccepted, s.publicKey)
 	}
@@ -344,7 +344,7 @@ func (s *BallotState) MaybeAcceptAsCommitted(n int, x SlotValue) bool {
 
 	// We accept this commit
 	s.phase = Confirm
-	if s.b == nil || !Equal(s.b.x, x) {
+	if s.b == nil || s.b.x != x {
 		// Totally replace our old target value
 		s.b = &Ballot{
 			n: n,
@@ -370,7 +370,7 @@ func (s *BallotState) MaybeConfirmAsCommitted(n int, x SlotValue) bool {
 	if s.phase == Prepare {
 		return false
 	}
-	if s.b == nil || !Equal(s.b.x, x) {
+	if s.b == nil || s.b.x != x {
 		return false
 	}
 
@@ -606,21 +606,21 @@ func (s *BallotState) AssertValid() {
 		log.Fatalf("c should be <= h")
 	}
 
-	if s.p != nil && s.pPrime != nil && Equal(s.p.x, s.pPrime.x) {
+	if s.p != nil && s.pPrime != nil && s.p.x == s.pPrime.x {
 		log.Printf("p: %+v", s.p)
 		log.Printf("pPrime: %+v", s.pPrime)
 		log.Fatalf("p and p prime should not be compatible")
 	}
 
 	if s.b != nil && s.phase == Prepare {
-		if s.p != nil && !Equal(s.b.x, s.p.x) && s.cn != 0 && s.hn <= s.p.n {
+		if s.p != nil && s.b.x != s.p.x && s.cn != 0 && s.hn <= s.p.n {
 			log.Printf("b: %+v", s.b)
 			log.Printf("c: %d", s.cn)
 			log.Printf("h: %d", s.hn)
 			log.Printf("p: %+v", s.p)
 			log.Fatalf("the vote to commit should have been aborted")
 		}
-		if s.pPrime != nil && !Equal(s.b.x, s.pPrime.x) && s.cn != 0 && s.hn <= s.pPrime.n {
+		if s.pPrime != nil && s.b.x != s.pPrime.x && s.cn != 0 && s.hn <= s.pPrime.n {
 			log.Printf("b: %+v", s.b)
 			log.Printf("c: %d", s.cn)
 			log.Printf("h: %d", s.hn)
@@ -630,7 +630,7 @@ func (s *BallotState) AssertValid() {
 	}
 
 	if s.b != nil && s.phase == Prepare {
-		if s.last != nil && !Equal(s.b.x, s.last.x) && s.last.n > s.b.n {
+		if s.last != nil && s.b.x != s.last.x && s.last.n > s.b.n {
 			log.Printf("last b: %+v", s.last)
 			log.Printf("curr b: %+v", s.b)
 			log.Fatalf("monotonicity violation")

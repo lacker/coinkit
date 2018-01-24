@@ -22,6 +22,8 @@ type Chain struct {
 
 	// Who we are
 	publicKey string
+
+	values ValueStore
 }
 
 // Handle handles an incoming message.
@@ -43,9 +45,9 @@ func (c *Chain) Handle(sender string, message util.Message) util.Message {
 		if c.current.Done() {
 			// This block is done, let's move on to the next one
 			log.Printf("%s is advancing to slot %d", c.publicKey, slot + 1)
-			prevHash := c.current.external.X.Hash()
+			c.values.Finalize(c.current.external.X)
 			c.history[slot] = c.current
-			c.current = NewBlock(c.publicKey, c.D, slot + 1, prevHash)
+			c.current = NewBlock(c.publicKey, c.D, slot + 1, c.values)
 		}
 		return nil
 	}
@@ -71,11 +73,12 @@ func (c *Chain) AssertValid() {
 	c.current.AssertValid()
 }
 
-func NewEmptyChain(publicKey string, qs QuorumSlice) *Chain {
+func NewEmptyChain(publicKey string, qs QuorumSlice, vs ValueStore) *Chain {
 	return &Chain{
-		current: NewBlock(publicKey, qs, 1, ""),
+		current: NewBlock(publicKey, qs, 1, vs),
 		history: make(map[int]*Block),
 		D: qs,
+		values: vs,
 		publicKey: publicKey,
 	}
 }

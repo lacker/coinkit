@@ -11,7 +11,8 @@ import (
 )
 
 func TestSolipsistQuorum(t *testing.T) {
-	s := NewBlock("foo", MakeQuorumSlice([]string{"foo"}, 1), 1, "")
+	vs := NewTestValueStore(1)
+	s := NewBlock("foo", MakeQuorumSlice([]string{"foo"}, 1), 1, vs)
 	if !MeetsQuorum(s.nState, []string{"foo"}) {
 		t.Fatal("foo should meet the quorum")
 	}
@@ -23,13 +24,14 @@ func TestSolipsistQuorum(t *testing.T) {
 func TestConsensus(t *testing.T) {
 	members := []string{"amy", "bob", "cal", "dan"}
 	qs := MakeQuorumSlice(members, 3)
-	amy := NewBlock("amy", qs, 1, "")
-	bob := NewBlock("bob", qs, 1, "")
-	cal := NewBlock("cal", qs, 1, "")
-	dan := NewBlock("dan", qs, 1, "")
+	vs := NewTestValueStore(0)
+	amy := NewBlock("amy", qs, 1, vs)
+	bob := NewBlock("bob", qs, 1, vs)
+	cal := NewBlock("cal", qs, 1, vs)
+	dan := NewBlock("dan", qs, 1, vs)
 
 	// Let everyone receive an initial nomination from Amy
-	amy.nState.NominateNewValue(MakeSlotValue("hello its amy"))
+	amy.nState.NominateNewValue(SlotValue("hello its amy"))
 	a := amy.OutgoingMessages()[0]
 	
 	bob.Handle("amy", a)
@@ -95,8 +97,9 @@ func blockSend(source *Block, target *Block) {
 func blockCluster(size int) []*Block {
 	qs, names := MakeTestQuorumSlice(size)
 	blocks := []*Block{}
-	for _, name := range names {
-		blocks = append(blocks, NewBlock(name, qs, 1, ""))
+	for i, name := range names {
+		vs := NewTestValueStore(i)
+		blocks = append(blocks, NewBlock(name, qs, 1, vs))
 	}
 	return blocks
 }
@@ -130,7 +133,7 @@ func nominationConverged(blocks []*Block) bool {
 			value = block.nState.PredictValue()
 		} else {
 			v := block.nState.PredictValue()
-			if !Equal(value, v) {
+			if value != v {
 				return false
 			}
 		}

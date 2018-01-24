@@ -16,9 +16,12 @@ type Node struct {
 }
 
 func NewNode(publicKey string, qs consensus.QuorumSlice) *Node {
+	// TODO: make this use the transaction queue instead
+	vs := consensus.NewTestValueStore(1337)
+	
 	return &Node{
 		publicKey: publicKey,
-		chain: consensus.NewEmptyChain(publicKey, qs),
+		chain: consensus.NewEmptyChain(publicKey, qs, vs),
 		queue: currency.NewTransactionQueue(),
 	}
 }

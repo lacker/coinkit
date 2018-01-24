@@ -41,8 +41,10 @@ func NewServer(c *Config) *Server {
 		peers = append(peers, NewPeer(p))
 	}
 
+	// TODO: replace with a Node
+	vs := consensus.NewTestValueStore(c.Port)
 	qs := consensus.MakeQuorumSlice(c.Members, c.Threshold)
-	chain := consensus.NewEmptyChain(c.KeyPair.PublicKey(), qs)
+	chain := consensus.NewEmptyChain(c.KeyPair.PublicKey(), qs, vs)
 	
 	return &Server{
 		port: c.Port,

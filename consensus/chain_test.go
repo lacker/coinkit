@@ -30,8 +30,9 @@ func chainSend(source *Chain, target *Chain) {
 func chainCluster(size int) []*Chain {
 	qs, names := MakeTestQuorumSlice(size)
 	chains := []*Chain{}
-	for _, name := range names {
-		chains = append(chains, NewEmptyChain(name, qs))
+	for i, name := range names {
+		vs := NewTestValueStore(i)
+		chains = append(chains, NewEmptyChain(name, qs, vs))
 	}
 	return chains
 }
@@ -46,7 +47,7 @@ func checkProgress(chains []*Chain, limit int, t *testing.T) {
 			// Check that this chain agrees with the first one for slot j
 			blockValue := chain.history[j].external.X
 			firstValue := first.history[j].external.X
-			if !Equal(blockValue, firstValue) {
+			if blockValue != firstValue {
 				log.Printf("%s externalized %+v for slot %d",
 					first.publicKey, firstValue, j)
 				log.Printf("%s externalized %+v for slot %d",

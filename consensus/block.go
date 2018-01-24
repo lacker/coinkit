@@ -2,7 +2,6 @@ package consensus
 
 import (
 	"log"
-	"strings"
 	"time"
 
 	"coinkit/util"
@@ -29,8 +28,7 @@ type Block struct {
 	// to catch up old nodes.
 	external *ExternalizeMessage
 
-	// The hash of the previous block, or "" if this is the first one
-	prevHash string
+	values ValueStore
 	
 	// Who we care about
 	D QuorumSlice
@@ -39,14 +37,15 @@ type Block struct {
 	publicKey string
 }
 
-func NewBlock(publicKey string, qs QuorumSlice, slot int, prevHash string) *Block {
-	nState := NewNominationState(publicKey, qs, prevHash)
+func NewBlock(
+	publicKey string, qs QuorumSlice, slot int, vs ValueStore) *Block {
+	nState := NewNominationState(publicKey, qs, vs)
 	block := &Block{
 		slot:      slot,
 		start:     time.Now(),
 		nState:    nState,
 		bState:    NewBallotState(publicKey, qs, nState),
-		prevHash:  prevHash,
+		values:    vs,
 		D:         qs,
 		publicKey: publicKey,
 	}
@@ -92,10 +91,11 @@ func (b *Block) Done() bool {
 
 func (b *Block) MaybeNominateNewValue() {
 	if b.nState.WantsToNominateNewValue() {
-		comment := strings.Replace(b.publicKey, "node", "comment", 1)
-		v := MakeSlotValue(comment)
-		log.Printf("%s nominates %+v", b.publicKey, v)
-		b.nState.NominateNewValue(v)
+		v, ok := b.values.SuggestValue()
+		if ok {
+			log.Printf("%s nominates %+v", b.publicKey, v)
+			b.nState.NominateNewValue(v)
+		}
 	}
 }
 

@@ -78,10 +78,6 @@ type Ballot struct {
 	x SlotValue
 }
 
-func Compatible(ballot1 Ballot, ballot2 Ballot) bool {
-	return Equal(ballot1.x, ballot2.x)
-}
-
 // Whether accepting a as prepared implies b is accepted as prepared
 func gtecompat(a *Ballot, b *Ballot) bool {
 	if a == nil || b == nil {
@@ -90,7 +86,7 @@ func gtecompat(a *Ballot, b *Ballot) bool {
 	if a.n < b.n {
 		return false
 	}
-	return Equal(a.x, b.x)
+	return a.x == b.x
 }
 
 // Whether accepting a as prepared implies accepting b is aborted
@@ -101,7 +97,7 @@ func gteincompat(a *Ballot, b *Ballot) bool {
 	if a.n < b.n {
 		return false
 	}
-	return !Equal(a.x, b.x)
+	return a.x != b.x
 }
 
 // PrepareMessage is the first phase of the three-phase ballot protocol.
@@ -146,17 +142,17 @@ func (m *PrepareMessage) MessageType() string {
 
 func (m *PrepareMessage) AcceptAsPrepared(n int, x SlotValue) bool {
 	// A prepare message accepts that both p and p prime are prepared.
-	if Equal(m.Px, x) {
+	if m.Px == x {
 		return m.Pn >= n
 	}
-	if Equal(m.Ppx, x) {
+	if m.Ppx == x {
 		return m.Ppn >= n
 	}
 	return false
 }
 
 func (m *PrepareMessage) VoteToPrepare(n int, x SlotValue) bool {
-	return Equal(x, m.Bx) && m.Bn >= n
+	return x == m.Bx && m.Bn >= n
 }
 
 func (m *PrepareMessage) AcceptAsCommitted(n int, x SlotValue) bool {
@@ -164,7 +160,7 @@ func (m *PrepareMessage) AcceptAsCommitted(n int, x SlotValue) bool {
 }
 
 func (m *PrepareMessage) VoteToCommit(n int, x SlotValue) bool {
-	if m.Cn == 0 || m.Hn == 0 || !Equal(m.Bx, x) {
+	if m.Cn == 0 || m.Hn == 0 || m.Bx != x {
 		return false
 	}
 	return m.Cn <= n && n <= m.Hn
@@ -175,7 +171,7 @@ func (m *PrepareMessage) CouldEverVoteFor(n int, x SlotValue) bool {
 		// Ballots don't go backwards
 		return false
 	}
-	if m.Bn == n && !Equal(m.Bx, x) {
+	if m.Bn == n && m.Bx != x {
 		// This message is currently voting *against*
 		return false
 	}
@@ -184,13 +180,13 @@ func (m *PrepareMessage) CouldEverVoteFor(n int, x SlotValue) bool {
 
 func (m *PrepareMessage) RelevantRange(x SlotValue) (int, int) {
 	min, max := 0, 0
-	if Equal(x, m.Bx) {
+	if x == m.Bx {
 		min, max = MakeRange(m.Bn, m.Cn, m.Hn)
 	}
-	if Equal(x, m.Px) {
+	if x == m.Px {
 		min, max = RangeUnion(min, max, m.Pn, m.Pn)
 	}
-	if Equal(x, m.Ppx) {
+	if x == m.Ppx {
 		min, max = RangeUnion(min, max, m.Ppn, m.Ppn)
 	}
 	return min, max
@@ -241,7 +237,7 @@ func (m *ConfirmMessage) MessageType() string {
 }
 
 func (m *ConfirmMessage) AcceptAsPrepared(n int, x SlotValue) bool {
-	return Equal(m.X, x)
+	return m.X == x
 }
 
 func (m *ConfirmMessage) VoteToPrepare(n int, x SlotValue) bool {
@@ -249,19 +245,19 @@ func (m *ConfirmMessage) VoteToPrepare(n int, x SlotValue) bool {
 }
 
 func (m *ConfirmMessage) AcceptAsCommitted(n int, x SlotValue) bool {
-	return Equal(m.X, x) && m.Cn <= n && n <= m.Hn
+	return m.X == x && m.Cn <= n && n <= m.Hn
 }
 
 func (m *ConfirmMessage) VoteToCommit(n int, x SlotValue) bool {
-	return Equal(m.X, x)
+	return m.X == x
 }
 
 func (m *ConfirmMessage) CouldEverVoteFor(n int, x SlotValue) bool {
-	return Equal(x, m.X)
+	return x == m.X
 }
 
 func (m *ConfirmMessage) RelevantRange(x SlotValue) (int, int) {
-	if Equal(x, m.X) {
+	if x == m.X {
 		return MakeRange(m.Pn, m.Cn, m.Hn)
 	}
 	return 0, 0
@@ -304,7 +300,7 @@ func (m *ExternalizeMessage) MessageType() string {
 }
 
 func (m *ExternalizeMessage) AcceptAsPrepared(n int, x SlotValue) bool {
-	return Equal(m.X, x)
+	return m.X == x
 }
 
 func (m *ExternalizeMessage) VoteToPrepare(n int, x SlotValue) bool {
@@ -312,7 +308,7 @@ func (m *ExternalizeMessage) VoteToPrepare(n int, x SlotValue) bool {
 }
 
 func (m *ExternalizeMessage) AcceptAsCommitted(n int, x SlotValue) bool {
-	return Equal(x, m.X) && m.Cn <= n
+	return x == m.X && m.Cn <= n
 }
 
 func (m *ExternalizeMessage) VoteToCommit(n int, x SlotValue) bool {
@@ -320,11 +316,11 @@ func (m *ExternalizeMessage) VoteToCommit(n int, x SlotValue) bool {
 }
 
 func (m *ExternalizeMessage) CouldEverVoteFor(n int, x SlotValue) bool {
-	return Equal(x, m.X)
+	return x == m.X
 }
 
 func (m *ExternalizeMessage) RelevantRange(x SlotValue) (int, int) {
-	if Equal(x, m.X) {
+	if x == m.X {
 		return MakeRange(m.Cn, m.Hn)
 	}
 	return 0, 0

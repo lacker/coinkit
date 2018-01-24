@@ -29,17 +29,16 @@ type NominationState struct {
 	// The number of messages this state has processed
 	received int
 
-	// The hash of the previous block, used to pseudorandomly determine
-	// which node should heuristically start nominations
-	prevHash string
-
 	// Which priority we think we are for creating a nomination
 	// 0 is the first priority
 	priority int
+
+	// The value store we use to validate or combine values
+	values ValueStore
 }
 
 func NewNominationState(
-	publicKey string, qs QuorumSlice, prevHash string) *NominationState {
+	publicKey string, qs QuorumSlice, vs ValueStore) *NominationState {
 
 	return &NominationState{
 		X:         make([]SlotValue, 0),
@@ -48,8 +47,8 @@ func NewNominationState(
 		N:         make(map[string]*NominationMessage),
 		publicKey: publicKey,
 		D:         qs,
-		prevHash:  prevHash,
-		priority:  SeedPriority(prevHash, qs.Members, publicKey),
+		priority:  SeedPriority(string(vs.Last()), qs.Members, publicKey),
+		values:    vs,
 	}	
 }
 
@@ -93,14 +92,13 @@ func (s *NominationState) NominateNewValue(v SlotValue) {
 // PredictValue can predict the value iff HasNomination is true. If not, panic
 func (s *NominationState) PredictValue() SlotValue {
 	if len(s.Z) > 0 {
-		return CombineSlice(s.Z)
+		return s.values.Combine(s.Z)
 	}
 	if len(s.Y) > 0 {
-		answer := CombineSlice(s.Y)
-		return answer
+		return s.values.Combine(s.Y)
 	}
 	if len(s.X) > 0 {
-		return CombineSlice(s.X)
+		return s.values.Combine(s.X)
 	}
 	panic("PredictValue was called when HasNomination was false")
 }
