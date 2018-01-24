@@ -11,7 +11,7 @@ func makeTestTransaction(n int) *SignedTransaction {
 	kp := util.NewKeyPairFromSecretPhrase(fmt.Sprintf("blorp %d", n))
 	t := &Transaction{
 		From: kp.PublicKey(),
-		Sequence: uint32(n),
+		Sequence: 1,
 		To: "nobody",
 		Amount: uint64(n),
 		Fee: uint64(n),
@@ -22,7 +22,9 @@ func makeTestTransaction(n int) *SignedTransaction {
 func TestFullQueue(t *testing.T) {
 	q := NewTransactionQueue()
 	for i := 1; i <= QueueLimit + 10; i++ {
-		q.Add(makeTestTransaction(i))
+		t := makeTestTransaction(i)
+		q.accounts.SetBalance(t.Transaction.From, 10 * t.Transaction.Amount)
+		q.Add(t)
 	}
 	if q.Size() != QueueLimit {
 		t.Fatalf("q.Size() was %d", q.Size())

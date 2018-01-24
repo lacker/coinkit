@@ -1,6 +1,8 @@
 package currency
 
 import (
+	"log"
+	
 	"github.com/emirpasic/gods/sets/treeset"
 )
 
@@ -62,12 +64,13 @@ func (q *TransactionQueue) Add(t *SignedTransaction) {
 		return
 	}
 	q.set.Add(t)
-	if q.set.Size() >= QueueLimit {
+	if q.set.Size() > QueueLimit {
 		it := q.set.Iterator()
 		if !it.Last() {
-			panic("logical failure with treeset")
+			log.Fatal("logical failure with treeset")
 		}
-		q.set.Remove(it.Value())
+		worst := it.Value()
+		q.set.Remove(worst)
 	}
 }
 

@@ -1,8 +1,11 @@
 package network
 
 import (
+	"log"
+	
 	"coinkit/consensus"
 	"coinkit/currency"
+	"coinkit/util"
 )
 
 // A Node is a logical container for everything one node in the network handles.
@@ -16,7 +19,7 @@ func NewNode(publicKey string, qs consensus.QuorumSlice) *Node {
 	return &Node{
 		publicKey: publicKey,
 		chain: consensus.NewEmptyChain(publicKey, qs),
-		queue: currency.NewTransactionQueue,
+		queue: currency.NewTransactionQueue(),
 	}
 }
 
@@ -25,21 +28,23 @@ func NewNode(publicKey string, qs consensus.QuorumSlice) *Node {
 // just return nil if it has no particular response.
 func (node *Node) Handle(sender string, message util.Message) util.Message {
 	if sender == node.publicKey {
-		return
+		return nil
 	}
 	switch m := message.(type) {
-	case *TransactionMessage:
-		node.queue.Handle(sender, m)
-	case *NominationMessage:
-		node.chain.Handle(sender, m)
-	case *PrepareMessage:
-		node.chain.Handle(sender, m)
-	case *ConfirmMessage:
-		node.chain.Handle(sender, m)
-	case *ExternalizeMessage:
-		node.chain.Handle(sender, m)
+	case *currency.TransactionMessage:
+		node.queue.Handle(m)
+		return nil
+	case *consensus.NominationMessage:
+		return node.chain.Handle(sender, m)
+	case *consensus.PrepareMessage:
+		return node.chain.Handle(sender, m)
+	case *consensus.ConfirmMessage:
+		return node.chain.Handle(sender, m)
+	case *consensus.ExternalizeMessage:
+		return node.chain.Handle(sender, m)
 	default:
 		log.Printf("unrecognized message: %+v", m)
+		return nil
 	}
 }
 
@@ -49,5 +54,5 @@ func (node *Node) OutgoingMessages() []util.Message {
 	if sharing != nil {
 		answer = append(answer, sharing)
 	}
-	return sharing
+	return answer
 }
