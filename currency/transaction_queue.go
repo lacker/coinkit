@@ -14,6 +14,9 @@ const QueueLimit = 1000
 // TransactionQueue keeps the transactions that are pending but have neither
 // been rejected nor confirmed.
 type TransactionQueue struct {
+	// Just for logging
+	publicKey string
+	
 	set *treeset.Set
 
 	// Transactions that we have not yet shared
@@ -32,8 +35,9 @@ type TransactionQueue struct {
 	last consensus.SlotValue
 }
 
-func NewTransactionQueue() *TransactionQueue {
+func NewTransactionQueue(publicKey string) *TransactionQueue {
 	return &TransactionQueue{
+		publicKey: publicKey,
 		set: treeset.NewWith(HighestPriorityFirst),
 		outbox: []*SignedTransaction{},
 		chunks: make(map[consensus.SlotValue]*LedgerChunk),
@@ -105,7 +109,7 @@ func (q *TransactionQueue) SharingMessage() *TransactionMessage {
 		}
 	}
 	q.outbox = []*SignedTransaction{}
-	if len(ts) == 0 {
+	if len(ts) == 0 && len(q.chunks) == 0 {
 		return nil
 	}
 	return &TransactionMessage{
@@ -145,6 +149,7 @@ func (q *TransactionQueue) Handle(m *TransactionMessage) {
 			if chunk.Hash() != key {
 				continue
 			}
+			log.Printf("%s learned that %s = %+v", q.publicKey, key, chunk)
 			q.chunks[key] = chunk
 		}
 	}
@@ -200,6 +205,7 @@ func (q *TransactionQueue) NewChunk(
 		State: state,
 	}
 	key := chunk.Hash()
+	log.Printf("%s created chunk %+v with hash %s", q.publicKey, chunk, key)
 	q.chunks[key] = chunk
 	return key, chunk
 }
@@ -209,7 +215,7 @@ func (q *TransactionQueue) Combine(list []consensus.SlotValue) consensus.SlotVal
 	for _, v := range list {
 		chunk := q.chunks[v]
 		if chunk == nil {
-			panic("cannot combine chunks with unknown data")
+			log.Fatalf("%s cannot combine unknown chunk %s", q.publicKey, v)
 		}
 		for _, t := range chunk.Transactions {
 			set.Add(t)
@@ -256,4 +262,9 @@ func (q *TransactionQueue) SuggestValue() (consensus.SlotValue, bool) {
 		return consensus.SlotValue(""), false
 	}
 	return key, true
+}
+
+func (q *TransactionQueue) ValidateValue(v consensus.SlotValue) bool {
+	_, ok := q.chunks[v]
+	return ok
 }

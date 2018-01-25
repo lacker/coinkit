@@ -48,6 +48,10 @@ type ValueStore interface {
 	// the next slot value
 	// The bool is false when there is no value to suggest
 	SuggestValue() (SlotValue, bool)
+
+	// ValidateValue returns whether a value can be used by the consensus
+	// mechanism.
+	ValidateValue(v SlotValue) bool
 }
 
 // For testing, id strings are comma-separated lists of values.
@@ -88,4 +92,8 @@ func (t *TestValueStore) Last() SlotValue {
 
 func (t *TestValueStore) SuggestValue() (SlotValue, bool) {
 	return t.suggestion, true
+}
+
+func (t *TestValueStore) ValidateValue(v SlotValue) bool {
+	return true
 }

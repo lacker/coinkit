@@ -5,7 +5,7 @@ import (
 )
 
 func TestFullQueue(t *testing.T) {
-	q := NewTransactionQueue()
+	q := NewTransactionQueue("testqueue")
 	for i := 1; i <= QueueLimit + 10; i++ {
 		t := makeTestTransaction(i)
 		q.accounts.SetBalance(t.Transaction.From, 10 * t.Transaction.Amount)

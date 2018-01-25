@@ -213,14 +213,16 @@ func (s *NominationState) Handle(node string, m *NominationMessage) {
 	s.N[node] = m
 
 	for i := oldLenNom; i < len(m.Nom); i++ {
-		if !HasSlotValue(touched, m.Nom[i]) {
-			touched = append(touched, m.Nom[i])
+		value := m.Nom[i]
+		if !HasSlotValue(touched, value) {
+			touched = append(touched, value)
 		}
 
-		// If we don't have a candidate, we can support this new nomination
-		if !HasSlotValue(s.X, m.Nom[i]) {
-			s.Logf("%s supports the nomination of %+v", s.publicKey, m.Nom[i])
-			s.X = append(s.X, m.Nom[i])
+		// If we don't have a candidate, and the value is valid,
+		// we can support this new nomination
+		if !HasSlotValue(s.X, value) && s.values.ValidateValue(value) {
+			s.Logf("%s supports the nomination of %+v", s.publicKey, value)
+			s.X = append(s.X, value)
 			s.Logf("new s.X: %+v", s.X)
 		}
 	}
