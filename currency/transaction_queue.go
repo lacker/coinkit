@@ -114,25 +114,39 @@ func (q *TransactionQueue) SharingMessage() *TransactionMessage {
 	}
 }
 
+// MaxBalance is used for testing
+func (q *TransactionQueue) MaxBalance() uint64 {
+	return q.accounts.MaxBalance()
+}
+
+// SetBalance is used for testing
+func (q *TransactionQueue) SetBalance(owner string, balance uint64) {
+	q.accounts.SetBalance(owner, balance)
+}
+
 // Handles a transaction message from another node.
 func (q *TransactionQueue) Handle(m *TransactionMessage) {
 	if m == nil {
 		return
 	}
-	for _, t := range m.Transactions {
-		q.Add(t)
+	if m.Transactions != nil {
+		for _, t := range m.Transactions {
+			q.Add(t)
+		}
 	}
-	for key, chunk := range m.Chunks {
-		if _, ok := q.chunks[key]; ok {
-			continue
+	if m.Chunks != nil {
+		for key, chunk := range m.Chunks {
+			if _, ok := q.chunks[key]; ok {
+				continue
+			}
+			if !q.accounts.ValidateChunk(chunk) {
+				continue
+			}
+			if chunk.Hash() != key {
+				continue
+			}
+			q.chunks[key] = chunk
 		}
-		if !q.accounts.ValidateChunk(chunk) {
-			continue
-		}
-		if chunk.Hash() != key {
-			continue
-		}
-		q.chunks[key] = chunk
 	}
 }
 

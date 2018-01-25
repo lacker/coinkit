@@ -5,6 +5,12 @@ import (
 	"encoding/binary"
 )
 
+// Accounts are stored in units of nanocoins.
+const OneMillion = 1000 * 1000
+const NumCoins = 21 * OneMillion
+const OneBillion = 1000 * OneMillion
+const TotalMoney = NumCoins * OneBillion
+
 type Account struct {
 	// The sequence id of the last transaction authorized by this account.
 	// 0 means there have never been any authorized transactions.
@@ -44,6 +50,22 @@ func (m *AccountMap) CowCopy() *AccountMap {
 		data: make(map[string]*Account),
 		fallback: m,
 	}
+}
+
+func (m *AccountMap) MaxBalance() uint64 {
+	answer := uint64(0)
+	for _, account := range m.data {
+		if account.Balance > answer {
+			answer = account.Balance
+		}
+	}
+	if m.fallback != nil {
+		b := m.fallback.MaxBalance()
+		if b > answer {
+			answer = b
+		}
+	}
+	return answer
 }
 
 // Checks that the data in the account map is what we expect
