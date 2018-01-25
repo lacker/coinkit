@@ -4,7 +4,12 @@ import (
 	"crypto/sha512"
 	"encoding/base64"
 	"sort"
+
+	"coinkit/consensus"
 )
+
+// MaxChunkSize defines how many items can be put in a chunk
+const MaxChunkSize = 100
 
 // A LedgerChunk is the information in one block of the blockchain.
 type LedgerChunk struct {
@@ -16,7 +21,7 @@ type LedgerChunk struct {
 	State map[string]*Account
 }
 
-func (c *LedgerChunk) Hash() string {
+func (c *LedgerChunk) Hash() consensus.SlotValue {
 	h := sha512.New()
 	for _, t := range c.Transactions {
 		h.Write([]byte(t.Signature))
@@ -31,5 +36,6 @@ func (c *LedgerChunk) Hash() string {
 		account := c.State[key]
 		h.Write(account.Bytes())
 	}
-	return base64.RawStdEncoding.EncodeToString(h.Sum(nil))
+	return consensus.SlotValue(base64.RawStdEncoding.EncodeToString(h.Sum(nil)))
 }
+

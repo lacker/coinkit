@@ -2,12 +2,11 @@ package currency
 
 import (
 	"log"
-	
-	"github.com/emirpasic/gods/sets/treeset"
-)
 
-// MaxChunkSize defines how many items can be put in a chunk
-const MaxChunkSize = 100
+	"github.com/emirpasic/gods/sets/treeset"
+
+	"coinkit/consensus"
+)
 
 // QueueLimit defines how many items will be held in the queue at a time
 const QueueLimit = 1000
@@ -22,19 +21,24 @@ type TransactionQueue struct {
 
 	// The ledger chunks that are being considered
 	// They are indexed by their hash
-	chunks map[string]*LedgerChunk
+	chunks map[consensus.SlotValue]*LedgerChunk
 	
 	// accounts is used to validate transactions
 	// For now this is the actual authentic store of account data
 	// TODO: get this into a real database
 	accounts *AccountMap
+
+	// The key of the last chunk to get finalized
+	last consensus.SlotValue
 }
 
 func NewTransactionQueue() *TransactionQueue {
 	return &TransactionQueue{
 		set: treeset.NewWith(HighestPriorityFirst),
 		outbox: []*SignedTransaction{},
+		chunks: make(map[consensus.SlotValue]*LedgerChunk),
 		accounts: NewAccountMap(),
+		last: consensus.SlotValue(""),
 	}
 }
 
@@ -91,7 +95,7 @@ func (q *TransactionQueue) Contains(t *SignedTransaction) bool {
 	return q.set.Contains(t)
 }
 
-func (q *TransactionQueue) Values() []*SignedTransaction {
+func (q *TransactionQueue) Transactions() []*SignedTransaction {
 	answer := []*SignedTransaction{}
 	for _, t := range q.set.Values() {
 		answer = append(answer, t.(*SignedTransaction))
@@ -126,43 +130,33 @@ func (q *TransactionQueue) Validate(t *SignedTransaction) bool {
 	return t != nil && t.Verify() && q.accounts.Validate(t.Transaction)
 }
 
-func (q *TransactionQueue) ValidateChunk(chunk *LedgerChunk) bool {
-	if chunk == nil {
-		return false
-	}
-
-	if len(chunk.Transactions) > MaxChunkSize {
-		return false
-	}
-	
-	validator := q.accounts.CowCopy()
-	for _, t := range chunk.Transactions {
-		if !q.Validate(t) || !validator.Process(t.Transaction) {
-			return false
+// Revalidate checks all pending transactions to see if they are still valid
+func (q *TransactionQueue) Revalidate() {
+	for _, t := range q.Transactions() {
+		if !q.Validate(t) {
+			q.Remove(t)
 		}
 	}
-
-	for owner, account := range chunk.State {
-		if !validator.CheckEqual(owner, account) {
-			return false
-		}
-	}
-
-	return true
 }
 
-// SuggestChunk is called when the chain processing system thinks we should
-// nominate the value for the next chunk.
-// Returns nil if we don't have enough data to suggest anything
-func (q *TransactionQueue) SuggestChunk() *LedgerChunk {
+// NewLedgerChunk creates a ledger chunk from a list of signed transactions.
+// The list should already be sorted and deduped and the signed transactions
+// should be verified.
+// Returns "", nil if there were no valid transactions.
+// This adds a cache entry to q.chunks
+func (q *TransactionQueue) NewChunk(
+	ts []*SignedTransaction) (consensus.SlotValue, *LedgerChunk) {
+	var last *SignedTransaction
 	transactions := []*SignedTransaction{}
 	validator := q.accounts.CowCopy()
 	state := make(map[string]*Account)
-	for _, t := range q.Values() {
+	for _, t := range ts {
+		if last != nil && HighestPriorityFirst(last, t) >= 0 {
+			panic("NewLedgerChunk called on non-sorted list")
+		}
+		last = t
 		if validator.Process(t.Transaction) {
 			transactions = append(transactions, t)
-		} else {
-			q.Remove(t)
 		}
 		state[t.From] = validator.Get(t.From)
 		state[t.To] = validator.Get(t.To)
@@ -170,8 +164,68 @@ func (q *TransactionQueue) SuggestChunk() *LedgerChunk {
 			break
 		}
 	}
-	return &LedgerChunk{
+	if len(transactions) == 0 {
+		return consensus.SlotValue(""), nil
+	}
+	chunk := &LedgerChunk{
 		Transactions: transactions,
 		State: state,
 	}
+	key := chunk.Hash()
+	q.chunks[key] = chunk
+	return key, chunk
+}
+
+func (q *TransactionQueue) Combine(list []consensus.SlotValue) consensus.SlotValue {
+	set := treeset.NewWith(HighestPriorityFirst)
+	for _, v := range list {
+		chunk := q.chunks[v]
+		if chunk == nil {
+			panic("cannot combine chunks with unknown data")
+		}
+		for _, t := range chunk.Transactions {
+			set.Add(t)
+		}
+	}
+	transactions := []*SignedTransaction{}
+	for _, t := range set.Values() {
+		transactions = append(transactions, t.(*SignedTransaction))
+	}
+	value, chunk := q.NewChunk(transactions)
+	if chunk == nil {
+		panic("combining valid chunks led to nothing")
+	}
+	return value
+}
+
+func (q *TransactionQueue) Finalize(v consensus.SlotValue) {
+	chunk, ok := q.chunks[v]
+	if !ok {
+		panic("We are finalizing a chunk but we don't know its data.")
+	}
+	
+	if !q.accounts.ValidateChunk(chunk) {
+		panic("We could not validate a finalized chunk.")
+	}
+
+	if !q.accounts.ProcessChunk(chunk) {
+		panic("We could not process a finalized chunk.")
+	}
+
+	q.last = v
+	q.chunks = make(map[consensus.SlotValue]*LedgerChunk)
+	q.Revalidate()
+}
+
+func (q *TransactionQueue) Last() consensus.SlotValue {
+	return q.last
+}
+
+// SuggestValue returns a chunk that is keyed by its hash
+func (q *TransactionQueue) SuggestValue() (consensus.SlotValue, bool) {
+	key, chunk := q.NewChunk(q.Transactions())
+	if chunk == nil {
+		return consensus.SlotValue(""), false
+	}
+	return key, true
 }

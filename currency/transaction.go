@@ -65,7 +65,7 @@ func (s *SignedTransaction) Verify() bool {
 // Positive return indicates a > b
 // Comparison indicates overall "priority" putting the highest priority first.
 // This means that when a has a higher fee than b, a < b.
-func HighestPriorityFirst (a, b interface{}) int {
+func HighestPriorityFirst(a, b interface{}) int {
 	s1 := a.(*SignedTransaction)
 	s2 := b.(*SignedTransaction)
 

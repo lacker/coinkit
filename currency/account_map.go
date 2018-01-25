@@ -118,3 +118,35 @@ func (m *AccountMap) Process(t *Transaction) bool {
 	m.Set(t.To, newTarget)
 	return true
 }
+
+// ProcessChunk returns false if the whole chunk cannot be processed.
+// In this situation, the account map may be left with only some of
+// the transactions in the chunk processed.
+func (m *AccountMap) ProcessChunk(chunk *LedgerChunk) bool {
+	if chunk == nil {
+		return false
+	}
+	if len(chunk.Transactions) > MaxChunkSize {
+		return false
+	}
+
+	for _, t := range chunk.Transactions {
+		if t == nil || !t.Verify() || !m.Process(t.Transaction) {
+			return false
+		}
+	}
+
+	for owner, account := range chunk.State {
+		if !m.CheckEqual(owner, account) {
+			return false
+		}
+	}
+
+	return true
+}
+
+// ValidateChunk returns true iff ProcessChunk could succeed.
+func (m *AccountMap) ValidateChunk(chunk *LedgerChunk) bool {
+	copy := m.CowCopy()
+	return copy.ProcessChunk(chunk)
+}
