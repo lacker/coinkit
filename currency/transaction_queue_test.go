@@ -1,23 +1,8 @@
 package currency
 
 import (
-	"fmt"
 	"testing"
-
-	"coinkit/util"
 )
-
-func makeTestTransaction(n int) *SignedTransaction {
-	kp := util.NewKeyPairFromSecretPhrase(fmt.Sprintf("blorp %d", n))
-	t := &Transaction{
-		From: kp.PublicKey(),
-		Sequence: 1,
-		To: "nobody",
-		Amount: uint64(n),
-		Fee: uint64(n),
-	}
-	return t.SignWith(kp)
-}
 
 func TestFullQueue(t *testing.T) {
 	q := NewTransactionQueue()

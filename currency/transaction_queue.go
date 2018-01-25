@@ -20,6 +20,10 @@ type TransactionQueue struct {
 	// Transactions that we have not yet shared
 	outbox []*SignedTransaction
 
+	// The ledger chunks that are being considered
+	// They are indexed by their hash
+	chunks map[string]*LedgerChunk
+	
 	// accounts is used to validate transactions
 	// For now this is the actual authentic store of account data
 	// TODO: get this into a real database

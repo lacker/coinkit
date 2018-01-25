@@ -2,6 +2,7 @@ package currency
 
 import (
 	"encoding/json"
+	"fmt"
 	
 	"coinkit/util"
 )
@@ -84,4 +85,14 @@ func HighestPriorityFirst (a, b interface{}) int {
 	}
 }
 
-
+func makeTestTransaction(n int) *SignedTransaction {
+	kp := util.NewKeyPairFromSecretPhrase(fmt.Sprintf("blorp %d", n))
+	t := &Transaction{
+		From: kp.PublicKey(),
+		Sequence: 1,
+		To: "nobody",
+		Amount: uint64(n),
+		Fee: uint64(n),
+	}
+	return t.SignWith(kp)
+}

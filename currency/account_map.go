@@ -1,6 +1,8 @@
 package currency
 
 import (
+	"bytes"
+	"encoding/binary"
 )
 
 type Account struct {
@@ -11,6 +13,12 @@ type Account struct {
 
 	// The current balance of this account.
 	Balance uint64
+}
+
+func (a Account) Bytes() []byte {
+	var buffer bytes.Buffer
+	binary.Write(&buffer, binary.LittleEndian, a)
+	return buffer.Bytes()
 }
 
 // Used to map a public key to its Account
