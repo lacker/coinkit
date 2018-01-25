@@ -16,13 +16,12 @@ type Node struct {
 }
 
 func NewNode(publicKey string, qs consensus.QuorumSlice) *Node {
-	// TODO: make this use the transaction queue instead
-	vs := consensus.NewTestValueStore(1337)
+	queue := currency.NewTransactionQueue()
 	
 	return &Node{
 		publicKey: publicKey,
-		chain: consensus.NewEmptyChain(publicKey, qs, vs),
-		queue: currency.NewTransactionQueue(),
+		chain: consensus.NewEmptyChain(publicKey, qs, queue),
+		queue: queue,
 	}
 }
 
@@ -52,10 +51,13 @@ func (node *Node) Handle(sender string, message util.Message) util.Message {
 }
 
 func (node *Node) OutgoingMessages() []util.Message {
-	answer := node.chain.OutgoingMessages()
+	answer := []util.Message{}
 	sharing := node.queue.SharingMessage()
 	if sharing != nil {
 		answer = append(answer, sharing)
+	}
+	for _, m := range node.chain.OutgoingMessages() {
+		answer = append(answer, m)
 	}
 	return answer
 }

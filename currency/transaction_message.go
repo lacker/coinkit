@@ -3,6 +3,7 @@ package currency
 import (
 	"sort"
 
+	"coinkit/consensus"
 	"coinkit/util"
 )
 
@@ -13,7 +14,11 @@ import (
 
 type TransactionMessage struct {
 	// Should be sorted and non-nil
+	// Only contains transactions that were not previously sent
 	Transactions []*SignedTransaction
+
+	// Contains any chunks that might be in the immediately following messages
+	Chunks map[consensus.SlotValue]*LedgerChunk
 }
 
 func (m *TransactionMessage) Slot() int {
@@ -32,6 +37,7 @@ func NewTransactionMessage(ts ...*SignedTransaction) *TransactionMessage {
 
 	return &TransactionMessage{
 		Transactions: ts,
+		Chunks: make(map[consensus.SlotValue]*LedgerChunk),
 	}
 }
 

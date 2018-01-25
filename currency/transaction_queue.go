@@ -82,15 +82,6 @@ func (q *TransactionQueue) Add(t *SignedTransaction) {
 	}
 }
 
-func (q *TransactionQueue) Handle(m *TransactionMessage) {
-	if m == nil {
-		return
-	}
-	for _, t := range m.Transactions {
-		q.Add(t)
-	}
-}
-
 func (q *TransactionQueue) Contains(t *SignedTransaction) bool {
 	return q.set.Contains(t)
 }
@@ -119,6 +110,29 @@ func (q *TransactionQueue) SharingMessage() *TransactionMessage {
 	}
 	return &TransactionMessage{
 		Transactions: ts,
+		Chunks: q.chunks,
+	}
+}
+
+// Handles a transaction message from another node.
+func (q *TransactionQueue) Handle(m *TransactionMessage) {
+	if m == nil {
+		return
+	}
+	for _, t := range m.Transactions {
+		q.Add(t)
+	}
+	for key, chunk := range m.Chunks {
+		if _, ok := q.chunks[key]; ok {
+			continue
+		}
+		if !q.accounts.ValidateChunk(chunk) {
+			continue
+		}
+		if chunk.Hash() != key {
+			continue
+		}
+		q.chunks[key] = chunk
 	}
 }
 
