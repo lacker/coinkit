@@ -1,7 +1,6 @@
 package network
 
 import (
-	"bufio"
 	"fmt"
 	"log"
 	"math/rand"
@@ -32,10 +31,13 @@ type Server struct {
 	info map[string]*PeerInfo
 	node *Node
 	outgoing []util.Message
+
+	// Messages get validated before entering the inbox
 	inbox chan *util.SignedMessage
 }
 
 func NewServer(c *Config) *Server {
+	inbox := make(chan *util.SignedMessage)
 	var peers []*Peer
 	log.Printf("config has peers: %v", c.PeerPorts)
 	for _, p := range c.PeerPorts {
@@ -47,6 +49,7 @@ func NewServer(c *Config) *Server {
 	// At the start, all money is in the "mint" account
 	node := NewNode(c.KeyPair.PublicKey(), qs)
 	mint := util.NewKeyPairFromSecretPhrase("mint")
+	log.Printf("establishing a mint: %s", mint.PublicKey())
 	node.queue.SetBalance(mint.PublicKey(), currency.TotalMoney)
 	
 	return &Server{
@@ -56,7 +59,7 @@ func NewServer(c *Config) *Server {
 		info: make(map[string]*PeerInfo),
 		node: node,
 		outgoing: node.OutgoingMessages(),
-		inbox: make(chan *util.SignedMessage),
+		inbox: inbox,
 	}
 }
 
@@ -64,21 +67,10 @@ func NewServer(c *Config) *Server {
 // This is likely to include many messages, all separated by endlines.
 func (s *Server) handleConnection(conn net.Conn) {
 	for {
-		data, err := bufio.NewReader(conn).ReadString('\n')
+		sm, err := util.ReadSignedMessage(conn)
 		if err != nil {
-			conn.Close()
-			break
-		}
-
-		// Chop the newline
-		serialized := data[:len(data)-1]
-		sm, err := util.NewSignedMessageFromSerialized(serialized)
-		if err != nil {
-			// The signature isn't valid.
-			// Maybe the message got chopped off? Maybe they are bad guys?
 			// Assume good intentions and close the connection.
-			log.Printf("got %d bytes of bad data: [%s]", len(serialized), serialized)
-			log.Printf("error: %v", err)
+			log.Printf("connection error: %v", err)
 			conn.Close()
 			break
 		}
@@ -93,7 +85,7 @@ func (s *Server) handleConnection(conn net.Conn) {
 		// Send this message to the processing goroutine
 		s.inbox <- sm
 		
-		fmt.Fprintf(conn, "ok\n")
+		util.WriteNilMessageTo(conn)
 	}
 }
 
@@ -101,6 +93,7 @@ func (s *Server) handleConnection(conn net.Conn) {
 // node objects aren't threadsafe.
 // Caller should be validating the signature
 func (s *Server) handleMessage(sm *util.SignedMessage) {
+	// TODO: send back any response messages
 	s.node.Handle(sm.Signer(), sm.Message())
 	s.outgoing = s.node.OutgoingMessages()
 }

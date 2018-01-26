@@ -26,6 +26,15 @@ func (m *AccountMessage) MessageType() string {
 	return "A"
 }
 
+func NewInquiryMessage(user string) *AccountMessage {
+	state := make(map[string]*Account)
+	state[user] = nil
+	return &AccountMessage{
+		I: 0,
+		State: state,
+	}	
+}
+
 func init() {
 	util.RegisterMessageType(&AccountMessage{})
 }

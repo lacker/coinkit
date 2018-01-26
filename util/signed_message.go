@@ -1,10 +1,14 @@
 package util
 
 import (
+	"bufio"
 	"errors"
 	"fmt"
+	"io"
 	"strings"
 )
+
+const OK = "ok"
 
 type SignedMessage struct {
 	message Message
@@ -57,4 +61,30 @@ func NewSignedMessageFromSerialized(serialized string) (*SignedMessage, error) {
 		signer: signer,
 		signature: signature,
 	}, nil
+}
+
+func (sm *SignedMessage) WriteTo(w io.Writer) {
+	fmt.Fprintf(w, sm.Serialize() + "\n")
+}
+
+func WriteNilMessageTo(w io.Writer) {
+	fmt.Fprintf(w, OK + "\n")
+}
+
+// ReadSignedMessage can return a nil message even when there is no error.
+// Specifically, a line with just "ok" indicates no message, but also no error.
+// The caller is responsible for setting any deadlines.
+func ReadSignedMessage(r io.Reader) (*SignedMessage, error) {
+	data, err := bufio.NewReader(r).ReadString('\n')
+	if err != nil {
+		return nil, err
+	}
+
+	// Chop the newline
+	serialized := data[:len(data)-1]
+	if serialized == OK {
+		return nil, nil
+	}
+	
+	return NewSignedMessageFromSerialized(serialized)
 }

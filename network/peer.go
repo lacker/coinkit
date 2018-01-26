@@ -6,6 +6,10 @@ import "log"
 import "net"
 import "time"
 
+// A Peer is an outgoing connection that we established to a server that
+// should be running the full node logic.
+// It will keep redialing even after disconnects.
+// TODO: convert from string to SignedMessage
 type Peer struct {
 	port      int
 	conn      net.Conn

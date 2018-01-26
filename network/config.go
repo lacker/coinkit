@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"math"
+	"math/rand"
 	
 	"coinkit/util"
 )
@@ -30,6 +31,11 @@ type Config struct {
 
 func LocalKeyPair(arg int) *util.KeyPair {
 	return util.NewKeyPairFromSecretPhrase(fmt.Sprintf("localnet node %d", arg))
+}
+
+// Just returns a port
+func RandomLocalServer() int {
+	return BasePort + rand.Intn(NumPeers)
 }
 
 func NewLocalConfig(arg int) *Config {
