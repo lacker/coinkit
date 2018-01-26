@@ -123,10 +123,8 @@ func (s *Server) listen() {
 
 func (s *Server) broadcast(m util.Message) {
 	sm := util.NewSignedMessage(s.keyPair, m)
-	line := sm.Serialize()
-	// log.Printf("sending %d bytes of data: [%s]", len(line), line)
 	for _, peer := range s.peers {
-		peer.Send(line)
+		peer.Send(sm)
 	}
 }
 

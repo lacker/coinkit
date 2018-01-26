@@ -1,19 +1,21 @@
 package network
 
-import "bufio"
-import "fmt"
-import "log"
-import "net"
-import "time"
+import (
+	"fmt"
+	"log"
+	"net"
+	"time"
+
+	"coinkit/util"
+)
 
 // A Peer is an outgoing connection that we established to a server that
 // should be running the full node logic.
 // It will keep redialing even after disconnects.
-// TODO: convert from string to SignedMessage
 type Peer struct {
 	port      int
 	conn      net.Conn
-	outbox    chan string
+	outbox    chan *util.SignedMessage
 	connected bool
 }
 
@@ -51,23 +53,25 @@ func (p *Peer) sendForever() {
 		message := <-p.outbox
 		for {
 			p.connect()
-			// log.Printf("sending message: %s", message)
-			fmt.Fprintf(p.conn, message+"\n")
+			message.WriteTo(p.conn)
 
 			// If we get an ok, great.
 			// If we don't get an ok, disconnect and try again.
 			p.conn.SetReadDeadline(time.Now().Add(5 * time.Second))
-			_, err := bufio.NewReader(p.conn).ReadString('\n')
-			if err == nil {
-				break
+			_, err := util.ReadSignedMessage(p.conn)
+
+			if err != nil {
+				log.Printf("bad response from port %d: %+v", p.port, err)
+				p.disconnect()
+				continue
 			}
-			log.Printf("did not receive an ok from port %d: %+v", p.port, err)
-			p.disconnect()
+
+			// TODO: handle the response
 		}
 	}
 }
 
-func (p *Peer) Send(message string) {
+func (p *Peer) Send(message *util.SignedMessage) {
 	for {
 		// Add to the outbox if we can
 		select {
@@ -90,7 +94,7 @@ func NewPeer(port int) *Peer {
 	log.Printf("connecting to peer at port %d", port)
 	// outbox has a buffer of buflen outgoing messages
 	buflen := 1
-	p := &Peer{port: port, outbox: make(chan string, buflen)}
+	p := &Peer{port: port, outbox: make(chan *util.SignedMessage, buflen)}
 	go p.sendForever()
 	return p
 }
