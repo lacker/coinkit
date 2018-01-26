@@ -33,9 +33,12 @@ func (node *Node) Handle(sender string, message util.Message) util.Message {
 		return nil
 	}
 	switch m := message.(type) {
+
+	case *currency.AccountMessage:
+		return node.queue.Handle(m)
 	case *currency.TransactionMessage:
-		node.queue.Handle(m)
-		return nil
+		return node.queue.Handle(m)
+
 	case *consensus.NominationMessage:
 		return node.chain.Handle(sender, m)
 	case *consensus.PrepareMessage:
@@ -44,6 +47,7 @@ func (node *Node) Handle(sender string, message util.Message) util.Message {
 		return node.chain.Handle(sender, m)
 	case *consensus.ExternalizeMessage:
 		return node.chain.Handle(sender, m)
+
 	default:
 		log.Printf("unrecognized message: %+v", m)
 		return nil

@@ -6,6 +6,7 @@ import (
 	"github.com/emirpasic/gods/sets/treeset"
 
 	"coinkit/consensus"
+	"coinkit/util"
 )
 
 // QueueLimit defines how many items will be held in the queue at a time
@@ -33,6 +34,9 @@ type TransactionQueue struct {
 
 	// The key of the last chunk to get finalized
 	last consensus.SlotValue
+
+	// The current slot we are working on
+	slot int
 }
 
 func NewTransactionQueue(publicKey string) *TransactionQueue {
@@ -43,6 +47,7 @@ func NewTransactionQueue(publicKey string) *TransactionQueue {
 		chunks: make(map[consensus.SlotValue]*LedgerChunk),
 		accounts: NewAccountMap(),
 		last: consensus.SlotValue(""),
+		slot: 1,
 	}
 }
 
@@ -128,8 +133,41 @@ func (q *TransactionQueue) SetBalance(owner string, balance uint64) {
 	q.accounts.SetBalance(owner, balance)
 }
 
+// Handle handles an incoming message.
+// It may return a message to be sent back to the original sender, or it
+// may just return nil if it has no particular response.
+func (q *TransactionQueue) Handle(message util.Message) util.Message {
+	switch m := message.(type) {
+
+	case *TransactionMessage:
+		q.HandleTransactionMessage(m)
+		return nil
+
+	case *AccountMessage:
+		return q.HandleAccountMessage(m)
+		
+	default:
+		log.Printf("queue did not recognize message: %+v", m)
+		return nil
+	}
+}
+
+func (q *TransactionQueue) HandleAccountMessage(m *AccountMessage) *AccountMessage {
+	if m == nil {
+		return nil
+	}
+	output := &AccountMessage{
+		I: q.slot,
+		State: make(map[string]*Account),
+	}
+	for key, _ := range m.State {
+		output.State[key] = q.accounts.Get(key)
+	}
+	return output
+}
+
 // Handles a transaction message from another node.
-func (q *TransactionQueue) Handle(m *TransactionMessage) {
+func (q *TransactionQueue) HandleTransactionMessage(m *TransactionMessage) {
 	if m == nil {
 		return
 	}
@@ -248,6 +286,7 @@ func (q *TransactionQueue) Finalize(v consensus.SlotValue) {
 
 	q.last = v
 	q.chunks = make(map[consensus.SlotValue]*LedgerChunk)
+	q.slot += 1
 	q.Revalidate()
 }
 
