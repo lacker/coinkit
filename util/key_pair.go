@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"crypto"
 	"crypto/rand"
+	"crypto/sha512"	
 	"encoding/base64"
 	"golang.org/x/crypto/ed25519"
 )
@@ -24,11 +25,11 @@ func NewKeyPair() *KeyPair {
 
 func NewKeyPairFromSecretPhrase(phrase string) *KeyPair {
 	// ed25519 needs 32 bytes of "entropy".
-	// Repeat the passphrase with commas to pad it out
-	for len(phrase) < 32 {
-		phrase = phrase + "," + phrase
-	}
-	reader := bytes.NewReader([]byte(phrase))
+	// Use the hash of the phrase for that.
+	h := sha512.New()
+	h.Write([]byte(phrase))
+	checksum := h.Sum(nil)
+	reader := bytes.NewReader(checksum)
 	pub, priv, err := ed25519.GenerateKey(reader)
 	if err != nil {
 		panic(err)
