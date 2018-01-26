@@ -1,10 +1,11 @@
 package currency
 
 import (
-	"crypto/sha512"
 	"encoding/base64"
 	"sort"
 
+	"golang.org/x/crypto/sha3"
+	
 	"coinkit/consensus"
 )
 
@@ -22,7 +23,7 @@ type LedgerChunk struct {
 }
 
 func (c *LedgerChunk) Hash() consensus.SlotValue {
-	h := sha512.New()
+	h := sha3.New512()
 	for _, t := range c.Transactions {
 		h.Write([]byte(t.Signature))
 	}
