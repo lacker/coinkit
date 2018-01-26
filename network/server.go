@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"coinkit/consensus"
+	"coinkit/currency"
 	"coinkit/util"
 )
 
@@ -29,7 +30,7 @@ type Server struct {
 	keyPair *util.KeyPair
 	peers []*Peer
 	info map[string]*PeerInfo
-	chain *consensus.Chain
+	node *Node
 	outgoing []util.Message
 	inbox chan *util.SignedMessage
 }
@@ -41,18 +42,20 @@ func NewServer(c *Config) *Server {
 		peers = append(peers, NewPeer(p))
 	}
 
-	// TODO: replace with a Node
-	vs := consensus.NewTestValueStore(c.Port)
 	qs := consensus.MakeQuorumSlice(c.Members, c.Threshold)
-	chain := consensus.NewEmptyChain(c.KeyPair.PublicKey(), qs, vs)
+	
+	// At the start, all money is in the "mint" account
+	node := NewNode(c.KeyPair.PublicKey(), qs)
+	mint := util.NewKeyPairFromSecretPhrase("mint")
+	node.queue.SetBalance(mint.PublicKey(), currency.TotalMoney)
 	
 	return &Server{
 		port: c.Port,
 		keyPair: c.KeyPair,
 		peers: peers,
 		info: make(map[string]*PeerInfo),
-		chain: chain,
-		outgoing: chain.OutgoingMessages(),
+		node: node,
+		outgoing: node.OutgoingMessages(),
 		inbox: make(chan *util.SignedMessage),
 	}
 }
@@ -95,11 +98,11 @@ func (s *Server) handleConnection(conn net.Conn) {
 }
 
 // handleMessage should only be called by a single goroutine, because the
-// chain objects aren't threadsafe.
+// node objects aren't threadsafe.
 // Caller should be validating the signature
 func (s *Server) handleMessage(sm *util.SignedMessage) {
-	s.chain.Handle(sm.Signer(), sm.Message())
-	s.outgoing = s.chain.OutgoingMessages()
+	s.node.Handle(sm.Signer(), sm.Message())
+	s.outgoing = s.node.OutgoingMessages()
 }
 
 func (s *Server) handleMessagesForever() {
