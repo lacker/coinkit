@@ -12,23 +12,10 @@ import (
 	"coinkit/util"
 )
 
-type PeerInfo struct {
-	publicKey string
-	uptime int
-}
-
-func NewPeerInfo(publicKey string) *PeerInfo {
-	return &PeerInfo{
-		publicKey: publicKey,
-		uptime: 0,
-	}
-}
-
 type Server struct {
 	port int
 	keyPair *util.KeyPair
 	peers []*Peer
-	info map[string]*PeerInfo
 	node *Node
 	outgoing []util.Message
 
@@ -56,7 +43,6 @@ func NewServer(c *Config) *Server {
 		port: c.Port,
 		keyPair: c.KeyPair,
 		peers: peers,
-		info: make(map[string]*PeerInfo),
 		node: node,
 		outgoing: node.OutgoingMessages(),
 		inbox: inbox,
@@ -73,13 +59,6 @@ func (s *Server) handleConnection(conn net.Conn) {
 			log.Printf("connection error: %v", err)
 			conn.Close()
 			break
-		}
-
-		// Get the info for this peer
-		info, ok := s.info[sm.Signer()]
-		if !ok {
-			info = NewPeerInfo(sm.Signer())
-			s.info[info.publicKey] = info
 		}
 
 		// Send this message to the processing goroutine
