@@ -19,12 +19,14 @@ type Server struct {
 	node *Node
 	outgoing []util.Message
 
-	// Messages get validated before entering the inbox
-	inbox chan *util.SignedMessage
+	// Messages we are going to handle. These do not require a response
+	messages chan *util.SignedMessage
+	
+	// Requests we are going to handle. These require a response
+	requests chan *Request
 }
 
 func NewServer(c *Config) *Server {
-	inbox := make(chan *util.SignedMessage)
 	var peers []*Client
 	log.Printf("config has peers: %v", c.PeerPorts)
 	for _, p := range c.PeerPorts {
@@ -45,7 +47,8 @@ func NewServer(c *Config) *Server {
 		peers: peers,
 		node: node,
 		outgoing: node.OutgoingMessages(),
-		inbox: inbox,
+		messages: make(chan *util.SignedMessage),
+		requests: make(chan *Request),
 	}
 }
 
@@ -61,26 +64,51 @@ func (s *Server) handleConnection(conn net.Conn) {
 			break
 		}
 
-		// Send this message to the processing goroutine
-		s.inbox <- sm
+		if sm == nil {
+			continue
+		}
 		
-		util.WriteNilMessageTo(conn)
+		// Send this message to the processing goroutine
+		response := make(chan *util.SignedMessage)
+		request := &Request{
+			Message: sm,
+			Response: response,
+		}
+
+		// Send our request to the processing goroutine, wait for the response,
+		// and return it down the connection
+		s.requests <- request
+		m := <-response
+
+		util.WriteSignedMessage(conn, m)
 	}
 }
 
-// handleMessage should only be called by a single goroutine, because the
-// node objects aren't threadsafe.
-// Caller should be validating the signature
-func (s *Server) handleMessage(sm *util.SignedMessage) {
-	// TODO: send back any response messages
-	s.node.Handle(sm.Signer(), sm.Message())
+func (s *Server) handleMessage(m *util.SignedMessage) *util.SignedMessage {
+	message := s.node.Handle(m.Signer(), m.Message())
+	sm := util.NewSignedMessage(s.keyPair, message)
 	s.outgoing = s.node.OutgoingMessages()
+	return sm
 }
 
 func (s *Server) handleMessagesForever() {
 	for {
-		m := <-s.inbox
-		s.handleMessage(m)
+		select {
+
+		case request := <-s.requests:
+			if request.Message != nil {
+				response := s.handleMessage(request.Message)
+				if request.Response != nil {
+					request.Response <- response
+				}
+			}
+		
+		case message := <-s.messages:
+			if message != nil {
+				s.handleMessage(message)
+			}
+
+		}		
 	}
 }
 
@@ -116,7 +144,10 @@ func (s *Server) ServeForever() {
 		for _, m := range messages {
 			sm := util.NewSignedMessage(s.keyPair, m)
 			for _, peer := range s.peers {
-				peer.Send(sm)
+				peer.Send(&Request{
+					Message: sm,
+					Response: s.messages,
+				})
 			}
 		}
 	}

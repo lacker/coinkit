@@ -14,7 +14,7 @@ import (
 type Client struct {
 	port      int
 	conn      net.Conn
-	outbox    chan *util.SignedMessage
+	queue    chan *Request
 	connected bool
 }
 
@@ -49,15 +49,18 @@ func (p *Client) disconnect() {
 func (p *Client) sendForever() {
 	// Send from the queue
 	for {
-		message := <-p.outbox
+		request := <-p.queue
+		if request.Message == nil {
+			log.Fatal("do not send nil messages through clients")
+		}
 		for {
 			p.connect()
-			message.WriteTo(p.conn)
+			util.WriteSignedMessage(p.conn, request.Message)
 
 			// If we get an ok, great.
 			// If we don't get an ok, disconnect and try again.
 			p.conn.SetReadDeadline(time.Now().Add(5 * time.Second))
-			_, err := util.ReadSignedMessage(p.conn)
+			response, err := util.ReadSignedMessage(p.conn)
 
 			if err != nil {
 				log.Printf("bad response from port %d: %+v", p.port, err)
@@ -65,35 +68,41 @@ func (p *Client) sendForever() {
 				continue
 			}
 
-			// TODO: handle the response
+			if request.Response != nil {
+				request.Response <- response
+			}
 		}
 	}
 }
 
-func (p *Client) Send(message *util.SignedMessage) {
+func (c *Client) Send(r *Request) {
 	for {
-		// Add to the outbox if we can
+		// Add to the queue if we can
 		select {
-		case p.outbox <- message:
+		case c.queue <- r:
 			return
 		default:
 			// The queue filled up
 		}
 
-		// Pop something off the outbox to be discarded if we can
+		// Pop something off the queue to be discarded if we can
 		select {
-		case _ = <-p.outbox:
+		case _ = <-c.queue:
 		default:
 			// There must be some racing. Just busy-add
 		}
 	}
 }
 
+// NewClient constructs a new client by connecting to the given port.
 func NewClient(port int) *Client {
 	log.Printf("connecting to peer at port %d", port)
-	// outbox has a buffer of buflen outgoing messages
+	// queue has a buffer of buflen outgoing messages
 	buflen := 1
-	p := &Client{port: port, outbox: make(chan *util.SignedMessage, buflen)}
+	p := &Client{
+		port: port,
+		queue: make(chan *Request, buflen),
+	}
 	go p.sendForever()
 	return p
 }

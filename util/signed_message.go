@@ -63,12 +63,12 @@ func NewSignedMessageFromSerialized(serialized string) (*SignedMessage, error) {
 	}, nil
 }
 
-func (sm *SignedMessage) WriteTo(w io.Writer) {
-	fmt.Fprintf(w, sm.Serialize() + "\n")
-}
-
-func WriteNilMessageTo(w io.Writer) {
-	fmt.Fprintf(w, OK + "\n")
+func WriteSignedMessage(w io.Writer, sm *SignedMessage) {
+	if sm == nil {
+		fmt.Fprintf(w, OK + "\n")
+	} else {
+		fmt.Fprintf(w, sm.Serialize() + "\n")
+	}
 }
 
 // ReadSignedMessage can return a nil message even when there is no error.
