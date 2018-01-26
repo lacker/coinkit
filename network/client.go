@@ -9,10 +9,9 @@ import (
 	"coinkit/util"
 )
 
-// A Peer is an outgoing connection that we established to a server that
-// should be running the full node logic.
+// A Client is a network connection established to a Server.
 // It will keep redialing even after disconnects.
-type Peer struct {
+type Client struct {
 	port      int
 	conn      net.Conn
 	outbox    chan *util.SignedMessage
@@ -20,7 +19,7 @@ type Peer struct {
 }
 
 // connect is idempotent
-func (p *Peer) connect() {
+func (p *Client) connect() {
 	if p.connected {
 		return
 	}
@@ -39,7 +38,7 @@ func (p *Peer) connect() {
 	}
 }
 
-func (p *Peer) disconnect() {
+func (p *Client) disconnect() {
 	if p.conn != nil {
 		p.conn.Close()
 	}
@@ -47,7 +46,7 @@ func (p *Peer) disconnect() {
 }
 
 // sendForever should handle disconnects or unresponsive peers.
-func (p *Peer) sendForever() {
+func (p *Client) sendForever() {
 	// Send from the queue
 	for {
 		message := <-p.outbox
@@ -71,7 +70,7 @@ func (p *Peer) sendForever() {
 	}
 }
 
-func (p *Peer) Send(message *util.SignedMessage) {
+func (p *Client) Send(message *util.SignedMessage) {
 	for {
 		// Add to the outbox if we can
 		select {
@@ -90,11 +89,11 @@ func (p *Peer) Send(message *util.SignedMessage) {
 	}
 }
 
-func NewPeer(port int) *Peer {
+func NewClient(port int) *Client {
 	log.Printf("connecting to peer at port %d", port)
 	// outbox has a buffer of buflen outgoing messages
 	buflen := 1
-	p := &Peer{port: port, outbox: make(chan *util.SignedMessage, buflen)}
+	p := &Client{port: port, outbox: make(chan *util.SignedMessage, buflen)}
 	go p.sendForever()
 	return p
 }

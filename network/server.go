@@ -15,7 +15,7 @@ import (
 type Server struct {
 	port int
 	keyPair *util.KeyPair
-	peers []*Peer
+	peers []*Client
 	node *Node
 	outgoing []util.Message
 
@@ -25,10 +25,10 @@ type Server struct {
 
 func NewServer(c *Config) *Server {
 	inbox := make(chan *util.SignedMessage)
-	var peers []*Peer
+	var peers []*Client
 	log.Printf("config has peers: %v", c.PeerPorts)
 	for _, p := range c.PeerPorts {
-		peers = append(peers, NewPeer(p))
+		peers = append(peers, NewClient(p))
 	}
 
 	qs := consensus.MakeQuorumSlice(c.Members, c.Threshold)
@@ -100,25 +100,24 @@ func (s *Server) listen() {
 	}
 }
 
-func (s *Server) broadcast(m util.Message) {
-	sm := util.NewSignedMessage(s.keyPair, m)
-	for _, peer := range s.peers {
-		peer.Send(sm)
-	}
-}
-
 // ServeForever spawns off all the goroutines
 func (s *Server) ServeForever() {
 	go s.handleMessagesForever()
 	go s.listen()
 
 	for {
+		// TODO: go faster if we have new info
 		time.Sleep(time.Second * time.Duration(1 + rand.Float64()))
+
+		// Broadcast to all peers
 		// Don't use s.outgoing directly in case the listen() goroutine
 		// modifies it while we iterate on it
 		messages := s.outgoing
-		for _, message := range messages {
-			s.broadcast(message)
+		for _, m := range messages {
+			sm := util.NewSignedMessage(s.keyPair, m)
+			for _, peer := range s.peers {
+				peer.Send(sm)
+			}
 		}
 	}
 }
