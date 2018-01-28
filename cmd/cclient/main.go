@@ -1,6 +1,7 @@
 package main 
 
 import (
+	"bufio"
 	"log"
 	"os"
 
@@ -35,6 +36,10 @@ func status(user string) {
 
 // Ask the user for a passphrase to log in.
 func login() *util.KeyPair {
+	scanner := bufio.NewScanner(os.Stdin)
+	scanner.Scan()
+    phrase := scanner.Text()
+
 	panic("TODO")
 }
 
