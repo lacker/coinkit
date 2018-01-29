@@ -21,7 +21,7 @@ type Server struct {
 
 	// Messages we are going to handle. These do not require a response
 	messages chan *util.SignedMessage
-	
+
 	// Requests we are going to handle. These require a response
 	requests chan *Request
 }
@@ -34,13 +34,13 @@ func NewServer(c *Config) *Server {
 	}
 
 	qs := consensus.MakeQuorumSlice(c.Members, c.Threshold)
-	
+
 	// At the start, all money is in the "mint" account
 	node := NewNode(c.KeyPair.PublicKey(), qs)
 	mint := util.NewKeyPairFromSecretPhrase("mint")
 	log.Printf("establishing a mint: %s", mint.PublicKey())
 	node.queue.SetBalance(mint.PublicKey(), currency.TotalMoney)
-	
+
 	return &Server{
 		port: c.Port,
 		keyPair: c.KeyPair,
@@ -67,7 +67,7 @@ func (s *Server) handleConnection(conn net.Conn) {
 		if sm == nil {
 			continue
 		}
-		
+
 		// Send this message to the processing goroutine
 		response := make(chan *util.SignedMessage)
 		request := &Request{
@@ -105,13 +105,13 @@ func (s *Server) handleMessagesForever() {
 					request.Response <- response
 				}
 			}
-		
+
 		case message := <-s.messages:
 			if message != nil {
 				s.handleMessage(message)
 			}
 
-		}		
+		}
 	}
 }
 
