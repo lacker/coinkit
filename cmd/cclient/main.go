@@ -39,8 +39,14 @@ func login() *util.KeyPair {
 	scanner := bufio.NewScanner(os.Stdin)
 	scanner.Scan()
     phrase := scanner.Text()
+	log.Printf("phrase: [%s]", phrase)
+	return util.NewKeyPairFromSecretPhrase(phrase)
+}
 
-	panic("TODO")
+func send(recipient string, amount string) {
+	kp := login()
+	log.Printf("kp: %+v", kp)
+	// TODO: fetch our own data so that we know what sequence number to use
 }
 
 // cclient runs a client that connects to the coinkit network.
@@ -60,7 +66,7 @@ func main() {
 		if len(rest) != 2 {
 			log.Fatal("Usage: cclient send <user> <amount>")
 		}
-		panic("TODO")
+		send(rest[0], rest[1])
 	default:
 		log.Fatalf("unrecognized operation: %s", op)
 	}
