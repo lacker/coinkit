@@ -7,7 +7,7 @@ if [ ! -d "$LOGS" ]; then
     exit 1
 fi
 
-RUNNING=`ps aux | grep '[^a-z]cserver' | grep -v grep`
+RUNNING=`ps aux | grep ^cserver`
 if [ -n "$RUNNING" ]
 then
     echo "there are already cservers running:"

@@ -5,6 +5,7 @@ import (
 	"log"
 	"math"
 	"math/rand"
+	"time"
 	
 	"coinkit/util"
 )
@@ -35,6 +36,7 @@ func LocalKeyPair(arg int) *util.KeyPair {
 
 // Just returns a port
 func RandomLocalServer() int {
+	rand.Seed(int64(time.Now().Nanosecond()))
 	return BasePort + rand.Intn(NumPeers)
 }
 

@@ -86,8 +86,11 @@ func (s *Server) handleConnection(conn net.Conn) {
 
 func (s *Server) handleMessage(m *util.SignedMessage) *util.SignedMessage {
 	message := s.node.Handle(m.Signer(), m.Message())
-	sm := util.NewSignedMessage(s.keyPair, message)
 	s.outgoing = s.node.OutgoingMessages()
+	if message == nil {
+		return nil
+	}
+	sm := util.NewSignedMessage(s.keyPair, message)
 	return sm
 }
 
