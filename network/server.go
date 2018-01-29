@@ -2,6 +2,7 @@ package network
 
 import (
 	"fmt"
+	"io"
 	"log"
 	"math/rand"
 	"net"
@@ -58,8 +59,9 @@ func (s *Server) handleConnection(conn net.Conn) {
 	for {
 		sm, err := util.ReadSignedMessage(conn)
 		if err != nil {
-			// Assume good intentions and close the connection.
-			log.Printf("connection error: %v", err)
+			if err != io.EOF {
+				log.Printf("connection error: %v", err)
+			}
 			conn.Close()
 			break
 		}
@@ -67,6 +69,8 @@ func (s *Server) handleConnection(conn net.Conn) {
 		if sm == nil {
 			continue
 		}
+
+		log.Printf("got message: %+v", sm.Message())
 		
 		// Send this message to the processing goroutine
 		response := make(chan *util.SignedMessage)

@@ -4,6 +4,8 @@ import (
 	"bufio"
 	"log"
 	"os"
+	"strconv"
+	"time"
 
 	"github.com/davecgh/go-spew/spew"
 	
@@ -40,13 +42,14 @@ func getAccount(user string, output chan *currency.Account) {
 	output <- account
 }
 
-// Fetches and displays the status for a user.
-func status(user string) {
+// Fetches, displays, and returns the status for a user.
+func status(user string) *currency.Account {
 	ac := make(chan *currency.Account)
 	go getAccount(user, ac)
 	account := <-ac
 
 	log.Printf("account data for %s:\n%s", user, spew.Sdump(account))
+	return account
 }
 
 // Asks for a login then displays the status
@@ -61,16 +64,61 @@ func login() *util.KeyPair {
 	scanner := bufio.NewScanner(os.Stdin)
 	scanner.Scan()
     phrase := scanner.Text()
-	log.Printf("read phrase: [%s]", phrase)
 	kp := util.NewKeyPairFromSecretPhrase(phrase)
 	log.Printf("hello. your name is %s", kp.PublicKey())
 	return kp
 }
 
-func send(recipient string, amount string) {
+func send(recipient string, amountStr string) {
+	amountInt, err := strconv.Atoi(amountStr)
+	if err != nil {
+		log.Fatalf("could not convert %s to a number", amountStr)
+	}
+	amount := uint64(amountInt)
 	kp := login()
-	log.Printf("kp: %+v", kp)
-	// TODO: fetch our own data so that we know what sequence number to use
+	user := kp.PublicKey()
+	ac := make(chan *currency.Account)
+	go getAccount(user, ac)
+	account := <-ac
+
+	log.Printf("account data for %s:\n%s", user, spew.Sdump(account))
+	
+	if account.Balance < amount {
+		log.Fatalf("cannot send %d when our account only has %d",
+			amount, account.Balance)
+	}
+
+	transaction := &currency.Transaction{
+		From: user,
+		Sequence: account.Sequence + 1,
+		To: recipient,
+		Amount: amount,
+		Fee: 0,
+	}
+
+	// Send our transaction to the network
+	st := transaction.SignWith(kp)
+	tm := currency.NewTransactionMessage(st)
+	sm := util.NewSignedMessage(kp, tm)
+	response := make(chan *util.SignedMessage)
+	req := &network.Request{
+		Message: sm,
+		Response: response,
+	}
+	client := network.NewClient(network.RandomLocalServer())
+	client.Send(req)
+	<-response
+	log.Printf("sending %d to %s", amount, recipient)
+	
+	// Wait for our transaction to clear
+	for {
+		a := status(user)
+		if a.Sequence >= transaction.Sequence {
+			break
+		}
+		time.Sleep(time.Second)
+	}
+	log.Printf("transaction %d cleared", transaction.Sequence)
 }
 
 // cclient runs a client that connects to the coinkit network.
