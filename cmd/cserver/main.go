@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"os"
+	"runtime/pprof"
 	"strconv"
 
 	"coinkit/network"
@@ -19,6 +20,18 @@ func main() {
 		log.Fatal(err)
 	}
 
+	// CPU profiling
+	/*
+	if arg == 0 {
+		f, err := os.Create("./profile")
+		if err != nil {
+			log.Fatal(err)
+		}
+		pprof.StartCPUProfile(f)
+		defer pprof.StopCPUProfile()		
+	}
+    */
+	
 	config := network.NewLocalConfig(arg)
 	
 	s := network.NewServer(config)

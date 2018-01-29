@@ -70,8 +70,6 @@ func (s *Server) handleConnection(conn net.Conn) {
 			continue
 		}
 
-		log.Printf("got message: %+v", sm.Message())
-		
 		// Send this message to the processing goroutine
 		response := make(chan *util.SignedMessage)
 		request := &Request{
@@ -135,15 +133,26 @@ func (s *Server) listen() {
 	}
 }
 
-// ServeForever spawns off all the goroutines
 func (s *Server) ServeForever() {
+	s.Serve(0)
+}
+
+// Serve spawns off all the goroutines. Shuts down after seconds
+func (s *Server) Serve(seconds int) {
 	go s.handleMessagesForever()
 	go s.listen()
 
+	start := time.Now()
+	
 	for {
 		// TODO: go faster if we have new info
 		time.Sleep(time.Second * time.Duration(1 + rand.Float64()))
 
+		elapsed := time.Now().Sub(start)
+		if seconds > 0 && elapsed > time.Second * time.Duration(seconds) {
+			break
+		}
+		
 		// Broadcast to all peers
 		// Don't use s.outgoing directly in case the listen() goroutine
 		// modifies it while we iterate on it
