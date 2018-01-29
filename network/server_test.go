@@ -15,3 +15,12 @@ func TestBasicNetwork(t *testing.T) {
 	go s1.ServeForever()
 	go s2.ServeForever()
 }
+
+func TestNewServerCreatesSufficient(t *testing.T) {
+	c0 := NewLocalConfig(0)
+	s0 := NewServer(c0)
+
+	if (len(s0.peers) != NumPeers - 1) {
+		t.Errorf("Didn't create the right number of peers %f %f", len(s0.peers), NumPeers);
+	}
+}
