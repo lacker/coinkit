@@ -96,7 +96,7 @@ func (c *Client) Send(r *Request) {
 
 // NewClient constructs a new client by connecting to the given port.
 func NewClient(port int) *Client {
-	log.Printf("connecting to peer at port %d", port)
+	log.Printf("connecting to node at port %d", port)
 	// queue has a buffer of buflen outgoing messages
 	buflen := 1
 	p := &Client{

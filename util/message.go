@@ -36,7 +36,7 @@ func RegisterMessageType(m Message) {
 		log.Fatalf("RegisterMessageType should be called on pointers to structs")
 	}
 
-	log.Printf("registering %s -> %+v", name, sv.Type())
+	// log.Printf("registering %s -> %+v", name, sv.Type())
 	MessageTypeMap[name] = sv.Type()
 }
 

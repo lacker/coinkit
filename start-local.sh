@@ -7,11 +7,11 @@ if [ ! -d "$LOGS" ]; then
     exit 1
 fi
 
-RUNNING=`ps aux | grep ^cserver`
+RUNNING=`pgrep ^cserver`
 if [ -n "$RUNNING" ]
 then
     echo "there are already cservers running:"
-    echo $RUNNING
+    ps aux | grep [^a-z]cserver | grep -v grep
     exit 1
 fi
 
@@ -21,3 +21,6 @@ for i in `seq 0 3`;
 do
     nohup cserver $i &> $LOGS/cserver$i.log &
 done 
+
+sleep 0.1
+ps aux | grep [^a-z]cserver | grep -v grep
