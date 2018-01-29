@@ -173,6 +173,7 @@ func (q *TransactionQueue) HandleTransactionMessage(m *TransactionMessage) {
 	}
 	if m.Transactions != nil {
 		for _, t := range m.Transactions {
+			// log.Printf("adding transaction: %+v", t.Transaction)
 			q.Add(t)
 		}
 	}
@@ -306,4 +307,12 @@ func (q *TransactionQueue) SuggestValue() (consensus.SlotValue, bool) {
 func (q *TransactionQueue) ValidateValue(v consensus.SlotValue) bool {
 	_, ok := q.chunks[v]
 	return ok
+}
+
+func (q *TransactionQueue) Log() {
+	ts := q.Transactions()
+	log.Printf("%s has %d pending transactions:", q.publicKey, len(ts))
+	for _, t := range ts {
+		log.Printf("%+v", t.Transaction)
+	}
 }

@@ -40,6 +40,7 @@ type Block struct {
 func NewBlock(
 	publicKey string, qs QuorumSlice, slot int, vs ValueStore) *Block {
 	nState := NewNominationState(publicKey, qs, vs)
+	nState.MaybeNominateNewValue()
 	block := &Block{
 		slot:      slot,
 		start:     time.Now(),
@@ -49,7 +50,6 @@ func NewBlock(
 		D:         qs,
 		publicKey: publicKey,
 	}
-	block.MaybeNominateNewValue()
 	return block
 }
 
@@ -69,7 +69,10 @@ func (b *Block) OutgoingMessages() []util.Message {
 		// This block is already externalized
 		return []util.Message{b.external}
 	}
-	
+
+	// We send out a blank nomination message even if it has no real content,
+	// because other nodes use that to figure out when they should start
+	// nominating something.
 	answer := []util.Message{b.nState.Message(b.slot, b.D)}
 
 	// If we aren't working on any ballot, try to start working on a ballot
@@ -89,16 +92,6 @@ func (b *Block) Done() bool {
 	return b.external != nil
 }
 
-func (b *Block) MaybeNominateNewValue() {
-	if b.nState.WantsToNominateNewValue() {
-		v, ok := b.values.SuggestValue()
-		if ok {
-			log.Printf("%s nominates %+v", b.publicKey, v)
-			b.nState.NominateNewValue(v)
-		}
-	}
-}
-
 // Handle handles an incoming message
 func (b *Block) Handle(sender string, message util.Message) {
 	if sender == b.publicKey {
@@ -108,7 +101,7 @@ func (b *Block) Handle(sender string, message util.Message) {
 	switch m := message.(type) {
 	case *NominationMessage:
 		b.nState.Handle(sender, m)
-		b.MaybeNominateNewValue()
+		b.nState.MaybeNominateNewValue()
 	case *PrepareMessage:
 		b.bState.Handle(sender, m)
 	case *ConfirmMessage:

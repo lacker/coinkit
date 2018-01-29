@@ -83,17 +83,19 @@ func nodeFuzzTest(seed int64, t *testing.T) {
 	rand.Seed(seed ^ 789789)
 	log.Printf("fuzz testing nodes with seed %d", seed)
 	for i := 0; i <= 10000; i++ {
-		// Pick a random pair of nodes to exchange messages
-		source := nodes[rand.Intn(len(nodes))]
-		target := nodes[rand.Intn(len(nodes))]
-		sendNodeToNodeMessages(source, target, t)
-
-		// Send a client-to-node message
-		j := rand.Intn(len(clientMessages))
-		client := clients[j]
-		m := clientMessages[j]
-		node := nodes[rand.Intn(len(nodes))]
-		node.Handle(client.PublicKey(), m)
+		if rand.Intn(2) == 0 {
+			// Pick a random pair of nodes to exchange messages
+			source := nodes[rand.Intn(len(nodes))]
+			target := nodes[rand.Intn(len(nodes))]
+			sendNodeToNodeMessages(source, target, t)
+		} else {
+			// Send a client-to-node message
+			j := rand.Intn(len(clientMessages))
+			client := clients[j]
+			m := clientMessages[j]
+			node := nodes[rand.Intn(len(nodes))]
+			node.Handle(client.PublicKey(), m)
+		}
 
 		// Check if we are done
 		if maxAccountBalance(nodes) == 1 {
@@ -102,7 +104,10 @@ func nodeFuzzTest(seed int64, t *testing.T) {
 	}
 
 	if maxAccountBalance(nodes) != 1 {
-		t.Fatalf("failure to converge")
+		for _, node := range nodes {
+			node.Log()
+		}
+		t.Fatalf("failure to converge with seed %d", seed)
 	}
 }
 

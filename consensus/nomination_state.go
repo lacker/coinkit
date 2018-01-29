@@ -71,13 +71,34 @@ func (s *NominationState) HasNomination() bool {
 	return len(s.X) > 0
 }
 
+// Returns whether we nominated a new value
+func (s *NominationState) MaybeNominateNewValue() bool {
+	if len(s.X) > 0 {
+		// We already nominated a value
+		return false
+	}
+
+	if s.D.Threshold * s.priority > s.received {
+		// We don't think it's our turn
+		return false
+	}
+
+	v, ok := s.values.SuggestValue()
+	if !ok {
+		// We have nothing to nominate
+		return false
+	}
+
+	log.Printf("%s nominates %+v", s.publicKey, v)
+	s.NominateNewValue(v)
+	return true
+}
+
 // WantsToNominateNewValue is a heuristic. If we already have some value, we don't
 // want to nominate a new one. We also want to wait some time, according to our
 // priority, before we are willing to make a nomination.
 func (s *NominationState) WantsToNominateNewValue() bool {
-	if len(s.X) > 0 {
-		return false
-	}
+
 	return s.D.Threshold * s.priority <= s.received
 }
 
