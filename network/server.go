@@ -13,10 +13,10 @@ import (
 )
 
 type Server struct {
-	port int
-	keyPair *util.KeyPair
-	peers []*Client
-	node *Node
+	port     int
+	keyPair  *util.KeyPair
+	peers    []*Client
+	node     *Node
 	outgoing []util.Message
 
 	// Messages we are going to handle. These do not require a response
@@ -42,10 +42,10 @@ func NewServer(c *Config) *Server {
 	node.queue.SetBalance(mint.PublicKey(), currency.TotalMoney)
 
 	return &Server{
-		port: c.Port,
-		keyPair: c.KeyPair,
-		peers: peers,
-		node: node,
+		port:     c.Port,
+		keyPair:  c.KeyPair,
+		peers:    peers,
+		node:     node,
 		outgoing: node.OutgoingMessages(),
 		messages: make(chan *util.SignedMessage),
 		requests: make(chan *Request),
@@ -71,7 +71,7 @@ func (s *Server) handleConnection(conn net.Conn) {
 		// Send this message to the processing goroutine
 		response := make(chan *util.SignedMessage)
 		request := &Request{
-			Message: sm,
+			Message:  sm,
 			Response: response,
 		}
 
@@ -116,11 +116,13 @@ func (s *Server) handleMessagesForever() {
 }
 
 // listen() runs a server that spawns a goroutine for each client that connects
-func (s *Server) listen() {
+func (s *Server) listen(errChan chan error) {
 	log.Printf("listening on port %d", s.port)
 	ln, err := net.Listen("tcp", fmt.Sprintf("localhost:%d", s.port))
 	if err != nil {
-		log.Fatal(err)
+		log.Print(err)
+		errChan <- err
+		return
 	}
 	for {
 		conn, err := ln.Accept()
@@ -132,13 +134,20 @@ func (s *Server) listen() {
 }
 
 // ServeForever spawns off all the goroutines
-func (s *Server) ServeForever() {
+func (s *Server) ServeForever() error {
 	go s.handleMessagesForever()
-	go s.listen()
+
+	listenErrChan := make(chan error)
+	go s.listen(listenErrChan)
+
+	listenErr := <-listenErrChan
+	if (listenErr != nil) {
+		return listenErr
+	}
 
 	for {
 		// TODO: go faster if we have new info
-		time.Sleep(time.Second * time.Duration(1 + rand.Float64()))
+		time.Sleep(time.Second * time.Duration(1+rand.Float64()))
 
 		// Broadcast to all peers
 		// Don't use s.outgoing directly in case the listen() goroutine
@@ -148,7 +157,7 @@ func (s *Server) ServeForever() {
 			sm := util.NewSignedMessage(s.keyPair, m)
 			for _, peer := range s.peers {
 				peer.Send(&Request{
-					Message: sm,
+					Message:  sm,
 					Response: s.messages,
 				})
 			}
