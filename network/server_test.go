@@ -106,9 +106,10 @@ func TestServerOkayWithFakeWellFormattedMessage(t *testing.T) {
 		Response: nil,
 	}
 
-	go s0.ServeForever()
+	s0.ServeInBackground()
 	s0.requests <- fakeRequest
 	// This hits the right code path but it feels like we ought to have a real assertion here
+	s0.Stop()
 }
 
 func ResetConnectionAndSendString(c *Client, s string) {
@@ -120,7 +121,7 @@ func ResetConnectionAndSendString(c *Client, s string) {
 
 func TestServerOkayWithMalformedMessage(t *testing.T) {
 	s := NewServer(NewLocalConfig(0))
-	s.ServeForever()
+	s.ServeInBackground()
 
 	c := NewClient(s.port)
 
@@ -153,4 +154,6 @@ func TestServerOkayWithMalformedMessage(t *testing.T) {
 	if err4 != nil {
 		t.Errorf("Couldn't get a response after the good message")
 	}
+
+	s.Stop()
 }
