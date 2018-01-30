@@ -148,7 +148,7 @@ func (s *Server) Serve(seconds int) error {
 	go s.listen(listenErrChan)
 
 	listenErr := <-listenErrChan
-	if (listenErr != nil) {
+	if listenErr != nil {
 		return listenErr
 	}
 
