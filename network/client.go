@@ -51,12 +51,13 @@ func (p *Client) sendForever() {
 	// Send from the queue
 	for {
 		request := <-p.queue
-		if request.Message == nil {
-			log.Fatal("do not send nil messages through clients")
+		line := request.GetLine()
+		if len(line) == 0 {
+			log.Fatalf("cannot send line: [%s]", line)
 		}
 		for {
 			p.connect()
-			util.WriteSignedMessage(p.conn, request.Message)
+			fmt.Fprintf(p.conn, line)
 
 			// If we get an ok, great.
 			// If we don't get an ok, disconnect and try again.
