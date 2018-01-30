@@ -1,6 +1,8 @@
 package network
 
 import (
+	"fmt"
+	"io"
 	"log"
 	"testing"
 	"time"
@@ -89,17 +91,6 @@ func TestNewServerCreatesSufficientPeers(t *testing.T) {
 
 	if (len(s0.peers) != NumPeers - 1) {
 		t.Errorf("Didn't create the right number of peers %f %f", len(s0.peers), NumPeers - 1);
-	}
-}
-
-func TestNewServerFailsIfPortTaken(t *testing.T) {
-	s0 := NewServer(NewLocalConfig(0))
-	s1 := NewServer(NewLocalConfig(0))
-
-	go s0.ServeForever()
-	err := s1.ServeForever()
-	if (err == nil) {
-		t.Errorf("Didn't error out when port is already in use")
 	}
 }
 
