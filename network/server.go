@@ -61,7 +61,6 @@ func (s *Server) handleConnection(conn net.Conn) {
 			if err != io.EOF {
 				log.Printf("connection error: %v", err)
 			}
-			log.Printf("AHHH: %v", err)
 			conn.Close()
 			break
 		}
@@ -124,7 +123,6 @@ func (s *Server) listen(errChan chan error) {
 	log.Printf("listening on port %d", s.port)
 	ln, err := net.Listen("tcp", fmt.Sprintf("localhost:%d", s.port))
 	if err != nil {
-		log.Print(err)
 		errChan <- err
 		return
 	}
