@@ -13,15 +13,15 @@ import (
 )
 
 type Server struct {
-	port int
-	keyPair *util.KeyPair
-	peers []*Client
-	node *Node
+	port     int
+	keyPair  *util.KeyPair
+	peers    []*Client
+	node     *Node
 	outgoing []util.Message
 
 	// Messages we are going to handle. These do not require a response
 	messages chan *util.SignedMessage
-	
+
 	// Requests we are going to handle. These require a response
 	requests chan *Request
 
@@ -40,17 +40,17 @@ func NewServer(c *Config) *Server {
 	}
 
 	qs := consensus.MakeQuorumSlice(c.Members, c.Threshold)
-	
+
 	// At the start, all money is in the "mint" account
 	node := NewNode(c.KeyPair.PublicKey(), qs)
 	mint := util.NewKeyPairFromSecretPhrase("mint")
 	node.queue.SetBalance(mint.PublicKey(), currency.TotalMoney)
-	
+
 	return &Server{
-		port: c.Port,
-		keyPair: c.KeyPair,
-		peers: peers,
-		node: node,
+		port:     c.Port,
+		keyPair:  c.KeyPair,
+		peers:    peers,
+		node:     node,
 		outgoing: node.OutgoingMessages(),
 		messages: make(chan *util.SignedMessage),
 		requests: make(chan *Request),
@@ -77,10 +77,11 @@ func (s *Server) handleConnection(conn net.Conn) {
 			continue
 		}
 
+
 		// Send this message to the processing goroutine
 		response := make(chan *util.SignedMessage)
 		request := &Request{
-			Message: sm,
+			Message:  sm,
 			Response: response,
 		}
 
@@ -109,6 +110,7 @@ func (s *Server) handleMessage(m *util.SignedMessage) *util.SignedMessage {
 
 func (s *Server) handleMessagesForever() {
 	for {
+
 		select {
 
 		case request := <-s.requests:
@@ -118,7 +120,7 @@ func (s *Server) handleMessagesForever() {
 					request.Response <- response
 				}
 			}
-		
+
 		case message := <-s.messages:
 			if message != nil {
 				s.handleMessage(message)
@@ -126,11 +128,10 @@ func (s *Server) handleMessagesForever() {
 
 		case <-s.quit:
 			break
-		}		
+		}
 	}
 }
 
-// listen() runs a server that spawns a goroutine for each client that connects
 func (s *Server) listen() {
 	for {
 		conn, err := s.listener.Accept()
@@ -168,7 +169,7 @@ func (s *Server) broadcastIntermittently() {
 		if s.shutdown {
 			break
 		}
-		
+
 		// Broadcast to all peers
 		// Don't use s.outgoing directly in case the listen() goroutine
 		// modifies it while we iterate on it
@@ -177,7 +178,7 @@ func (s *Server) broadcastIntermittently() {
 			sm := util.NewSignedMessage(s.keyPair, m)
 			for _, peer := range s.peers {
 				peer.Send(&Request{
-					Message: sm,
+					Message:  sm,
 					Response: s.messages,
 				})
 			}
