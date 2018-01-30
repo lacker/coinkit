@@ -61,6 +61,7 @@ func (s *Server) handleConnection(conn net.Conn) {
 			if err != io.EOF {
 				log.Printf("connection error: %v", err)
 			}
+			log.Printf("AHHH: %v", err)
 			conn.Close()
 			break
 		}
