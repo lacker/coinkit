@@ -37,17 +37,48 @@ go test ./...
 
 # Build everything
 go install ./...
+```
 
 ## How to run it
 
-TODO: explain both how to run a local cluster and how to connect to a remote one
+Commands are from the `~/go/src/coinkit` directory.
 
-# Run one of these commands, to run server 0, 1, 2, or 3
-cserver 0
-cserver 1
-cserver 2
-cserver 3
+To run a local cluster of four cservers:
+
 ```
+./start-local.sh
+```
+
+To stop the local cluster:
+
+```
+./stop-local.sh
+```
+
+You can check the current account balance with:
+
+```
+cclient status [publicKey]
+```
+
+If no key is provided, it will prompt you for a passphrase. You can also
+use this to create your own account - just use any passphrase, and then
+note what the public key is so that other accounts can send you money.
+
+To send money:
+
+```
+cclient send [user] [amount]
+```
+
+The send command will keep checking back to see when the money leaves the source
+account. Right now it may take 5-10 seconds to process a new send command, so
+have a bit of patience.
+
+To start off with, all the money is in one account where the passphrase is "mint".
+If you're just poking around, I recommend sending some money from the mint
+to an account of your own and then checking your account's balance as a little
+exercise.
 
 ## Code organization
 
