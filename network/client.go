@@ -89,7 +89,8 @@ func (c *Client) Send(r *Request) {
 		select {
 		case _ = <-c.queue:
 		default:
-			// There must be some racing. Just busy-add
+			// There must be some racing. Wait a bit and try again
+			time.Sleep(time.Millisecond)
 		}
 	}
 }

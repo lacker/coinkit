@@ -65,3 +65,8 @@ func (node *Node) OutgoingMessages() []util.Message {
 	}
 	return answer
 }
+
+func (node *Node) Log() {
+	node.chain.Log()
+	node.queue.Log()
+}

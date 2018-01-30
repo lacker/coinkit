@@ -99,15 +99,19 @@ func (c *Chain) HandleTimerTick() {
 	c.current.HandleTimerTick()
 }
 
+func (chain *Chain) Log() {
+	log.Printf("--------------------------------------------------------------------------")
+	log.Printf("%s is working on slot %d", chain.publicKey, chain.current.slot)
+	if chain.current.bState != nil {
+		chain.current.bState.Show()
+	} else {
+		log.Printf("spew: %s", spew.Sdump(chain))
+	}
+}
+
 func LogChains(chains []*Chain) {
 	for _, chain := range chains {
-		log.Printf("--------------------------------------------------------------------------")
-		log.Printf("%s is working on slot %d", chain.publicKey, chain.current.slot)
-		if chain.current.bState != nil {
-			chain.current.bState.Show()
-		} else {
-			log.Printf("spew: %s", spew.Sdump(chain))
-		}
+		chain.Log()
 	}
 	log.Printf("**************************************************************************")
 }

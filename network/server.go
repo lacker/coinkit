@@ -2,6 +2,7 @@ package network
 
 import (
 	"fmt"
+	"io"
 	"log"
 	"math/rand"
 	"net"
@@ -58,8 +59,9 @@ func (s *Server) handleConnection(conn net.Conn) {
 	for {
 		sm, err := util.ReadSignedMessage(conn)
 		if err != nil {
-			// Assume good intentions and close the connection.
-			log.Printf("connection error: %v", err)
+			if err != io.EOF {
+				log.Printf("connection error: %v", err)
+			}
 			conn.Close()
 			break
 		}
@@ -133,8 +135,12 @@ func (s *Server) listen(errChan chan error) {
 	}
 }
 
-// ServeForever spawns off all the goroutines
-func (s *Server) ServeForever() error {
+func (s *Server) ServeForever() {
+	s.Serve(0)
+}
+
+// Serve spawns off all the goroutines. Shuts down after seconds
+func (s *Server) Serve(seconds int) {
 	go s.handleMessagesForever()
 
 	listenErrChan := make(chan error)
@@ -145,10 +151,17 @@ func (s *Server) ServeForever() error {
 		return listenErr
 	}
 
+	start := time.Now()
+	
 	for {
 		// TODO: go faster if we have new info
-		time.Sleep(time.Second * time.Duration(1+rand.Float64()))
+		time.Sleep(time.Second)
 
+		elapsed := time.Now().Sub(start)
+		if seconds > 0 && elapsed > time.Second * time.Duration(seconds) {
+			break
+		}
+		
 		// Broadcast to all peers
 		// Don't use s.outgoing directly in case the listen() goroutine
 		// modifies it while we iterate on it
