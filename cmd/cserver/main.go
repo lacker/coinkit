@@ -3,7 +3,7 @@ package main
 import (
 	"log"
 	"os"
-	"runtime/pprof"
+	//"runtime/pprof"
 	"strconv"
 
 	"coinkit/network"

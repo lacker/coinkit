@@ -2,7 +2,20 @@ package network
 
 import (
 	"testing"
+	"coinkit/util"
 )
+
+type FakeMessage struct {
+	Number int
+}
+
+func (m *FakeMessage) Slot() int {
+	return 0
+}
+
+func (m *FakeMessage) MessageType() string {
+	return "Fake"
+}
 
 func TestBasicNetwork(t *testing.T) {
 	c0 := NewLocalConfig(0)
@@ -14,4 +27,24 @@ func TestBasicNetwork(t *testing.T) {
 	go s0.ServeForever()
 	go s1.ServeForever()
 	go s2.ServeForever()
+}
+
+func TestNewServerCreatesSufficientPeers(t *testing.T) {
+	c0 := NewLocalConfig(0)
+	s0 := NewServer(c0)
+
+	if (len(s0.peers) != NumPeers - 1) {
+		t.Errorf("Didn't create the right number of peers %f %f", len(s0.peers), NumPeers - 1);
+	}
+}
+
+func TestNewServerFailsIfPortTaken(t *testing.T) {
+	s0 := NewServer(NewLocalConfig(0))
+	s1 := NewServer(NewLocalConfig(0))
+
+	go s0.ServeForever()
+	err := s1.ServeForever()
+	if (err == nil) {
+		t.Errorf("Didn't error out when port is already in use")
+	}
 }
