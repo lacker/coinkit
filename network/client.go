@@ -6,6 +6,7 @@ import (
 	"net"
 	"time"
 
+	"coinkit/currency"
 	"coinkit/util"
 )
 
@@ -75,6 +76,7 @@ func (p *Client) sendForever() {
 	}
 }
 
+// Send issues a request and will send the response to the response channel.
 func (c *Client) Send(r *Request) {
 	for {
 		// Add to the queue if we can
@@ -93,6 +95,37 @@ func (c *Client) Send(r *Request) {
 			time.Sleep(time.Millisecond)
 		}
 	}
+}
+
+// Sends a signed message and waits for the response.
+func (c *Client) SendMessage(message *util.SignedMessage) *util.SignedMessage {
+	response := make(chan *util.SignedMessage)
+	request := &Request{
+		Message: message,
+		Response: response,
+	}
+	// Wait on a response.
+	// This hangs on network failure
+	c.Send(request)
+	sm := <-response
+	return sm
+}
+
+// GetAccount fetches account data.
+// Hangs on network failure, can log fatal on a malicious server.
+func (c *Client) GetAccount(user string) *currency.Account {
+	// Since this is public data we'll use a throwaway key and stay anonymous
+	kp := util.NewKeyPair()
+
+	message := currency.NewInquiryMessage(user)
+	sm := util.NewSignedMessage(kp, message)
+	response := c.SendMessage(sm)
+	m := response.Message()
+	am, ok := m.(*currency.AccountMessage)
+	if !ok {
+		log.Fatal("received non-account message: %+v", message)
+	}
+	return am.State[user]
 }
 
 // NewClient constructs a new client by connecting to the given port.

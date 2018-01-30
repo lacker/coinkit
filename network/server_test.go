@@ -1,17 +1,31 @@
 package network
 
 import (
+	"log"
 	"testing"
 )
 
-func TestBasicNetwork(t *testing.T) {
-	c0 := NewLocalConfig(0)
-	c1 := NewLocalConfig(1)
-	c2 := NewLocalConfig(2)
-	s0 := NewServer(c0)
-	s1 := NewServer(c1)
-	s2 := NewServer(c2)
-	go s0.ServeForever()
-	go s1.ServeForever()
-	go s2.ServeForever()
+func makeServers() []*Server {
+	answer := []*Server{}
+	for i := 0; i <= 3; i++ {
+		config := NewLocalConfig(i)
+		server := NewServer(config)
+		server.ServeInBackground()
+		answer = append(answer, server)
+	}
+	return answer
 }
+
+func stopServers(servers []*Server) {
+	for _, server := range servers {
+		server.Stop()
+	}
+}
+
+func TestStartStop(t *testing.T) {
+	servers := makeServers()
+	stopServers(servers)
+	moreServers := makeServers()
+	stopServers(moreServers)
+}
+
