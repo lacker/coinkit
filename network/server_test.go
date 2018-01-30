@@ -89,7 +89,7 @@ func TestNewServerCreatesSufficientPeers(t *testing.T) {
 	c0 := NewLocalConfig(0)
 	s0 := NewServer(c0)
 
-	if (len(s0.peers) != NumPeers - 1) {
+	if len(s0.peers) != NumPeers - 1 {
 		t.Errorf("Didn't create the right number of peers %f %f", len(s0.peers), NumPeers - 1);
 	}
 }
@@ -126,13 +126,13 @@ func TestServerOkayWithMalformedMessage(t *testing.T) {
 
 	ResetConnectionAndSendString(c, "Hello, I am sending you garbage.\n\n\n")
 	_, err := util.ReadSignedMessage(c.conn)
-	if (err != io.EOF) {
+	if err != io.EOF {
 		t.Errorf("Didn't get disconnected after a malformed message")
 	}
 
 	ResetConnectionAndSendString(c, "a:b:c:d\n")
 	_, err2 := util.ReadSignedMessage(c.conn)
-	if (err2 != io.EOF) {
+	if err2 != io.EOF {
 		t.Errorf("Didn't get disconnected after a malformed message")
 	}
 
@@ -142,7 +142,7 @@ func TestServerOkayWithMalformedMessage(t *testing.T) {
 		fmt.Sprintf("e:%s:%s:%s\n", kp.PublicKey(), "notRealSignature", goodMessage))
 
 	_, err3 := util.ReadSignedMessage(c.conn)
-	if (err3 != io.EOF) {
+	if err3 != io.EOF {
 		t.Errorf("Didn't get disconnected after a malformed message")
 	}
 
@@ -150,7 +150,7 @@ func TestServerOkayWithMalformedMessage(t *testing.T) {
 	ResetConnectionAndSendString(c, fmt.Sprintf("e:%s:%s:%s\n", kp.PublicKey(), kp.Sign(goodMessage), goodMessage))
 	_, err4 := util.ReadSignedMessage(c.conn)
 
-	if (err4 != nil) {
+	if err4 != nil {
 		t.Errorf("Couldn't get a response after the good message")
 	}
 }
