@@ -145,13 +145,18 @@ func (s *Server) listen() {
 }
 
 // Must be called before listen()
+// Will retry up to 5 seconds
 func (s *Server) acquirePort() {
 	log.Printf("listening on port %d", s.port)
-	ln, err := net.Listen("tcp", fmt.Sprintf("localhost:%d", s.port))
-	if err != nil {
-		log.Fatal(err)
+	for i := 0; i < 100; i++ {
+		ln, err := net.Listen("tcp", fmt.Sprintf("localhost:%d", s.port))
+		if err == nil {
+			s.listener = ln
+			return
+		}
+		time.Sleep(time.Millisecond * time.Duration(50))
 	}
-	s.listener = ln	
+	log.Fatal("could not acquire port %d", s.port)
 }
 
 // broadcastIntermittently() sends outgoing messages every so often. it
