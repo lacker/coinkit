@@ -35,7 +35,6 @@ type Server struct {
 
 func NewServer(c *Config) *Server {
 	var peers []*Client
-	log.Printf("config has peers: %v", c.PeerPorts)
 	for _, p := range c.PeerPorts {
 		peers = append(peers, NewClient(p))
 	}
@@ -45,7 +44,6 @@ func NewServer(c *Config) *Server {
 	// At the start, all money is in the "mint" account
 	node := NewNode(c.KeyPair.PublicKey(), qs)
 	mint := util.NewKeyPairFromSecretPhrase("mint")
-	log.Printf("establishing a mint: %s", mint.PublicKey())
 	node.queue.SetBalance(mint.PublicKey(), currency.TotalMoney)
 	
 	return &Server{
@@ -135,7 +133,6 @@ func (s *Server) handleMessagesForever() {
 // listen() runs a server that spawns a goroutine for each client that connects
 func (s *Server) listen() {
 	for {
-		log.Printf("accepting on port %d", s.port)		
 		conn, err := s.listener.Accept()
 		if s.shutdown {
 			break

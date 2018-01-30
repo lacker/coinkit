@@ -72,6 +72,7 @@ func (p *Client) sendForever() {
 			if request.Response != nil {
 				request.Response <- response
 			}
+			break
 		}
 	}
 }
@@ -89,7 +90,8 @@ func (c *Client) Send(r *Request) {
 
 		// Pop something off the queue to be discarded if we can
 		select {
-		case _ = <-c.queue:
+		case x := <-c.queue:
+			log.Printf("send queue overloaded, dropping %+v", x)
 		default:
 			// There must be some racing. Wait a bit and try again
 			time.Sleep(time.Millisecond)
@@ -128,9 +130,12 @@ func (c *Client) GetAccount(user string) *currency.Account {
 	return am.State[user]
 }
 
+func (c *Client) Address() string {
+	return fmt.Sprintf("localhost:%d", c.port)
+}
+
 // NewClient constructs a new client by connecting to the given port.
 func NewClient(port int) *Client {
-	log.Printf("connecting to node at port %d", port)
 	// queue has a buffer of buflen outgoing messages
 	buflen := 1
 	p := &Client{
