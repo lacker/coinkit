@@ -72,6 +72,10 @@ func (q *TransactionQueue) Remove(t *SignedTransaction) {
 	q.set.Remove(t)
 }
 
+func (q *TransactionQueue) Logf(format string, a ...interface{}) {
+	log.Printf(format, a...)
+}
+
 // Add adds a transaction to the queue
 // If it isn't valid, we just discard it.
 // We don't constantly revalidate so it's possible we have invalid
@@ -80,8 +84,13 @@ func (q *TransactionQueue) Add(t *SignedTransaction) {
 	if !q.Validate(t) {
 		return
 	}
+	preSize := q.set.Size()
 	q.set.Add(t)
-	if q.set.Size() > QueueLimit {
+	postSize := q.set.Size()
+	if postSize > preSize {
+		q.Logf("saw a new transaction: %+v", t.Transaction)
+	}
+	if postSize > QueueLimit {
 		it := q.set.Iterator()
 		if !it.Last() {
 			log.Fatal("logical failure with treeset")
@@ -244,8 +253,11 @@ func (q *TransactionQueue) NewChunk(
 		State: state,
 	}
 	key := chunk.Hash()
-	log.Printf("%s created chunk %+v with hash %s", q.publicKey, chunk, key)
-	q.chunks[key] = chunk
+	if _, ok := q.chunks[key]; !ok {
+		// We have not already created this chunk
+		log.Printf("%s created chunk %+v with hash %s", q.publicKey, chunk, key)
+		q.chunks[key] = chunk
+	}
 	return key, chunk
 }
 

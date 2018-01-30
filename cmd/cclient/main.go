@@ -14,39 +14,16 @@ import (
 	"coinkit/util"
 )
 
-// getAccount fetches account data from a server and sends it, once, to the
-// provided channel.
-func getAccount(user string, output chan *currency.Account) {
-	// Since this is public data we'll use a throwaway key and stay anonymous
-	kp := util.NewKeyPair()
-
-	message := currency.NewInquiryMessage(user)
-	sm := util.NewSignedMessage(kp, message)
-	client := network.NewClient(network.RandomLocalServer())
-	response := make(chan *util.SignedMessage)
-	request := &network.Request{
-		Message: sm,
-		Response: response,
-	}
-
-	// Wait on a response.
-	// This hangs on network failure
-	client.Send(request)
-	sm = <-response
-	m := sm.Message()
-	am, ok := m.(*currency.AccountMessage)
-	if !ok {
-		log.Fatal("received non-account message: %+v", message)
-	}
-	account := am.State[user]
-	output <- account
+func newClient() *network.Client {
+	c := network.NewClient(network.RandomLocalServer())
+	log.Printf("connecting to %s", c.Address())
+	return c
 }
 
 // Fetches, displays, and returns the status for a user.
 func status(user string) *currency.Account {
-	ac := make(chan *currency.Account)
-	go getAccount(user, ac)
-	account := <-ac
+	client := newClient()
+	account := client.GetAccount(user)
 
 	log.Printf("account data for %s:\n%s", user, spew.Sdump(account))
 	return account
@@ -77,9 +54,8 @@ func send(recipient string, amountStr string) {
 	amount := uint64(amountInt)
 	kp := login()
 	user := kp.PublicKey()
-	ac := make(chan *currency.Account)
-	go getAccount(user, ac)
-	account := <-ac
+	client := newClient()
+	account := client.GetAccount(user)
 
 	log.Printf("account data for %s:\n%s", user, spew.Sdump(account))
 	
@@ -100,14 +76,7 @@ func send(recipient string, amountStr string) {
 	st := transaction.SignWith(kp)
 	tm := currency.NewTransactionMessage(st)
 	sm := util.NewSignedMessage(kp, tm)
-	response := make(chan *util.SignedMessage)
-	req := &network.Request{
-		Message: sm,
-		Response: response,
-	}
-	client := network.NewClient(network.RandomLocalServer())
-	client.Send(req)
-	<-response
+	client.SendMessage(sm)
 	log.Printf("sending %d to %s", amount, recipient)
 	
 	// Wait for our transaction to clear

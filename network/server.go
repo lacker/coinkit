@@ -24,11 +24,17 @@ type Server struct {
 
 	// Requests we are going to handle. These require a response
 	requests chan *Request
+
+	listener net.Listener
+
+	// We close the quit channel and set shutdown to true
+	// when the server is shutting down
+	shutdown bool
+	quit chan bool
 }
 
 func NewServer(c *Config) *Server {
 	var peers []*Client
-	log.Printf("config has peers: %v", c.PeerPorts)
 	for _, p := range c.PeerPorts {
 		peers = append(peers, NewClient(p))
 	}
@@ -38,7 +44,6 @@ func NewServer(c *Config) *Server {
 	// At the start, all money is in the "mint" account
 	node := NewNode(c.KeyPair.PublicKey(), qs)
 	mint := util.NewKeyPairFromSecretPhrase("mint")
-	log.Printf("establishing a mint: %s", mint.PublicKey())
 	node.queue.SetBalance(mint.PublicKey(), currency.TotalMoney)
 
 	return &Server{
@@ -49,6 +54,9 @@ func NewServer(c *Config) *Server {
 		outgoing: node.OutgoingMessages(),
 		messages: make(chan *util.SignedMessage),
 		requests: make(chan *Request),
+		listener: nil,
+		shutdown: false,
+		quit: make(chan bool),
 	}
 }
 
@@ -58,7 +66,7 @@ func (s *Server) handleConnection(conn net.Conn) {
 	for {
 		sm, err := util.ReadSignedMessage(conn)
 		if err != nil {
-			if err != io.EOF {
+			if !s.shutdown && err != io.EOF {
 				log.Printf("connection error: %v", err)
 			}
 			conn.Close()
@@ -80,9 +88,13 @@ func (s *Server) handleConnection(conn net.Conn) {
 		// Send our request to the processing goroutine, wait for the response,
 		// and return it down the connection
 		s.requests <- request
-		m := <-response
-
-		util.WriteSignedMessage(conn, m)
+		select {
+		case m := <-response:
+			util.WriteSignedMessage(conn, m)
+		case <-s.quit:
+			conn.Close()
+			break
+		}
 	}
 }
 
@@ -114,20 +126,18 @@ func (s *Server) handleMessagesForever() {
 				s.handleMessage(message)
 			}
 
+		case <-s.quit:
+			break
 		}
 	}
 }
 
-// listen() runs a server that spawns a goroutine for each client that connects
-func (s *Server) listen(errChan chan error) {
-	log.Printf("listening on port %d", s.port)
-	ln, err := net.Listen("tcp", fmt.Sprintf("localhost:%d", s.port))
-	if err != nil {
-		errChan <- err
-		return
-	}
+func (s *Server) listen() {
 	for {
-		conn, err := ln.Accept()
+		conn, err := s.listener.Accept()
+		if s.shutdown {
+			break
+		}
 		if err != nil {
 			log.Print("incoming connection error: ", err)
 		}
@@ -135,31 +145,29 @@ func (s *Server) listen(errChan chan error) {
 	}
 }
 
-func (s *Server) ServeForever() error {
-	return s.Serve(0)
+// Must be called before listen()
+// Will retry up to 5 seconds
+func (s *Server) acquirePort() {
+	log.Printf("listening on port %d", s.port)
+	for i := 0; i < 100; i++ {
+		ln, err := net.Listen("tcp", fmt.Sprintf("localhost:%d", s.port))
+		if err == nil {
+			s.listener = ln
+			return
+		}
+		time.Sleep(time.Millisecond * time.Duration(50))
+	}
+	log.Fatal("could not acquire port %d", s.port)
 }
 
-// Serve spawns off all the goroutines. Shuts down after seconds
-func (s *Server) Serve(seconds int) error {
-	go s.handleMessagesForever()
-
-	listenErrChan := make(chan error)
-	go s.listen(listenErrChan)
-
-	listenErr := <-listenErrChan
-	if listenErr != nil {
-		return listenErr
-	}
-
-	start := time.Now()
-
+// broadcastIntermittently() sends outgoing messages every so often. it
+// should be run as a goroutine.
+func (s *Server) broadcastIntermittently() {
 	for {
 		// TODO: go faster if we have new info
 		time.Sleep(time.Second)
-
-		elapsed := time.Now().Sub(start)
-		if seconds > 0 && elapsed > time.Second * time.Duration(seconds) {
-			return nil
+		if s.shutdown {
+			break
 		}
 
 		// Broadcast to all peers
@@ -175,5 +183,36 @@ func (s *Server) Serve(seconds int) error {
 				})
 			}
 		}
+	}
+}
+
+// ServeForever spawns off all the goroutines and never returns.
+// Stop() might not work when you run the server this way, because stopping
+// during startup does not work well
+func (s *Server) ServeForever() {
+	s.acquirePort()
+
+	go s.handleMessagesForever()
+	go s.listen()
+	s.broadcastIntermittently()
+}
+
+// ServeInBackground spawns goroutines to run the server.
+// It returns once it has successfully bound to its port.
+// Stop() should work if it is called after ServeInBackground returns.
+func (s *Server) ServeInBackground() {
+	s.acquirePort()
+	go s.handleMessagesForever()
+	go s.listen()
+	go s.broadcastIntermittently()
+}
+
+func (s *Server) Stop() {
+	s.shutdown = true
+	close(s.quit)
+	
+	if s.listener != nil {
+		log.Printf("closing listener on port %d", s.port)
+		s.listener.Close()
 	}
 }
