@@ -2,7 +2,20 @@ package network
 
 import (
 	"testing"
+	"coinkit/util"
 )
+
+type FakeMessage struct {
+	Number int
+}
+
+func (m *FakeMessage) Slot() int {
+	return 0
+}
+
+func (m *FakeMessage) MessageType() string {
+	return "Fake"
+}
 
 func TestBasicNetwork(t *testing.T) {
 	c0 := NewLocalConfig(0)
@@ -34,4 +47,20 @@ func TestNewServerFailsIfPortTaken(t *testing.T) {
 	if (err == nil) {
 		t.Errorf("Didn't error out when port is already in use")
 	}
+}
+
+func TestServerOkayWithFakeWellFormattedMessage(t *testing.T) {
+	s0 := NewServer(NewLocalConfig(0))
+
+	m := &FakeMessage{Number: 4}
+	kp := util.NewKeyPairFromSecretPhrase("foo")
+	sm := util.NewSignedMessage(kp, m)
+
+	fakeRequest := &Request {
+		Message: sm,
+		Response: nil,
+	}
+
+	go s0.ServeForever()
+	s0.requests <- fakeRequest
 }

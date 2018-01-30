@@ -69,6 +69,7 @@ func (s *Server) handleConnection(conn net.Conn) {
 			continue
 		}
 
+
 		// Send this message to the processing goroutine
 		response := make(chan *util.SignedMessage)
 		request := &Request{
@@ -97,6 +98,7 @@ func (s *Server) handleMessage(m *util.SignedMessage) *util.SignedMessage {
 
 func (s *Server) handleMessagesForever() {
 	for {
+
 		select {
 
 		case request := <-s.requests:
@@ -151,7 +153,7 @@ func (s *Server) Serve(seconds int) error {
 	}
 
 	start := time.Now()
-	
+
 	for {
 		// TODO: go faster if we have new info
 		time.Sleep(time.Second)
@@ -160,7 +162,7 @@ func (s *Server) Serve(seconds int) error {
 		if seconds > 0 && elapsed > time.Second * time.Duration(seconds) {
 			return nil
 		}
-		
+
 		// Broadcast to all peers
 		// Don't use s.outgoing directly in case the listen() goroutine
 		// modifies it while we iterate on it
