@@ -17,6 +17,7 @@ import (
 func newClient() *network.Client {
 	c := network.NewClient(network.RandomLocalServer())
 	log.Printf("connecting to %s", c.Address())
+	return c
 }
 
 // Fetches, displays, and returns the status for a user.
