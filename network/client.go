@@ -137,7 +137,7 @@ func (c *Client) Address() string {
 // NewClient constructs a new client by connecting to the given port.
 func NewClient(port int) *Client {
 	// queue has a buffer of buflen outgoing messages
-	buflen := 1
+	buflen := 10
 	p := &Client{
 		port: port,
 		queue: make(chan *Request, buflen),

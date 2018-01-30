@@ -49,7 +49,6 @@ func TestSendingMoney(t *testing.T) {
 	sm := util.NewSignedMessage(mint, tm)
 	client := NewClient(9000)
 	client.SendMessage(sm)
-	log.Printf("sent a message")
 	
 	failures := 0
 	for {
