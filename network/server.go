@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"io"
 	"log"
-	"math/rand"
 	"net"
 	"time"
 
@@ -135,12 +134,12 @@ func (s *Server) listen(errChan chan error) {
 	}
 }
 
-func (s *Server) ServeForever() {
-	s.Serve(0)
+func (s *Server) ServeForever() error {
+	return s.Serve(0)
 }
 
 // Serve spawns off all the goroutines. Shuts down after seconds
-func (s *Server) Serve(seconds int) {
+func (s *Server) Serve(seconds int) error {
 	go s.handleMessagesForever()
 
 	listenErrChan := make(chan error)
@@ -159,7 +158,7 @@ func (s *Server) Serve(seconds int) {
 
 		elapsed := time.Now().Sub(start)
 		if seconds > 0 && elapsed > time.Second * time.Duration(seconds) {
-			break
+			return nil
 		}
 		
 		// Broadcast to all peers
