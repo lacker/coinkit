@@ -146,7 +146,7 @@ func (s *Server) Serve(seconds int) {
 	
 	for {
 		// TODO: go faster if we have new info
-		time.Sleep(time.Second * time.Duration(1 + rand.Float64()))
+		time.Sleep(time.Second)
 
 		elapsed := time.Now().Sub(start)
 		if seconds > 0 && elapsed > time.Second * time.Duration(seconds) {
