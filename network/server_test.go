@@ -29,6 +29,7 @@ func makeServers() []*Server {
 	answer := []*Server{}
 	for _, config := range configs {
 		server := NewServer(config)
+		server.BroadcastInterval = 5 * time.Second
 		server.ServeInBackground()
 		answer = append(answer, server)
 	}

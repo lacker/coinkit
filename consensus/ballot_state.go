@@ -77,7 +77,7 @@ func NewBallotState(publicKey string, qs QuorumSlice, nState *NominationState) *
 }
 
 func (s *BallotState) Logf(format string, a ...interface{}) {
-	log.Printf(format, a...)
+	log.Printf(s.publicKey[:3] + " " + format, a...)
 }
 
 func (s *BallotState) Show() {

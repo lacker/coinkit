@@ -53,7 +53,7 @@ func NewNominationState(
 }
 
 func (s *NominationState) Logf(format string, a ...interface{}) {
-	log.Printf(format, a...)
+	log.Printf(s.publicKey[:3] + " " + format, a...)
 }
 
 func (s *NominationState) Show() {

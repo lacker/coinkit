@@ -26,6 +26,10 @@ type Chain struct {
 	values ValueStore
 }
 
+func (c *Chain) Logf(format string, a ...interface{}) {
+	log.Printf(c.publicKey[:3] + " " + format, a...)
+}
+
 // Handle handles an incoming message.
 // It may return a message to be sent back to the original sender, or it may
 // just return nil if it has no particular response.

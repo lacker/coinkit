@@ -33,7 +33,10 @@ type Server struct {
 	// We close the quit channel and set shutdown to true
 	// when the server is shutting down
 	shutdown bool
-	quit chan bool
+	quit     chan bool
+
+	// How often we send out a broadcast of redundant data
+	BroadcastInterval time.Duration
 }
 
 func NewServer(config *ServerConfig) *Server {
@@ -59,6 +62,7 @@ func NewServer(config *ServerConfig) *Server {
 		listener: nil,
 		shutdown: false,
 		quit: make(chan bool),
+		BroadcastInterval: time.Second,
 	}
 }
 
@@ -215,7 +219,7 @@ func (s *Server) broadcastIntermittently() {
 	lastLines := []string{}
 
 	for {
-		timer := time.NewTimer(time.Second)
+		timer := time.NewTimer(s.BroadcastInterval)
 		select {
 
 		case <-s.quit:
