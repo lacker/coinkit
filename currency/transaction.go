@@ -25,6 +25,11 @@ type Transaction struct {
 	Fee uint64
 }
 
+func (t *Transaction) String() string {
+	return fmt.Sprintf("send %d from %s -> %s, seq %d fee %d",
+		t.Amount, util.Shorten(t.From), util.Shorten(t.To), t.Sequence, t.Fee)
+}
+
 type SignedTransaction struct {
 	*Transaction
 

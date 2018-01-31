@@ -4,13 +4,15 @@ import (
 	"log"
 )
 
+func Shorten(name string) string {
+	length := len(name)
+	if length > 6 {
+		length = 6
+	}
+	return name[:length]
+}
+
 // Send logging through here so that it's easier to manage
 func Logf(tag string, publicKey string, format string, a ...interface{}) {
-	shortNameLen := len(publicKey)
-	if shortNameLen > 6 {
-		shortNameLen = 6
-	}
-	shortName := publicKey[:shortNameLen]
-
-	log.Printf(shortName + " " + format, a...)
+	log.Printf(Shorten(publicKey) + " " + format, a...)
 }

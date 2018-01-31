@@ -88,7 +88,7 @@ func (q *TransactionQueue) Add(t *SignedTransaction) {
 	q.set.Add(t)
 	postSize := q.set.Size()
 	if postSize > preSize {
-		q.Logf("saw a new transaction: %+v", t.Transaction)
+		q.Logf("saw a new transaction: %s", t.Transaction)
 	}
 	if postSize > QueueLimit {
 		it := q.set.Iterator()

@@ -78,6 +78,10 @@ type Ballot struct {
 	x SlotValue
 }
 
+func (b *Ballot) String() string {
+	return fmt.Sprintf("(%d,%s)", b.n, util.Shorten(string(b.x)))
+}
+
 // Whether accepting a as prepared implies b is accepted as prepared
 func gtecompat(a *Ballot, b *Ballot) bool {
 	if a == nil || b == nil {

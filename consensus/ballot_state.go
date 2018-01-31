@@ -166,11 +166,11 @@ func (s *BallotState) MaybeAcceptAsPrepared(n int, x SlotValue) bool {
 		return false
 	}
 
-	s.Logf("%s accepts as prepared: %d %+v", s.publicKey, n, x)
 	ballot := &Ballot{
 		n: n,
 		x: x,
 	}
+	s.Logf("accepts as prepared: %s", ballot)
 
 	// p and p prime should be the top two conflicting things we accept
 	// as prepared. update them accordingly

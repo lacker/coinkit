@@ -66,6 +66,10 @@ func NewServer(config *ServerConfig) *Server {
 	}
 }
 
+func (s *Server) Logf(format string, a ...interface{}) {
+	util.Logf("SE", s.keyPair.PublicKey(), format, a...)
+}
+
 // Handles an incoming connection.
 // This is likely to include many messages, all separated by endlines.
 func (s *Server) handleConnection(conn net.Conn) {
@@ -190,7 +194,7 @@ func (s *Server) listen() {
 // Must be called before listen()
 // Will retry up to 5 seconds
 func (s *Server) acquirePort() {
-	log.Printf("listening on port %d", s.port)
+	s.Logf("listening on port %d", s.port)
 	for i := 0; i < 100; i++ {
 		ln, err := net.Listen("tcp", fmt.Sprintf("localhost:%d", s.port))
 		if err == nil {

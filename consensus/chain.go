@@ -65,8 +65,7 @@ func (c *Chain) Handle(sender string, message util.Message) util.Message {
 	// The sender needs our help with an old block
 	oldBlock := c.history[slot]
 	if oldBlock != nil {
-		log.Printf("%s sending a catchup for slot %d",
-			c.publicKey, oldBlock.external.I)
+		c.Logf("sending a catchup for slot %d", oldBlock.external.I)
 		return oldBlock.external
 	}
 	
