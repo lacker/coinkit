@@ -1,6 +1,9 @@
 package currency
 
 import (
+	"fmt"
+	"strings"
+	
 	"coinkit/util"
 )
 
@@ -24,6 +27,18 @@ func (m *AccountMessage) Slot() int {
 
 func (m *AccountMessage) MessageType() string {
 	return "A"
+}
+
+func (m *AccountMessage) String() string {
+	parts := []string{"account"}
+	if m.I != 0 {
+		parts = append(parts, fmt.Sprintf("i=%d", m.I))
+	}
+	for user, account := range m.State {
+		parts = append(parts, fmt.Sprintf("%s=%s",
+			util.Shorten(user), StringifyAccount(account)))
+	}
+	return strings.Join(parts, " ")
 }
 
 func NewInquiryMessage(user string) *AccountMessage {

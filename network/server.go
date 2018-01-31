@@ -5,7 +5,6 @@ import (
 	"io"
 	"log"
 	"net"
-	"strings"
 	"time"
 
 	"coinkit/currency"
@@ -129,6 +128,7 @@ func (s *Server) getOutgoing() ([]string, bool) {
 func (s *Server) updateOutgoing() {
 	// First encode the outgoing messages into lines
 	out := s.node.OutgoingMessages()
+
 	lines := []string{}
 	for _, m := range out {
 		sm := util.NewSignedMessage(s.keyPair, m)
@@ -217,6 +217,15 @@ func (s *Server) broadcastLines(lines []string) {
 	}
 }
 
+func scontains(list []string, s string) bool {
+	for _, str := range list {
+		if str == s {
+			return true
+		}
+	}
+	return false
+}
+
 // broadcastIntermittently() sends outgoing messages every so often. it
 // should be run as a goroutine.
 func (s *Server) broadcastIntermittently() {
@@ -237,16 +246,22 @@ func (s *Server) broadcastIntermittently() {
 				lines = newerLines
 			}
 
-			if strings.Join(lastLines, ",") == strings.Join(lines, ",") {
-				// It's just the same thing, no need for an instant send
-				continue
+			// When we receive a new outgoing, we only need to send out the
+			// lines that have changed since last time.
+			changedLines := []string{}
+			for _, line := range lines {
+				if !scontains(lastLines, line) {
+					changedLines = append(changedLines, line)
+				}
 			}
-
+			
 			lastLines = lines
-			s.broadcastLines(lines)
+			s.broadcastLines(changedLines)
 
 		case <-timer.C:
-			// Re-send stuff
+			// When we hit the timer, we rebroadcast the whole outbox.
+			// This is a backstop against miscellaneous problems. If the
+			// network is functioning perfectly, this isn't necessary.
 			s.broadcastLines(lastLines)
 		}
 	}

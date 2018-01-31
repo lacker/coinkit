@@ -81,22 +81,25 @@ func (q *TransactionQueue) Logf(format string, a ...interface{}) {
 // We don't constantly revalidate so it's possible we have invalid
 // transactions in the queue.
 func (q *TransactionQueue) Add(t *SignedTransaction) {
-	if !q.Validate(t) {
+	if !q.Validate(t) || q.Contains(t) {
 		return
 	}
-	preSize := q.set.Size()
+
+	q.Logf("saw a new transaction: %s", t.Transaction)
 	q.set.Add(t)
-	postSize := q.set.Size()
-	if postSize > preSize {
-		q.Logf("saw a new transaction: %s", t.Transaction)
-	}
-	if postSize > QueueLimit {
+	
+	if q.set.Size() > QueueLimit {
 		it := q.set.Iterator()
 		if !it.Last() {
 			log.Fatal("logical failure with treeset")
 		}
 		worst := it.Value()
 		q.set.Remove(worst)
+	}
+
+	// If we are willing to keep it, let's also share it
+	if q.Contains(t) {
+		q.outbox = append(q.outbox, t)
 	}
 }
 
@@ -180,9 +183,9 @@ func (q *TransactionQueue) HandleTransactionMessage(m *TransactionMessage) {
 	if m == nil {
 		return
 	}
+
 	if m.Transactions != nil {
 		for _, t := range m.Transactions {
-			// log.Printf("adding transaction: %+v", t.Transaction)
 			q.Add(t)
 		}
 	}

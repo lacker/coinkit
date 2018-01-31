@@ -24,12 +24,16 @@ func (m *FakeMessage) MessageType() string {
 	return "Fake"
 }
 
+func (m *FakeMessage) String() string {
+	return "Fake"
+}
+
 func makeServers() []*Server {
 	_, configs := NewUnitTestNetwork()
 	answer := []*Server{}
 	for _, config := range configs {
 		server := NewServer(config)
-		server.BroadcastInterval = 5 * time.Second
+		server.BroadcastInterval = 20 * time.Second
 		server.ServeInBackground()
 		answer = append(answer, server)
 	}
@@ -77,7 +81,7 @@ func TestSendingMoney(t *testing.T) {
 		failures++
 
 		log.Printf("%d failures", failures)
-		if failures >= 10 {
+		if failures >= 5 {
 			t.Fatalf("too much failure")
 		}
 		

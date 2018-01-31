@@ -13,6 +13,9 @@ type Message interface {
 
 	// MessageType returns a unique short string mapping to the type
 	MessageType() string
+
+	// String() should return a short, human-readable string
+	String() string
 }
 
 // MessageTypeMap maps into struct types whose pointer-types implement Message.

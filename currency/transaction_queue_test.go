@@ -27,3 +27,16 @@ func TestFullQueue(t *testing.T) {
 		t.Fatalf("queue should be empty")
 	}
 }
+
+func TestSharingMessage(t *testing.T) {
+	q := NewTransactionQueue("testqueue")
+	if q.SharingMessage() != nil {
+		t.Fatal("there should be no sharing message with an empty queue")
+	}
+	tr := makeTestTransaction(0)
+	q.accounts.SetBalance(tr.Transaction.From, 10 * tr.Transaction.Amount)
+	q.Add(tr)
+	if q.SharingMessage() == nil {
+		t.Fatal("there should be a sharing message after we add one transaction")
+	}
+}

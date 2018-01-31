@@ -90,8 +90,8 @@ func (c *Client) Send(r *Request) {
 
 		// Pop something off the queue to be discarded if we can
 		select {
-		case x := <-c.queue:
-			log.Printf("send queue overloaded, dropping %+v", x)
+		case <-c.queue:
+			log.Printf("send queue overloaded, dropping message")
 		default:
 			// There must be some racing. Wait a bit and try again
 			time.Sleep(time.Millisecond)

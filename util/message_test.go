@@ -16,6 +16,10 @@ func (m *TestingMessage) MessageType() string {
 	return "Testing"
 }
 
+func (m *TestingMessage) String() string {
+	return "Testing"
+}
+
 func init() {
 	RegisterMessageType(&TestingMessage{})
 }

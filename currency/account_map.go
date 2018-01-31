@@ -3,6 +3,7 @@ package currency
 import (
 	"bytes"
 	"encoding/binary"
+	"fmt"
 )
 
 // Accounts are stored in units of nanocoins.
@@ -19,6 +20,14 @@ type Account struct {
 
 	// The current balance of this account.
 	Balance uint64
+}
+
+// For debugging
+func StringifyAccount(a *Account) string {
+	if a == nil {
+		return "nil"
+	}
+	return fmt.Sprintf("s%d:b%d", a.Sequence, a.Balance)
 }
 
 func (a Account) Bytes() []byte {

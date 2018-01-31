@@ -1,7 +1,9 @@
 package currency
 
 import (
+	"fmt"
 	"sort"
+	"strings"
 
 	"coinkit/consensus"
 	"coinkit/util"
@@ -27,6 +29,15 @@ func (m *TransactionMessage) Slot() int {
 
 func (m *TransactionMessage) MessageType() string {
 	return "T"
+}
+
+func (m *TransactionMessage) String() string {
+	cnames := []string{}
+	for name, _ := range m.Chunks {
+		cnames = append(cnames, util.Shorten(string(name)))
+	}
+	return fmt.Sprintf("trans %s chunks (%s)",
+		StringifyTransactions(m.Transactions), strings.Join(cnames, ","))
 }
 
 // Orders the transactions

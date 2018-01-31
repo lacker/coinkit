@@ -3,6 +3,7 @@ package currency
 import (
 	"encoding/json"
 	"fmt"
+	"strings"
 	
 	"coinkit/util"
 )
@@ -101,3 +102,18 @@ func makeTestTransaction(n int) *SignedTransaction {
 	}
 	return t.SignWith(kp)
 }
+
+func StringifyTransactions(transactions []*SignedTransaction) string {
+	parts := []string{}
+	limit := 2
+	for i, t := range transactions {
+		if i >= limit {
+			parts = append(parts, fmt.Sprintf("and %d more",
+				len(transactions) - limit))
+			break
+		}
+		parts = append(parts, t.String())
+	}
+	return fmt.Sprintf("(%s)", strings.Join(parts, "; "))
+}
+
