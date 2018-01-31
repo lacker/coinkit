@@ -2,7 +2,9 @@ package currency
 
 import (
 	"encoding/base64"
+	"fmt"
 	"sort"
+	"strings"
 
 	"golang.org/x/crypto/sha3"
 	
@@ -40,3 +42,16 @@ func (c *LedgerChunk) Hash() consensus.SlotValue {
 	return consensus.SlotValue(base64.RawStdEncoding.EncodeToString(h.Sum(nil)))
 }
 
+func (c *LedgerChunk) String() string {
+	parts := []string{}
+	limit := 2
+	for i, t := range c.Transactions {
+		if i >= limit {
+			parts = append(parts, fmt.Sprintf("and %d more",
+				len(c.Transactions) - limit))
+			break
+		}
+		parts = append(parts, t.String())
+	}
+	return fmt.Sprintf("(%s)", strings.Join(parts, "; "))
+}

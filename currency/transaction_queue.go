@@ -197,7 +197,7 @@ func (q *TransactionQueue) HandleTransactionMessage(m *TransactionMessage) {
 			if chunk.Hash() != key {
 				continue
 			}
-			log.Printf("%s learned that %s = %+v", q.publicKey, key, chunk)
+			q.Logf("learned that %s = %s", util.Shorten(string(key)), chunk)
 			q.chunks[key] = chunk
 		}
 	}
@@ -255,7 +255,8 @@ func (q *TransactionQueue) NewChunk(
 	key := chunk.Hash()
 	if _, ok := q.chunks[key]; !ok {
 		// We have not already created this chunk
-		log.Printf("%s created chunk %+v with hash %s", q.publicKey, chunk, key)
+		log.Printf("created chunk %s with hash %s",
+			chunk, util.Shorten(string(key)))
 		q.chunks[key] = chunk
 	}
 	return key, chunk

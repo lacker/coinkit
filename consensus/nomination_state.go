@@ -89,7 +89,7 @@ func (s *NominationState) MaybeNominateNewValue() bool {
 		return false
 	}
 
-	s.Logf("nominating %+v", s.publicKey, v)
+	s.Logf("nominating %s", util.Shorten(string(v)))
 	s.NominateNewValue(v)
 	return true
 }
@@ -185,11 +185,9 @@ func (s *NominationState) MaybeAdvance(v SlotValue) bool {
 		// Accept this value
 		s.Logf("accepts the nomination of %s", util.Shorten(string(v)))
 		changed = true
-		s.Logf("old s.Y: %+v", s.Y)
 		AssertNoDupes(s.Y)
 		s.Y = append(s.Y, v)
 		accepted = append(accepted, s.publicKey)
-		s.Logf("new s.Y: %+v", s.Y)
 		AssertNoDupes(s.Y)
 	}
 
@@ -198,7 +196,6 @@ func (s *NominationState) MaybeAdvance(v SlotValue) bool {
 		s.Logf("confirms the nomination of %s", util.Shorten(string(v)))
 		changed = true
 		s.Z = append(s.Z, v)
-		s.Logf("new s.Z: %+v", s.Z)
 	}
 	return changed
 }
@@ -242,9 +239,8 @@ func (s *NominationState) Handle(node string, m *NominationMessage) {
 		// If we don't have a candidate, and the value is valid,
 		// we can support this new nomination
 		if !HasSlotValue(s.X, value) && s.values.ValidateValue(value) {
-			s.Logf("%s supports the nomination of %+v", s.publicKey, value)
+			s.Logf("supports the nomination of %s", util.Shorten(string(value)))
 			s.X = append(s.X, value)
-			s.Logf("new s.X: %+v", s.X)
 		}
 	}
 
