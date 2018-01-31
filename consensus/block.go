@@ -2,7 +2,6 @@ package consensus
 
 import (
 	"log"
-	"time"
 
 	"coinkit/util"
 )
@@ -16,9 +15,6 @@ import (
 type Block struct {
 	// Which slot this block state is building
 	slot int
-
-	// The time we started working on this slot
-	start time.Time
 
 	nState *NominationState
 	bState *BallotState
@@ -43,7 +39,6 @@ func NewBlock(
 	nState.MaybeNominateNewValue()
 	block := &Block{
 		slot:      slot,
-		start:     time.Now(),
 		nState:    nState,
 		bState:    NewBallotState(publicKey, qs, nState),
 		values:    vs,
