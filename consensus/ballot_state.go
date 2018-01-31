@@ -266,7 +266,7 @@ func (s *BallotState) MaybeConfirmAsPrepared(n int, x SlotValue) bool {
 		return false
 	}
 
-	s.Logf("%s confirms as prepared: %d %+v", s.publicKey, n, x)
+	s.Logf("confirms as prepared: %s", &Ballot{n: n, x: x})
 	
 	if s.hn == n && *s.z != x {
 		// We have two equally high ballots and they are both
@@ -341,7 +341,7 @@ func (s *BallotState) MaybeAcceptAsCommitted(n int, x SlotValue) bool {
 		return false
 	}
 
-	s.Logf("%s accepts as committed: %d %+v", s.publicKey, n, x)
+	s.Logf("accepts as committed: %s", &Ballot{n: n, x: x})
 
 	// We accept this commit
 	s.phase = Confirm
@@ -395,7 +395,7 @@ func (s *BallotState) MaybeConfirmAsCommitted(n int, x SlotValue) bool {
 		return false
 	}
 
-	s.Logf("%s confirms as committed: %d %+v", s.publicKey, n, x)
+	s.Logf("confirms as committed: %s", &Ballot{n: n, x: x})
 
 	if s.phase == Confirm {
 		s.phase = Externalize
@@ -576,7 +576,7 @@ func (s *BallotState) Handle(node string, message BallotMessage) {
 		s.CheckIfStale()
 		return
 	}
-	s.Logf("\n\n%s got ballot message from %s:\n%+v", s.publicKey, node, message)
+	s.Logf("got message from %s: %s", util.Shorten(node), message)
 	s.stale[node] = 0
 	s.M[node] = message
 

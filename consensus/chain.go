@@ -48,7 +48,7 @@ func (c *Chain) Handle(sender string, message util.Message) util.Message {
 		c.current.Handle(sender, message)
 		if c.current.Done() {
 			// This block is done, let's move on to the next one
-			log.Printf("%s is advancing to slot %d", c.publicKey, slot + 1)
+			c.Logf("advancing to slot %d", slot + 1)
 			c.values.Finalize(c.current.external.X)
 			c.history[slot] = c.current
 			c.current = NewBlock(c.publicKey, c.D, slot + 1, c.values)

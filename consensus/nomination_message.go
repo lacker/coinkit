@@ -1,6 +1,8 @@
 package consensus
 
 import (
+	"strings"
+	
 	"coinkit/util"
 )
 
@@ -27,6 +29,25 @@ func (m *NominationMessage) MessageType() string {
 
 func (m *NominationMessage) Slot() int {
 	return m.I
+}
+
+func (m *NominationMessage) String() string {
+	shortNom := []string{}
+	shortAcc := []string{}
+	for _, nom := range m.Nom {
+		shortNom = append(shortNom, util.Shorten(string(nom)))
+	}
+	for _, acc := range m.Acc {
+		shortAcc = append(shortAcc, util.Shorten(string(acc)))
+	}
+	answer := "nominate []"
+	if len(shortNom) > 0 {
+		answer = "nominate " + strings.Join(shortNom, ",")
+	}
+	if len(shortAcc) > 0 {
+		answer += " accept " + strings.Join(shortAcc, ",")
+	}
+	return answer
 }
 
 func init() {

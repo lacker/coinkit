@@ -183,7 +183,7 @@ func (s *NominationState) MaybeAdvance(v SlotValue) bool {
 
 	if accept && !HasSlotValue(s.Y, v) {
 		// Accept this value
-		s.Logf("%s accepts the nomination of %+v", s.publicKey, v)
+		s.Logf("accepts the nomination of %s", util.Shorten(string(v)))
 		changed = true
 		s.Logf("old s.Y: %+v", s.Y)
 		AssertNoDupes(s.Y)
@@ -195,7 +195,7 @@ func (s *NominationState) MaybeAdvance(v SlotValue) bool {
 
 	// We confirm once a quorum has accepted
 	if MeetsQuorum(s, accepted) {
-		s.Logf("%s confirms the nomination of %+v", s.publicKey, v)
+		s.Logf("confirms the nomination of %s", util.Shorten(string(v)))
 		changed = true
 		s.Z = append(s.Z, v)
 		s.Logf("new s.Z: %+v", s.Z)
@@ -230,7 +230,7 @@ func (s *NominationState) Handle(node string, m *NominationMessage) {
 		return
 	}
 	// Update our most-recent-message
-	s.Logf("\n\n%s got nomination message from %s:\n%+v", s.publicKey, node, m)
+	s.Logf("got message from %s: %s", util.Shorten(node), m)
 	s.N[node] = m
 
 	for i := oldLenNom; i < len(m.Nom); i++ {

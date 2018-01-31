@@ -2,7 +2,8 @@ package consensus
 
 import (
 	"fmt"
-
+	"strings"
+	
 	"coinkit/util"
 )
 
@@ -41,6 +42,9 @@ type BallotMessage interface {
 	// RelevantRange returns the range of ballots that this message specifically
 	// provides information for.
 	RelevantRange(x SlotValue) (int, int)
+
+	// A readable, relatively-short string good for putting in logs.
+	String() string
 }
 
 // Ballot phases
@@ -130,6 +134,23 @@ type PrepareMessage struct {
 	Hn int
 
 	D QuorumSlice
+}
+
+func (m *PrepareMessage) String() string {
+	parts := []string{fmt.Sprintf("prepare i=%d b=%d,%s",
+		m.I, m.Bn, util.Shorten(string(m.Bx)))}
+	if m.Pn > 0 {
+		parts = append(parts, fmt.Sprintf("p=%d,%s",
+			m.Pn, util.Shorten(string(m.Px))))
+	}
+	if m.Ppn > 0 {
+		parts = append(parts, fmt.Sprintf("pp=%d,%s",
+			m.Ppn, util.Shorten(string(m.Ppx))))
+	}
+	if m.Cn > 0 || m.Hn > 0 {
+		parts = append(parts, fmt.Sprintf("ch=%d,%d", m.Cn, m.Hn))
+	}
+	return strings.Join(parts, " ")
 }
 
 func (m *PrepareMessage) QuorumSlice() QuorumSlice {
@@ -228,6 +249,11 @@ type ConfirmMessage struct {
 	D QuorumSlice
 }
 
+func (m *ConfirmMessage) String() string {
+	return fmt.Sprintf("confirm i=%d x=%s p=%d ch=%d,%d",
+		m.I, util.Shorten(string(m.X)), m.Pn, m.Cn, m.Hn)
+}
+
 func (m *ConfirmMessage) QuorumSlice() QuorumSlice {
 	return m.D
 }
@@ -289,6 +315,11 @@ type ExternalizeMessage struct {
 	Hn int
 
 	D QuorumSlice
+}
+
+func (m *ExternalizeMessage) String() string {
+	return fmt.Sprintf("externalize i=%d x=%s ch=%d,%d",
+		m.I, util.Shorten(string(m.X)), m.Cn, m.Hn)
 }
 
 func (m *ExternalizeMessage) QuorumSlice() QuorumSlice {
