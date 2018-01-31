@@ -5,6 +5,7 @@ import (
 	"io"
 	"log"
 	"net"
+	"strings"
 	"time"
 
 	"coinkit/consensus"
@@ -17,7 +18,10 @@ type Server struct {
 	keyPair  *util.KeyPair
 	peers    []*Client
 	node     *Node
-	outgoing []util.Message
+
+	// Whenever there is a new batch of outgoing messages, it is serialized
+	// into a list of lines and sent to the outgoing channel
+	outgoing chan []string
 
 	// Messages we are going to handle. These do not require a response
 	messages chan *util.SignedMessage
@@ -51,7 +55,7 @@ func NewServer(c *Config) *Server {
 		keyPair:  c.KeyPair,
 		peers:    peers,
 		node:     node,
-		outgoing: node.OutgoingMessages(),
+		outgoing: make(chan []string, 10),
 		messages: make(chan *util.SignedMessage),
 		requests: make(chan *Request),
 		listener: nil,
@@ -77,7 +81,6 @@ func (s *Server) handleConnection(conn net.Conn) {
 			continue
 		}
 
-
 		// Send this message to the processing goroutine
 		response := make(chan *util.SignedMessage)
 		request := &Request{
@@ -88,19 +91,56 @@ func (s *Server) handleConnection(conn net.Conn) {
 		// Send our request to the processing goroutine, wait for the response,
 		// and return it down the connection
 		s.requests <- request
+		timer := time.NewTimer(time.Second * 5)
 		select {
 		case m := <-response:
 			util.WriteSignedMessage(conn, m)
 		case <-s.quit:
 			conn.Close()
 			break
+		case <-timer.C:
+			log.Fatalf("we failed to respond to a message within 5 seconds")
 		}
 	}
 }
 
+// Flushes the outgoing queue and returns the last value if there is any.
+// Returns [], false if there is none
+// Does not wait
+func (s *Server) getOutgoing() ([]string, bool) {
+	lines := []string{}
+	ok := false
+	for {
+		select {
+		case lines = <-s.outgoing:
+			ok = true
+		default:
+			return lines, ok
+		}
+	}
+}
+
+func (s *Server) updateOutgoing() {
+	// First encode the outgoing messages into lines
+	out := s.node.OutgoingMessages()
+	lines := []string{}
+	for _, m := range out {
+		sm := util.NewSignedMessage(s.keyPair, m)
+		lines = append(lines, util.SignedMessageToLine(sm))
+	}
+
+	// Clear the outgoing queue
+	s.getOutgoing()
+	
+	// Send our lines to the now-probably-empty queue
+	s.outgoing <- lines	
+}
+
 func (s *Server) handleMessage(m *util.SignedMessage) *util.SignedMessage {
 	message := s.node.Handle(m.Signer(), m.Message())
-	s.outgoing = s.node.OutgoingMessages()
+	s.updateOutgoing()
+
+	// Return the appropriate message
 	if message == nil {
 		return nil
 	}
@@ -160,28 +200,48 @@ func (s *Server) acquirePort() {
 	log.Fatal("could not acquire port %d", s.port)
 }
 
+func (s *Server) broadcastLines(lines []string) {
+	for _, line := range lines {
+		for _, peer := range s.peers {
+			peer.Send(&Request{
+				Line: line,
+				Response: s.messages,
+			})
+		}
+	}
+}
+
 // broadcastIntermittently() sends outgoing messages every so often. it
 // should be run as a goroutine.
 func (s *Server) broadcastIntermittently() {
-	for {
-		// TODO: go faster if we have new info
-		time.Sleep(time.Second)
-		if s.shutdown {
-			break
-		}
+	lastLines := []string{}
 
-		// Broadcast to all peers
-		// Don't use s.outgoing directly in case the listen() goroutine
-		// modifies it while we iterate on it
-		messages := s.outgoing
-		for _, m := range messages {
-			sm := util.NewSignedMessage(s.keyPair, m)
-			for _, peer := range s.peers {
-				peer.Send(&Request{
-					Message:  sm,
-					Response: s.messages,
-				})
+	for {
+		timer := time.NewTimer(time.Second)
+		select {
+
+		case <-s.quit:
+			break
+			
+		case lines := <-s.outgoing:
+
+			// See if there are even newer lines
+			newerLines, ok := s.getOutgoing()
+			if ok {
+				lines = newerLines
 			}
+
+			if strings.Join(lastLines, ",") == strings.Join(lines, ",") {
+				// It's just the same thing, no need for an instant send
+				continue
+			}
+
+			lastLines = lines
+			s.broadcastLines(lines)
+
+		case <-timer.C:
+			// Re-send stuff
+			s.broadcastLines(lastLines)
 		}
 	}
 }
