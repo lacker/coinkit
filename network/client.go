@@ -13,60 +13,59 @@ import (
 // A Client is a network connection established to a Server.
 // It will keep redialing even after disconnects.
 type Client struct {
-	port      int
+	address   *Address
 	conn      net.Conn
-	queue    chan *Request
+	queue     chan *Request
 	connected bool
 }
 
 // connect is idempotent
-func (p *Client) connect() {
-	if p.connected {
+func (c *Client) connect() {
+	if c.connected {
 		return
 	}
 	failCount := 0
 	for {
-		conn, err := net.Dial("tcp", fmt.Sprintf("localhost:%d", p.port))
+		conn, err := net.Dial("tcp", c.address.String())
 		if err == nil {
-			p.conn = conn
-			p.connected = true
+			c.conn = conn
+			c.connected = true
 			return
 		}
 
 		failCount++
-		// log.Printf("dial failed. waiting %d seconds on port %d", failCount, p.port)
 		time.Sleep(time.Duration(failCount) * time.Second)
 	}
 }
 
-func (p *Client) disconnect() {
-	if p.conn != nil {
-		p.conn.Close()
+func (c *Client) disconnect() {
+	if c.conn != nil {
+		c.conn.Close()
 	}
-	p.connected = false
+	c.connected = false
 }
 
 // sendForever should handle disconnects or unresponsive peers.
-func (p *Client) sendForever() {
+func (c *Client) sendForever() {
 	// Send from the queue
 	for {
-		request := <-p.queue
+		request := <-c.queue
 		line := request.GetLine()
 		if len(line) == 0 {
 			log.Fatalf("cannot send line: [%s]", line)
 		}
 		for {
-			p.connect()
-			fmt.Fprintf(p.conn, line)
+			c.connect()
+			fmt.Fprintf(c.conn, line)
 
 			// If we get an ok, great.
 			// If we don't get an ok, disconnect and try again.
-			p.conn.SetReadDeadline(time.Now().Add(5 * time.Second))
-			response, err := util.ReadSignedMessage(p.conn)
+			c.conn.SetReadDeadline(time.Now().Add(5 * time.Second))
+			response, err := util.ReadSignedMessage(c.conn)
 
 			if err != nil {
-				log.Printf("bad response from port %d: %+v", p.port, err)
-				p.disconnect()
+				log.Printf("bad response from %s: %+v", c.address.String(), err)
+				c.disconnect()
 				continue
 			}
 
@@ -131,16 +130,12 @@ func (c *Client) GetAccount(user string) *currency.Account {
 	return am.State[user]
 }
 
-func (c *Client) Address() string {
-	return fmt.Sprintf("localhost:%d", c.port)
-}
-
-// NewClient constructs a new client by connecting to the given port.
-func NewClient(port int) *Client {
+// NewClient connects to the Server at the given address.
+func NewClient(address *Address) *Client {
 	// queue has a buffer of buflen outgoing messages
 	buflen := 10
 	p := &Client{
-		port: port,
+		address: address,
 		queue: make(chan *Request, buflen),
 	}
 	go p.sendForever()

@@ -11,6 +11,7 @@ import (
 	"coinkit/util"
 )
 
+// FakeMessage implements util.Message but does not get registered
 type FakeMessage struct {
 	Number int
 }
@@ -24,9 +25,9 @@ func (m *FakeMessage) MessageType() string {
 }
 
 func makeServers() []*Server {
+	_, configs := NewUnitTestNetwork()
 	answer := []*Server{}
-	for i := 0; i <= 3; i++ {
-		config := NewLocalConfig(i)
+	for _, config := range configs {
 		server := NewServer(config)
 		server.ServeInBackground()
 		answer = append(answer, server)
@@ -61,7 +62,7 @@ func TestSendingMoney(t *testing.T) {
 	st := transaction.SignWith(mint)
 	tm := currency.NewTransactionMessage(st)
 	sm := util.NewSignedMessage(mint, tm)
-	client := NewClient(9000)
+	client := NewClient(servers[0].LocalhostAddress())
 	client.SendMessage(sm)
 	
 	failures := 0
@@ -85,18 +86,9 @@ func TestSendingMoney(t *testing.T) {
 	stopServers(servers)
 }
 
-func TestNewServerCreatesSufficientPeers(t *testing.T) {
-	c0 := NewLocalConfig(0)
-	s0 := NewServer(c0)
-
-	if len(s0.peers) != NumPeers - 1 {
-		t.Errorf("Didn't create the right number of peers %f %f", len(s0.peers), NumPeers - 1);
-	}
-	s0.Stop()
-}
-
 func TestServerOkayWithFakeWellFormattedMessage(t *testing.T) {
-	s0 := NewServer(NewLocalConfig(1))
+	_, configs := NewUnitTestNetwork()
+	s := NewServer(configs[0])
 
 	m := &FakeMessage{Number: 4}
 	kp := util.NewKeyPairFromSecretPhrase("foo")
@@ -107,15 +99,15 @@ func TestServerOkayWithFakeWellFormattedMessage(t *testing.T) {
 		Response: nil,
 	}
 
-	s0.ServeInBackground()
-	s0.requests <- fakeRequest
+	s.ServeInBackground()
+	s.requests <- fakeRequest
 	// This hits the right code path but it feels like we ought to have a
 	// better assertion here
-	s0.Stop()
+	s.Stop()
 }
 
-func sendString(port int, s string) error {
-	c := NewClient(port)
+func sendString(address *Address, s string) error {
+	c := NewClient(address)
 	c.connect()
 	c.conn.SetReadDeadline(time.Now().Add(1 * time.Second))
 	fmt.Fprintf(c.conn, s)
@@ -124,14 +116,15 @@ func sendString(port int, s string) error {
 }
 
 func TestServerOkayWithMalformedMessage(t *testing.T) {
-	s := NewServer(NewLocalConfig(2))
+	_, configs := NewUnitTestNetwork()
+	s := NewServer(configs[1])
 	s.ServeInBackground()
 
-	if sendString(s.port, "I am sending you garbage.\n\n\n") != io.EOF {
+	if sendString(s.LocalhostAddress(), "Garbage!\n\n\n") != io.EOF {
 		t.Errorf("Didn't get disconnected after a total garbage message")
 	}
 
-	if sendString(s.port, "a:b:c:d\n") != io.EOF {
+	if sendString(s.LocalhostAddress(), "a:b:c:d\n") != io.EOF {
 		t.Errorf("Didn't get disconnected after a semi-garbage message")
 	}
 
@@ -140,14 +133,14 @@ func TestServerOkayWithMalformedMessage(t *testing.T) {
 	line := fmt.Sprintf("e:%s:%s:%s\n",
 		kp.PublicKey(), "notRealSignature", goodMessage)
 
-	if sendString(s.port, line) != io.EOF {
+	if sendString(s.LocalhostAddress(), line) != io.EOF {
 		t.Errorf("Didn't get disconnected after a bad-signature message")
 	}
 
 	line = fmt.Sprintf("e:%s:%s:%s\n",
 		kp.PublicKey(), kp.Sign(goodMessage), goodMessage)
 
-	if sendString(s.port, line) != nil {
+	if sendString(s.LocalhostAddress(), line) != nil {
 		t.Errorf("The server should still process a good message")
 	}
 

@@ -2,70 +2,103 @@ package network
 
 import (
 	"fmt"
-	"log"
 	"math"
 	"math/rand"
 	"time"
-	
+
+	"coinkit/consensus"
 	"coinkit/util"
 )
 
-const (
-	BasePort = 9000
-	NumPeers = 4
-)
-
-type Config struct {
-	// What port we should listen on
+type Address struct {
+	Host string
 	Port int
-	
-	// The physical network config of who to send messages to
-	PeerPorts []int
+}
 
-	// Our own identity
-	KeyPair *util.KeyPair
+func (a *Address) String() string {
+	return fmt.Sprintf("%s:%d", a.Host, a.Port)
+}
 
-	// Defining our quorum
+// Configuration for a network
+type NetworkConfig struct {
+	// Nodes that are accepting external connections for this network
+	Nodes []*Address
+
+	// Defining the quorum for the network
 	Members []string
 	Threshold int
 }
 
-func LocalKeyPair(arg int) *util.KeyPair {
-	return util.NewKeyPairFromSecretPhrase(fmt.Sprintf("localnet node %d", arg))
+// Configuration for a particular server running part of the network
+type ServerConfig struct {
+	Network *NetworkConfig
+
+	Port int
+	KeyPair *util.KeyPair
+}
+
+func (nc *NetworkConfig) QuorumSlice() consensus.QuorumSlice {
+	return consensus.MakeQuorumSlice(nc.Members, nc.Threshold)
+}
+
+// Using a seed prevents multiple networks from accidentally communicating
+// with each other if you don't want them to. If you do want different
+// programs to communicate with each other on a localhost network, just
+// use the same seed, like zero.
+func NewLocalhostNetwork(
+	firstPort int, num int, seed int) (*NetworkConfig, []*ServerConfig) {
+	
+	// Require a 2k+1 out of 3k+1 consensus
+	threshold := int(math.Ceil(2.0 / 3.0 * float64(num - 1))) + 1
+	
+	network := &NetworkConfig{
+		Nodes: []*Address{},
+		Members: []string{},
+		Threshold: threshold,
+	}
+	servers := []*ServerConfig{}
+	
+	for port := firstPort; port < firstPort + num; port++ {
+		network.Nodes = append(network.Nodes, &Address{
+			Host: "localhost",
+			Port: port,
+		})
+		kp := util.NewKeyPairFromSecretPhrase(fmt.Sprintf("%d %d", seed, port))
+		network.Members = append(network.Members, kp.PublicKey())
+		servers = append(servers, &ServerConfig{
+			Network: network,
+			Port: port,
+			KeyPair: kp,
+		})
+	}
+
+	return network, servers
+}
+
+const MinUnitTestPort = 2000
+const MaxUnitTestPort = 8999
+var nextUnitTestPort = MinUnitTestPort
+
+// Avoids port contention which slows down the tests that use ports
+func NewUnitTestNetwork() (*NetworkConfig, []*ServerConfig) {
+	rand.Seed(int64(time.Now().Nanosecond()))
+	num := 4
+	if nextUnitTestPort + num > MaxUnitTestPort {
+		nextUnitTestPort = MinUnitTestPort
+	}
+	n, s := NewLocalhostNetwork(nextUnitTestPort, num, rand.Int())
+	nextUnitTestPort += num
+	return n, s
+}
+
+func NewLocalNetwork() (*NetworkConfig, []*ServerConfig) {
+	return NewLocalhostNetwork(9000, 4, 0)
 }
 
 // Just returns a port
-func RandomLocalServer() int {
+func (nc *NetworkConfig) RandomAddress() *Address {
 	rand.Seed(int64(time.Now().Nanosecond()))
-	return BasePort + rand.Intn(NumPeers)
+	index := rand.Intn(len(nc.Nodes))
+	return nc.Nodes[index]
 }
 
-func NewLocalConfig(arg int) *Config {
-	if arg < 0 || arg >= NumPeers {
-		log.Fatalf("invalid arg: %d", arg)
-	}
-	port := BasePort + arg
-	kp := LocalKeyPair(arg)
-
-	var peerPorts []int
-	var members []string
-	for i := 0; i < NumPeers; i++ {
-		members = append(members, LocalKeyPair(i).PublicKey())
-		p := BasePort + i
-		if p == port {
-			continue
-		}
-		peerPorts = append(peerPorts, p)
-	}
-
-	// Require a 2k+1 out of 3k+1 consensus
-	threshold := int(math.Ceil(2.0 / 3.0 * float64(len(members) - 1))) + 1
-
-	return &Config{
-		Port: port,
-		PeerPorts: peerPorts,
-		KeyPair: kp,
-		Members: members,
-		Threshold: threshold,
-	}
-}

@@ -10,17 +10,23 @@ import (
 
 // cserver runs a coinkit server.
 
+func usage() {
+	log.Fatal("Usage: cserver <i> where i is in [0, 1, 2, 3]")
+}
+
 func main() {
 	if len(os.Args) < 2 {
-		log.Fatal("Usage: cserver <i> where i is in [0, 1, 2, ..., NumPeers - 1]")
+		usage()
 	}
 	arg, err := strconv.Atoi(os.Args[1])
 	if err != nil {
 		log.Fatal(err)
 	}
+	if arg < 0 || arg > 3 {
+		usage()
+	}
 
-	config := network.NewLocalConfig(arg)
-	
-	s := network.NewServer(config)
+	_, configs := network.NewLocalNetwork()
+	s := network.NewServer(configs[arg])
 	s.ServeForever()
 }

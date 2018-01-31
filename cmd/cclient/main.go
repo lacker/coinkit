@@ -15,8 +15,10 @@ import (
 )
 
 func newClient() *network.Client {
-	c := network.NewClient(network.RandomLocalServer())
-	log.Printf("connecting to %s", c.Address())
+	config, _ := network.NewLocalNetwork()
+	address := config.RandomAddress()
+	c := network.NewClient(address)
+	log.Printf("connecting to %s", address.String())
 	return c
 }
 

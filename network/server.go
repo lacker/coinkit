@@ -8,7 +8,6 @@ import (
 	"strings"
 	"time"
 
-	"coinkit/consensus"
 	"coinkit/currency"
 	"coinkit/util"
 )
@@ -37,22 +36,21 @@ type Server struct {
 	quit chan bool
 }
 
-func NewServer(c *Config) *Server {
-	var peers []*Client
-	for _, p := range c.PeerPorts {
-		peers = append(peers, NewClient(p))
+func NewServer(config *ServerConfig) *Server {
+	peers := []*Client{}
+	for _, address := range config.Network.Nodes {
+		peers = append(peers, NewClient(address))
 	}
-
-	qs := consensus.MakeQuorumSlice(c.Members, c.Threshold)
+	qs := config.Network.QuorumSlice()
 
 	// At the start, all money is in the "mint" account
-	node := NewNode(c.KeyPair.PublicKey(), qs)
+	node := NewNode(config.KeyPair.PublicKey(), qs)
 	mint := util.NewKeyPairFromSecretPhrase("mint")
 	node.queue.SetBalance(mint.PublicKey(), currency.TotalMoney)
 
 	return &Server{
-		port:     c.Port,
-		keyPair:  c.KeyPair,
+		port:     config.Port,
+		keyPair:  config.KeyPair,
 		peers:    peers,
 		node:     node,
 		outgoing: make(chan []string, 10),
@@ -197,7 +195,7 @@ func (s *Server) acquirePort() {
 		}
 		time.Sleep(time.Millisecond * time.Duration(50))
 	}
-	log.Fatal("could not acquire port %d", s.port)
+	log.Fatalf("could not acquire port %d", s.port)
 }
 
 func (s *Server) broadcastLines(lines []string) {
@@ -243,6 +241,13 @@ func (s *Server) broadcastIntermittently() {
 			// Re-send stuff
 			s.broadcastLines(lastLines)
 		}
+	}
+}
+
+func (s *Server) LocalhostAddress() *Address {
+	return &Address{
+		Host: "localhost",
+		Port: s.port,
 	}
 }
 
