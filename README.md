@@ -72,8 +72,7 @@ cclient send [user] [amount]
 ```
 
 The send command will keep checking back to see when the money leaves the source
-account. Right now it may take 5-10 seconds to process a new send command, so
-have a bit of patience.
+account. It should just take a second or two to send the money.
 
 To start off with, all the money is in one account where the passphrase is "mint".
 If you're just poking around, I recommend sending some money from the mint
