@@ -466,10 +466,11 @@ func (s *BallotState) CheckForBlockedBallot() bool {
 	return s.GoToNextBallot()
 }
 
-// HandleTimerTick returns whether we ended up changing the ballot state.
+// HandleStaleQuorum returns whether we ended up changing the ballot state.
 // The assumption is that the system is stuck on some ballot, and we should
 // proceed to the next ballot if this could be the stuck one.
-func (s *BallotState) HandleTimerTick() bool {
+// TODO: could we just use CheckForBlockedBallot here?
+func (s *BallotState) HandleStaleQuorum() bool {
 	if s.b == nil {
 		return false
 	}
@@ -504,7 +505,7 @@ func (s *BallotState) CheckIfStale() {
 	}
 	if MeetsQuorum(s, stale) {
 		s.stale = make(map[string]int)
- 		s.HandleTimerTick()
+ 		s.HandleStaleQuorum()
 	}
 }
 

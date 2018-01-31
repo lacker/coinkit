@@ -119,6 +119,3 @@ func (b *Block) Handle(sender string, message util.Message) {
 	b.AssertValid()
 }
 
-func (b *Block) HandleTimerTick() {
-	b.bState.HandleTimerTick()
-}
