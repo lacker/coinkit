@@ -1,7 +1,7 @@
 package consensus
 
 import (
-	"log"
+	"coinkit/util"
 )
 
 // The nomination state for the Stellar Consensus Protocol.
@@ -53,7 +53,7 @@ func NewNominationState(
 }
 
 func (s *NominationState) Logf(format string, a ...interface{}) {
-	log.Printf(s.publicKey[:3] + " " + format, a...)
+	util.Logf("NS", s.publicKey, format, a...)
 }
 
 func (s *NominationState) Show() {
@@ -89,7 +89,7 @@ func (s *NominationState) MaybeNominateNewValue() bool {
 		return false
 	}
 
-	log.Printf("%s nominates %+v", s.publicKey, v)
+	s.Logf("nominating %+v", s.publicKey, v)
 	s.NominateNewValue(v)
 	return true
 }

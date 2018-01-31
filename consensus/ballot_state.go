@@ -1,6 +1,7 @@
 package consensus
 
 import (
+	"coinkit/util"
 	"log"
 )
 
@@ -77,25 +78,25 @@ func NewBallotState(publicKey string, qs QuorumSlice, nState *NominationState) *
 }
 
 func (s *BallotState) Logf(format string, a ...interface{}) {
-	log.Printf(s.publicKey[:3] + " " + format, a...)
+	util.Logf("BS", s.publicKey, format, a...)
 }
 
 func (s *BallotState) Show() {
-	log.Printf("bState for %s:", s.publicKey)
+	s.Logf("bState for %s:", s.publicKey)
 	if s.phase != Prepare {
-		log.Printf("phase: %s", s.phase)
+		s.Logf("phase: %s", s.phase)
 	}
-	log.Printf("b: %+v", s.b)
-	log.Printf("p: %+v", s.p)
-	log.Printf("pPrime: %+v", s.pPrime)
-	log.Printf("c: %d", s.cn)
-	log.Printf("h: %d", s.hn)
-	log.Printf("z: %+v", s.z)
+	s.Logf("b: %+v", s.b)
+	s.Logf("p: %+v", s.p)
+	s.Logf("pPrime: %+v", s.pPrime)
+	s.Logf("c: %d", s.cn)
+	s.Logf("h: %d", s.hn)
+	s.Logf("z: %+v", s.z)
 	if s.z == nil {
 		if !s.nState.HasNomination() {
-			log.Printf("no candidate value")
+			s.Logf("no candidate value")
 		} else {
-			log.Printf("candidate: %+v", s.nState.PredictValue())
+			s.Logf("candidate: %+v", s.nState.PredictValue())
 		}
 	}
 }
@@ -608,32 +609,32 @@ func (s *BallotState) AssertValid() {
 	}
 
 	if s.p != nil && s.pPrime != nil && s.p.x == s.pPrime.x {
-		log.Printf("p: %+v", s.p)
-		log.Printf("pPrime: %+v", s.pPrime)
+		s.Logf("p: %+v", s.p)
+		s.Logf("pPrime: %+v", s.pPrime)
 		log.Fatalf("p and p prime should not be compatible")
 	}
 
 	if s.b != nil && s.phase == Prepare {
 		if s.p != nil && s.b.x != s.p.x && s.cn != 0 && s.hn <= s.p.n {
-			log.Printf("b: %+v", s.b)
-			log.Printf("c: %d", s.cn)
-			log.Printf("h: %d", s.hn)
-			log.Printf("p: %+v", s.p)
+			s.Logf("b: %+v", s.b)
+			s.Logf("c: %d", s.cn)
+			s.Logf("h: %d", s.hn)
+			s.Logf("p: %+v", s.p)
 			log.Fatalf("the vote to commit should have been aborted")
 		}
 		if s.pPrime != nil && s.b.x != s.pPrime.x && s.cn != 0 && s.hn <= s.pPrime.n {
-			log.Printf("b: %+v", s.b)
-			log.Printf("c: %d", s.cn)
-			log.Printf("h: %d", s.hn)
-			log.Printf("pPrime: %+v", s.pPrime)
+			s.Logf("b: %+v", s.b)
+			s.Logf("c: %d", s.cn)
+			s.Logf("h: %d", s.hn)
+			s.Logf("pPrime: %+v", s.pPrime)
 			log.Fatalf("the vote to commit should have been aborted")
 		}
 	}
 
 	if s.b != nil && s.phase == Prepare {
 		if s.last != nil && s.b.x != s.last.x && s.last.n > s.b.n {
-			log.Printf("last b: %+v", s.last)
-			log.Printf("curr b: %+v", s.b)
+			s.Logf("last b: %+v", s.last)
+			s.Logf("curr b: %+v", s.b)
 			log.Fatalf("monotonicity violation")
 		}
 

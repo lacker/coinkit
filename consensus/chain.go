@@ -2,7 +2,7 @@ package consensus
 
 import (
 	"log"
-
+	
 	"github.com/davecgh/go-spew/spew"
 
 	"coinkit/util"
@@ -27,7 +27,7 @@ type Chain struct {
 }
 
 func (c *Chain) Logf(format string, a ...interface{}) {
-	log.Printf(c.publicKey[:3] + " " + format, a...)
+	util.Logf("CH", c.publicKey, format, a...)
 }
 
 // Handle handles an incoming message.

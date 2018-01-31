@@ -73,7 +73,7 @@ func (q *TransactionQueue) Remove(t *SignedTransaction) {
 }
 
 func (q *TransactionQueue) Logf(format string, a ...interface{}) {
-	log.Printf(q.publicKey[:3] + " " + format, a...)
+	util.Logf("TQ", q.publicKey, format, a...)
 }
 
 // Add adds a transaction to the queue
