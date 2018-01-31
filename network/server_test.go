@@ -83,7 +83,7 @@ func TestSendingMoney(t *testing.T) {
 		time.Sleep(time.Second)
 	}
 
-	stopServers(servers)
+	go stopServers(servers)
 }
 
 func TestServerOkayWithFakeWellFormattedMessage(t *testing.T) {
@@ -103,13 +103,13 @@ func TestServerOkayWithFakeWellFormattedMessage(t *testing.T) {
 	s.requests <- fakeRequest
 	// This hits the right code path but it feels like we ought to have a
 	// better assertion here
-	s.Stop()
+	go s.Stop()
 }
 
 func sendString(address *Address, s string) error {
 	c := NewClient(address)
 	c.connect()
-	c.conn.SetReadDeadline(time.Now().Add(1 * time.Second))
+	c.conn.SetReadDeadline(time.Now().Add(100 * time.Millisecond))
 	fmt.Fprintf(c.conn, s)
 	_, err := util.ReadSignedMessage(c.conn)
 	return err
@@ -144,5 +144,5 @@ func TestServerOkayWithMalformedMessage(t *testing.T) {
 		t.Errorf("The server should still process a good message")
 	}
 
-	s.Stop()
+	go s.Stop()
 }
