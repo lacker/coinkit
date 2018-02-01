@@ -14,6 +14,7 @@ const QueueLimit = 1000
 
 // TransactionQueue keeps the transactions that are pending but have neither
 // been rejected nor confirmed.
+// TransactionQueue is not threadsafe.
 type TransactionQueue struct {
 	// Just for logging
 	publicKey string

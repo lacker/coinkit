@@ -9,6 +9,7 @@ import (
 )
 
 // Chain creates the blockchain, gaining consensus on one Block at a time.
+// Chain is not threadsafe.
 type Chain struct {
 	// The block we are currently working on
 	current *Block
@@ -84,6 +85,11 @@ func (c *Chain) Handle(sender string, message util.Message) util.Message {
 
 func (c *Chain) AssertValid() {
 	c.current.AssertValid()
+}
+
+// Slot() returns the slot this chain is currently working on
+func (c *Chain) Slot() int {
+	return c.current.slot
 }
 
 func NewEmptyChain(publicKey string, qs QuorumSlice, vs ValueStore) *Chain {

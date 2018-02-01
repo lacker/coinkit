@@ -8,7 +8,8 @@ import (
 	"coinkit/util"
 )
 
-// A Node is a logical container for everything one node in the network handles.
+// Node is the logical container for everything one node in the network handles.
+// Node is not threadsafe.
 type Node struct {
 	publicKey string
 	chain     *consensus.Chain
@@ -23,6 +24,11 @@ func NewNode(publicKey string, qs consensus.QuorumSlice) *Node {
 		chain:     consensus.NewEmptyChain(publicKey, qs, queue),
 		queue:     queue,
 	}
+}
+
+// Slot() returns the slot this node is currently working on
+func (node *Node) Slot() int {
+	return node.chain.Slot()
 }
 
 // Handle handles an incoming message.

@@ -29,6 +29,9 @@ type Server struct {
 
 	listener net.Listener
 
+	// We close the currentBlock channel whenever the current block is complete
+	currentBlock chan bool
+
 	// We close the quit channel and set shutdown to true
 	// when the server is shutting down
 	shutdown bool
@@ -61,6 +64,7 @@ func NewServer(config *ServerConfig) *Server {
 		listener:          nil,
 		shutdown:          false,
 		quit:              make(chan bool),
+		currentBlock:      make(chan bool),
 		BroadcastInterval: time.Second,
 	}
 }
@@ -143,8 +147,15 @@ func (s *Server) updateOutgoing() {
 }
 
 func (s *Server) handleMessage(m *util.SignedMessage) *util.SignedMessage {
+	prevSlot := s.node.Slot()
 	message := s.node.Handle(m.Signer(), m.Message())
+	postSlot := s.node.Slot()
 	s.updateOutgoing()
+
+	if postSlot != prevSlot {
+		close(s.currentBlock)
+		s.currentBlock = make(chan bool)
+	}
 
 	// Return the appropriate message
 	if message == nil {

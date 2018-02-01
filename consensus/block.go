@@ -12,6 +12,7 @@ import (
 // Most logic is not in the Block itself, but is delegated to the
 // NominationState for the nomination phase and the BallotState for the
 // ballot phase.
+// Block is not threadsafe.
 type Block struct {
 	// Which slot this block state is building
 	slot int
@@ -25,7 +26,7 @@ type Block struct {
 	external *ExternalizeMessage
 
 	values ValueStore
-	
+
 	// Who we care about
 	D QuorumSlice
 
@@ -110,7 +111,6 @@ func (b *Block) Handle(sender string, message util.Message) {
 	if b.bState.phase == Externalize && b.external == nil {
 		b.external = b.bState.Message(b.slot, b.D).(*ExternalizeMessage)
 	}
-	
+
 	b.AssertValid()
 }
-
