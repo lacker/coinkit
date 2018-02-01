@@ -14,5 +14,5 @@ func Shorten(name string) string {
 
 // Send logging through here so that it's easier to manage
 func Logf(tag string, publicKey string, format string, a ...interface{}) {
-	log.Printf(Shorten(publicKey) + " " + format, a...)
+	log.Printf(tag + " " + Shorten(publicKey) + " " + format, a...)
 }
