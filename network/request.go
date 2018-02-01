@@ -12,7 +12,7 @@ type Request struct {
 
 	// If Message is nil, it has been pre-encoded into MessageString.
 	Line string
-	
+
 	Response chan *util.SignedMessage
 }
 

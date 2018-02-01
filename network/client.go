@@ -103,7 +103,7 @@ func (c *Client) Send(r *Request) {
 func (c *Client) SendMessage(message *util.SignedMessage) *util.SignedMessage {
 	response := make(chan *util.SignedMessage)
 	request := &Request{
-		Message: message,
+		Message:  message,
 		Response: response,
 	}
 	// Wait on a response.
@@ -136,7 +136,7 @@ func NewClient(address *Address) *Client {
 	buflen := 10
 	p := &Client{
 		address: address,
-		queue: make(chan *Request, buflen),
+		queue:   make(chan *Request, buflen),
 	}
 	go p.sendForever()
 	return p
