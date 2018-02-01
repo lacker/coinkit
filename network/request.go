@@ -1,6 +1,8 @@
 package network
 
 import (
+	"time"
+
 	"coinkit/util"
 )
 
@@ -14,6 +16,8 @@ type Request struct {
 	Line string
 
 	Response chan *util.SignedMessage
+
+	Timeout time.Duration
 }
 
 func (r *Request) GetLine() string {

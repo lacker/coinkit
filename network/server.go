@@ -12,10 +12,10 @@ import (
 )
 
 type Server struct {
-	port     int
-	keyPair  *util.KeyPair
-	peers    []*Client
-	node     *Node
+	port    int
+	keyPair *util.KeyPair
+	peers   []*Client
+	node    *Node
 
 	// Whenever there is a new batch of outgoing messages, it is serialized
 	// into a list of lines and sent to the outgoing channel
@@ -51,16 +51,16 @@ func NewServer(config *ServerConfig) *Server {
 	node.queue.SetBalance(mint.PublicKey(), currency.TotalMoney)
 
 	return &Server{
-		port:     config.Port,
-		keyPair:  config.KeyPair,
-		peers:    peers,
-		node:     node,
-		outgoing: make(chan []string, 10),
-		messages: make(chan *util.SignedMessage),
-		requests: make(chan *Request),
-		listener: nil,
-		shutdown: false,
-		quit: make(chan bool),
+		port:              config.Port,
+		keyPair:           config.KeyPair,
+		peers:             peers,
+		node:              node,
+		outgoing:          make(chan []string, 10),
+		messages:          make(chan *util.SignedMessage),
+		requests:          make(chan *Request),
+		listener:          nil,
+		shutdown:          false,
+		quit:              make(chan bool),
 		BroadcastInterval: time.Second,
 	}
 }
@@ -137,9 +137,9 @@ func (s *Server) updateOutgoing() {
 
 	// Clear the outgoing queue
 	s.getOutgoing()
-	
+
 	// Send our lines to the now-probably-empty queue
-	s.outgoing <- lines	
+	s.outgoing <- lines
 }
 
 func (s *Server) handleMessage(m *util.SignedMessage) *util.SignedMessage {
@@ -210,8 +210,9 @@ func (s *Server) broadcastLines(lines []string) {
 	for _, line := range lines {
 		for _, peer := range s.peers {
 			peer.Send(&Request{
-				Line: line,
+				Line:     line,
 				Response: s.messages,
+				Timeout:  5 * time.Second,
 			})
 		}
 	}
@@ -237,7 +238,7 @@ func (s *Server) broadcastIntermittently() {
 
 		case <-s.quit:
 			break
-			
+
 		case lines := <-s.outgoing:
 
 			// See if there are even newer lines
@@ -254,7 +255,7 @@ func (s *Server) broadcastIntermittently() {
 					changedLines = append(changedLines, line)
 				}
 			}
-			
+
 			lastLines = lines
 			s.broadcastLines(changedLines)
 
@@ -298,7 +299,7 @@ func (s *Server) ServeInBackground() {
 func (s *Server) Stop() {
 	s.shutdown = true
 	close(s.quit)
-	
+
 	if s.listener != nil {
 		log.Printf("closing listener on port %d", s.port)
 		s.listener.Close()

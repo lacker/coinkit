@@ -50,6 +50,9 @@ func (c *Client) sendForever() {
 	// Send from the queue
 	for {
 		request := <-c.queue
+		if request.Timeout == 0 {
+			log.Fatalf("you should use a timeout with clients")
+		}
 		line := request.GetLine()
 		if len(line) == 0 {
 			log.Fatalf("cannot send line: [%s]", line)
@@ -60,7 +63,7 @@ func (c *Client) sendForever() {
 
 			// If we get an ok, great.
 			// If we don't get an ok, disconnect and try again.
-			c.conn.SetReadDeadline(time.Now().Add(5 * time.Second))
+			c.conn.SetReadDeadline(time.Now().Add(request.Timeout))
 			response, err := util.ReadSignedMessage(c.conn)
 
 			if err != nil {
@@ -105,6 +108,7 @@ func (c *Client) SendMessage(message *util.SignedMessage) *util.SignedMessage {
 	request := &Request{
 		Message:  message,
 		Response: response,
+		Timeout:  5 * time.Second,
 	}
 	// Wait on a response.
 	// This hangs on network failure
