@@ -268,7 +268,7 @@ func (s *BallotState) MaybeConfirmAsPrepared(n int, x SlotValue) bool {
 
 	s.Logf("confirms as prepared: %s", &Ballot{n: n, x: x})
 	
-	if s.hn == n && *s.z != x {
+	if s.hn == n {
 		// We have two equally high ballots and they are both
 		// confirmed as prepared. This means that every ballot is
 		// both prepared and aborted at this ballot number, and we'll have to go
