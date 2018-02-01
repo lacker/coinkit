@@ -1,40 +1,6 @@
 package currency
 
-import (
-	"bytes"
-	"encoding/binary"
-	"fmt"
-)
-
-// Accounts are stored in units of nanocoins.
-const OneMillion = 1000 * 1000
-const NumCoins = 21 * OneMillion
-const OneBillion = 1000 * OneMillion
-const TotalMoney = NumCoins * OneBillion
-
-type Account struct {
-	// The sequence id of the last transaction authorized by this account.
-	// 0 means there have never been any authorized transactions.
-	// Used to prevent replay attacks.
-	Sequence uint32
-
-	// The current balance of this account.
-	Balance uint64
-}
-
-// For debugging
-func StringifyAccount(a *Account) string {
-	if a == nil {
-		return "nil"
-	}
-	return fmt.Sprintf("s%d:b%d", a.Sequence, a.Balance)
-}
-
-func (a Account) Bytes() []byte {
-	var buffer bytes.Buffer
-	binary.Write(&buffer, binary.LittleEndian, a)
-	return buffer.Bytes()
-}
+import ()
 
 // Used to map a public key to its Account
 type AccountMap struct {
@@ -56,7 +22,7 @@ func NewAccountMap() *AccountMap {
 // made won't be visible in the original
 func (m *AccountMap) CowCopy() *AccountMap {
 	return &AccountMap{
-		data: make(map[string]*Account),
+		data:     make(map[string]*Account),
 		fallback: m,
 	}
 }
@@ -107,7 +73,7 @@ func (m *AccountMap) Validate(t *Transaction) bool {
 	if account == nil {
 		return false
 	}
-	if account.Sequence + 1 != t.Sequence {
+	if account.Sequence+1 != t.Sequence {
 		return false
 	}
 	cost := t.Amount + t.Fee
@@ -139,11 +105,11 @@ func (m *AccountMap) Process(t *Transaction) bool {
 	}
 	newSource := &Account{
 		Sequence: t.Sequence,
-		Balance: source.Balance - t.Amount - t.Fee,
+		Balance:  source.Balance - t.Amount - t.Fee,
 	}
 	newTarget := &Account{
 		Sequence: target.Sequence,
-		Balance: target.Balance + t.Amount,
+		Balance:  target.Balance + t.Amount,
 	}
 	m.Set(t.From, newSource)
 	m.Set(t.To, newTarget)
