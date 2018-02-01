@@ -100,7 +100,7 @@ func (s *Server) handleConnection(conn net.Conn) {
 		// Send our request to the processing goroutine, wait for the response,
 		// and return it down the connection
 		s.requests <- request
-		timer := time.NewTimer(time.Second * 5)
+		timer := time.NewTimer(time.Second)
 		select {
 		case m := <-response:
 			util.WriteSignedMessage(conn, m)
@@ -108,7 +108,7 @@ func (s *Server) handleConnection(conn net.Conn) {
 			conn.Close()
 			break
 		case <-timer.C:
-			log.Fatalf("we failed to respond to a message within 5 seconds")
+			log.Fatalf("the processing goroutine got overloaded")
 		}
 	}
 }
@@ -129,7 +129,11 @@ func (s *Server) getOutgoing() ([]string, bool) {
 	}
 }
 
-func (s *Server) updateOutgoing() {
+// unsafeUpdateOutgoing gets the outgoing messages from our node and uses
+// the outgoing channel to broadcast them.
+// Since it deals with the node directly, it should only be called from the
+// message-processing goroutine.
+func (s *Server) unsafeUpdateOutgoing() {
 	// First encode the outgoing messages into lines
 	out := s.node.OutgoingMessages()
 
@@ -146,11 +150,13 @@ func (s *Server) updateOutgoing() {
 	s.outgoing <- lines
 }
 
-func (s *Server) handleMessage(m *util.SignedMessage) *util.SignedMessage {
+// unsafeHandleMessage handles a message by interacting with the node directly.
+// It should be only be called from the message-processing goroutine.
+func (s *Server) unsafeHandleMessage(m *util.SignedMessage) *util.SignedMessage {
 	prevSlot := s.node.Slot()
 	message := s.node.Handle(m.Signer(), m.Message())
 	postSlot := s.node.Slot()
-	s.updateOutgoing()
+	s.unsafeUpdateOutgoing()
 
 	if postSlot != prevSlot {
 		close(s.currentBlock)
@@ -165,14 +171,17 @@ func (s *Server) handleMessage(m *util.SignedMessage) *util.SignedMessage {
 	return sm
 }
 
-func (s *Server) handleMessagesForever() {
+// processMessagesForever should be run in its own goroutine. This is the only
+// goroutine that is allowed to access the node, because node is not threadsafe.
+// The 'unsafe' methods should only be called from within here.
+func (s *Server) processMessagesForever() {
 	for {
 
 		select {
 
 		case request := <-s.requests:
 			if request.Message != nil {
-				response := s.handleMessage(request.Message)
+				response := s.unsafeHandleMessage(request.Message)
 				if request.Response != nil {
 					request.Response <- response
 				}
@@ -180,7 +189,7 @@ func (s *Server) handleMessagesForever() {
 
 		case message := <-s.messages:
 			if message != nil {
-				s.handleMessage(message)
+				s.unsafeHandleMessage(message)
 			}
 
 		case <-s.quit:
@@ -292,7 +301,7 @@ func (s *Server) LocalhostAddress() *Address {
 func (s *Server) ServeForever() {
 	s.acquirePort()
 
-	go s.handleMessagesForever()
+	go s.processMessagesForever()
 	go s.listen()
 	s.broadcastIntermittently()
 }
@@ -302,7 +311,7 @@ func (s *Server) ServeForever() {
 // Stop() should work if it is called after ServeInBackground returns.
 func (s *Server) ServeInBackground() {
 	s.acquirePort()
-	go s.handleMessagesForever()
+	go s.processMessagesForever()
 	go s.listen()
 	go s.broadcastIntermittently()
 }
