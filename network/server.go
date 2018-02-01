@@ -364,7 +364,7 @@ func (s *Server) Stop() {
 	close(s.quit)
 
 	if s.listener != nil {
-		log.Printf("closing listener on port %d", s.port)
+		s.Logf("releasing port %d", s.port)
 		s.listener.Close()
 	}
 }
