@@ -76,39 +76,82 @@ func (s *Server) Logf(format string, a ...interface{}) {
 // Handles an incoming connection.
 // This is likely to include many messages, all separated by endlines.
 func (s *Server) handleConnection(conn net.Conn) {
+	defer conn.Close()
+
 	for {
 		sm, err := util.ReadSignedMessage(conn)
 		if err != nil {
 			if !s.shutdown && err != io.EOF {
 				log.Printf("connection error: %v", err)
 			}
-			conn.Close()
-			break
+			return
 		}
-
 		if sm == nil {
 			continue
 		}
 
-		// Send this message to the processing goroutine
-		response := make(chan *util.SignedMessage)
-		request := &Request{
-			Message:  sm,
-			Response: response,
+		m, ok := s.handleMessage(sm)
+		if !ok {
+			return
 		}
 
-		// Send our request to the processing goroutine, wait for the response,
-		// and return it down the connection
-		s.requests <- request
-		timer := time.NewTimer(time.Second)
+		util.WriteSignedMessage(conn, m)
+	}
+}
+
+// handleMessage will try many times for an InfoMessage, but only once for other
+// messages.
+// handleMessage is safe to be called from multiple threads, because it dispatches
+// messages to the processing goroutine for processing.
+// If we did not process the message, (nil, false) is returned.
+// (nil, true) means we processed the message and there is a nil response.
+func (s *Server) handleMessage(sm *util.SignedMessage) (*util.SignedMessage, bool) {
+	if _, ok := sm.Message().(*util.InfoMessage); ok {
+		return s.retryHandleMessage(sm)
+	}
+	return s.handleMessageOnce(sm)
+}
+
+// handleMessageOnce is like handleMessage but explicitly only tries once.
+func (s *Server) handleMessageOnce(sm *util.SignedMessage) (*util.SignedMessage, bool) {
+	response := make(chan *util.SignedMessage)
+	request := &Request{
+		Message:  sm,
+		Response: response,
+	}
+
+	// Send our request to the processing goroutine, wait for the response,
+	// and return it down the connection
+	s.requests <- request
+	timer := time.NewTimer(time.Second)
+	select {
+	case m := <-response:
+		return m, true
+	case <-s.quit:
+		return nil, false
+	case <-timer.C:
+		log.Fatalf("the processing goroutine got overloaded")
+		return nil, false
+	}
+}
+
+// retryHandleMessage is like handleMessageOnce, but it expects a non-nil response.
+// If the response is nil, it waits for another block to be finalized and tries again
+// when it is.
+func (s *Server) retryHandleMessage(sm *util.SignedMessage) (*util.SignedMessage, bool) {
+	for {
+		m, ok := s.handleMessageOnce(sm)
+		if !ok {
+			return m, ok
+		}
+		if m != nil {
+			return m, ok
+		}
 		select {
-		case m := <-response:
-			util.WriteSignedMessage(conn, m)
+		case <-s.currentBlock:
+			// There's another block, so let the loop retry
 		case <-s.quit:
-			conn.Close()
-			break
-		case <-timer.C:
-			log.Fatalf("the processing goroutine got overloaded")
+			return nil, false
 		}
 	}
 }
@@ -132,7 +175,7 @@ func (s *Server) getOutgoing() ([]string, bool) {
 // unsafeUpdateOutgoing gets the outgoing messages from our node and uses
 // the outgoing channel to broadcast them.
 // Since it deals with the node directly, it should only be called from the
-// message-processing goroutine.
+// message-processing thread.
 func (s *Server) unsafeUpdateOutgoing() {
 	// First encode the outgoing messages into lines
 	out := s.node.OutgoingMessages()
@@ -150,9 +193,9 @@ func (s *Server) unsafeUpdateOutgoing() {
 	s.outgoing <- lines
 }
 
-// unsafeHandleMessage handles a message by interacting with the node directly.
-// It should be only be called from the message-processing goroutine.
-func (s *Server) unsafeHandleMessage(m *util.SignedMessage) *util.SignedMessage {
+// unsafeProcessMessage handles a message by interacting with the node directly.
+// It should be only be called from the message-processing thread.
+func (s *Server) unsafeProcessMessage(m *util.SignedMessage) *util.SignedMessage {
 	prevSlot := s.node.Slot()
 	message := s.node.Handle(m.Signer(), m.Message())
 	postSlot := s.node.Slot()
@@ -172,7 +215,7 @@ func (s *Server) unsafeHandleMessage(m *util.SignedMessage) *util.SignedMessage 
 }
 
 // processMessagesForever should be run in its own goroutine. This is the only
-// goroutine that is allowed to access the node, because node is not threadsafe.
+// thread that is allowed to access the node, because node is not threadsafe.
 // The 'unsafe' methods should only be called from within here.
 func (s *Server) processMessagesForever() {
 	for {
@@ -181,7 +224,7 @@ func (s *Server) processMessagesForever() {
 
 		case request := <-s.requests:
 			if request.Message != nil {
-				response := s.unsafeHandleMessage(request.Message)
+				response := s.unsafeProcessMessage(request.Message)
 				if request.Response != nil {
 					request.Response <- response
 				}
@@ -189,7 +232,7 @@ func (s *Server) processMessagesForever() {
 
 		case message := <-s.messages:
 			if message != nil {
-				s.unsafeHandleMessage(message)
+				s.unsafeProcessMessage(message)
 			}
 
 		case <-s.quit:
