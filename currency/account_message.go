@@ -3,7 +3,7 @@ package currency
 import (
 	"fmt"
 	"strings"
-	
+
 	"coinkit/util"
 )
 
@@ -39,15 +39,6 @@ func (m *AccountMessage) String() string {
 			util.Shorten(user), StringifyAccount(account)))
 	}
 	return strings.Join(parts, " ")
-}
-
-func NewInquiryMessage(user string) *AccountMessage {
-	state := make(map[string]*Account)
-	state[user] = nil
-	return &AccountMessage{
-		I: 0,
-		State: state,
-	}	
 }
 
 func init() {

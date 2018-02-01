@@ -17,7 +17,7 @@ const QueueLimit = 1000
 type TransactionQueue struct {
 	// Just for logging
 	publicKey string
-	
+
 	set *treeset.Set
 
 	// Transactions that we have not yet shared
@@ -26,7 +26,7 @@ type TransactionQueue struct {
 	// The ledger chunks that are being considered
 	// They are indexed by their hash
 	chunks map[consensus.SlotValue]*LedgerChunk
-	
+
 	// accounts is used to validate transactions
 	// For now this is the actual authentic store of account data
 	// TODO: get this into a real database
@@ -42,12 +42,12 @@ type TransactionQueue struct {
 func NewTransactionQueue(publicKey string) *TransactionQueue {
 	return &TransactionQueue{
 		publicKey: publicKey,
-		set: treeset.NewWith(HighestPriorityFirst),
-		outbox: []*SignedTransaction{},
-		chunks: make(map[consensus.SlotValue]*LedgerChunk),
-		accounts: NewAccountMap(),
-		last: consensus.SlotValue(""),
-		slot: 1,
+		set:       treeset.NewWith(HighestPriorityFirst),
+		outbox:    []*SignedTransaction{},
+		chunks:    make(map[consensus.SlotValue]*LedgerChunk),
+		accounts:  NewAccountMap(),
+		last:      consensus.SlotValue(""),
+		slot:      1,
 	}
 }
 
@@ -87,7 +87,7 @@ func (q *TransactionQueue) Add(t *SignedTransaction) {
 
 	q.Logf("saw a new transaction: %s", t.Transaction)
 	q.set.Add(t)
-	
+
 	if q.set.Size() > QueueLimit {
 		it := q.set.Iterator()
 		if !it.Last() {
@@ -131,7 +131,7 @@ func (q *TransactionQueue) SharingMessage() *TransactionMessage {
 	}
 	return &TransactionMessage{
 		Transactions: ts,
-		Chunks: q.chunks,
+		Chunks:       q.chunks,
 	}
 }
 
@@ -155,26 +155,24 @@ func (q *TransactionQueue) Handle(message util.Message) util.Message {
 		q.HandleTransactionMessage(m)
 		return nil
 
-	case *AccountMessage:
-		return q.HandleAccountMessage(m)
-		
+	case *util.InfoMessage:
+		return q.HandleInfoMessage(m)
+
 	default:
 		log.Printf("queue did not recognize message: %+v", m)
 		return nil
 	}
 }
 
-func (q *TransactionQueue) HandleAccountMessage(m *AccountMessage) *AccountMessage {
-	if m == nil {
+func (q *TransactionQueue) HandleInfoMessage(m *util.InfoMessage) *AccountMessage {
+	if m == nil || m.Account == "" {
 		return nil
 	}
 	output := &AccountMessage{
-		I: q.slot,
+		I:     q.slot,
 		State: make(map[string]*Account),
 	}
-	for key, _ := range m.State {
-		output.State[key] = q.accounts.Get(key)
-	}
+	output.State[m.Account] = q.accounts.Get(m.Account)
 	return output
 }
 
@@ -253,7 +251,7 @@ func (q *TransactionQueue) NewChunk(
 	}
 	chunk := &LedgerChunk{
 		Transactions: transactions,
-		State: state,
+		State:        state,
 	}
 	key := chunk.Hash()
 	if _, ok := q.chunks[key]; !ok {
@@ -292,7 +290,7 @@ func (q *TransactionQueue) Finalize(v consensus.SlotValue) {
 	if !ok {
 		panic("We are finalizing a chunk but we don't know its data.")
 	}
-	
+
 	if !q.accounts.ValidateChunk(chunk) {
 		panic("We could not validate a finalized chunk.")
 	}

@@ -2,7 +2,7 @@ package network
 
 import (
 	"log"
-	
+
 	"coinkit/consensus"
 	"coinkit/currency"
 	"coinkit/util"
@@ -11,17 +11,17 @@ import (
 // A Node is a logical container for everything one node in the network handles.
 type Node struct {
 	publicKey string
-	chain *consensus.Chain
-	queue *currency.TransactionQueue
+	chain     *consensus.Chain
+	queue     *currency.TransactionQueue
 }
 
 func NewNode(publicKey string, qs consensus.QuorumSlice) *Node {
 	queue := currency.NewTransactionQueue(publicKey)
-	
+
 	return &Node{
 		publicKey: publicKey,
-		chain: consensus.NewEmptyChain(publicKey, qs, queue),
-		queue: queue,
+		chain:     consensus.NewEmptyChain(publicKey, qs, queue),
+		queue:     queue,
 	}
 }
 
@@ -35,7 +35,17 @@ func (node *Node) Handle(sender string, message util.Message) util.Message {
 	switch m := message.(type) {
 
 	case *currency.AccountMessage:
-		return node.queue.Handle(m)
+		return nil
+
+	case *util.InfoMessage:
+		if m.Account != "" {
+			return node.queue.Handle(m)
+		}
+		if m.I != 0 {
+			return node.chain.Handle(sender, m)
+		}
+		return nil
+
 	case *currency.TransactionMessage:
 		return node.queue.Handle(m)
 

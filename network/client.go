@@ -118,14 +118,17 @@ func (c *Client) SendMessage(message *util.SignedMessage) *util.SignedMessage {
 }
 
 // GetAccount fetches account data.
-// Hangs on network failure, can log fatal on a malicious server.
+// This can log fatal with a malicious server so don't use it from a server.
 func (c *Client) GetAccount(user string) *currency.Account {
 	// Since this is public data we'll use a throwaway key and stay anonymous
 	kp := util.NewKeyPair()
 
-	message := currency.NewInquiryMessage(user)
+	message := &util.InfoMessage{Account: user}
 	sm := util.NewSignedMessage(kp, message)
 	response := c.SendMessage(sm)
+	if response == nil {
+		log.Fatal("got nil account message")
+	}
 	m := response.Message()
 	am, ok := m.(*currency.AccountMessage)
 	if !ok {
