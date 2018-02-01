@@ -1,14 +1,13 @@
-package main 
+package main
 
 import (
 	"bufio"
 	"log"
 	"os"
 	"strconv"
-	"time"
 
 	"github.com/davecgh/go-spew/spew"
-	
+
 	"coinkit/currency"
 	"coinkit/network"
 	"coinkit/util"
@@ -42,7 +41,7 @@ func login() *util.KeyPair {
 	log.Printf("please enter your passphrase:")
 	scanner := bufio.NewScanner(os.Stdin)
 	scanner.Scan()
-    phrase := scanner.Text()
+	phrase := scanner.Text()
 	kp := util.NewKeyPairFromSecretPhrase(phrase)
 	log.Printf("hello. your name is %s", kp.PublicKey())
 	return kp
@@ -60,18 +59,19 @@ func send(recipient string, amountStr string) {
 	account := client.GetAccount(user)
 
 	log.Printf("account data for %s:\n%s", user, spew.Sdump(account))
-	
+
 	if account.Balance < amount {
 		log.Fatalf("cannot send %d when our account only has %d",
 			amount, account.Balance)
 	}
 
+	seq := account.Sequence + 1
 	transaction := &currency.Transaction{
-		From: user,
-		Sequence: account.Sequence + 1,
-		To: recipient,
-		Amount: amount,
-		Fee: 0,
+		From:     user,
+		Sequence: seq,
+		To:       recipient,
+		Amount:   amount,
+		Fee:      0,
 	}
 
 	// Send our transaction to the network
@@ -80,15 +80,9 @@ func send(recipient string, amountStr string) {
 	sm := util.NewSignedMessage(kp, tm)
 	client.SendMessage(sm)
 	log.Printf("sending %d to %s", amount, recipient)
-	
+
 	// Wait for our transaction to clear
-	for {
-		a := status(user)
-		if a.Sequence >= transaction.Sequence {
-			break
-		}
-		time.Sleep(time.Second)
-	}
+	client.WaitToClear(user, seq)
 	log.Printf("transaction %d cleared", transaction.Sequence)
 }
 
