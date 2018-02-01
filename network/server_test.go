@@ -58,35 +58,20 @@ func TestSendingMoney(t *testing.T) {
 	mint := util.NewKeyPairFromSecretPhrase("mint")
 	bob := util.NewKeyPairFromSecretPhrase("bob")
 	transaction := &currency.Transaction{
-		From: mint.PublicKey(),
+		From:     mint.PublicKey(),
 		Sequence: 1,
-		To: bob.PublicKey(),
-		Amount: 100,
-		Fee: 1,
+		To:       bob.PublicKey(),
+		Amount:   100,
+		Fee:      1,
 	}
 	st := transaction.SignWith(mint)
 	tm := currency.NewTransactionMessage(st)
 	sm := util.NewSignedMessage(mint, tm)
 	client := NewClient(servers[0].LocalhostAddress())
 	client.SendMessage(sm)
-	
-	failures := 0
-	for {
-		account := client.GetAccount(bob.PublicKey())
-		log.Printf("got account: %+v", account)
-		
-		if account != nil && account.Balance > 0 {
-			break
-		}
-		failures++
 
-		log.Printf("%d failures", failures)
-		if failures >= 5 {
-			t.Fatalf("too much failure")
-		}
-		
-		time.Sleep(time.Second)
-	}
+	client.WaitToClear(mint.PublicKey(), 1)
+	log.Printf("transaction cleared")
 
 	go stopServers(servers)
 }
@@ -99,8 +84,8 @@ func TestServerOkayWithFakeWellFormattedMessage(t *testing.T) {
 	kp := util.NewKeyPairFromSecretPhrase("foo")
 	sm := util.NewSignedMessage(kp, m)
 
-	fakeRequest := &Request {
-		Message: sm,
+	fakeRequest := &Request{
+		Message:  sm,
 		Response: nil,
 	}
 

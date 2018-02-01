@@ -117,26 +117,6 @@ func (c *Client) SendMessage(message *util.SignedMessage) *util.SignedMessage {
 	return sm
 }
 
-// GetAccount fetches account data.
-// This can log fatal with a malicious server so don't use it from a server.
-func (c *Client) GetAccount(user string) *currency.Account {
-	// Since this is public data we'll use a throwaway key and stay anonymous
-	kp := util.NewKeyPair()
-
-	message := &util.InfoMessage{Account: user}
-	sm := util.NewSignedMessage(kp, message)
-	response := c.SendMessage(sm)
-	if response == nil {
-		log.Fatal("got nil account message")
-	}
-	m := response.Message()
-	am, ok := m.(*currency.AccountMessage)
-	if !ok {
-		log.Fatal("received non-account message: %+v", message)
-	}
-	return am.State[user]
-}
-
 // NewClient connects to the Server at the given address.
 func NewClient(address *Address) *Client {
 	// queue has a buffer of buflen outgoing messages
@@ -147,4 +127,33 @@ func NewClient(address *Address) *Client {
 	}
 	go p.sendForever()
 	return p
+}
+
+func (c *Client) SendInfoMessage(message *util.InfoMessage) util.Message {
+	// We can use an anonymous key with info messages
+	kp := util.NewKeyPair()
+	sm := util.NewSignedMessage(kp, message)
+	response := c.SendMessage(sm)
+	if response == nil {
+		log.Fatal("got nil account message")
+	}
+	return response.Message()
+}
+
+// WaitToClear waits for the transaction with this sequence number to clear.
+func (c *Client) WaitToClear(user string, sequence uint32) *currency.Account {
+	for {
+		m := c.SendInfoMessage(&util.InfoMessage{Account: user})
+		account := m.(*currency.AccountMessage).State[user]
+		if account.Sequence >= sequence {
+			return account
+		}
+		log.Printf("waiting for slot %d", m.Slot())
+		c.SendInfoMessage(&util.InfoMessage{I: m.Slot()})
+	}
+}
+
+func (c *Client) GetAccount(user string) *currency.Account {
+	m := c.SendInfoMessage(&util.InfoMessage{Account: user}).(*currency.AccountMessage)
+	return m.State[user]
 }
