@@ -88,6 +88,11 @@ func (b *Block) Done() bool {
 	return b.external != nil
 }
 
+// ValueStoreUpdated should be called when the value store is updated.
+func (b *Block) ValueStoreUpdated() {
+	b.nState.MaybeNominateNewValue()
+}
+
 // Handle handles an incoming message
 func (b *Block) Handle(sender string, message util.Message) {
 	if sender == b.publicKey {

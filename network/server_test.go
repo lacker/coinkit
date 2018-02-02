@@ -149,6 +149,10 @@ func BenchmarkSendMoney10(b *testing.B) {
 	benchmarkSendMoney(10, b)
 }
 
+func BenchmarkSendMoney30(b *testing.B) {
+	benchmarkSendMoney(30, b)
+}
+
 func TestServerOkayWithFakeWellFormattedMessage(t *testing.T) {
 	_, configs := NewUnitTestNetwork()
 	s := NewServer(configs[0])
