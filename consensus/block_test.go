@@ -2,6 +2,7 @@ package consensus
 
 import (
 	"log"
+	"math"
 	"math/rand"
 	"testing"
 
@@ -81,20 +82,52 @@ func TestConsensus(t *testing.T) {
 	}
 }
 
+func exchangeMessages(blocks []*Block, beEvil bool) {
+	for _, block := range blocks {
+		messages := block.OutgoingMessages()
+
+		for _, block2 := range blocks {
+			if block == block2 {
+				continue
+			}
+
+			for _, message := range messages {
+				if (beEvil) {
+					switch m := message.(type) {
+					case *PrepareMessage:
+						m.Hn = math.MaxInt32
+					}
+				}
+
+				block2.Handle(block.publicKey, message)
+			}
+		}
+	}
+}
+
+func TestProtectionAgainstBigRangeDDoS(t *testing.T) {
+	members := []string{"amy", "bob", "cal", "dan"}
+	qs := MakeQuorumSlice(members, 3)
+	vs := NewTestValueStore(0)
+
+	var blocks []*Block
+	for _, name  := range members {
+		blocks = append(blocks, NewBlock(name, qs, 1, vs))
+
+	}
+
+	exchangeMessages(blocks, false)
+	exchangeMessages(blocks, false)
+	exchangeMessages(blocks, true)
+}
+
 // Simulate the pending messages being sent from source to target
-func blockSend(source *Block, target *Block, beEvil bool) {
+func blockSend(source *Block, target *Block) {
 	if source == target {
 		return
 	}
 	messages := source.OutgoingMessages()
 	for _, message := range messages {
-		if beEvil {
-			switch m := message.(type) {
-			case *PrepareMessage:
-				m.Hn = 100000
-			}
-		}
-
 		m := util.EncodeThenDecode(message)
 		target.Handle(source.publicKey, m)
 	}
@@ -154,12 +187,7 @@ func blockFuzzTest(blocks []*Block, seed int64, t *testing.T) {
 	for i := 0; i < 10000; i++ {
 		j := rand.Intn(len(blocks))
 		k := rand.Intn(len(blocks))
-		// Let's do something malicious occasionally
-		if i % 5000 == 0 {
-			blockSend(blocks[j], blocks[k], true)
-		} else {
-			blockSend(blocks[j], blocks[k], false)
-		}
+		blockSend(blocks[j], blocks[k])
 
 		if allDone(blocks) {
 			return

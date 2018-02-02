@@ -556,17 +556,7 @@ func (s *BallotState) InvestigateValue(x SlotValue) {
 	// For example, we could only investigate ballots that have a blocking
 	// set that mentions something about them.
 	min, max := s.RelevantRange(x)
-	var numberToNodes map[int][]string
 	for i := min; i <= max; i++ {
-		if i > 10 {
-			if numberToNodes == nil {
-				numberToNodes = s.NodesTalkingAboutBallotNumbers(x)
-			}
-			if !s.D.BlockedBy(numberToNodes[i]) {
-				continue
-			}
-		}
-
 		s.InvestigateBallot(i, x)
 	}
 }
