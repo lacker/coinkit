@@ -37,8 +37,8 @@ type Server struct {
 	shutdown bool
 	quit     chan bool
 
-	// How often we send out a broadcast of redundant data
-	BroadcastInterval time.Duration
+	// How often we send out a rebroadcast, resending our redundant data
+	RebroadcastInterval time.Duration
 }
 
 func NewServer(config *ServerConfig) *Server {
@@ -50,27 +50,34 @@ func NewServer(config *ServerConfig) *Server {
 
 	// At the start, all money is in the "mint" account
 	node := NewNode(config.KeyPair.PublicKey(), qs)
-	mint := util.NewKeyPairFromSecretPhrase("mint")
-	node.queue.SetBalance(mint.PublicKey(), currency.TotalMoney)
 
 	return &Server{
-		port:              config.Port,
-		keyPair:           config.KeyPair,
-		peers:             peers,
-		node:              node,
-		outgoing:          make(chan []string, 10),
-		messages:          make(chan *util.SignedMessage),
-		requests:          make(chan *Request),
-		listener:          nil,
-		shutdown:          false,
-		quit:              make(chan bool),
-		currentBlock:      make(chan bool),
-		BroadcastInterval: time.Second,
+		port:                config.Port,
+		keyPair:             config.KeyPair,
+		peers:               peers,
+		node:                node,
+		outgoing:            make(chan []string, 10),
+		messages:            make(chan *util.SignedMessage),
+		requests:            make(chan *Request),
+		listener:            nil,
+		shutdown:            false,
+		quit:                make(chan bool),
+		currentBlock:        make(chan bool),
+		RebroadcastInterval: time.Second,
 	}
 }
 
 func (s *Server) Logf(format string, a ...interface{}) {
 	util.Logf("SE", s.keyPair.PublicKey(), format, a...)
+}
+
+func (s *Server) InitMint() {
+	mint := util.NewKeyPairFromSecretPhrase("mint")
+	s.SetBalance(mint.PublicKey(), currency.TotalMoney)
+}
+
+func (s *Server) SetBalance(user string, amount uint64) {
+	s.node.queue.SetBalance(user, amount)
 }
 
 // Handles an incoming connection.
@@ -290,13 +297,14 @@ func scontains(list []string, s string) bool {
 	return false
 }
 
-// broadcastIntermittently() sends outgoing messages every so often. it
-// should be run as a goroutine.
+// broadcastIntermittently() sends outgoing messages every so often. It
+// should be run as a goroutine. This handles both redundancy rebroadcasts and
+// the regular broadcasts of new messages.
 func (s *Server) broadcastIntermittently() {
 	lastLines := []string{}
 
 	for {
-		timer := time.NewTimer(s.BroadcastInterval)
+		timer := time.NewTimer(s.RebroadcastInterval)
 		select {
 
 		case <-s.quit:
@@ -323,7 +331,7 @@ func (s *Server) broadcastIntermittently() {
 			s.broadcastLines(changedLines)
 
 		case <-timer.C:
-			// When we hit the timer, we rebroadcast the whole outbox.
+			// It's time for a rebroadcast. Send out duplicate messages.
 			// This is a backstop against miscellaneous problems. If the
 			// network is functioning perfectly, this isn't necessary.
 			s.broadcastLines(lastLines)
