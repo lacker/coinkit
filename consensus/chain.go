@@ -119,6 +119,10 @@ func (c *Chain) OutgoingMessages() []util.Message {
 	return answer
 }
 
+func (chain *Chain) Stats() {
+	chain.Logf("%d blocks externalized", chain.Slot()-1)
+}
+
 func (chain *Chain) Log() {
 	log.Printf("--------------------------------------------------------------------------")
 	log.Printf("%s is working on slot %d", chain.publicKey, chain.current.slot)

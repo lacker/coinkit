@@ -38,6 +38,9 @@ type TransactionQueue struct {
 
 	// The current slot we are working on
 	slot int
+
+	// A count of the number of transactions this queue has finalized
+	finalized int
 }
 
 func NewTransactionQueue(publicKey string) *TransactionQueue {
@@ -49,6 +52,7 @@ func NewTransactionQueue(publicKey string) *TransactionQueue {
 		accounts:  NewAccountMap(),
 		last:      consensus.SlotValue(""),
 		slot:      1,
+		finalized: 0,
 	}
 }
 
@@ -306,6 +310,7 @@ func (q *TransactionQueue) Finalize(v consensus.SlotValue) {
 		panic("We could not process a finalized chunk.")
 	}
 
+	q.finalized += len(chunk.Transactions)
 	q.last = v
 	q.chunks = make(map[consensus.SlotValue]*LedgerChunk)
 	q.slot += 1
@@ -332,10 +337,14 @@ func (q *TransactionQueue) ValidateValue(v consensus.SlotValue) bool {
 	return ok
 }
 
+func (q *TransactionQueue) Stats() {
+	q.Logf("%d transactions finalized", q.finalized)
+}
+
 func (q *TransactionQueue) Log() {
 	ts := q.Transactions()
-	log.Printf("%s has %d pending transactions:", q.publicKey, len(ts))
+	q.Logf("has %d pending transactions:", q.publicKey, len(ts))
 	for _, t := range ts {
-		log.Printf("%+v", t.Transaction)
+		q.Logf("%s", t.Transaction)
 	}
 }

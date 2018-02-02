@@ -139,6 +139,9 @@ func benchmarkSendMoney(numClients int, b *testing.B) {
 	for _, ch := range chans {
 		<-ch
 	}
+	for _, server := range servers {
+		server.Stats()
+	}
 }
 
 func BenchmarkSendMoney1(b *testing.B) {
@@ -149,8 +152,8 @@ func BenchmarkSendMoney10(b *testing.B) {
 	benchmarkSendMoney(10, b)
 }
 
-func BenchmarkSendMoney30(b *testing.B) {
-	benchmarkSendMoney(30, b)
+func BenchmarkSendMoney20(b *testing.B) {
+	benchmarkSendMoney(20, b)
 }
 
 func TestServerOkayWithFakeWellFormattedMessage(t *testing.T) {

@@ -37,6 +37,11 @@ type Server struct {
 	shutdown bool
 	quit     chan bool
 
+	// A counter of how many messages we have broadcasted
+	broadcasted int
+
+	start time.Time
+
 	// How often we send out a rebroadcast, resending our redundant data
 	RebroadcastInterval time.Duration
 }
@@ -63,6 +68,7 @@ func NewServer(config *ServerConfig) *Server {
 		shutdown:            false,
 		quit:                make(chan bool),
 		currentBlock:        make(chan bool),
+		broadcasted:         0,
 		RebroadcastInterval: time.Second,
 	}
 }
@@ -269,6 +275,7 @@ func (s *Server) acquirePort() {
 		ln, err := net.Listen("tcp", fmt.Sprintf("localhost:%d", s.port))
 		if err == nil {
 			s.listener = ln
+			s.start = time.Now()
 			return
 		}
 		time.Sleep(time.Millisecond * time.Duration(50))
@@ -285,6 +292,7 @@ func (s *Server) broadcastLines(lines []string) {
 				Timeout:  5 * time.Second,
 			})
 		}
+		s.broadcasted += 1
 	}
 }
 
@@ -365,6 +373,13 @@ func (s *Server) ServeInBackground() {
 	go s.processMessagesForever()
 	go s.listen()
 	go s.broadcastIntermittently()
+}
+
+func (s *Server) Stats() {
+	s.Logf("server stats:")
+	s.Logf("%.1fs uptime", time.Now().Sub(s.start).Seconds())
+	s.Logf("%d messages broadcasted", s.broadcasted)
+	s.node.Stats()
 }
 
 func (s *Server) Stop() {
