@@ -35,10 +35,10 @@ func makeServers() []*Server {
 		server := NewServer(config)
 		server.InitMint()
 
-		// Essentially disable the rebroadcasts for these tests.
+		// A high number essentially disables the rebroadcasts for these tests.
 		// In theory they should not be necessary unless we have node failures
 		// or lossy communication channels.
-		server.RebroadcastInterval = 60 * time.Second
+		server.RebroadcastInterval = 1 * time.Second
 
 		server.ServeInBackground()
 		answer = append(answer, server)
@@ -139,6 +139,10 @@ func benchmarkSendMoney(numClients int, b *testing.B) {
 	for _, ch := range chans {
 		<-ch
 	}
+}
+
+func BenchmarkSendMoney1(b *testing.B) {
+	benchmarkSendMoney(1, b)
 }
 
 func BenchmarkSendMoney10(b *testing.B) {
