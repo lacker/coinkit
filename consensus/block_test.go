@@ -33,7 +33,7 @@ func TestConsensus(t *testing.T) {
 	// Let everyone receive an initial nomination from Amy
 	amy.nState.NominateNewValue(SlotValue("hello its amy"))
 	a := amy.OutgoingMessages()[0]
-	
+
 	bob.Handle("amy", a)
 	if len(bob.nState.N) != 1 {
 		t.Fatal("len(bob.nState.N) != 1")
@@ -82,12 +82,19 @@ func TestConsensus(t *testing.T) {
 }
 
 // Simulate the pending messages being sent from source to target
-func blockSend(source *Block, target *Block) {
+func blockSend(source *Block, target *Block, beEvil bool) {
 	if source == target {
 		return
 	}
 	messages := source.OutgoingMessages()
 	for _, message := range messages {
+		if beEvil {
+			switch m := message.(type) {
+			case *PrepareMessage:
+				m.Hn = 100000
+			}
+		}
+
 		m := util.EncodeThenDecode(message)
 		target.Handle(source.publicKey, m)
 	}
@@ -147,7 +154,13 @@ func blockFuzzTest(blocks []*Block, seed int64, t *testing.T) {
 	for i := 0; i < 10000; i++ {
 		j := rand.Intn(len(blocks))
 		k := rand.Intn(len(blocks))
-		blockSend(blocks[j], blocks[k])
+		// Let's do something malicious occasionally
+		if i % 5000 == 0 {
+			blockSend(blocks[j], blocks[k], true)
+		} else {
+			blockSend(blocks[j], blocks[k], false)
+		}
+
 		if allDone(blocks) {
 			return
 		}

@@ -529,9 +529,24 @@ func (s *BallotState) RelevantRange(x SlotValue) (int, int) {
 	min, max := 0, 0
 	for _, message := range s.M {
 		a, b := message.RelevantRange(x)
-		min, max = RangeUnion(min, max, a, b) 
+		min, max = RangeUnion(min, max, a, b)
 	}
 	return min, max
+}
+
+// Returns a map of ballot numbers to the set of nodes that are
+// saying something about those numbers for this slot value.
+func (s *BallotState) NodesTalkingAboutBallotNumbers(x SlotValue) map[int][]string {
+	numberToNodes := make(map[int][]string)
+
+	for node, m := range s.M {
+		touchedMin, touchedMax := m.RelevantRange(x)
+		for i := touchedMin; i <= touchedMax; i++ {
+			numberToNodes[i] = append(numberToNodes[i], node)
+		}
+	}
+
+	return numberToNodes
 }
 
 // InvestigateValue checks if any information can be updated for this value.
@@ -541,7 +556,17 @@ func (s *BallotState) InvestigateValue(x SlotValue) {
 	// For example, we could only investigate ballots that have a blocking
 	// set that mentions something about them.
 	min, max := s.RelevantRange(x)
+	var numberToNodes map[int][]string
 	for i := min; i <= max; i++ {
+		if i > 10 {
+			if numberToNodes == nil {
+				numberToNodes = s.NodesTalkingAboutBallotNumbers(x)
+			}
+			if !s.D.BlockedBy(numberToNodes[i]) {
+				continue
+			}
+		}
+
 		s.InvestigateBallot(i, x)
 	}
 }

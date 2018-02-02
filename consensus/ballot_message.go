@@ -3,7 +3,7 @@ package consensus
 import (
 	"fmt"
 	"strings"
-	
+
 	"coinkit/util"
 )
 
