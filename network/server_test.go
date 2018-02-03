@@ -38,7 +38,7 @@ func makeServers() []*Server {
 		// A high number essentially disables the rebroadcasts for these tests.
 		// In theory they should not be necessary unless we have node failures
 		// or lossy communication channels.
-		server.RebroadcastInterval = 1 * time.Second
+		server.RebroadcastInterval = 2 * time.Second
 
 		server.ServeInBackground()
 		answer = append(answer, server)
