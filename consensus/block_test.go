@@ -103,7 +103,6 @@ func exchangeMessages(blocks []*Block, beEvil bool) {
 				}
 
 				block2.Handle(block.publicKey, message)
-				block2.bState.Show()
 			}
 		}
 	}
@@ -117,7 +116,6 @@ func TestProtectionAgainstBigRangeDDoS(t *testing.T) {
 	var blocks []*Block
 	for _, name  := range members {
 		blocks = append(blocks, NewBlock(name, qs, 1, vs))
-
 	}
 
 	exchangeMessages(blocks, false)
