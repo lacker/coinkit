@@ -32,7 +32,7 @@ type Server struct {
 	// We close the currentBlock channel whenever the current block is complete
 	currentBlock chan bool
 
-	// We close the quit channel and set shutdown to true
+	// We set shutdown to true and close the quit channel
 	// when the server is shutting down
 	shutdown bool
 	quit     chan bool

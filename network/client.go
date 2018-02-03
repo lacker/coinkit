@@ -17,6 +17,11 @@ type Client struct {
 	conn      net.Conn
 	queue     chan *Request
 	connected bool
+
+	// We set closing to true and close the quit channel when the
+	// client is closing
+	closing bool
+	quit    chan bool
 }
 
 // connect is idempotent
@@ -80,6 +85,13 @@ func (c *Client) sendForever() {
 	}
 }
 
+// Close() should be called when the client is no longer being used. Requests in
+// progress may or may not have callbacks called. This is important to do so that
+// we don't have eternal redials from clients that are no longer in use.
+func (c *Client) Close() {
+	panic("TODO: implement")
+}
+
 // Send issues a request and will send the response to the response channel.
 func (c *Client) Send(r *Request) {
 	for {
@@ -124,6 +136,8 @@ func NewClient(address *Address) *Client {
 	p := &Client{
 		address: address,
 		queue:   make(chan *Request, buflen),
+		closing: false,
+		quit:    make(chan bool),
 	}
 	go p.sendForever()
 	return p
