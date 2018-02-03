@@ -17,6 +17,12 @@ fi
 
 go install ./...
 
+if [ $? -ne 0 ]
+then
+    echo "not starting cservers due to error"
+    exit 1
+fi
+
 for i in `seq 0 3`;
 do
     nohup cserver $i &> $LOGS/cserver$i.log &

@@ -28,5 +28,6 @@ func main() {
 
 	_, configs := network.NewLocalNetwork()
 	s := network.NewServer(configs[arg])
+	s.InitMint()
 	s.ServeForever()
 }

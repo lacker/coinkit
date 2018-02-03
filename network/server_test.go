@@ -33,7 +33,13 @@ func makeServers() []*Server {
 	answer := []*Server{}
 	for _, config := range configs {
 		server := NewServer(config)
-		server.BroadcastInterval = 20 * time.Second
+		server.InitMint()
+
+		// A high number essentially disables the rebroadcasts for these tests.
+		// In theory they should not be necessary unless we have node failures
+		// or lossy communication channels.
+		server.RebroadcastInterval = 1 * time.Second
+
 		server.ServeInBackground()
 		answer = append(answer, server)
 	}
@@ -53,27 +59,101 @@ func TestStartStop(t *testing.T) {
 	stopServers(moreServers)
 }
 
-func TestSendingMoney(t *testing.T) {
+// sendMoney waits until the transaction clears
+// it fatals if from doesn't have the money
+func sendMoney(client *Client, from *util.KeyPair, to *util.KeyPair, amount uint64) {
+	account := client.GetAccount(from.PublicKey())
+	if account == nil || account.Balance < amount {
+		log.Fatalf("%s did not have enough money", from.PublicKey())
+	}
+	seq := account.Sequence + 1
+	transaction := &currency.Transaction{
+		From:     from.PublicKey(),
+		Sequence: account.Sequence + 1,
+		To:       to.PublicKey(),
+		Amount:   amount,
+		Fee:      0,
+	}
+	st := transaction.SignWith(from)
+	tm := currency.NewTransactionMessage(st)
+	sm := util.NewSignedMessage(from, tm)
+	client.SendMessage(sm)
+	client.WaitToClear(from.PublicKey(), seq)
+}
+
+func TestSendMoney(t *testing.T) {
 	servers := makeServers()
 	mint := util.NewKeyPairFromSecretPhrase("mint")
 	bob := util.NewKeyPairFromSecretPhrase("bob")
-	transaction := &currency.Transaction{
-		From:     mint.PublicKey(),
-		Sequence: 1,
-		To:       bob.PublicKey(),
-		Amount:   100,
-		Fee:      1,
-	}
-	st := transaction.SignWith(mint)
-	tm := currency.NewTransactionMessage(st)
-	sm := util.NewSignedMessage(mint, tm)
 	client := NewClient(servers[0].LocalhostAddress())
-	client.SendMessage(sm)
-
-	client.WaitToClear(mint.PublicKey(), 1)
+	sendMoney(client, mint, bob, 100)
 	log.Printf("transaction cleared")
-
 	go stopServers(servers)
+}
+
+func makeClients(servers []*Server, n int) []*Client {
+	clients := []*Client{}
+	for {
+		for _, server := range servers {
+			clients = append(clients, NewClient(server.LocalhostAddress()))
+			if len(clients) == n {
+				return clients
+			}
+		}
+	}
+}
+
+// sendMoneyRepeatedly sends one unit of money repeat times and closes the done
+// channel when it is done.
+func sendMoneyRepeatedly(
+	client *Client, from *util.KeyPair, to *util.KeyPair, repeat int, done chan bool) {
+	for i := 0; i < repeat; i++ {
+		sendMoney(client, from, to, 1)
+	}
+	close(done)
+}
+
+func benchmarkSendMoney(numClients int, b *testing.B) {
+	servers := makeServers()
+	clients := makeClients(servers, numClients)
+
+	// Setup
+	kps := []*util.KeyPair{}
+	chans := []chan bool{}
+	mint := util.NewKeyPairFromSecretPhrase("mint")
+	for i := 0; i < numClients; i++ {
+		kps = append(kps, util.NewKeyPairFromSecretPhrase(fmt.Sprintf("kp%d", i)))
+		chans = append(chans, make(chan bool))
+		for _, server := range servers {
+			server.SetBalance(kps[i].PublicKey(), uint64(b.N))
+		}
+	}
+	b.ResetTimer()
+
+	// Kickoff
+	for i, client := range clients {
+		go sendMoneyRepeatedly(client, kps[i], mint, b.N, chans[i])
+	}
+
+	// Wait for the finish
+	for _, ch := range chans {
+		<-ch
+	}
+	for _, server := range servers {
+		server.Stats()
+	}
+}
+
+func BenchmarkSendMoney1(b *testing.B) {
+	benchmarkSendMoney(1, b)
+}
+
+func BenchmarkSendMoney10(b *testing.B) {
+	benchmarkSendMoney(10, b)
+}
+
+func BenchmarkSendMoney20(b *testing.B) {
+	benchmarkSendMoney(20, b)
 }
 
 func TestServerOkayWithFakeWellFormattedMessage(t *testing.T) {

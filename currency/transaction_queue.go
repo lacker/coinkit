@@ -38,6 +38,9 @@ type TransactionQueue struct {
 
 	// The current slot we are working on
 	slot int
+
+	// A count of the number of transactions this queue has finalized
+	finalized int
 }
 
 func NewTransactionQueue(publicKey string) *TransactionQueue {
@@ -49,6 +52,7 @@ func NewTransactionQueue(publicKey string) *TransactionQueue {
 		accounts:  NewAccountMap(),
 		last:      consensus.SlotValue(""),
 		slot:      1,
+		finalized: 0,
 	}
 }
 
@@ -81,9 +85,10 @@ func (q *TransactionQueue) Logf(format string, a ...interface{}) {
 // If it isn't valid, we just discard it.
 // We don't constantly revalidate so it's possible we have invalid
 // transactions in the queue.
-func (q *TransactionQueue) Add(t *SignedTransaction) {
+// Returns whether any changes were made.
+func (q *TransactionQueue) Add(t *SignedTransaction) bool {
 	if !q.Validate(t) || q.Contains(t) {
-		return
+		return false
 	}
 
 	q.Logf("saw a new transaction: %s", t.Transaction)
@@ -101,7 +106,9 @@ func (q *TransactionQueue) Add(t *SignedTransaction) {
 	// If we are willing to keep it, let's also share it
 	if q.Contains(t) {
 		q.outbox = append(q.outbox, t)
+		return true
 	}
+	return false
 }
 
 func (q *TransactionQueue) Contains(t *SignedTransaction) bool {
@@ -147,21 +154,20 @@ func (q *TransactionQueue) SetBalance(owner string, balance uint64) {
 }
 
 // Handle handles an incoming message.
-// It may return a message to be sent back to the original sender, or it
-// may just return nil if it has no particular response.
-func (q *TransactionQueue) Handle(message util.Message) util.Message {
+// It returns any message that should be sent back to the original sender, and
+// a flag telling whether it made any internal updates.
+func (q *TransactionQueue) Handle(message util.Message) (util.Message, bool) {
 	switch m := message.(type) {
 
 	case *TransactionMessage:
-		q.HandleTransactionMessage(m)
-		return nil
+		return nil, q.HandleTransactionMessage(m)
 
 	case *util.InfoMessage:
-		return q.HandleInfoMessage(m)
+		return q.HandleInfoMessage(m), false
 
 	default:
 		log.Printf("queue did not recognize message: %+v", m)
-		return nil
+		return nil, false
 	}
 }
 
@@ -178,14 +184,16 @@ func (q *TransactionQueue) HandleInfoMessage(m *util.InfoMessage) *AccountMessag
 }
 
 // Handles a transaction message from another node.
-func (q *TransactionQueue) HandleTransactionMessage(m *TransactionMessage) {
+// Returns whether it made any internal updates.
+func (q *TransactionQueue) HandleTransactionMessage(m *TransactionMessage) bool {
 	if m == nil {
-		return
+		return false
 	}
 
+	updated := false
 	if m.Transactions != nil {
 		for _, t := range m.Transactions {
-			q.Add(t)
+			updated = updated || q.Add(t)
 		}
 	}
 	if m.Chunks != nil {
@@ -201,8 +209,10 @@ func (q *TransactionQueue) HandleTransactionMessage(m *TransactionMessage) {
 			}
 			q.Logf("learned that %s = %s", util.Shorten(string(key)), chunk)
 			q.chunks[key] = chunk
+			updated = true
 		}
 	}
+	return updated
 }
 
 func (q *TransactionQueue) Size() int {
@@ -300,6 +310,7 @@ func (q *TransactionQueue) Finalize(v consensus.SlotValue) {
 		panic("We could not process a finalized chunk.")
 	}
 
+	q.finalized += len(chunk.Transactions)
 	q.last = v
 	q.chunks = make(map[consensus.SlotValue]*LedgerChunk)
 	q.slot += 1
@@ -314,8 +325,10 @@ func (q *TransactionQueue) Last() consensus.SlotValue {
 func (q *TransactionQueue) SuggestValue() (consensus.SlotValue, bool) {
 	key, chunk := q.NewChunk(q.Transactions())
 	if chunk == nil {
+		q.Logf("has no suggestion")
 		return consensus.SlotValue(""), false
 	}
+	q.Logf("suggests %s = %s", key, chunk)
 	return key, true
 }
 
@@ -324,10 +337,14 @@ func (q *TransactionQueue) ValidateValue(v consensus.SlotValue) bool {
 	return ok
 }
 
+func (q *TransactionQueue) Stats() {
+	q.Logf("%d transactions finalized", q.finalized)
+}
+
 func (q *TransactionQueue) Log() {
 	ts := q.Transactions()
-	log.Printf("%s has %d pending transactions:", q.publicKey, len(ts))
+	q.Logf("has %d pending transactions:", q.publicKey, len(ts))
 	for _, t := range ts {
-		log.Printf("%+v", t.Transaction)
+		q.Logf("%s", t.Transaction)
 	}
 }

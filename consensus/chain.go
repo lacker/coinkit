@@ -102,6 +102,11 @@ func NewEmptyChain(publicKey string, qs QuorumSlice, vs ValueStore) *Chain {
 	}
 }
 
+// ValueStoreUpdated should be called when the value store is updated
+func (c *Chain) ValueStoreUpdated() {
+	c.current.ValueStoreUpdated()
+}
+
 func (c *Chain) OutgoingMessages() []util.Message {
 	answer := c.current.OutgoingMessages()
 
@@ -112,6 +117,10 @@ func (c *Chain) OutgoingMessages() []util.Message {
 	}
 
 	return answer
+}
+
+func (chain *Chain) Stats() {
+	chain.Logf("%d blocks externalized", chain.Slot()-1)
 }
 
 func (chain *Chain) Log() {
