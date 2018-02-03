@@ -83,6 +83,8 @@ func TestConsensus(t *testing.T) {
 }
 
 func exchangeMessages(blocks []*Block, beEvil bool) {
+	firstEvil := false
+
 	for _, block := range blocks {
 		messages := block.OutgoingMessages()
 
@@ -92,14 +94,16 @@ func exchangeMessages(blocks []*Block, beEvil bool) {
 			}
 
 			for _, message := range messages {
-				if (beEvil) {
+				if (beEvil && !firstEvil) {
 					switch m := message.(type) {
 					case *PrepareMessage:
 						m.Hn = math.MaxInt32
+						firstEvil = true
 					}
 				}
 
 				block2.Handle(block.publicKey, message)
+				block2.bState.Show()
 			}
 		}
 	}
@@ -119,6 +123,11 @@ func TestProtectionAgainstBigRangeDDoS(t *testing.T) {
 	exchangeMessages(blocks, false)
 	exchangeMessages(blocks, false)
 	exchangeMessages(blocks, true)
+	exchangeMessages(blocks, false)
+
+	if !allDone(blocks) {
+		t.Fatalf("Didn't converge")
+	}
 }
 
 // Simulate the pending messages being sent from source to target

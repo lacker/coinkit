@@ -55,7 +55,7 @@ type BallotState struct {
 	// How many duplicate messages we received from each peer
 	// Used like a timer to guess when we should advance rounds
 	stale map[string]int
-	
+
 	// Who we are
 	publicKey string
 
@@ -91,13 +91,14 @@ func (s *BallotState) Show() {
 	s.Logf("pPrime: %+v", s.pPrime)
 	s.Logf("c: %d", s.cn)
 	s.Logf("h: %d", s.hn)
-	s.Logf("z: %+v", s.z)
 	if s.z == nil {
 		if !s.nState.HasNomination() {
 			s.Logf("no candidate value")
 		} else {
 			s.Logf("candidate: %+v", s.nState.PredictValue())
 		}
+	} else {
+		s.Logf("z: %+v", *s.z)
 	}
 }
 
@@ -534,28 +535,33 @@ func (s *BallotState) RelevantRange(x SlotValue) (int, int) {
 	return min, max
 }
 
-// Returns a map of ballot numbers to the set of nodes that are
-// saying something about those numbers for this slot value.
-func (s *BallotState) NodesTalkingAboutBallotNumbers(x SlotValue) map[int][]string {
+// Returns the max ballot number that a blocking set of nodes are talking about.
+func (s *BallotState) MaxActionableBallotNumber() int {
 	numberToNodes := make(map[int][]string)
 
-	for node, m := range s.M {
-		touchedMin, touchedMax := m.RelevantRange(x)
-		for i := touchedMin; i <= touchedMax; i++ {
-			numberToNodes[i] = append(numberToNodes[i], node)
+	for node, message := range s.M {
+		maxN := message.MaxN()
+		numberToNodes[maxN] = append(numberToNodes[maxN], node)
+	}
+
+	max := 0
+
+	for n, nodes := range numberToNodes {
+		if n > max && s.D.BlockedBy(nodes) {
+			max = n
 		}
 	}
 
-	return numberToNodes
+	return max
 }
 
 // InvestigateValue checks if any information can be updated for this value.
 func (s *BallotState) InvestigateValue(x SlotValue) {
-	// We could get DOS'd here.
-	// TODO: do something intelligent if RelevantRange is too large.
-	// For example, we could only investigate ballots that have a blocking
-	// set that mentions something about them.
 	min, max := s.RelevantRange(x)
+	maxActionable := s.MaxActionableBallotNumber()
+	if max > maxActionable {
+		max = maxActionable
+	}
 	for i := min; i <= max; i++ {
 		s.InvestigateBallot(i, x)
 	}
