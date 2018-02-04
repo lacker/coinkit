@@ -89,7 +89,9 @@ func (c *Client) sendForever() {
 // progress may or may not have callbacks called. This is important to do so that
 // we don't have eternal redials from clients that are no longer in use.
 func (c *Client) Close() {
-	panic("TODO: implement")
+	c.closing = true
+	close(c.quit)
+	// TODO: make other stuff respect this
 }
 
 // Send issues a request and will send the response to the response channel.
