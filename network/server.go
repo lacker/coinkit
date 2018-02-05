@@ -32,7 +32,7 @@ type Server struct {
 	// We close the currentBlock channel whenever the current block is complete
 	currentBlock chan bool
 
-	// We close the quit channel and set shutdown to true
+	// We set shutdown to true and close the quit channel
 	// when the server is shutting down
 	shutdown bool
 	quit     chan bool
@@ -262,6 +262,7 @@ func (s *Server) listen() {
 		}
 		if err != nil {
 			log.Print("incoming connection error: ", err)
+			continue
 		}
 		go s.handleConnection(conn)
 	}
@@ -342,6 +343,7 @@ func (s *Server) broadcastIntermittently() {
 			// It's time for a rebroadcast. Send out duplicate messages.
 			// This is a backstop against miscellaneous problems. If the
 			// network is functioning perfectly, this isn't necessary.
+			s.Logf("performing a backup rebroadcast")
 			s.broadcastLines(lastLines)
 		}
 	}
@@ -389,5 +391,9 @@ func (s *Server) Stop() {
 	if s.listener != nil {
 		s.Logf("releasing port %d", s.port)
 		s.listener.Close()
+	}
+
+	for _, peer := range s.peers {
+		peer.Close()
 	}
 }

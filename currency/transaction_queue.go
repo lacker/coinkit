@@ -267,8 +267,7 @@ func (q *TransactionQueue) NewChunk(
 	key := chunk.Hash()
 	if _, ok := q.chunks[key]; !ok {
 		// We have not already created this chunk
-		log.Printf("created chunk %s with hash %s",
-			chunk, util.Shorten(string(key)))
+		q.Logf("i=%d, new chunk %s -> %s", q.slot, util.Shorten(string(key)), chunk)
 		q.chunks[key] = chunk
 	}
 	return key, chunk
@@ -328,7 +327,7 @@ func (q *TransactionQueue) SuggestValue() (consensus.SlotValue, bool) {
 		q.Logf("has no suggestion")
 		return consensus.SlotValue(""), false
 	}
-	q.Logf("suggests %s = %s", key, chunk)
+	q.Logf("i=%d, suggests %s = %s", q.slot, util.Shorten(string(key)), chunk)
 	return key, true
 }
 
