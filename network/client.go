@@ -26,7 +26,7 @@ type Client struct {
 
 // connect is idempotent
 func (c *Client) connect() {
-	if c.connected {
+	if c.connected || c.closing {
 		return
 	}
 	failCount := 0
@@ -39,7 +39,13 @@ func (c *Client) connect() {
 		}
 
 		failCount++
-		time.Sleep(time.Duration(failCount) * time.Second)
+		timer := time.NewTimer(time.Duration(failCount) * time.Second)
+		select {
+		case <-c.quit:
+			return
+		case <-timer.C:
+			// Looping again will try to reconnect
+		}
 	}
 }
 
@@ -54,7 +60,13 @@ func (c *Client) disconnect() {
 func (c *Client) sendForever() {
 	// Send from the queue
 	for {
-		request := <-c.queue
+		var request *Request
+		select {
+		case <-c.quit:
+			return
+		case request = <-c.queue:
+		}
+
 		if request.Timeout == 0 {
 			log.Fatalf("you should use a timeout with clients")
 		}
@@ -62,14 +74,22 @@ func (c *Client) sendForever() {
 		if len(line) == 0 {
 			log.Fatalf("cannot send line: [%s]", line)
 		}
+
 		for {
 			c.connect()
+			if c.closing {
+				return
+			}
 			fmt.Fprintf(c.conn, line)
 
 			// If we get an ok, great.
 			// If we don't get an ok, disconnect and try again.
 			c.conn.SetReadDeadline(time.Now().Add(request.Timeout))
 			response, err := util.ReadSignedMessage(c.conn)
+
+			if c.closing {
+				return
+			}
 
 			if err != nil {
 				log.Printf("bad response from %s: %+v", c.address.String(), err)
@@ -80,6 +100,7 @@ func (c *Client) sendForever() {
 			if request.Response != nil {
 				request.Response <- response
 			}
+
 			break
 		}
 	}
@@ -91,7 +112,9 @@ func (c *Client) sendForever() {
 func (c *Client) Close() {
 	c.closing = true
 	close(c.quit)
-	// TODO: make other stuff respect this
+	if c.conn != nil {
+		c.conn.Close()
+	}
 }
 
 // Send issues a request and will send the response to the response channel.
@@ -101,6 +124,8 @@ func (c *Client) Send(r *Request) {
 		select {
 		case c.queue <- r:
 			return
+		case <-c.quit:
+			return
 		default:
 			// The queue filled up
 		}
@@ -109,6 +134,8 @@ func (c *Client) Send(r *Request) {
 		select {
 		case <-c.queue:
 			log.Printf("send queue overloaded, dropping message")
+		case <-c.quit:
+			return
 		default:
 			// There must be some racing. Wait a bit and try again
 			time.Sleep(time.Millisecond)

@@ -390,4 +390,8 @@ func (s *Server) Stop() {
 		s.Logf("releasing port %d", s.port)
 		s.listener.Close()
 	}
+
+	for _, peer := range s.peers {
+		peer.Close()
+	}
 }

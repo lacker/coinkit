@@ -152,8 +152,8 @@ func BenchmarkSendMoney10(b *testing.B) {
 	benchmarkSendMoney(10, b)
 }
 
-func BenchmarkSendMoney20(b *testing.B) {
-	benchmarkSendMoney(20, b)
+func BenchmarkSendMoney30(b *testing.B) {
+	benchmarkSendMoney(30, b)
 }
 
 func TestServerOkayWithFakeWellFormattedMessage(t *testing.T) {
