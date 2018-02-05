@@ -3,6 +3,7 @@ package consensus
 import (
 	"coinkit/util"
 	"log"
+	"sort"
 )
 
 // The ballot state for the Stellar Consensus Protocol.
@@ -544,11 +545,23 @@ func (s *BallotState) MaxActionableBallotNumber() int {
 		numberToNodes[maxN] = append(numberToNodes[maxN], node)
 	}
 
+	i := 0
+	nKeys := make([]int, len(numberToNodes))
+	for n := range numberToNodes {
+		nKeys[i] = n
+		i++
+	}
+
+	sort.Sort(sort.Reverse(sort.IntSlice(nKeys)))
+
+	nodesAbove := []string{}
 	max := 0
 
-	for n, nodes := range numberToNodes {
-		if n > max && s.D.BlockedBy(nodes) {
+	for _, n := range nKeys {
+		nodesAbove = append(nodesAbove, numberToNodes[n]...)
+		if (s.D.BlockedBy(nodesAbove)) {
 			max = n
+			break
 		}
 	}
 
@@ -562,8 +575,14 @@ func (s *BallotState) InvestigateValue(x SlotValue) {
 	if max > maxActionable {
 		max = maxActionable
 	}
-	for i := min; i <= max; i++ {
+
+	i := min
+	for ; i <= max; i++ {
 		s.InvestigateBallot(i, x)
+	}
+
+	if s.b != nil && i <= s.b.n {
+		s.InvestigateBallot(s.b.n, x)
 	}
 }
 
