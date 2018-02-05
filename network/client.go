@@ -33,6 +33,9 @@ func (c *Client) connect() {
 	for {
 		conn, err := net.Dial("tcp", c.address.String())
 		if err == nil {
+			if c.conn != nil {
+				c.conn.Close()
+			}
 			c.conn = conn
 			c.connected = true
 			return

@@ -262,6 +262,7 @@ func (s *Server) listen() {
 		}
 		if err != nil {
 			log.Print("incoming connection error: ", err)
+			continue
 		}
 		go s.handleConnection(conn)
 	}
@@ -342,6 +343,7 @@ func (s *Server) broadcastIntermittently() {
 			// It's time for a rebroadcast. Send out duplicate messages.
 			// This is a backstop against miscellaneous problems. If the
 			// network is functioning perfectly, this isn't necessary.
+			s.Logf("performing a backup rebroadcast")
 			s.broadcastLines(lastLines)
 		}
 	}
