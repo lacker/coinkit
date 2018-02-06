@@ -25,7 +25,7 @@ type NetworkConfig struct {
 	Nodes []*Address
 
 	// Defining the quorum for the network
-	Members []string
+	Members   []string
 	Threshold int
 }
 
@@ -33,7 +33,7 @@ type NetworkConfig struct {
 type ServerConfig struct {
 	Network *NetworkConfig
 
-	Port int
+	Port    int
 	KeyPair *util.KeyPair
 }
 
@@ -47,27 +47,27 @@ func (nc *NetworkConfig) QuorumSlice() consensus.QuorumSlice {
 // use the same seed, like zero.
 func NewLocalhostNetwork(
 	firstPort int, num int, seed int) (*NetworkConfig, []*ServerConfig) {
-	
+
 	// Require a 2k+1 out of 3k+1 consensus
-	threshold := int(math.Ceil(2.0 / 3.0 * float64(num - 1))) + 1
-	
+	threshold := int(math.Ceil(2.0/3.0*float64(num-1))) + 1
+
 	network := &NetworkConfig{
-		Nodes: []*Address{},
-		Members: []string{},
+		Nodes:     []*Address{},
+		Members:   []string{},
 		Threshold: threshold,
 	}
 	servers := []*ServerConfig{}
-	
-	for port := firstPort; port < firstPort + num; port++ {
+
+	for port := firstPort; port < firstPort+num; port++ {
 		network.Nodes = append(network.Nodes, &Address{
-			Host: "localhost",
+			Host: "127.0.0.1",
 			Port: port,
 		})
 		kp := util.NewKeyPairFromSecretPhrase(fmt.Sprintf("%d %d", seed, port))
 		network.Members = append(network.Members, kp.PublicKey())
 		servers = append(servers, &ServerConfig{
 			Network: network,
-			Port: port,
+			Port:    port,
 			KeyPair: kp,
 		})
 	}
@@ -77,13 +77,14 @@ func NewLocalhostNetwork(
 
 const MinUnitTestPort = 2000
 const MaxUnitTestPort = 8999
+
 var nextUnitTestPort = MinUnitTestPort
 
 // Avoids port contention which slows down the tests that use ports
 func NewUnitTestNetwork() (*NetworkConfig, []*ServerConfig) {
 	rand.Seed(int64(time.Now().Nanosecond()))
 	num := 4
-	if nextUnitTestPort + num > MaxUnitTestPort {
+	if nextUnitTestPort+num > MaxUnitTestPort {
 		nextUnitTestPort = MinUnitTestPort
 	}
 	n, s := NewLocalhostNetwork(nextUnitTestPort, num, rand.Int())
@@ -101,4 +102,3 @@ func (nc *NetworkConfig) RandomAddress() *Address {
 	index := rand.Intn(len(nc.Nodes))
 	return nc.Nodes[index]
 }
-
