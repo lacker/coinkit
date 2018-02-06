@@ -2,6 +2,7 @@ package consensus
 
 import (
 	"log"
+	"math"
 	"math/rand"
 	"testing"
 
@@ -33,7 +34,7 @@ func TestConsensus(t *testing.T) {
 	// Let everyone receive an initial nomination from Amy
 	amy.nState.NominateNewValue(SlotValue("hello its amy"))
 	a := amy.OutgoingMessages()[0]
-	
+
 	bob.Handle("amy", a)
 	if len(bob.nState.N) != 1 {
 		t.Fatal("len(bob.nState.N) != 1")
@@ -78,6 +79,52 @@ func TestConsensus(t *testing.T) {
 	}
 	if len(dan.nState.Y) != 0 {
 		t.Fatal("len(dan.nState.Y) != 0")
+	}
+}
+
+func exchangeMessages(blocks []*Block, beEvil bool) {
+	firstEvil := false
+
+	for _, block := range blocks {
+		messages := block.OutgoingMessages()
+
+		for _, block2 := range blocks {
+			if block == block2 {
+				continue
+			}
+
+			for _, message := range messages {
+				if (beEvil && !firstEvil) {
+					switch m := message.(type) {
+					case *PrepareMessage:
+						m.Hn = math.MaxInt32
+						firstEvil = true
+					}
+				}
+
+				block2.Handle(block.publicKey, message)
+			}
+		}
+	}
+}
+
+func TestProtectionAgainstBigRangeDDoS(t *testing.T) {
+	members := []string{"amy", "bob", "cal", "dan"}
+	qs := MakeQuorumSlice(members, 3)
+	vs := NewTestValueStore(0)
+
+	var blocks []*Block
+	for _, name  := range members {
+		blocks = append(blocks, NewBlock(name, qs, 1, vs))
+	}
+
+	exchangeMessages(blocks, false)
+	exchangeMessages(blocks, false)
+	exchangeMessages(blocks, true)
+	exchangeMessages(blocks, false)
+
+	if !allDone(blocks) {
+		t.Fatalf("Didn't converge")
 	}
 }
 
@@ -148,6 +195,7 @@ func blockFuzzTest(blocks []*Block, seed int64, t *testing.T) {
 		j := rand.Intn(len(blocks))
 		k := rand.Intn(len(blocks))
 		blockSend(blocks[j], blocks[k])
+
 		if allDone(blocks) {
 			return
 		}

@@ -3,7 +3,8 @@ package consensus
 import (
 	"fmt"
 	"strings"
-	
+	"sort"
+
 	"coinkit/util"
 )
 
@@ -42,6 +43,9 @@ type BallotMessage interface {
 	// RelevantRange returns the range of ballots that this message specifically
 	// provides information for.
 	RelevantRange(x SlotValue) (int, int)
+
+	// Returns the highest ballot number that this message says anything about.
+	MaxN() int
 
 	// A readable, relatively-short string good for putting in logs.
 	String() string
@@ -217,6 +221,12 @@ func (m *PrepareMessage) RelevantRange(x SlotValue) (int, int) {
 	return min, max
 }
 
+func (m *PrepareMessage) MaxN() int {
+	ns := []int{m.Bn, m.Cn, m.Hn, m.Pn, m.Ppn}
+	sort.Ints(ns)
+	return ns[len(ns)-1]
+}
+
 func (m *PrepareMessage) BallotNumber() int {
 	return m.Bn
 }
@@ -293,6 +303,12 @@ func (m *ConfirmMessage) RelevantRange(x SlotValue) (int, int) {
 	return 0, 0
 }
 
+func (m *ConfirmMessage) MaxN() int {
+	ns := []int{m.Pn, m.Cn, m.Hn}
+	sort.Ints(ns)
+	return ns[len(ns)-1]
+}
+
 func (m *ConfirmMessage) BallotNumber() int {
 	return m.Hn
 }
@@ -359,6 +375,10 @@ func (m *ExternalizeMessage) RelevantRange(x SlotValue) (int, int) {
 		return MakeRange(m.Cn, m.Hn)
 	}
 	return 0, 0
+}
+
+func (m *ExternalizeMessage) MaxN() int {
+	return m.Hn
 }
 
 func (m *ExternalizeMessage) BallotNumber() int {

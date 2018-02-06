@@ -3,6 +3,7 @@ package consensus
 import (
 	"coinkit/util"
 	"log"
+	"sort"
 )
 
 // The ballot state for the Stellar Consensus Protocol.
@@ -55,7 +56,7 @@ type BallotState struct {
 	// How many duplicate messages we received from each peer
 	// Used like a timer to guess when we should advance rounds
 	stale map[string]int
-	
+
 	// Who we are
 	publicKey string
 
@@ -91,13 +92,14 @@ func (s *BallotState) Show() {
 	s.Logf("pPrime: %+v", s.pPrime)
 	s.Logf("c: %d", s.cn)
 	s.Logf("h: %d", s.hn)
-	s.Logf("z: %+v", s.z)
 	if s.z == nil {
 		if !s.nState.HasNomination() {
 			s.Logf("no candidate value")
 		} else {
 			s.Logf("candidate: %+v", s.nState.PredictValue())
 		}
+	} else {
+		s.Logf("z: %+v", *s.z)
 	}
 }
 
@@ -268,7 +270,7 @@ func (s *BallotState) MaybeConfirmAsPrepared(n int, x SlotValue) bool {
 
 	s.Logf("confirms as prepared: %s", &Ballot{n: n, x: x})
 	
-	if s.hn == n && *s.z != x {
+	if s.hn == n {
 		// We have two equally high ballots and they are both
 		// confirmed as prepared. This means that every ballot is
 		// both prepared and aborted at this ballot number, and we'll have to go
@@ -529,20 +531,56 @@ func (s *BallotState) RelevantRange(x SlotValue) (int, int) {
 	min, max := 0, 0
 	for _, message := range s.M {
 		a, b := message.RelevantRange(x)
-		min, max = RangeUnion(min, max, a, b) 
+		min, max = RangeUnion(min, max, a, b)
 	}
 	return min, max
 }
 
+// Returns the max ballot number that a blocking set of nodes are talking about.
+func (s *BallotState) MaxActionableBallotNumber() int {
+	numberToNodes := make(map[int][]string)
+
+	for node, message := range s.M {
+		maxN := message.MaxN()
+		numberToNodes[maxN] = append(numberToNodes[maxN], node)
+	}
+
+	i := 0
+	nKeys := make([]int, len(numberToNodes))
+	for n := range numberToNodes {
+		nKeys[i] = n
+		i++
+	}
+
+	sort.Sort(sort.Reverse(sort.IntSlice(nKeys)))
+
+	nodesAbove := []string{}
+
+	for _, n := range nKeys {
+		nodesAbove = append(nodesAbove, numberToNodes[n]...)
+		if (s.D.BlockedBy(nodesAbove)) {
+			return n
+		}
+	}
+
+	return 0
+}
+
 // InvestigateValue checks if any information can be updated for this value.
 func (s *BallotState) InvestigateValue(x SlotValue) {
-	// We could get DOS'd here.
-	// TODO: do something intelligent if RelevantRange is too large.
-	// For example, we could only investigate ballots that have a blocking
-	// set that mentions something about them.
 	min, max := s.RelevantRange(x)
-	for i := min; i <= max; i++ {
+	maxActionable := s.MaxActionableBallotNumber()
+	if max > maxActionable {
+		max = maxActionable
+	}
+
+	i := min
+	for ; i <= max; i++ {
 		s.InvestigateBallot(i, x)
+	}
+
+	if s.b != nil && i <= s.b.n {
+		s.InvestigateBallot(s.b.n, x)
 	}
 }
 
