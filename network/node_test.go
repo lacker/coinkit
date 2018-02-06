@@ -36,32 +36,83 @@ func maxAccountBalance(nodes []*Node) uint64 {
 	return answer
 }
 
+func TestNodeCatchup(t *testing.T) {
+	kp := util.NewKeyPairFromSecretPhrase("client")
+	qs, names := consensus.MakeTestQuorumSlice(4)
+	nodes := []*Node{}
+	for _, name := range names {
+		node := NewNode(name, qs)
+		node.queue.SetBalance(kp.PublicKey(), 100)
+		nodes = append(nodes, node)
+	}
+
+	// Run a few rounds with the first three nodes
+	for round := 1; round <= 3; round++ {
+		tr := &currency.Transaction{
+			From:     kp.PublicKey(),
+			Sequence: uint32(round),
+			To:       "bob",
+			Amount:   1,
+			Fee:      0,
+		}
+		ts := []*currency.SignedTransaction{tr.SignWith(kp)}
+		m := currency.NewTransactionMessage(ts...)
+		nodes[0].Handle(kp.PublicKey(), m)
+		for i := 0; i < 10; i++ {
+			sendNodeToNodeMessages(nodes[0], nodes[1], t)
+			sendNodeToNodeMessages(nodes[0], nodes[2], t)
+			sendNodeToNodeMessages(nodes[1], nodes[2], t)
+			sendNodeToNodeMessages(nodes[1], nodes[0], t)
+			sendNodeToNodeMessages(nodes[2], nodes[0], t)
+			sendNodeToNodeMessages(nodes[2], nodes[1], t)
+		}
+		for i := 0; i <= 2; i++ {
+			if nodes[i].Slot() != round+1 {
+				t.Fatalf("nodes[%d] did not finish round %d", i, round)
+			}
+		}
+	}
+
+	// The last node should be able to catch up
+	for i := 0; i < 10; i++ {
+		sendNodeToNodeMessages(nodes[0], nodes[3], t)
+		sendNodeToNodeMessages(nodes[3], nodes[0], t)
+		sendNodeToNodeMessages(nodes[1], nodes[3], t)
+		sendNodeToNodeMessages(nodes[3], nodes[2], t)
+		sendNodeToNodeMessages(nodes[2], nodes[3], t)
+		sendNodeToNodeMessages(nodes[3], nodes[2], t)
+	}
+	if nodes[3].Slot() != 4 {
+		t.Fatalf("catchup failed")
+	}
+}
+
 func nodeFuzzTest(seed int64, t *testing.T) {
 	initialMoney := uint64(4)
-	
+
 	numClients := 5
 	clients := []*util.KeyPair{}
 	for i := 0; i < numClients; i++ {
 		kp := util.NewKeyPairFromSecretPhrase(fmt.Sprintf("client%d", i))
 		clients = append(clients, kp)
 	}
-	
+
 	clientMessages := []*currency.TransactionMessage{}
 	for i, client := range clients {
-		neighbor := clients[(i+1) % len(clients)]
+		neighbor := clients[(i+1)%len(clients)]
 
 		// Each client attempts to send 1 money to their neighbor
 		// with a fee of 1, many times.
 		// This should always end up with everyone having 1 money.
-		// Proof is left as an exercise to the reader :D		
+		// Proof is left as an exercise to the reader :D
 		ts := []*currency.SignedTransaction{}
 		for seq := uint32(1); seq < uint32(initialMoney); seq++ {
 			t := &currency.Transaction{
-				From: client.PublicKey(),
+				From:     client.PublicKey(),
 				Sequence: seq,
-				To: neighbor.PublicKey(),
-				Amount: 1,
-				Fee: 1,
+				To:       neighbor.PublicKey(),
+				Amount:   1,
+				Fee:      1,
 			}
 			ts = append(ts, t.SignWith(client))
 		}
@@ -79,7 +130,7 @@ func nodeFuzzTest(seed int64, t *testing.T) {
 		}
 		nodes = append(nodes, node)
 	}
-	
+
 	rand.Seed(seed ^ 789789)
 	log.Printf("fuzz testing nodes with seed %d", seed)
 	for i := 0; i <= 10000; i++ {
