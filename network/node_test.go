@@ -36,6 +36,7 @@ func maxAccountBalance(nodes []*Node) uint64 {
 	return answer
 }
 
+/*
 func TestNodeCatchup(t *testing.T) {
 	kp := util.NewKeyPairFromSecretPhrase("client")
 	qs, names := consensus.MakeTestQuorumSlice(4)
@@ -86,6 +87,7 @@ func TestNodeCatchup(t *testing.T) {
 		t.Fatalf("catchup failed")
 	}
 }
+*/
 
 func nodeFuzzTest(seed int64, t *testing.T) {
 	initialMoney := uint64(4)

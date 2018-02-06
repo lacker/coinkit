@@ -90,7 +90,7 @@ func TestSendMoney(t *testing.T) {
 	sendMoney(client, mint, bob, 100)
 	log.Printf("transaction cleared")
 	elapsed := time.Now().Sub(start).Seconds()
-	if elapsed > 0.5 {
+	if elapsed > 1.0 {
 		t.Fatalf("sending money is too slow: %.2f seconds", elapsed)
 	}
 	go stopServers(servers)

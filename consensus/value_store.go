@@ -38,9 +38,12 @@ func HasSlotValue(a []SlotValue, b SlotValue) bool {
 type ValueStore interface {
 	Combine(list []SlotValue) SlotValue
 
+	// Whether the ValueStore is ready to finalize this value
+	CanFinalize(v SlotValue) bool
+
 	// Called when a value is finalized
 	Finalize(v SlotValue)
-	
+
 	// The last finalized slot value
 	Last() SlotValue
 
@@ -56,13 +59,13 @@ type ValueStore interface {
 
 // For testing, id strings are comma-separated lists of values.
 type TestValueStore struct {
-	last SlotValue
+	last       SlotValue
 	suggestion SlotValue
 }
 
 func NewTestValueStore(n int) *TestValueStore {
 	return &TestValueStore{
-		last: "",
+		last:       "",
 		suggestion: SlotValue(fmt.Sprintf("value%d", n)),
 	}
 }
@@ -80,6 +83,10 @@ func (t *TestValueStore) Combine(list []SlotValue) SlotValue {
 	}
 	sort.Strings(parts)
 	return SlotValue(strings.Join(parts, ","))
+}
+
+func (t *TestValueStore) CanFinalize(v SlotValue) bool {
+	return true
 }
 
 func (t *TestValueStore) Finalize(v SlotValue) {

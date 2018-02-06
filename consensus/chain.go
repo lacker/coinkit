@@ -56,7 +56,7 @@ func (c *Chain) Handle(sender string, message util.Message) util.Message {
 
 	if slot == c.current.slot {
 		c.current.Handle(sender, message)
-		if c.current.Done() {
+		if c.current.Done() && c.values.CanFinalize(c.current.external.X) {
 			// This block is done, let's move on to the next one
 			c.Logf("advancing to slot %d", slot+1)
 			c.values.Finalize(c.current.external.X)

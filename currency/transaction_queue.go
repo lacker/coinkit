@@ -26,6 +26,10 @@ type TransactionQueue struct {
 	// They are indexed by their hash
 	chunks map[consensus.SlotValue]*LedgerChunk
 
+	// Ledger chunks that already got finalized
+	// They are indexed by slot
+	oldChunks map[int]*LedgerChunk
+
 	// accounts is used to validate transactions
 	// For now this is the actual authentic store of account data
 	// TODO: get this into a real database
@@ -46,6 +50,7 @@ func NewTransactionQueue(publicKey string) *TransactionQueue {
 		publicKey: publicKey,
 		set:       treeset.NewWith(HighestPriorityFirst),
 		chunks:    make(map[consensus.SlotValue]*LedgerChunk),
+		oldChunks: make(map[int]*LedgerChunk),
 		accounts:  NewAccountMap(),
 		last:      consensus.SlotValue(""),
 		slot:      1,
@@ -150,8 +155,20 @@ func (q *TransactionQueue) Handle(message util.Message) (util.Message, bool) {
 		return q.HandleInfoMessage(m), false
 
 	default:
-		log.Printf("queue did not recognize message: %+v", m)
 		return nil, false
+	}
+}
+
+func (q *TransactionQueue) CatchupMessage(slot int) *TransactionMessage {
+	chunk, ok := q.oldChunks[slot]
+	if !ok {
+		return nil
+	}
+	chunks := make(map[consensus.SlotValue]*LedgerChunk)
+	chunks[chunk.Hash()] = chunk
+	return &TransactionMessage{
+		Transactions: []*SignedTransaction{},
+		Chunks:       chunks,
 	}
 }
 
@@ -279,6 +296,11 @@ func (q *TransactionQueue) Combine(list []consensus.SlotValue) consensus.SlotVal
 	return value
 }
 
+func (q *TransactionQueue) CanFinalize(v consensus.SlotValue) bool {
+	_, ok := q.chunks[v]
+	return ok
+}
+
 func (q *TransactionQueue) Finalize(v consensus.SlotValue) {
 	chunk, ok := q.chunks[v]
 	if !ok {
@@ -293,6 +315,7 @@ func (q *TransactionQueue) Finalize(v consensus.SlotValue) {
 		panic("We could not process a finalized chunk.")
 	}
 
+	q.oldChunks[q.slot] = chunk
 	q.finalized += len(chunk.Transactions)
 	q.last = v
 	q.chunks = make(map[consensus.SlotValue]*LedgerChunk)
