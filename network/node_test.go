@@ -114,7 +114,7 @@ func nodeFuzzTest(seed int64, t *testing.T) {
 // Works up to 1k
 func TestNodeFullCluster(t *testing.T) {
 	var i int64
-	for i = 1; i <= 2; i++ {
+	for i = 1; i <= util.GetTestLoopLength(2, 1000); i++ {
 		nodeFuzzTest(i, t)
 	}
 }
