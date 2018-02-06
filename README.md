@@ -79,6 +79,19 @@ If you're just poking around, I recommend sending some money from the mint
 to an account of your own and then checking your account's balance as a little
 exercise.
 
+## Benchmarking
+
+```
+# Testing a 4-server network with one client
+go test ./network -run=zzz -bench=BenchmarkSendMoney1$ -benchtime=20s
+
+# With 10 clients
+go test ./network -run=zzz -bench=BenchmarkSendMoney10$ -benchtime=20s
+
+# With 30 clients
+go test ./network -run=zzz -bench=BenchmarkSendMoney30$ -benchtime=20s
+```
+
 ## Code organization
 
 * `cmd`: The code for the command-line tools, `cserver` and `cclient`.
