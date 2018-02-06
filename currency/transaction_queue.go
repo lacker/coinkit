@@ -142,7 +142,7 @@ func (q *TransactionQueue) SetBalance(owner string, balance uint64) {
 	q.accounts.SetBalance(owner, balance)
 }
 
-func (q *TransactionQueue) CatchupMessage(slot int) *TransactionMessage {
+func (q *TransactionQueue) OldChunkMessage(slot int) *TransactionMessage {
 	chunk, ok := q.oldChunks[slot]
 	if !ok {
 		return nil

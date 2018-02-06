@@ -40,6 +40,11 @@ func (node *Node) Handle(sender string, message util.Message) util.Message {
 	}
 	switch m := message.(type) {
 
+	case *HistoryMessage:
+		node.Handle(sender, m.T)
+		node.Handle(sender, m.E)
+		return nil
+
 	case *currency.AccountMessage:
 		return nil
 
@@ -59,17 +64,35 @@ func (node *Node) Handle(sender string, message util.Message) util.Message {
 		return nil
 
 	case *consensus.NominationMessage:
-		return node.chain.Handle(sender, m)
+		return node.handleChainMessage(sender, m)
 	case *consensus.PrepareMessage:
-		return node.chain.Handle(sender, m)
+		return node.handleChainMessage(sender, m)
 	case *consensus.ConfirmMessage:
-		return node.chain.Handle(sender, m)
+		return node.handleChainMessage(sender, m)
 	case *consensus.ExternalizeMessage:
-		return node.chain.Handle(sender, m)
+		return node.handleChainMessage(sender, m)
 
 	default:
 		log.Printf("unrecognized message: %+v", m)
 		return nil
+	}
+}
+
+// A helper to handle the messages
+func (node *Node) handleChainMessage(sender string, message util.Message) util.Message {
+	response := node.chain.Handle(sender, message)
+
+	externalize, ok := response.(*consensus.ExternalizeMessage)
+	if !ok {
+		return response
+	}
+
+	// Augment externalize messages into history messages
+	t := node.queue.OldChunkMessage(externalize.I)
+	return &HistoryMessage{
+		T: t,
+		E: externalize,
+		I: externalize.I,
 	}
 }
 
