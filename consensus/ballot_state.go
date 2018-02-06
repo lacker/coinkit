@@ -555,17 +555,15 @@ func (s *BallotState) MaxActionableBallotNumber() int {
 	sort.Sort(sort.Reverse(sort.IntSlice(nKeys)))
 
 	nodesAbove := []string{}
-	max := 0
 
 	for _, n := range nKeys {
 		nodesAbove = append(nodesAbove, numberToNodes[n]...)
 		if (s.D.BlockedBy(nodesAbove)) {
-			max = n
-			break
+			return n
 		}
 	}
 
-	return max
+	return 0
 }
 
 // InvestigateValue checks if any information can be updated for this value.
