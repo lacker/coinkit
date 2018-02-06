@@ -142,23 +142,6 @@ func (q *TransactionQueue) SetBalance(owner string, balance uint64) {
 	q.accounts.SetBalance(owner, balance)
 }
 
-// Handle handles an incoming message.
-// It returns any message that should be sent back to the original sender, and
-// a flag telling whether it made any internal updates.
-func (q *TransactionQueue) Handle(message util.Message) (util.Message, bool) {
-	switch m := message.(type) {
-
-	case *TransactionMessage:
-		return nil, q.HandleTransactionMessage(m)
-
-	case *util.InfoMessage:
-		return q.HandleInfoMessage(m), false
-
-	default:
-		return nil, false
-	}
-}
-
 func (q *TransactionQueue) CatchupMessage(slot int) *TransactionMessage {
 	chunk, ok := q.oldChunks[slot]
 	if !ok {

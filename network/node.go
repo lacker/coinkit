@@ -45,8 +45,7 @@ func (node *Node) Handle(sender string, message util.Message) util.Message {
 
 	case *util.InfoMessage:
 		if m.Account != "" {
-			answer, _ := node.queue.Handle(m)
-			return answer
+			return node.queue.HandleInfoMessage(m)
 		}
 		if m.I != 0 {
 			return node.chain.Handle(sender, m)
@@ -54,11 +53,10 @@ func (node *Node) Handle(sender string, message util.Message) util.Message {
 		return nil
 
 	case *currency.TransactionMessage:
-		response, updated := node.queue.Handle(m)
-		if updated {
+		if node.queue.HandleTransactionMessage(m) {
 			node.chain.ValueStoreUpdated()
 		}
-		return response
+		return nil
 
 	case *consensus.NominationMessage:
 		return node.chain.Handle(sender, m)
