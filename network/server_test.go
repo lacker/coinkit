@@ -83,11 +83,16 @@ func sendMoney(client *Client, from *util.KeyPair, to *util.KeyPair, amount uint
 
 func TestSendMoney(t *testing.T) {
 	servers := makeServers()
+	start := time.Now()
 	mint := util.NewKeyPairFromSecretPhrase("mint")
 	bob := util.NewKeyPairFromSecretPhrase("bob")
 	client := NewClient(servers[0].LocalhostAddress())
 	sendMoney(client, mint, bob, 100)
 	log.Printf("transaction cleared")
+	elapsed := time.Now().Sub(start).Seconds()
+	if elapsed > 0.5 {
+		t.Fatalf("sending money is too slow: %.2f seconds", elapsed)
+	}
 	go stopServers(servers)
 }
 

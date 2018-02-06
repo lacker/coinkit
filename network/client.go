@@ -164,7 +164,7 @@ func (c *Client) SendMessage(message *util.SignedMessage) *util.SignedMessage {
 // NewClient connects to the Server at the given address.
 func NewClient(address *Address) *Client {
 	// queue has a buffer of buflen outgoing messages
-	buflen := 10
+	buflen := 100
 	p := &Client{
 		address: address,
 		queue:   make(chan *Request, buflen),

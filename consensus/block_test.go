@@ -7,7 +7,7 @@ import (
 	"testing"
 
 	"coinkit/util"
-	
+
 	"github.com/davecgh/go-spew/spew"
 )
 
@@ -233,7 +233,7 @@ func blockFuzzTest(blocks []*Block, seed int64, t *testing.T) {
 // Should work to 100k
 func TestBlockFullCluster(t *testing.T) {
 	var i int64
-	for i = 0; i < 100; i++ {
+	for i = 0; i < util.GetTestLoopLength(100, 100000); i++ {
 		c := blockCluster(4)
 		blockFuzzTest(c, i, t)
 	}
@@ -242,7 +242,7 @@ func TestBlockFullCluster(t *testing.T) {
 // Should work to 100k
 func TestBlockOneNodeKnockedOut(t *testing.T) {
 	var i int64
-	for i = 0; i < 100; i++ {
+	for i = 0; i < util.GetTestLoopLength(100, 100000); i++ {
 		c := blockCluster(4)
 		knockout := c[0:3]
 		blockFuzzTest(knockout, i, t)

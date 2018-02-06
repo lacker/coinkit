@@ -19,10 +19,8 @@ type TransactionQueue struct {
 	// Just for logging
 	publicKey string
 
+	// The pool of pending transactions.
 	set *treeset.Set
-
-	// Transactions that we have not yet shared
-	outbox []*SignedTransaction
 
 	// The ledger chunks that are being considered
 	// They are indexed by their hash
@@ -47,7 +45,6 @@ func NewTransactionQueue(publicKey string) *TransactionQueue {
 	return &TransactionQueue{
 		publicKey: publicKey,
 		set:       treeset.NewWith(HighestPriorityFirst),
-		outbox:    []*SignedTransaction{},
 		chunks:    make(map[consensus.SlotValue]*LedgerChunk),
 		accounts:  NewAccountMap(),
 		last:      consensus.SlotValue(""),
@@ -103,12 +100,7 @@ func (q *TransactionQueue) Add(t *SignedTransaction) bool {
 		q.set.Remove(worst)
 	}
 
-	// If we are willing to keep it, let's also share it
-	if q.Contains(t) {
-		q.outbox = append(q.outbox, t)
-		return true
-	}
-	return false
+	return q.Contains(t)
 }
 
 func (q *TransactionQueue) Contains(t *SignedTransaction) bool {
@@ -123,17 +115,9 @@ func (q *TransactionQueue) Transactions() []*SignedTransaction {
 	return answer
 }
 
-// SharingMessage returns the messages we want to share with other nodes.
-// We only want to share once, so this does mutate the queue.
-// Returns nil if we have nothing to share.
+// SharingMessage returns the pending transactions we want to share with other nodes.
 func (q *TransactionQueue) SharingMessage() *TransactionMessage {
-	ts := []*SignedTransaction{}
-	for _, t := range q.outbox {
-		if q.Contains(t) {
-			ts = append(ts, t)
-		}
-	}
-	q.outbox = []*SignedTransaction{}
+	ts := q.Transactions()
 	if len(ts) == 0 && len(q.chunks) == 0 {
 		return nil
 	}

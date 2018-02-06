@@ -273,7 +273,7 @@ func (s *Server) listen() {
 func (s *Server) acquirePort() {
 	s.Logf("listening on port %d", s.port)
 	for i := 0; i < 100; i++ {
-		ln, err := net.Listen("tcp", fmt.Sprintf("localhost:%d", s.port))
+		ln, err := net.Listen("tcp", fmt.Sprintf("127.0.0.1:%d", s.port))
 		if err == nil {
 			s.listener = ln
 			s.start = time.Now()
@@ -351,7 +351,7 @@ func (s *Server) broadcastIntermittently() {
 
 func (s *Server) LocalhostAddress() *Address {
 	return &Address{
-		Host: "localhost",
+		Host: "127.0.0.1",
 		Port: s.port,
 	}
 }
