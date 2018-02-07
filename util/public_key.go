@@ -36,8 +36,18 @@ func (pk PublicKey) Validate() bool {
 	return bytes.Equal(checkBytes(pk[:32]), pk[32:])
 }
 
+// For debugging
+func (pk PublicKey) ShortName() string {
+	return hex.EncodeToString(pk[:3])
+}
+
 func (pk PublicKey) String() string {
 	return "0x" + hex.EncodeToString(pk[:])
+}
+
+// Strips the checksum
+func (pk PublicKey) WithoutChecksum() []byte {
+	return pk[:32]
 }
 
 func (pk PublicKey) Equal(other PublicKey) bool {

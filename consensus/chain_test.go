@@ -16,9 +16,9 @@ func chainSend(source *Chain, target *Chain) {
 	messages := source.OutgoingMessages()
 	for _, message := range messages {
 		m := util.EncodeThenDecode(message)
-		response := target.Handle(source.publicKey, m)
+		response := target.Handle(source.publicKey.String(), m)
 		if response != nil {
-			x := source.Handle(target.publicKey, response)
+			x := source.Handle(target.publicKey.String(), response)
 			if x != nil {
 				log.Fatal("infinite response loop")
 			}

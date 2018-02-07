@@ -2,6 +2,8 @@ package consensus
 
 import (
 	"fmt"
+
+	"coinkit/util"
 )
 
 type QuorumSlice struct {
@@ -18,7 +20,7 @@ type QuorumSlice struct {
 
 func MakeQuorumSlice(members []string, threshold int) QuorumSlice {
 	return QuorumSlice{
-		Members: members,
+		Members:   members,
 		Threshold: threshold,
 	}
 }
@@ -49,20 +51,23 @@ func (qs *QuorumSlice) SatisfiedWith(nodes []string) bool {
 
 // Makes data for a test quorum slice that requires a consensus of more
 // than two thirds of the given size.
-// Also returns a list of all node names.
-func MakeTestQuorumSlice(size int) (QuorumSlice, []string) {
+// Also returns a list of public keys of the quorum members.
+func MakeTestQuorumSlice(size int) (QuorumSlice, []util.PublicKey) {
 	threshold := 2*size/3 + 1
+	pks := []util.PublicKey{}
 	names := []string{}
 	for i := 0; i < size; i++ {
-		names = append(names, fmt.Sprintf("node%d", i))
+		pk := util.NewKeyPairFromSecretPhrase(fmt.Sprintf("node%d", i)).PublicKey()
+		pks = append(pks, pk)
+		names = append(names, pk.String())
 	}
 	qs := MakeQuorumSlice(names, threshold)
-	return qs, names
+	return qs, pks
 }
 
 type QuorumFinder interface {
 	QuorumSlice(node string) (*QuorumSlice, bool)
-	PublicKey() string
+	PublicKey() util.PublicKey
 }
 
 // Returns whether this set of nodes meets the quorum for the network overall.
@@ -75,7 +80,7 @@ func MeetsQuorum(f QuorumFinder, nodes []string) bool {
 		qs, ok := f.QuorumSlice(node)
 		if ok && qs.SatisfiedWith(nodes) {
 			filtered = append(filtered, node)
-			if node == f.PublicKey() {
+			if node == f.PublicKey().String() {
 				hasUs = true
 			}
 		}

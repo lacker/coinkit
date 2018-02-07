@@ -39,4 +39,9 @@ func TestValidation(t *testing.T) {
 	if !pk.Equal(pk2) || !pk2.Equal(pk) {
 		t.Fatal("write-then-read should lead to equality")
 	}
+
+	pk3 := GeneratePublicKey(pk.WithoutChecksum())
+	if !pk.Equal(pk3) {
+		t.Fatal("WithoutChecksum should be undoable")
+	}
 }

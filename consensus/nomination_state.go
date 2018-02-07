@@ -21,7 +21,7 @@ type NominationState struct {
 	N map[string]*NominationMessage
 
 	// Who we are
-	publicKey string
+	publicKey util.PublicKey
 
 	// Who we listen to for quorum
 	D QuorumSlice
@@ -38,7 +38,7 @@ type NominationState struct {
 }
 
 func NewNominationState(
-	publicKey string, qs QuorumSlice, vs ValueStore) *NominationState {
+	publicKey util.PublicKey, qs QuorumSlice, vs ValueStore) *NominationState {
 
 	return &NominationState{
 		X:         make([]SlotValue, 0),
@@ -47,17 +47,17 @@ func NewNominationState(
 		N:         make(map[string]*NominationMessage),
 		publicKey: publicKey,
 		D:         qs,
-		priority:  SeedPriority(string(vs.Last()), qs.Members, publicKey),
+		priority:  SeedPriority(string(vs.Last()), qs.Members, publicKey.String()),
 		values:    vs,
-	}	
+	}
 }
 
 func (s *NominationState) Logf(format string, a ...interface{}) {
-	util.Logf("NS", s.publicKey, format, a...)
+	util.Logf("NS", s.publicKey.ShortName(), format, a...)
 }
 
 func (s *NominationState) Show() {
-	s.Logf("nState for %s:", s.publicKey)
+	s.Logf("nState:")
 	s.Logf("X: %+v", s.X)
 	s.Logf("Y: %+v", s.Y)
 	s.Logf("Z: %+v", s.Z)
@@ -78,7 +78,7 @@ func (s *NominationState) MaybeNominateNewValue() bool {
 		return false
 	}
 
-	if s.D.Threshold * s.priority > s.received {
+	if s.D.Threshold*s.priority > s.received {
 		// We don't think it's our turn
 		return false
 	}
@@ -99,7 +99,7 @@ func (s *NominationState) MaybeNominateNewValue() bool {
 // priority, before we are willing to make a nomination.
 func (s *NominationState) WantsToNominateNewValue() bool {
 
-	return s.D.Threshold * s.priority <= s.received
+	return s.D.Threshold*s.priority <= s.received
 }
 
 func (s *NominationState) NominateNewValue(v SlotValue) {
@@ -125,7 +125,7 @@ func (s *NominationState) PredictValue() SlotValue {
 }
 
 func (s *NominationState) QuorumSlice(node string) (*QuorumSlice, bool) {
-	if node == s.publicKey {
+	if node == s.publicKey.String() {
 		return &s.D, true
 	}
 	m, ok := s.N[node]
@@ -135,7 +135,7 @@ func (s *NominationState) QuorumSlice(node string) (*QuorumSlice, bool) {
 	return &m.D, true
 }
 
-func (s *NominationState) PublicKey() string {
+func (s *NominationState) PublicKey() util.PublicKey {
 	return s.publicKey
 }
 
@@ -159,10 +159,10 @@ func (s *NominationState) MaybeAdvance(v SlotValue) bool {
 	votedOrAccepted := []string{}
 	accepted := []string{}
 	if HasSlotValue(s.X, v) {
-		votedOrAccepted = append(votedOrAccepted, s.publicKey)
+		votedOrAccepted = append(votedOrAccepted, s.publicKey.String())
 	}
 	if HasSlotValue(s.Y, v) {
-		accepted = append(accepted, s.publicKey)
+		accepted = append(accepted, s.publicKey.String())
 	}
 	for node, m := range s.N {
 		if HasSlotValue(m.Acc, v) {
@@ -187,7 +187,7 @@ func (s *NominationState) MaybeAdvance(v SlotValue) bool {
 		changed = true
 		AssertNoDupes(s.Y)
 		s.Y = append(s.Y, v)
-		accepted = append(accepted, s.publicKey)
+		accepted = append(accepted, s.publicKey.String())
 		AssertNoDupes(s.Y)
 	}
 
@@ -203,7 +203,7 @@ func (s *NominationState) MaybeAdvance(v SlotValue) bool {
 // Handles an incoming nomination message from a peer node
 func (s *NominationState) Handle(node string, m *NominationMessage) {
 	s.received++
-	
+
 	// What nodes we have seen new information about
 	touched := []SlotValue{}
 

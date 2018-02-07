@@ -17,7 +17,7 @@ const QueueLimit = 1000
 // TransactionQueue is not threadsafe.
 type TransactionQueue struct {
 	// Just for logging
-	publicKey string
+	publicKey util.PublicKey
 
 	// The pool of pending transactions.
 	set *treeset.Set
@@ -45,7 +45,7 @@ type TransactionQueue struct {
 	finalized int
 }
 
-func NewTransactionQueue(publicKey string) *TransactionQueue {
+func NewTransactionQueue(publicKey util.PublicKey) *TransactionQueue {
 	return &TransactionQueue{
 		publicKey: publicKey,
 		set:       treeset.NewWith(HighestPriorityFirst),
@@ -80,7 +80,7 @@ func (q *TransactionQueue) Remove(t *SignedTransaction) {
 }
 
 func (q *TransactionQueue) Logf(format string, a ...interface{}) {
-	util.Logf("TQ", q.publicKey, format, a...)
+	util.Logf("TQ", q.publicKey.ShortName(), format, a...)
 }
 
 // Add adds a transaction to the queue
@@ -332,7 +332,7 @@ func (q *TransactionQueue) Stats() {
 
 func (q *TransactionQueue) Log() {
 	ts := q.Transactions()
-	q.Logf("has %d pending transactions:", q.publicKey, len(ts))
+	q.Logf("has %d pending transactions:", len(ts))
 	for _, t := range ts {
 		q.Logf("%s", t.Transaction)
 	}

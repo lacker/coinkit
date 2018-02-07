@@ -1,9 +1,10 @@
 package consensus
 
 import (
-	"coinkit/util"
 	"log"
 	"sort"
+
+	"coinkit/util"
 )
 
 // The ballot state for the Stellar Consensus Protocol.
@@ -58,7 +59,7 @@ type BallotState struct {
 	stale map[string]int
 
 	// Who we are
-	publicKey string
+	publicKey util.PublicKey
 
 	// Who we listen to for quorum
 	D QuorumSlice
@@ -67,23 +68,23 @@ type BallotState struct {
 	nState *NominationState
 }
 
-func NewBallotState(publicKey string, qs QuorumSlice, nState *NominationState) *BallotState {
+func NewBallotState(publicKey util.PublicKey, qs QuorumSlice, nState *NominationState) *BallotState {
 	return &BallotState{
 		phase:     Prepare,
 		M:         make(map[string]BallotMessage),
 		publicKey: publicKey,
-	    stale:     make(map[string]int),
+		stale:     make(map[string]int),
 		D:         qs,
 		nState:    nState,
 	}
 }
 
 func (s *BallotState) Logf(format string, a ...interface{}) {
-	util.Logf("BS", s.publicKey, format, a...)
+	util.Logf("BS", s.publicKey.ShortName(), format, a...)
 }
 
 func (s *BallotState) Show() {
-	s.Logf("bState for %s:", s.publicKey)
+	s.Logf("bState:")
 	if s.phase != Prepare {
 		s.Logf("phase: %s", s.phase)
 	}
@@ -96,19 +97,19 @@ func (s *BallotState) Show() {
 		if !s.nState.HasNomination() {
 			s.Logf("no candidate value")
 		} else {
-			s.Logf("candidate: %+v", s.nState.PredictValue())
+			s.Logf("candidate: %s", s.nState.PredictValue())
 		}
 	} else {
-		s.Logf("z: %+v", *s.z)
+		s.Logf("z: %s", *s.z)
 	}
 }
 
-func (s *BallotState) PublicKey() string {
+func (s *BallotState) PublicKey() util.PublicKey {
 	return s.publicKey
 }
 
 func (s *BallotState) QuorumSlice(node string) (*QuorumSlice, bool) {
-	if node == s.publicKey {
+	if node == s.publicKey.String() {
 		return &s.D, true
 	}
 	m, ok := s.M[node]
@@ -149,7 +150,7 @@ func (s *BallotState) MaybeAcceptAsPrepared(n int, x SlotValue) bool {
 	accepted := []string{}
 	if s.b != nil && s.b.n >= n && s.b.x == x {
 		// We have voted for this
-		votedOrAccepted = append(votedOrAccepted, s.publicKey)
+		votedOrAccepted = append(votedOrAccepted, s.publicKey.String())
 	}
 
 	for node, m := range s.M {
@@ -255,7 +256,7 @@ func (s *BallotState) MaybeConfirmAsPrepared(n int, x SlotValue) bool {
 	accepted := []string{}
 	if gtecompat(s.p, ballot) || gtecompat(s.pPrime, ballot) {
 		// We accept as prepared
-		accepted = append(accepted, s.publicKey)
+		accepted = append(accepted, s.publicKey.String())
 	}
 
 	for node, m := range s.M {
@@ -269,7 +270,7 @@ func (s *BallotState) MaybeConfirmAsPrepared(n int, x SlotValue) bool {
 	}
 
 	s.Logf("confirms as prepared: %s", &Ballot{n: n, x: x})
-	
+
 	if s.hn == n {
 		// We have two equally high ballots and they are both
 		// confirmed as prepared. This means that every ballot is
@@ -326,7 +327,7 @@ func (s *BallotState) MaybeAcceptAsCommitted(n int, x SlotValue) bool {
 	if s.phase == Prepare && s.b != nil &&
 		s.b.x == x && s.cn != 0 && s.cn <= n && n <= s.hn {
 		// We vote to commit this
-		votedOrAccepted = append(votedOrAccepted, s.publicKey)
+		votedOrAccepted = append(votedOrAccepted, s.publicKey.String())
 	}
 
 	for node, m := range s.M {
@@ -380,7 +381,7 @@ func (s *BallotState) MaybeConfirmAsCommitted(n int, x SlotValue) bool {
 	accepted := []string{}
 	if s.phase == Confirm {
 		if s.cn <= n && n <= s.hn {
-			accepted = append(accepted, s.publicKey)
+			accepted = append(accepted, s.publicKey.String())
 		}
 	} else if s.cn <= n && n <= s.hn {
 		// We already did confirm this as committed
@@ -418,14 +419,14 @@ func (s *BallotState) MaybeConfirmAsCommitted(n int, x SlotValue) bool {
 // GoToNextBallot returns whether we could actually go to the next ballot.
 func (s *BallotState) GoToNextBallot() bool {
 	b := &Ballot{}
-	
+
 	if s.b == nil {
 		// Start with ballot 1
 		b.n = 1
 	} else {
 		b.n = s.b.n + 1
 	}
-	
+
 	if s.z != nil {
 		b.x = *s.z
 	} else {
@@ -435,7 +436,7 @@ func (s *BallotState) GoToNextBallot() bool {
 		}
 		b.x = s.nState.PredictValue()
 	}
-	
+
 	s.b = b
 	if s.cn == 0 && s.hn >= s.b.n && !s.AcceptedAbort(s.hn, s.b.x) {
 		// With the new ballot, we can immediately vote to commit
@@ -500,7 +501,7 @@ func (s *BallotState) HandleStaleQuorum() bool {
 // We do rely on this heuristic being neither too aggressive nor too conservative
 // for values to converge.
 func (s *BallotState) CheckIfStale() {
-	stale := []string{s.publicKey}
+	stale := []string{s.publicKey.String()}
 	for node, staleCount := range s.stale {
 		if staleCount >= 3 {
 			stale = append(stale, node)
@@ -508,7 +509,7 @@ func (s *BallotState) CheckIfStale() {
 	}
 	if MeetsQuorum(s, stale) {
 		s.stale = make(map[string]int)
- 		s.HandleStaleQuorum()
+		s.HandleStaleQuorum()
 	}
 }
 
@@ -558,7 +559,7 @@ func (s *BallotState) MaxActionableBallotNumber() int {
 
 	for _, n := range nKeys {
 		nodesAbove = append(nodesAbove, numberToNodes[n]...)
-		if (s.D.BlockedBy(nodesAbove)) {
+		if s.D.BlockedBy(nodesAbove) {
 			return n
 		}
 	}
@@ -730,5 +731,3 @@ func (s *BallotState) Message(slot int, qs QuorumSlice) BallotMessage {
 
 	panic("code flow should not get here")
 }
-
-

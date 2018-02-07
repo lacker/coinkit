@@ -4,20 +4,20 @@ import (
 	"encoding/json"
 	"fmt"
 	"strings"
-	
+
 	"coinkit/util"
 )
 
 type Transaction struct {
 	// Who is sending this money
 	From string
-	
+
 	// The sequence number for this transaction
 	Sequence uint32
 
 	// Who is receiving this money
 	To string
-	
+
 	// The amount of currency to transfer
 	Amount uint64
 
@@ -36,13 +36,13 @@ type SignedTransaction struct {
 
 	// The signature to prove that the sender has signed this
 	// Nil if the transaction has not been signed
-	Signature string	
+	Signature string
 }
 
 // Signs the transaction with the provided keypair.
 // The caller must check the keypair is the actual sender.
 func (t *Transaction) SignWith(keyPair *util.KeyPair) *SignedTransaction {
-	if keyPair.PublicKey() != t.From {
+	if keyPair.PublicKey().String() != t.From {
 		panic("you can only sign your own transactions")
 	}
 	bytes, err := json.Marshal(t)
@@ -51,7 +51,7 @@ func (t *Transaction) SignWith(keyPair *util.KeyPair) *SignedTransaction {
 	}
 	return &SignedTransaction{
 		Transaction: t,
-		Signature: keyPair.Sign(string(bytes)),
+		Signature:   keyPair.Sign(string(bytes)),
 	}
 }
 
@@ -63,7 +63,11 @@ func (s *SignedTransaction) Verify() bool {
 	if err != nil {
 		return false
 	}
-	return util.Verify(s.Transaction.From, string(bytes), s.Signature)
+	pk, err := util.ReadPublicKey(s.Transaction.From)
+	if err != nil {
+		return false
+	}
+	return util.Verify(pk, string(bytes), s.Signature)
 }
 
 // HighestPriorityFirst is a comparator in the emirpasic/gods comparator style.
@@ -94,11 +98,11 @@ func HighestPriorityFirst(a, b interface{}) int {
 func makeTestTransaction(n int) *SignedTransaction {
 	kp := util.NewKeyPairFromSecretPhrase(fmt.Sprintf("blorp %d", n))
 	t := &Transaction{
-		From: kp.PublicKey(),
+		From:     kp.PublicKey().String(),
 		Sequence: 1,
-		To: "nobody",
-		Amount: uint64(n),
-		Fee: uint64(n),
+		To:       "nobody",
+		Amount:   uint64(n),
+		Fee:      uint64(n),
 	}
 	return t.SignWith(kp)
 }
@@ -109,11 +113,10 @@ func StringifyTransactions(transactions []*SignedTransaction) string {
 	for i, t := range transactions {
 		if i >= limit {
 			parts = append(parts, fmt.Sprintf("and %d more",
-				len(transactions) - limit))
+				len(transactions)-limit))
 			break
 		}
 		parts = append(parts, t.String())
 	}
 	return fmt.Sprintf("(%s)", strings.Join(parts, "; "))
 }
-

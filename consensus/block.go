@@ -31,11 +31,11 @@ type Block struct {
 	D QuorumSlice
 
 	// Who we are
-	publicKey string
+	publicKey util.PublicKey
 }
 
 func NewBlock(
-	publicKey string, qs QuorumSlice, slot int, vs ValueStore) *Block {
+	publicKey util.PublicKey, qs QuorumSlice, slot int, vs ValueStore) *Block {
 	nState := NewNominationState(publicKey, qs, vs)
 	nState.MaybeNominateNewValue()
 	block := &Block{
@@ -95,7 +95,7 @@ func (b *Block) ValueStoreUpdated() {
 
 // Handle handles an incoming message
 func (b *Block) Handle(sender string, message util.Message) {
-	if sender == b.publicKey {
+	if sender == b.publicKey.String() {
 		// It's one of our own returning to us, we can ignore it
 		return
 	}

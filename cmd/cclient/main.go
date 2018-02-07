@@ -33,7 +33,7 @@ func status(user string) *currency.Account {
 // Asks for a login then displays the status
 func ourStatus() {
 	kp := login()
-	status(kp.PublicKey())
+	status(kp.PublicKey().String())
 }
 
 // Ask the user for a passphrase to log in.
@@ -43,7 +43,7 @@ func login() *util.KeyPair {
 	scanner.Scan()
 	phrase := scanner.Text()
 	kp := util.NewKeyPairFromSecretPhrase(phrase)
-	log.Printf("hello. your name is %s", kp.PublicKey())
+	log.Printf("hello. your name is %s", kp.PublicKey().String())
 	return kp
 }
 
@@ -54,7 +54,7 @@ func send(recipient string, amountStr string) {
 	}
 	amount := uint64(amountInt)
 	kp := login()
-	user := kp.PublicKey()
+	user := kp.PublicKey().String()
 	client := newClient()
 	account := client.GetAccount(user)
 

@@ -5,7 +5,8 @@ import (
 )
 
 func TestRejectingGarbage(t *testing.T) {
-	if Verify("garbagekey", "message", "garbagesig") {
+	randomKey := NewKeyPair().PublicKey()
+	if Verify(randomKey, "message", "garbagesig") {
 		t.Fatal("this should not have been verified")
 	}
 }

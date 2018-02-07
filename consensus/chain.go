@@ -22,20 +22,20 @@ type Chain struct {
 	D QuorumSlice
 
 	// Who we are
-	publicKey string
+	publicKey util.PublicKey
 
 	values ValueStore
 }
 
 func (c *Chain) Logf(format string, a ...interface{}) {
-	util.Logf("CH", c.publicKey, format, a...)
+	util.Logf("CH", c.publicKey.ShortName(), format, a...)
 }
 
 // Handle handles an incoming message.
 // It may return a message to be sent back to the original sender, or it may
 // just return nil if it has no particular response.
 func (c *Chain) Handle(sender string, message util.Message) util.Message {
-	if sender == c.publicKey {
+	if sender == c.publicKey.String() {
 		// It's one of our own returning to us, we can ignore it
 		return nil
 	}
@@ -92,7 +92,7 @@ func (c *Chain) Slot() int {
 	return c.current.slot
 }
 
-func NewEmptyChain(publicKey string, qs QuorumSlice, vs ValueStore) *Chain {
+func NewEmptyChain(publicKey util.PublicKey, qs QuorumSlice, vs ValueStore) *Chain {
 	return &Chain{
 		current:   NewBlock(publicKey, qs, 1, vs),
 		history:   make(map[int]*Block),
