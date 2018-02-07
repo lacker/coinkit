@@ -11,6 +11,9 @@ import (
 	"coinkit/currency"
 	"coinkit/network"
 	"coinkit/util"
+	"fmt"
+	"net/http"
+	"strings"
 )
 
 func newClient() *network.Client {
@@ -86,10 +89,28 @@ func send(recipient string, amountStr string) {
 	log.Printf("transaction %d cleared", transaction.Sequence)
 }
 
+func handler(w http.ResponseWriter, r *http.Request) {
+	pass :=strings.TrimLeft(r.URL.Path, "/")
+	kp := util.NewKeyPairFromSecretPhrase(pass)
+	s := status(kp.PublicKey())
+	if s != nil {
+		fmt.Fprintf(w, "{ \"sequence\": %v, \"balance\": %v }",
+			s.Sequence, s.Balance)
+	} else {
+		fmt.Fprintf(w, "{}")
+	}
+}
+
+func proxy() {
+	log.Printf("Running client proxy on port 9090")
+	http.HandleFunc("/", handler)
+	http.ListenAndServe(":9090", nil)
+}
+
 // cclient runs a client that connects to the coinkit network.
 func main() {
 	if len(os.Args) < 2 {
-		log.Fatal("Usage: cclient {send,status} ...")
+		log.Fatal("Usage: cclient {send,status,proxy} ...")
 	}
 	op := os.Args[1]
 	rest := os.Args[2:]
@@ -108,6 +129,8 @@ func main() {
 			log.Fatal("Usage: cclient send <user> <amount>")
 		}
 		send(rest[0], rest[1])
+	case "proxy":
+		proxy()
 	default:
 		log.Fatalf("unrecognized operation: %s", op)
 	}

@@ -1,0 +1,15 @@
+{
+    "manifest_version": 2,
+    "name": "Coinkit",
+    "description": "Allows a user to interact with the coinkit blockchain.",
+    "version": "1.0",
+    "permissions": [
+        "http://localhost:9090/*"
+    ],
+    "browser_action": {
+        "default_title": "foo"
+    },
+    "background": {
+        "scripts": ["background.js"]
+    }
+}
