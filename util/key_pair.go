@@ -7,11 +7,11 @@ import (
 	"encoding/base64"
 
 	"golang.org/x/crypto/ed25519"
-	"golang.org/x/crypto/sha3"		
+	"golang.org/x/crypto/sha3"
 )
 
 type KeyPair struct {
-	publicKey ed25519.PublicKey
+	publicKey  ed25519.PublicKey
 	privateKey ed25519.PrivateKey
 }
 
