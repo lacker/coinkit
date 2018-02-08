@@ -59,6 +59,9 @@ func (s *SignedTransaction) Verify() bool {
 	if s.Transaction == nil {
 		return false
 	}
+	if _, err := util.ReadPublicKey(s.Transaction.To); err != nil {
+		return false
+	}
 	bytes, err := json.Marshal(s.Transaction)
 	if err != nil {
 		return false
@@ -97,10 +100,11 @@ func HighestPriorityFirst(a, b interface{}) int {
 
 func makeTestTransaction(n int) *SignedTransaction {
 	kp := util.NewKeyPairFromSecretPhrase(fmt.Sprintf("blorp %d", n))
+	dest := util.NewKeyPairFromSecretPhrase("destination")
 	t := &Transaction{
 		From:     kp.PublicKey().String(),
 		Sequence: 1,
-		To:       "nobody",
+		To:       dest.PublicKey().String(),
 		Amount:   uint64(n),
 		Fee:      uint64(n),
 	}
