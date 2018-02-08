@@ -52,6 +52,9 @@ func send(recipient string, amountStr string) {
 	if err != nil {
 		log.Fatalf("could not convert %s to a number", amountStr)
 	}
+	if _, err := util.ReadPublicKey(recipient); err != nil {
+		log.Fatalf("invalid address: %s", recipient)
+	}
 	amount := uint64(amountInt)
 	kp := login()
 	user := kp.PublicKey().String()
