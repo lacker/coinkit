@@ -38,6 +38,7 @@ func maxAccountBalance(nodes []*Node) uint64 {
 
 func TestNodeCatchup(t *testing.T) {
 	kp := util.NewKeyPairFromSecretPhrase("client")
+	kp2 := util.NewKeyPairFromSecretPhrase("bob")
 	qs, names := consensus.MakeTestQuorumSlice(4)
 	nodes := []*Node{}
 	for _, name := range names {
@@ -51,7 +52,7 @@ func TestNodeCatchup(t *testing.T) {
 		tr := &currency.Transaction{
 			From:     kp.PublicKey().String(),
 			Sequence: uint32(round),
-			To:       "bob",
+			To:       kp2.PublicKey().String(),
 			Amount:   1,
 			Fee:      0,
 		}
