@@ -38,7 +38,7 @@ func makeServers() []*Server {
 		// A high number essentially disables the rebroadcasts for these tests.
 		// In theory they should not be necessary unless we have node failures
 		// or lossy communication channels.
-		server.RebroadcastInterval = 2 * time.Second
+		server.RebroadcastInterval = 4 * time.Second
 
 		server.ServeInBackground()
 		answer = append(answer, server)
@@ -90,7 +90,7 @@ func TestSendMoney(t *testing.T) {
 	sendMoney(client, mint, bob, 100)
 	log.Printf("transaction cleared")
 	elapsed := time.Now().Sub(start).Seconds()
-	if elapsed > 1.0 {
+	if elapsed > 3.0 {
 		t.Fatalf("sending money is too slow: %.2f seconds", elapsed)
 	}
 	go stopServers(servers)
