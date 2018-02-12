@@ -47,6 +47,10 @@ func (c *Connection) Close() {
 	})
 }
 
+func (c *Connection) IsClosed() bool {
+	return c.closed
+}
+
 func (c *Connection) runIncoming() {
 	for {
 		// Wait for 2x the keepalive period
@@ -91,7 +95,7 @@ func (c *Connection) Send(message *util.SignedMessage) bool {
 	case c.outbox <- message:
 		return true
 	default:
-		log.Printf("outbox overloaded, dropping message")
+		log.Printf("Connection outbox overloaded, dropping message")
 		return false
 	}
 }
