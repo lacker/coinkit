@@ -31,4 +31,12 @@ func NewRedialConnection(address *Address, handler func(*util.SignedMessage)) *R
 	return c
 }
 
+func (c *RedialConnection) Close() {
+	c.quitOnce.Do(func() {
+		c.closed = true
+		c.conn.Close()
+		close(c.quit)
+	})
+}
+
 // TODO: implement more functions
