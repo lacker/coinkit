@@ -5,6 +5,7 @@ import (
 
 	"coinkit/consensus"
 	"coinkit/currency"
+	"coinkit/data"
 	"coinkit/util"
 )
 
@@ -14,6 +15,7 @@ type Node struct {
 	publicKey util.PublicKey
 	chain     *consensus.Chain
 	queue     *currency.TransactionQueue
+	store     *data.DataStore
 }
 
 func NewNode(publicKey util.PublicKey, qs consensus.QuorumSlice) *Node {
@@ -23,6 +25,7 @@ func NewNode(publicKey util.PublicKey, qs consensus.QuorumSlice) *Node {
 		publicKey: publicKey,
 		chain:     consensus.NewEmptyChain(publicKey, qs, queue),
 		queue:     queue,
+		store:     data.NewDataStore(),
 	}
 }
 
@@ -39,6 +42,10 @@ func (node *Node) Handle(sender string, message util.Message) util.Message {
 		return nil
 	}
 	switch m := message.(type) {
+
+	case *data.DataMessage:
+		log.Printf("XXX there is a data message: %+v", m)
+		return node.store.Handle(m)
 
 	case *HistoryMessage:
 		node.Handle(sender, m.T)
@@ -101,6 +108,10 @@ func (node *Node) OutgoingMessages() []util.Message {
 	sharing := node.queue.SharingMessage()
 	if sharing != nil {
 		answer = append(answer, sharing)
+	}
+	d := node.store.OutgoingMessage()
+	if d != nil {
+		answer = append(answer, d)
 	}
 	for _, m := range node.chain.OutgoingMessages() {
 		answer = append(answer, m)
