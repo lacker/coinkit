@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log"
 	"strings"
 )
 
@@ -18,6 +19,9 @@ type SignedMessage struct {
 }
 
 func NewSignedMessage(kp *KeyPair, message Message) *SignedMessage {
+	if message == nil {
+		log.Fatal("cannot sign nil message")
+	}
 	ms := EncodeMessage(message)
 	return &SignedMessage{
 		message:       message,
@@ -90,6 +94,7 @@ func ReadSignedMessage(r io.Reader) (*SignedMessage, error) {
 
 	// Chop the newline
 	serialized := data[:len(data)-1]
+	log.Printf("XXX serialized: [%s]", serialized)
 	if serialized == OK {
 		return nil, nil
 	}
