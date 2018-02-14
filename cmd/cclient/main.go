@@ -103,6 +103,7 @@ func upload(filename string) {
 	h.Write(bytes)
 	checksum := h.Sum(nil)
 	key := hex.EncodeToString(checksum[:8])
+	log.Printf("uploading file as: %s", key)
 	dmap := make(map[string]string)
 	dmap[key] = string(bytes)
 	message := &data.DataMessage{

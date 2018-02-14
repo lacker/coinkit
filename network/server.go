@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"coinkit/currency"
+	"coinkit/data"
 	"coinkit/util"
 )
 
@@ -376,6 +377,10 @@ func (s *Server) ServeInBackground() {
 	go s.processMessagesForever()
 	go s.listen()
 	go s.broadcastIntermittently()
+}
+
+func (s *Server) DataStore() *data.DataStore {
+	return s.node.DataStore()
 }
 
 func (s *Server) Stats() {

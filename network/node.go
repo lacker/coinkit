@@ -34,6 +34,10 @@ func (node *Node) Slot() int {
 	return node.chain.Slot()
 }
 
+func (node *Node) DataStore() *data.DataStore {
+	return node.store
+}
+
 // Handle handles an incoming message.
 // It may return a message to be sent back to the original sender, or it may
 // just return nil if it has no particular response.

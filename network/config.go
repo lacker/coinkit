@@ -92,6 +92,16 @@ func NewUnitTestNetwork() (*NetworkConfig, []*ServerConfig) {
 	return n, s
 }
 
+// This miner is aware of the local network but still anonymous.
+func NewMinerConfig() *ServerConfig {
+	networkConfig, _ := NewLocalNetwork()
+	return &ServerConfig{
+		Network: networkConfig,
+		Port:    9999,
+		KeyPair: util.NewKeyPair(),
+	}
+}
+
 func NewLocalNetwork() (*NetworkConfig, []*ServerConfig) {
 	return NewLocalhostNetwork(9000, 4, 0)
 }
