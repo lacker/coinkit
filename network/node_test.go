@@ -19,7 +19,10 @@ func sendNodeToNodeMessages(source *Node, target *Node, t *testing.T) {
 		if response != nil {
 			x := source.Handle(target.publicKey.String(), response)
 			if x != nil {
-				log.Fatal("infinite response loop")
+				log.Printf("initial message: %+v", message)
+				log.Printf("response message: %+v", response)
+				log.Printf("re-response message: %+v", x)
+				t.Fatal("infinite response loop")
 			}
 		}
 	}

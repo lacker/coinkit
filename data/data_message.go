@@ -7,9 +7,12 @@ import (
 )
 
 // A DataMessage is used to exchange data among peers.
-// An empty string means that the sender has this value, it just isn't included.
 type DataMessage struct {
+	// An empty string means that the sender has this value, it just isn't included.
 	Data map[string]string
+
+	// Open is the number of bytes that we are interested in receiving in response.
+	Open int
 }
 
 func (m *DataMessage) Slot() int {

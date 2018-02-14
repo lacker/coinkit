@@ -44,7 +44,11 @@ func (node *Node) Handle(sender string, message util.Message) util.Message {
 	switch m := message.(type) {
 
 	case *data.DataMessage:
-		return node.store.Handle(m)
+		response := node.store.Handle(m)
+		if response == nil {
+			return nil
+		}
+		return response
 
 	case *HistoryMessage:
 		node.Handle(sender, m.T)

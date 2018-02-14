@@ -62,7 +62,6 @@ func EncodeMessage(m Message) string {
 	if m == nil || reflect.ValueOf(m).IsNil() {
 		panic("you should not EncodeMessage(nil)")
 	}
-	log.Printf("encoding message: %+v", m)
 	bytes, err := json.Marshal(DecodedMessage{
 		T: m.MessageType(),
 		M: m,
