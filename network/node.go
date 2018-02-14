@@ -104,11 +104,11 @@ func (node *Node) handleChainMessage(sender string, message util.Message) util.M
 
 func (node *Node) OutgoingMessages() []util.Message {
 	answer := []util.Message{}
-	sharing := node.queue.SharingMessage()
+	sharing := node.queue.TransactionMessage()
 	if sharing != nil {
 		answer = append(answer, sharing)
 	}
-	d := node.store.OutgoingMessage()
+	d := node.store.DataMessage()
 	if d != nil {
 		answer = append(answer, d)
 	}

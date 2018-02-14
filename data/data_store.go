@@ -53,7 +53,7 @@ func (d *DataStore) Handle(m *DataMessage) *DataMessage {
 	return answer
 }
 
-func (d *DataStore) OutgoingMessage() *DataMessage {
+func (d *DataStore) DataMessage() *DataMessage {
 	if len(d.store) == 0 {
 		return nil
 	}

@@ -59,6 +59,10 @@ type PartiallyDecodedMessage struct {
 }
 
 func EncodeMessage(m Message) string {
+	if m == nil || reflect.ValueOf(m).IsNil() {
+		panic("you should not EncodeMessage(nil)")
+	}
+	log.Printf("encoding message: %+v", m)
 	bytes, err := json.Marshal(DecodedMessage{
 		T: m.MessageType(),
 		M: m,
@@ -86,8 +90,11 @@ func DecodeMessage(encoded string) (Message, error) {
 	if err != nil {
 		return nil, err
 	}
+	if m == nil {
+		return nil, fmt.Errorf("it looks like a nil got encoded")
+	}
 
-	return m.(Message), nil
+	return m, nil
 }
 
 // Useful for simulating a network transit

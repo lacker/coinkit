@@ -2,13 +2,17 @@ package main
 
 import (
 	"bufio"
+	"encoding/hex"
+	"io/ioutil"
 	"log"
 	"os"
 	"strconv"
 
 	"github.com/davecgh/go-spew/spew"
+	"golang.org/x/crypto/sha3"
 
 	"coinkit/currency"
+	"coinkit/data"
 	"coinkit/network"
 	"coinkit/util"
 	"fmt"
@@ -110,6 +114,28 @@ func proxy() {
 	http.ListenAndServe(":9090", nil)
 }
 
+func upload(filename string) {
+	// Construct a message from the file
+	bytes, err := ioutil.ReadFile(filename)
+	if err != nil {
+		panic(err)
+	}
+	h := sha3.New512()
+	h.Write(bytes)
+	checksum := h.Sum(nil)
+	key := hex.EncodeToString(checksum[:8])
+	dmap := make(map[string]string)
+	dmap[key] = string(bytes)
+	message := &data.DataMessage{
+		Data: dmap,
+	}
+
+	kp := util.NewKeyPair()
+	client := newClient()
+	sm := util.NewSignedMessage(kp, message)
+	client.SendMessage(sm)
+}
+
 // cclient runs a client that connects to the coinkit network.
 func main() {
 	if len(os.Args) < 2 {
@@ -134,6 +160,11 @@ func main() {
 		send(rest[0], rest[1])
 	case "proxy":
 		proxy()
+	case "upload":
+		if len(rest) != 1 {
+			log.Fatal("Usage: cclient upload <filename>")
+		}
+		upload(rest[0])
 	default:
 		log.Fatalf("unrecognized operation: %s", op)
 	}

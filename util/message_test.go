@@ -1,6 +1,7 @@
 package util
 
 import (
+	"encoding/json"
 	"testing"
 )
 
@@ -29,5 +30,20 @@ func TestMessageEncoding(t *testing.T) {
 	m2 := EncodeThenDecode(m).(*TestingMessage)
 	if m2.Number != 7 {
 		t.Fatalf("m2.Number turned into %d", m2.Number)
+	}
+}
+
+func TestDecodingInvalidMessage(t *testing.T) {
+	bytes, err := json.Marshal(DecodedMessage{
+		T: "Testing",
+		M: nil,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	encoded := string(bytes)
+	m, err := DecodeMessage(encoded)
+	if err == nil || m != nil {
+		t.Fatal("an encoded nil message should fail to decode")
 	}
 }
