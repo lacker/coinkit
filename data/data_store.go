@@ -54,9 +54,6 @@ func (d *DataStore) Handle(m *DataMessage) *DataMessage {
 }
 
 func (d *DataStore) DataMessage() *DataMessage {
-	if len(d.store) == 0 {
-		return nil
-	}
 	message := &DataMessage{
 		Data: make(map[string]string),
 	}

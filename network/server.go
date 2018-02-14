@@ -5,6 +5,7 @@ import (
 	"io"
 	"log"
 	"net"
+	"reflect"
 	"time"
 
 	"coinkit/currency"
@@ -220,7 +221,7 @@ func (s *Server) unsafeProcessMessage(m *util.SignedMessage) *util.SignedMessage
 	}
 
 	// Return the appropriate message
-	if message == nil {
+	if message == nil || reflect.ValueOf(message).IsNil() {
 		return nil
 	}
 	sm := util.NewSignedMessage(s.keyPair, message)
