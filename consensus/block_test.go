@@ -13,9 +13,11 @@ import (
 
 func TestSolipsistQuorum(t *testing.T) {
 	vs := NewTestValueStore(1)
-	s := NewBlock("foo", MakeQuorumSlice([]string{"foo"}, 1), 1, vs)
-	if !MeetsQuorum(s.nState, []string{"foo"}) {
-		t.Fatal("foo should meet the quorum")
+	kp := util.NewKeyPairFromSecretPhrase("foo")
+	s := NewBlock(kp.PublicKey(),
+		MakeQuorumSlice([]string{kp.PublicKey().String()}, 1), 1, vs)
+	if !MeetsQuorum(s.nState, []string{kp.PublicKey().String()}) {
+		t.Fatal("known public key should meet the quorum")
 	}
 	if MeetsQuorum(s.nState, []string{"bar"}) {
 		t.Fatal("bar should not meet the quorum")
@@ -23,24 +25,33 @@ func TestSolipsistQuorum(t *testing.T) {
 }
 
 func TestConsensus(t *testing.T) {
-	members := []string{"amy", "bob", "cal", "dan"}
+	apk := util.NewKeyPairFromSecretPhrase("amy").PublicKey()
+	bpk := util.NewKeyPairFromSecretPhrase("bob").PublicKey()
+	cpk := util.NewKeyPairFromSecretPhrase("cal").PublicKey()
+	dpk := util.NewKeyPairFromSecretPhrase("dan").PublicKey()
+	members := []string{
+		apk.String(),
+		bpk.String(),
+		cpk.String(),
+		dpk.String(),
+	}
 	qs := MakeQuorumSlice(members, 3)
 	vs := NewTestValueStore(0)
-	amy := NewBlock("amy", qs, 1, vs)
-	bob := NewBlock("bob", qs, 1, vs)
-	cal := NewBlock("cal", qs, 1, vs)
-	dan := NewBlock("dan", qs, 1, vs)
+	amy := NewBlock(apk, qs, 1, vs)
+	bob := NewBlock(bpk, qs, 1, vs)
+	cal := NewBlock(cpk, qs, 1, vs)
+	dan := NewBlock(dpk, qs, 1, vs)
 
 	// Let everyone receive an initial nomination from Amy
 	amy.nState.NominateNewValue(SlotValue("hello its amy"))
 	a := amy.OutgoingMessages()[0]
 
-	bob.Handle("amy", a)
+	bob.Handle(apk.String(), a)
 	if len(bob.nState.N) != 1 {
 		t.Fatal("len(bob.nState.N) != 1")
 	}
-	cal.Handle("amy", a)
-	dan.Handle("amy", a)
+	cal.Handle(apk.String(), a)
+	dan.Handle(apk.String(), a)
 
 	// At this point everyone should have a nomination
 	if !amy.nState.HasNomination() {
@@ -60,14 +71,14 @@ func TestConsensus(t *testing.T) {
 	// but still no candidates. This works even without dan, who has nothing
 	// accepted.
 	b := bob.OutgoingMessages()[0]
-	amy.Handle("bob", b)
+	amy.Handle(bpk.String(), b)
 	if len(amy.nState.N) != 1 {
 		t.Fatalf("amy.nState.N = %#v", amy.nState.N)
 	}
-	cal.Handle("bob", b)
+	cal.Handle(bpk.String(), b)
 	c := cal.OutgoingMessages()[0]
-	amy.Handle("cal", c)
-	bob.Handle("cal", c)
+	amy.Handle(cpk.String(), c)
+	bob.Handle(cpk.String(), c)
 	if len(amy.nState.Y) != 1 {
 		t.Fatal("len(amy.nState.Y) != 1")
 	}
@@ -94,7 +105,7 @@ func exchangeMessages(blocks []*Block, beEvil bool) {
 			}
 
 			for _, message := range messages {
-				if (beEvil && !firstEvil) {
+				if beEvil && !firstEvil {
 					switch m := message.(type) {
 					case *PrepareMessage:
 						m.Hn = math.MaxInt32
@@ -102,20 +113,32 @@ func exchangeMessages(blocks []*Block, beEvil bool) {
 					}
 				}
 
-				block2.Handle(block.publicKey, message)
+				block2.Handle(block.publicKey.String(), message)
 			}
 		}
 	}
 }
 
 func TestProtectionAgainstBigRangeDDoS(t *testing.T) {
-	members := []string{"amy", "bob", "cal", "dan"}
+	apk := util.NewKeyPairFromSecretPhrase("amy").PublicKey()
+	bpk := util.NewKeyPairFromSecretPhrase("bob").PublicKey()
+	cpk := util.NewKeyPairFromSecretPhrase("cal").PublicKey()
+	dpk := util.NewKeyPairFromSecretPhrase("dan").PublicKey()
+	members := []string{
+		apk.String(),
+		bpk.String(),
+		cpk.String(),
+		dpk.String(),
+	}
+
 	qs := MakeQuorumSlice(members, 3)
 	vs := NewTestValueStore(0)
 
-	var blocks []*Block
-	for _, name  := range members {
-		blocks = append(blocks, NewBlock(name, qs, 1, vs))
+	blocks := []*Block{
+		NewBlock(apk, qs, 1, vs),
+		NewBlock(bpk, qs, 1, vs),
+		NewBlock(cpk, qs, 1, vs),
+		NewBlock(dpk, qs, 1, vs),
 	}
 
 	exchangeMessages(blocks, false)
@@ -136,7 +159,7 @@ func blockSend(source *Block, target *Block) {
 	messages := source.OutgoingMessages()
 	for _, message := range messages {
 		m := util.EncodeThenDecode(message)
-		target.Handle(source.publicKey, m)
+		target.Handle(source.publicKey.String(), m)
 	}
 }
 
@@ -218,7 +241,7 @@ func blockFuzzTest(blocks []*Block, seed int64, t *testing.T) {
 		t.Fatalf("fuzz testing with seed %d, nomination did not converge", seed)
 	}
 
-	log.Printf("balloting did not converge")		
+	log.Printf("balloting did not converge")
 	for i := 0; i < len(blocks); i++ {
 		log.Printf("--------------------------------------------------------------------------")
 		if blocks[i].bState != nil {

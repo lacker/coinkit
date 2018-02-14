@@ -15,9 +15,9 @@ func sendNodeToNodeMessages(source *Node, target *Node, t *testing.T) {
 	messages := source.OutgoingMessages()
 	for _, message := range messages {
 		m := util.EncodeThenDecode(message)
-		response := target.Handle(source.publicKey, m)
+		response := target.Handle(source.publicKey.String(), m)
 		if response != nil {
-			x := source.Handle(target.publicKey, response)
+			x := source.Handle(target.publicKey.String(), response)
 			if x != nil {
 				log.Fatal("infinite response loop")
 			}
@@ -38,26 +38,27 @@ func maxAccountBalance(nodes []*Node) uint64 {
 
 func TestNodeCatchup(t *testing.T) {
 	kp := util.NewKeyPairFromSecretPhrase("client")
+	kp2 := util.NewKeyPairFromSecretPhrase("bob")
 	qs, names := consensus.MakeTestQuorumSlice(4)
 	nodes := []*Node{}
 	for _, name := range names {
 		node := NewNode(name, qs)
-		node.queue.SetBalance(kp.PublicKey(), 100)
+		node.queue.SetBalance(kp.PublicKey().String(), 100)
 		nodes = append(nodes, node)
 	}
 
 	// Run a few rounds with the first three nodes
 	for round := 1; round <= 3; round++ {
 		tr := &currency.Transaction{
-			From:     kp.PublicKey(),
+			From:     kp.PublicKey().String(),
 			Sequence: uint32(round),
-			To:       "bob",
+			To:       kp2.PublicKey().String(),
 			Amount:   1,
 			Fee:      0,
 		}
 		ts := []*currency.SignedTransaction{tr.SignWith(kp)}
 		m := currency.NewTransactionMessage(ts...)
-		nodes[0].Handle(kp.PublicKey(), m)
+		nodes[0].Handle(kp.PublicKey().String(), m)
 		for i := 0; i < 10; i++ {
 			sendNodeToNodeMessages(nodes[0], nodes[1], t)
 			sendNodeToNodeMessages(nodes[0], nodes[2], t)
@@ -108,9 +109,9 @@ func nodeFuzzTest(seed int64, t *testing.T) {
 		ts := []*currency.SignedTransaction{}
 		for seq := uint32(1); seq < uint32(initialMoney); seq++ {
 			t := &currency.Transaction{
-				From:     client.PublicKey(),
+				From:     client.PublicKey().String(),
 				Sequence: seq,
-				To:       neighbor.PublicKey(),
+				To:       neighbor.PublicKey().String(),
 				Amount:   1,
 				Fee:      1,
 			}
@@ -126,7 +127,7 @@ func nodeFuzzTest(seed int64, t *testing.T) {
 	for _, name := range names {
 		node := NewNode(name, qs)
 		for _, client := range clients {
-			node.queue.SetBalance(client.PublicKey(), initialMoney)
+			node.queue.SetBalance(client.PublicKey().String(), initialMoney)
 		}
 		nodes = append(nodes, node)
 	}
@@ -145,7 +146,7 @@ func nodeFuzzTest(seed int64, t *testing.T) {
 			client := clients[j]
 			m := clientMessages[j]
 			node := nodes[rand.Intn(len(nodes))]
-			node.Handle(client.PublicKey(), m)
+			node.Handle(client.PublicKey().String(), m)
 		}
 
 		// Check if we are done

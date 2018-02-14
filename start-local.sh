@@ -15,6 +15,7 @@ then
     exit 1
 fi
 
+echo rebuilding binaries...
 go install ./...
 
 if [ $? -ne 0 ]

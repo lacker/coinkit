@@ -74,12 +74,12 @@ func NewServer(config *ServerConfig) *Server {
 }
 
 func (s *Server) Logf(format string, a ...interface{}) {
-	util.Logf("SE", s.keyPair.PublicKey(), format, a...)
+	util.Logf("SE", s.keyPair.PublicKey().ShortName(), format, a...)
 }
 
 func (s *Server) InitMint() {
 	mint := util.NewKeyPairFromSecretPhrase("mint")
-	s.SetBalance(mint.PublicKey(), currency.TotalMoney)
+	s.SetBalance(mint.PublicKey().String(), currency.TotalMoney)
 }
 
 func (s *Server) SetBalance(user string, amount uint64) {

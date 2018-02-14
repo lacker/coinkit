@@ -112,6 +112,7 @@ func (c *Client) sendForever() {
 // Close() should be called when the client is no longer being used. Requests in
 // progress may or may not have callbacks called. This is important to do so that
 // we don't have eternal redials from clients that are no longer in use.
+// WARNING: calling close multiple times is bad
 func (c *Client) Close() {
 	c.closing = true
 	close(c.quit)

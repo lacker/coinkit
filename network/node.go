@@ -5,24 +5,27 @@ import (
 
 	"coinkit/consensus"
 	"coinkit/currency"
+	"coinkit/data"
 	"coinkit/util"
 )
 
 // Node is the logical container for everything one node in the network handles.
 // Node is not threadsafe.
 type Node struct {
-	publicKey string
+	publicKey util.PublicKey
 	chain     *consensus.Chain
 	queue     *currency.TransactionQueue
+	store     *data.DataStore
 }
 
-func NewNode(publicKey string, qs consensus.QuorumSlice) *Node {
+func NewNode(publicKey util.PublicKey, qs consensus.QuorumSlice) *Node {
 	queue := currency.NewTransactionQueue(publicKey)
 
 	return &Node{
 		publicKey: publicKey,
 		chain:     consensus.NewEmptyChain(publicKey, qs, queue),
 		queue:     queue,
+		store:     data.NewDataStore(),
 	}
 }
 
@@ -35,10 +38,13 @@ func (node *Node) Slot() int {
 // It may return a message to be sent back to the original sender, or it may
 // just return nil if it has no particular response.
 func (node *Node) Handle(sender string, message util.Message) util.Message {
-	if sender == node.publicKey {
+	if sender == node.publicKey.String() {
 		return nil
 	}
 	switch m := message.(type) {
+
+	case *data.DataMessage:
+		return node.store.Handle(m)
 
 	case *HistoryMessage:
 		node.Handle(sender, m.T)
@@ -101,6 +107,10 @@ func (node *Node) OutgoingMessages() []util.Message {
 	sharing := node.queue.SharingMessage()
 	if sharing != nil {
 		answer = append(answer, sharing)
+	}
+	d := node.store.OutgoingMessage()
+	if d != nil {
+		answer = append(answer, d)
 	}
 	for _, m := range node.chain.OutgoingMessages() {
 		answer = append(answer, m)

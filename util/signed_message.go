@@ -11,19 +11,19 @@ import (
 const OK = "ok"
 
 type SignedMessage struct {
-	message Message
+	message       Message
 	messageString string
-	signer string
-	signature string
+	signer        string
+	signature     string
 }
 
 func NewSignedMessage(kp *KeyPair, message Message) *SignedMessage {
 	ms := EncodeMessage(message)
 	return &SignedMessage{
-		message: message,
+		message:       message,
 		messageString: ms,
-		signer: kp.PublicKey(),
-		signature: kp.Sign(ms),
+		signer:        kp.PublicKey().String(),
+		signature:     kp.Sign(ms),
 	}
 }
 
@@ -48,7 +48,11 @@ func NewSignedMessageFromSerialized(serialized string) (*SignedMessage, error) {
 	if version != "e" {
 		return nil, errors.New("unrecognized version")
 	}
-	if !Verify(signer, ms, signature) {
+	publicKey, err := ReadPublicKey(signer)
+	if err != nil {
+		return nil, err
+	}
+	if !Verify(publicKey, ms, signature) {
 		return nil, errors.New("signature failed verification")
 	}
 	m, err := DecodeMessage(ms)
@@ -56,10 +60,10 @@ func NewSignedMessageFromSerialized(serialized string) (*SignedMessage, error) {
 		return nil, err
 	}
 	return &SignedMessage{
-		message: m,
+		message:       m,
 		messageString: ms,
-		signer: signer,
-		signature: signature,
+		signer:        signer,
+		signature:     signature,
 	}, nil
 }
 
@@ -89,6 +93,6 @@ func ReadSignedMessage(r io.Reader) (*SignedMessage, error) {
 	if serialized == OK {
 		return nil, nil
 	}
-	
+
 	return NewSignedMessageFromSerialized(serialized)
 }

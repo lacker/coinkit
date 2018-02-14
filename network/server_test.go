@@ -38,7 +38,7 @@ func makeServers() []*Server {
 		// A high number essentially disables the rebroadcasts for these tests.
 		// In theory they should not be necessary unless we have node failures
 		// or lossy communication channels.
-		server.RebroadcastInterval = 2 * time.Second
+		server.RebroadcastInterval = 4 * time.Second
 
 		server.ServeInBackground()
 		answer = append(answer, server)
@@ -62,15 +62,15 @@ func TestStartStop(t *testing.T) {
 // sendMoney waits until the transaction clears
 // it fatals if from doesn't have the money
 func sendMoney(client *Client, from *util.KeyPair, to *util.KeyPair, amount uint64) {
-	account := client.GetAccount(from.PublicKey())
+	account := client.GetAccount(from.PublicKey().String())
 	if account == nil || account.Balance < amount {
-		log.Fatalf("%s did not have enough money", from.PublicKey())
+		log.Fatalf("%s did not have enough money", from.PublicKey().String())
 	}
 	seq := account.Sequence + 1
 	transaction := &currency.Transaction{
-		From:     from.PublicKey(),
+		From:     from.PublicKey().String(),
 		Sequence: account.Sequence + 1,
-		To:       to.PublicKey(),
+		To:       to.PublicKey().String(),
 		Amount:   amount,
 		Fee:      0,
 	}
@@ -78,7 +78,7 @@ func sendMoney(client *Client, from *util.KeyPair, to *util.KeyPair, amount uint
 	tm := currency.NewTransactionMessage(st)
 	sm := util.NewSignedMessage(from, tm)
 	client.SendMessage(sm)
-	client.WaitToClear(from.PublicKey(), seq)
+	client.WaitToClear(from.PublicKey().String(), seq)
 }
 
 func TestSendMoney(t *testing.T) {
@@ -90,7 +90,7 @@ func TestSendMoney(t *testing.T) {
 	sendMoney(client, mint, bob, 100)
 	log.Printf("transaction cleared")
 	elapsed := time.Now().Sub(start).Seconds()
-	if elapsed > 1.0 {
+	if elapsed > 3.0 {
 		t.Fatalf("sending money is too slow: %.2f seconds", elapsed)
 	}
 	go stopServers(servers)
@@ -130,7 +130,7 @@ func benchmarkSendMoney(numClients int, b *testing.B) {
 		kps = append(kps, util.NewKeyPairFromSecretPhrase(fmt.Sprintf("kp%d", i)))
 		chans = append(chans, make(chan bool))
 		for _, server := range servers {
-			server.SetBalance(kps[i].PublicKey(), uint64(b.N))
+			server.SetBalance(kps[i].PublicKey().String(), uint64(b.N))
 		}
 	}
 	b.ResetTimer()
@@ -206,14 +206,14 @@ func TestServerOkayWithMalformedMessage(t *testing.T) {
 	goodMessage := "{ \"T\": \"N\", \"M\": { \"I\": 1 } }"
 	kp := util.NewKeyPair()
 	line := fmt.Sprintf("e:%s:%s:%s\n",
-		kp.PublicKey(), "notRealSignature", goodMessage)
+		kp.PublicKey().String(), "notRealSignature", goodMessage)
 
 	if sendString(s.LocalhostAddress(), line) != io.EOF {
 		t.Errorf("Didn't get disconnected after a bad-signature message")
 	}
 
 	line = fmt.Sprintf("e:%s:%s:%s\n",
-		kp.PublicKey(), kp.Sign(goodMessage), goodMessage)
+		kp.PublicKey().String(), kp.Sign(goodMessage), goodMessage)
 
 	if sendString(s.LocalhostAddress(), line) != nil {
 		t.Errorf("The server should still process a good message")

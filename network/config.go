@@ -64,7 +64,7 @@ func NewLocalhostNetwork(
 			Port: port,
 		})
 		kp := util.NewKeyPairFromSecretPhrase(fmt.Sprintf("%d %d", seed, port))
-		network.Members = append(network.Members, kp.PublicKey())
+		network.Members = append(network.Members, kp.PublicKey().String())
 		servers = append(servers, &ServerConfig{
 			Network: network,
 			Port:    port,

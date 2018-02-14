@@ -11,17 +11,17 @@ func TestTransactionMessages(t *testing.T) {
 	kp2 := util.NewKeyPairFromSecretPhrase("key pair 2")
 	t1 := Transaction{
 		Sequence: 1,
-		Amount: 100,
-		Fee: 2,
-		From: kp1.PublicKey(),
-		To: kp2.PublicKey(),
+		Amount:   100,
+		Fee:      2,
+		From:     kp1.PublicKey().String(),
+		To:       kp2.PublicKey().String(),
 	}
 	t2 := Transaction{
 		Sequence: 1,
-		Amount: 50,
-		Fee: 2,
-		From: kp2.PublicKey(),
-		To: kp1.PublicKey(),
+		Amount:   50,
+		Fee:      2,
+		From:     kp2.PublicKey().String(),
+		To:       kp1.PublicKey().String(),
 	}
 	s1 := t1.SignWith(kp1)
 	s2 := t2.SignWith(kp2)
