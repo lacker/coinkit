@@ -90,7 +90,7 @@ func send(recipient string, amountStr string) {
 }
 
 func handler(w http.ResponseWriter, r *http.Request) {
-	pass :=strings.TrimLeft(r.URL.Path, "/")
+	pass := strings.TrimLeft(r.URL.Path, "/")
 	kp := util.NewKeyPairFromSecretPhrase(pass)
 	s := status(kp.PublicKey())
 	if s != nil {
