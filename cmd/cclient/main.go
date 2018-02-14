@@ -95,9 +95,9 @@ func send(recipient string, amountStr string) {
 func handler(w http.ResponseWriter, r *http.Request) {
 	pass := strings.TrimLeft(r.URL.Path, "/")
 	kp := util.NewKeyPairFromSecretPhrase(pass)
-	s := status(kp.PublicKey())
+	s := status(kp.PublicKey().String())
 	if s != nil {
-		fmt.Fprintf(w, "{ \"sequence\": %v, \"balance\": %v }",
+		fmt.Fprintf(w, "{ \"sequence\": %d, \"balance\": %d }",
 			s.Sequence, s.Balance)
 	} else {
 		fmt.Fprintf(w, "{}")
