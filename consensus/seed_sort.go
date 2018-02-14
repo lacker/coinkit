@@ -32,6 +32,7 @@ func SeedSort(seed string, input []string) []string {
 }
 
 // SeedPriority returns the index of node in the seed-sorted list
+// -1 indicates we should never nominate anything
 func SeedPriority(seed string, input []string, node string) int {
 	sorted := SeedSort(seed, input)
 	for i, value := range sorted {
@@ -39,5 +40,5 @@ func SeedPriority(seed string, input []string, node string) int {
 			return i
 		}
 	}
-	panic("we have no seed priority")
+	return -1
 }

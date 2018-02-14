@@ -233,6 +233,9 @@ func (s *Server) unsafeProcessMessage(m *util.SignedMessage) *util.SignedMessage
 // thread that is allowed to access the node, because node is not threadsafe.
 // The 'unsafe' methods should only be called from within here.
 func (s *Server) processMessagesForever() {
+	// TODO: run long tests to make sure this is ok
+	s.unsafeUpdateOutgoing()
+
 	for {
 
 		select {

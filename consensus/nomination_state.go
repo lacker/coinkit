@@ -31,6 +31,7 @@ type NominationState struct {
 
 	// Which priority we think we are for creating a nomination
 	// 0 is the first priority
+	// Negative means we should never create a nomination
 	priority int
 
 	// The value store we use to validate or combine values
@@ -78,7 +79,7 @@ func (s *NominationState) MaybeNominateNewValue() bool {
 		return false
 	}
 
-	if s.D.Threshold*s.priority > s.received {
+	if s.priority < 0 || s.D.Threshold*s.priority > s.received {
 		// We don't think it's our turn
 		return false
 	}

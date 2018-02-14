@@ -20,6 +20,7 @@ func NewFileServer(store *data.DataStore) *FileServer {
 }
 
 func (fs *FileServer) ServeForever(port int) {
+	log.Printf("serving files on port %d", port)
 	handler := func(w http.ResponseWriter, r *http.Request) {
 		key := strings.TrimLeft(r.URL.Path, "/")
 		log.Printf("handling [%s]", key)
@@ -31,5 +32,5 @@ func (fs *FileServer) ServeForever(port int) {
 		}
 	}
 	http.HandleFunc("/", handler)
-	http.ListenAndServe(fmt.Sprintf(":%d"), nil)
+	http.ListenAndServe(fmt.Sprintf("127.0.0.1:%d", port), nil)
 }
