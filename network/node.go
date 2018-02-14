@@ -44,7 +44,6 @@ func (node *Node) Handle(sender string, message util.Message) util.Message {
 	switch m := message.(type) {
 
 	case *data.DataMessage:
-		log.Printf("XXX there is a data message: %+v", m)
 		return node.store.Handle(m)
 
 	case *HistoryMessage:
