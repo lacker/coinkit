@@ -120,8 +120,8 @@ func (q *TransactionQueue) Transactions() []*SignedTransaction {
 	return answer
 }
 
-// SharingMessage returns the pending transactions we want to share with other nodes.
-func (q *TransactionQueue) SharingMessage() *TransactionMessage {
+// TransactionMessage returns the pending transactions we want to share with other nodes.
+func (q *TransactionQueue) TransactionMessage() *TransactionMessage {
 	ts := q.Transactions()
 	if len(ts) == 0 && len(q.chunks) == 0 {
 		return nil

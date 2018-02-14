@@ -31,16 +31,16 @@ func TestFullQueue(t *testing.T) {
 	}
 }
 
-func TestSharingMessage(t *testing.T) {
+func TestTransactionMessage(t *testing.T) {
 	kp := util.NewKeyPair()
 	q := NewTransactionQueue(kp.PublicKey())
-	if q.SharingMessage() != nil {
-		t.Fatal("there should be no sharing message with an empty queue")
+	if q.TransactionMessage() != nil {
+		t.Fatal("there should be no transaction message with an empty queue")
 	}
 	tr := makeTestTransaction(0)
 	q.accounts.SetBalance(tr.Transaction.From, 10*tr.Transaction.Amount)
 	q.Add(tr)
-	if q.SharingMessage() == nil {
-		t.Fatal("there should be a sharing message after we add one transaction")
+	if q.TransactionMessage() == nil {
+		t.Fatal("there should be a transaction message after we add one transaction")
 	}
 }

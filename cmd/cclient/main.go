@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"encoding/hex"
 	"io/ioutil"
 	"log"
 	"os"
@@ -101,8 +102,9 @@ func upload(filename string) {
 	h := sha3.New512()
 	h.Write(bytes)
 	checksum := h.Sum(nil)
+	key := hex.EncodeToString(checksum[:8])
 	dmap := make(map[string]string)
-	dmap[string(checksum)] = string(bytes)
+	dmap[key] = string(bytes)
 	message := &data.DataMessage{
 		Data: dmap,
 	}
