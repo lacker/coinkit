@@ -15,7 +15,7 @@ import (
 // closed.
 // Some messages might get dropped during a reconnect.
 type RedialConnection struct {
-	conn     *Connection
+	conn     *BasicConnection
 	address  *Address
 	handler  func(*util.SignedMessage)
 	outbox   chan *util.SignedMessage
@@ -60,7 +60,7 @@ func (c *RedialConnection) connect() {
 	for {
 		conn, err := net.Dial("tcp", c.address.String())
 		if err == nil {
-			c.conn = NewConnection(conn, c.handler)
+			c.conn = NewBasicConnection(conn, c.handler)
 			return
 		}
 

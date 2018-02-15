@@ -13,10 +13,10 @@ import (
 // How frequently in seconds to send keepalive pings
 const keepalive = 10
 
-// A Connection represents a two-way message channel.
+// A BasicConnection represents a two-way message channel.
 // You can close it at any point, and it will close itself if it detects
 // network problems.
-type Connection struct {
+type BasicConnection struct {
 	conn     net.Conn
 	handler  func(*util.SignedMessage)
 	outbox   chan *util.SignedMessage
@@ -25,10 +25,10 @@ type Connection struct {
 	quitOnce sync.Once
 }
 
-// NewConnection creates a new logical connection given a network connection.
+// NewBasicConnection creates a new logical connection given a network connection.
 // handler will get called on all non-nil incoming messages.
-func NewConnection(conn net.Conn, handler func(*util.SignedMessage)) *Connection {
-	c := &Connection{
+func NewBasicConnection(conn net.Conn, handler func(*util.SignedMessage)) *BasicConnection {
+	c := &BasicConnection{
 		conn:    conn,
 		handler: handler,
 		outbox:  make(chan *util.SignedMessage, 100),
@@ -40,18 +40,18 @@ func NewConnection(conn net.Conn, handler func(*util.SignedMessage)) *Connection
 	return c
 }
 
-func (c *Connection) Close() {
+func (c *BasicConnection) Close() {
 	c.quitOnce.Do(func() {
 		c.closed = true
 		close(c.quit)
 	})
 }
 
-func (c *Connection) IsClosed() bool {
+func (c *BasicConnection) IsClosed() bool {
 	return c.closed
 }
 
-func (c *Connection) runIncoming() {
+func (c *BasicConnection) runIncoming() {
 	for {
 		// Wait for 2x the keepalive period
 		c.conn.SetReadDeadline(time.Now().Add(2 * keepalive * time.Second))
@@ -71,7 +71,7 @@ func (c *Connection) runIncoming() {
 	c.handler = nil
 }
 
-func (c *Connection) runOutgoing() {
+func (c *BasicConnection) runOutgoing() {
 	for {
 		var message *util.SignedMessage
 		timer := time.NewTimer(time.Duration(keepalive * time.Second))
@@ -90,7 +90,7 @@ func (c *Connection) runOutgoing() {
 
 // Send sends a message, but only if the queue is not full.
 // It returns whether the message entered the outbox.
-func (c *Connection) Send(message *util.SignedMessage) bool {
+func (c *BasicConnection) Send(message *util.SignedMessage) bool {
 	select {
 	case c.outbox <- message:
 		return true
@@ -101,6 +101,6 @@ func (c *Connection) Send(message *util.SignedMessage) bool {
 }
 
 // QuitChannel returns a channel that gets closed once, when the channel shuts down.
-func (c *Connection) QuitChannel() chan bool {
+func (c *BasicConnection) QuitChannel() chan bool {
 	return c.quit
 }
