@@ -5,7 +5,6 @@ import (
 	"io"
 	"log"
 	"net"
-	"reflect"
 	"time"
 
 	"coinkit/currency"
@@ -212,7 +211,7 @@ func (s *Server) unsafeUpdateOutgoing() {
 // It should be only be called from the message-processing thread.
 func (s *Server) unsafeProcessMessage(m *util.SignedMessage) *util.SignedMessage {
 	prevSlot := s.node.Slot()
-	message := s.node.Handle(m.Signer(), m.Message())
+	message, hasResponse := s.node.Handle(m.Signer(), m.Message())
 	postSlot := s.node.Slot()
 	s.unsafeUpdateOutgoing()
 
@@ -222,7 +221,7 @@ func (s *Server) unsafeProcessMessage(m *util.SignedMessage) *util.SignedMessage
 	}
 
 	// Return the appropriate message
-	if message == nil || reflect.ValueOf(message).IsNil() {
+	if !hasResponse {
 		return nil
 	}
 	sm := util.NewSignedMessage(s.keyPair, message)

@@ -39,66 +39,75 @@ func (node *Node) DataStore() *data.DataStore {
 }
 
 // Handle handles an incoming message.
-// It may return a message to be sent back to the original sender, or it may
-// just return nil if it has no particular response.
-func (node *Node) Handle(sender string, message util.Message) util.Message {
+// It may return a message to be sent back to the original sender
+// The bool flag tells whether it has a response or not.
+func (node *Node) Handle(sender string, message util.Message) (util.Message, bool) {
 	if sender == node.publicKey.String() {
-		return nil
+		return nil, false
 	}
 	switch m := message.(type) {
 
 	case *data.DataMessage:
 		response := node.store.Handle(m)
 		if response == nil {
-			return nil
+			return nil, false
 		}
-		return response
+		return response, true
 
 	case *HistoryMessage:
 		node.Handle(sender, m.T)
 		node.Handle(sender, m.E)
-		return nil
+		return nil, false
 
 	case *currency.AccountMessage:
-		return nil
+		return nil, false
 
 	case *util.InfoMessage:
 		if m.Account != "" {
-			return node.queue.HandleInfoMessage(m)
+			answer := node.queue.HandleInfoMessage(m)
+			return answer, answer != nil
 		}
 		if m.I != 0 {
-			return node.chain.Handle(sender, m)
+			answer, ok := node.chain.Handle(sender, m)
+			return answer, ok
 		}
-		return nil
+		return nil, false
 
 	case *currency.TransactionMessage:
 		if node.queue.HandleTransactionMessage(m) {
 			node.chain.ValueStoreUpdated()
 		}
-		return nil
+		return nil, false
 
 	case *consensus.NominationMessage:
-		return node.handleChainMessage(sender, m)
+		answer, ok := node.handleChainMessage(sender, m)
+		return answer, ok
 	case *consensus.PrepareMessage:
-		return node.handleChainMessage(sender, m)
+		answer, ok := node.handleChainMessage(sender, m)
+		return answer, ok
 	case *consensus.ConfirmMessage:
-		return node.handleChainMessage(sender, m)
+		answer, ok := node.handleChainMessage(sender, m)
+		return answer, ok
 	case *consensus.ExternalizeMessage:
-		return node.handleChainMessage(sender, m)
+		answer, ok := node.handleChainMessage(sender, m)
+		return answer, ok
 
 	default:
 		log.Printf("unrecognized message: %+v", m)
-		return nil
+		return nil, false
 	}
 }
 
 // A helper to handle the messages
-func (node *Node) handleChainMessage(sender string, message util.Message) util.Message {
-	response := node.chain.Handle(sender, message)
+func (node *Node) handleChainMessage(sender string, message util.Message) (util.Message, bool) {
+	response, ok := node.chain.Handle(sender, message)
+	if !ok {
+		return nil, false
+	}
 
 	externalize, ok := response.(*consensus.ExternalizeMessage)
 	if !ok {
-		return response
+		return response, true
 	}
 
 	// Augment externalize messages into history messages
@@ -107,7 +116,7 @@ func (node *Node) handleChainMessage(sender string, message util.Message) util.M
 		T: t,
 		E: externalize,
 		I: externalize.I,
-	}
+	}, true
 }
 
 func (node *Node) OutgoingMessages() []util.Message {

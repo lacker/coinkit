@@ -15,10 +15,10 @@ func sendNodeToNodeMessages(source *Node, target *Node, t *testing.T) {
 	messages := source.OutgoingMessages()
 	for _, message := range messages {
 		m := util.EncodeThenDecode(message)
-		response := target.Handle(source.publicKey.String(), m)
-		if response != nil {
-			x := source.Handle(target.publicKey.String(), response)
-			if x != nil {
+		response, ok := target.Handle(source.publicKey.String(), m)
+		if ok {
+			x, ok := source.Handle(target.publicKey.String(), response)
+			if ok {
 				log.Printf("initial message: %+v", message)
 				log.Printf("response message: %+v", response)
 				log.Printf("re-response message: %+v", x)

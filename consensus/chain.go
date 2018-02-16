@@ -32,12 +32,12 @@ func (c *Chain) Logf(format string, a ...interface{}) {
 }
 
 // Handle handles an incoming message.
-// It may return a message to be sent back to the original sender, or it may
-// just return nil if it has no particular response.
-func (c *Chain) Handle(sender string, message util.Message) util.Message {
+// It may return a message to be sent back to the original sender.
+// The bool flag is whether we returned a response.
+func (c *Chain) Handle(sender string, message util.Message) (util.Message, bool) {
 	if sender == c.publicKey.String() {
 		// It's one of our own returning to us, we can ignore it
-		return nil
+		return nil, false
 	}
 
 	slot := message.Slot()
@@ -49,9 +49,9 @@ func (c *Chain) Handle(sender string, message util.Message) util.Message {
 	if _, ok := message.(*util.InfoMessage); ok {
 		block := c.history[slot]
 		if block != nil {
-			return block.external
+			return block.external, true
 		}
-		return nil
+		return nil, false
 	}
 
 	if slot == c.current.slot {
@@ -63,24 +63,24 @@ func (c *Chain) Handle(sender string, message util.Message) util.Message {
 			c.history[slot] = c.current
 			c.current = NewBlock(c.publicKey, c.D, slot+1, c.values)
 		}
-		return nil
+		return nil, false
 	}
 
 	// This message is for an old block
 	if _, ok := message.(*ExternalizeMessage); ok {
 		// The sender is done with this block and so are we
-		return nil
+		return nil, false
 	}
 
 	// The sender is behind. Let's send them info for the old block
 	oldBlock := c.history[slot]
 	if oldBlock != nil {
 		c.Logf("sending a catchup for slot %d", oldBlock.external.I)
-		return oldBlock.external
+		return oldBlock.external, true
 	}
 
 	// We can't help the sender catch up
-	return nil
+	return nil, false
 }
 
 func (c *Chain) AssertValid() {
