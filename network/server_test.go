@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"net"
 	"testing"
 	"time"
-	"net"
 
 	"coinkit/currency"
 	"coinkit/util"
@@ -188,7 +188,7 @@ func checkForDeadSocket(c net.Conn) error {
 
 	// If our read timed out, let's try again until we get a definitive error.
 	if err, ok := err.(net.Error); ok && err.Timeout() {
-		 return checkForDeadSocket(c)
+		return checkForDeadSocket(c)
 	}
 
 	return err
