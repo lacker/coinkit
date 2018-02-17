@@ -6,6 +6,7 @@ import (
 	"log"
 	"testing"
 	"time"
+	"net"
 
 	"coinkit/currency"
 	"coinkit/util"
@@ -181,13 +182,23 @@ func TestServerOkayWithFakeWellFormattedMessage(t *testing.T) {
 	go s.Stop()
 }
 
+func checkForDeadSocket(c net.Conn) error {
+	c.SetReadDeadline(time.Now().Add(100 * time.Millisecond))
+	_, err := util.ReadSignedMessage(c)
+
+	// If our read timed out, let's try again until we get a definitive error.
+	if err, ok := err.(net.Error); ok && err.Timeout() {
+		 return checkForDeadSocket(c)
+	}
+
+	return err
+}
+
 func sendString(address *Address, s string) error {
 	c := NewClient(address)
 	c.connect()
-	c.conn.SetReadDeadline(time.Now().Add(100 * time.Millisecond))
 	fmt.Fprintf(c.conn, s)
-	_, err := util.ReadSignedMessage(c.conn)
-	return err
+	return checkForDeadSocket(c.conn)
 }
 
 func TestServerOkayWithMalformedMessage(t *testing.T) {
