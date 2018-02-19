@@ -111,3 +111,14 @@ func (c *RedialConnection) Send(message *util.SignedMessage) bool {
 func (c *RedialConnection) QuitChannel() chan bool {
 	return c.quit
 }
+
+// Sends one message, waits for a response, and returns it.
+func GetResponse(address *Address, message *util.SignedMessage) *util.SignedMessage {
+	output := make(chan *util.SignedMessage)
+	handler := func(m *util.SignedMessage) {
+		output <- m
+	}
+	conn := NewRedialConnection(address, handler)
+	conn.Send(message)
+	return <-output
+}
