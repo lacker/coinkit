@@ -17,19 +17,19 @@ import (
 type RedialConnection struct {
 	conn     *BasicConnection
 	address  *Address
-	handler  func(*util.SignedMessage)
+	inbox    chan *util.SignedMessage
 	outbox   chan *util.SignedMessage
 	quit     chan bool
 	closed   bool
 	quitOnce sync.Once
 }
 
-func NewRedialConnection(address *Address, handler func(*util.SignedMessage)) *RedialConnection {
+func NewRedialConnection(address *Address, inbox chan *util.SignedMessage) *RedialConnection {
 	c := &RedialConnection{
-		handler: handler,
-		outbox:  make(chan *util.SignedMessage, 100),
-		quit:    make(chan bool),
-		closed:  false,
+		outbox: make(chan *util.SignedMessage, 100),
+		inbox:  inbox,
+		quit:   make(chan bool),
+		closed: false,
 	}
 	go c.runOutgoing()
 	return c
@@ -60,7 +60,7 @@ func (c *RedialConnection) connect() {
 	for {
 		conn, err := net.Dial("tcp", c.address.String())
 		if err == nil {
-			c.conn = NewBasicConnection(conn, c.handler)
+			c.conn = NewBasicConnection(conn, c.inbox)
 			return
 		}
 
@@ -108,17 +108,17 @@ func (c *RedialConnection) Send(message *util.SignedMessage) bool {
 	}
 }
 
-func (c *RedialConnection) QuitChannel() chan bool {
-	return c.quit
+// Receive returns the next message that is received.
+// It returns nil if the connection gets closed before a message is read.
+func (c *RedialConnection) Receive() *util.SignedMessage {
+	select {
+	case m := <-c.inbox:
+		return m
+	case <-c.quit:
+		return nil
+	}
 }
 
-// Sends one message, waits for a response, and returns it.
-func GetResponse(address *Address, message *util.SignedMessage) *util.SignedMessage {
-	output := make(chan *util.SignedMessage)
-	handler := func(m *util.SignedMessage) {
-		output <- m
-	}
-	conn := NewRedialConnection(address, handler)
-	conn.Send(message)
-	return <-output
+func (c *RedialConnection) QuitChannel() chan bool {
+	return c.quit
 }

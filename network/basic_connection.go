@@ -20,20 +20,21 @@ type BasicConnection struct {
 	conn     net.Conn
 	handler  func(*util.SignedMessage)
 	outbox   chan *util.SignedMessage
+	inbox    chan *util.SignedMessage
 	quit     chan bool
 	closed   bool
 	quitOnce sync.Once
 }
 
 // NewBasicConnection creates a new logical connection given a network connection.
-// handler will get called on all non-nil incoming messages.
-func NewBasicConnection(conn net.Conn, handler func(*util.SignedMessage)) *BasicConnection {
+// inbox is the channel to send messages to.
+func NewBasicConnection(conn net.Conn, inbox chan *util.SignedMessage) *BasicConnection {
 	c := &BasicConnection{
-		conn:    conn,
-		handler: handler,
-		outbox:  make(chan *util.SignedMessage, 100),
-		quit:    make(chan bool),
-		closed:  false,
+		conn:   conn,
+		outbox: make(chan *util.SignedMessage, 100),
+		inbox:  inbox,
+		quit:   make(chan bool),
+		closed: false,
 	}
 	go c.runIncoming()
 	go c.runOutgoing()
@@ -65,10 +66,9 @@ func (c *BasicConnection) runIncoming() {
 			break
 		}
 		if response != nil {
-			c.handler(response)
+			c.inbox <- response
 		}
 	}
-	c.handler = nil
 }
 
 func (c *BasicConnection) runOutgoing() {
@@ -97,6 +97,17 @@ func (c *BasicConnection) Send(message *util.SignedMessage) bool {
 	default:
 		log.Printf("Connection outbox overloaded, dropping message")
 		return false
+	}
+}
+
+// Receive returns the next message that is received.
+// It returns nil if the connection gets closed before a message is read.
+func (c *BasicConnection) Receive() *util.SignedMessage {
+	select {
+	case m := <-c.inbox:
+		return m
+	case <-c.quit:
+		return nil
 	}
 }
 
