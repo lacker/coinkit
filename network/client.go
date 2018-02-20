@@ -176,7 +176,7 @@ func NewClient(address *Address) *Client {
 	return p
 }
 
-func (c *Client) SendInfoMessage(message *util.InfoMessage) util.Message {
+func (c *Client) sendInfoMessage(message *util.InfoMessage) util.Message {
 	// We can use an anonymous key with info messages
 	kp := util.NewKeyPair()
 	sm := util.NewSignedMessage(kp, message)
@@ -190,17 +190,17 @@ func (c *Client) SendInfoMessage(message *util.InfoMessage) util.Message {
 // WaitToClear waits for the transaction with this sequence number to clear.
 func (c *Client) WaitToClear(user string, sequence uint32) *currency.Account {
 	for {
-		m := c.SendInfoMessage(&util.InfoMessage{Account: user})
+		m := c.sendInfoMessage(&util.InfoMessage{Account: user})
 		account := m.(*currency.AccountMessage).State[user]
 		if account.Sequence >= sequence {
 			return account
 		}
 		log.Printf("waiting for slot %d", m.Slot())
-		c.SendInfoMessage(&util.InfoMessage{I: m.Slot()})
+		c.sendInfoMessage(&util.InfoMessage{I: m.Slot()})
 	}
 }
 
 func (c *Client) GetAccount(user string) *currency.Account {
-	m := c.SendInfoMessage(&util.InfoMessage{Account: user}).(*currency.AccountMessage)
+	m := c.sendInfoMessage(&util.InfoMessage{Account: user}).(*currency.AccountMessage)
 	return m.State[user]
 }
