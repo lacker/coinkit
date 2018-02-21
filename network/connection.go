@@ -42,3 +42,15 @@ func WaitToClear(c Connection, user string, sequence uint32) *currency.Account {
 		SendAnonymousMessage(c, &util.InfoMessage{I: m.Slot()})
 	}
 }
+
+func GetAccount(c Connection, user string) *currency.Account {
+	for {
+		SendAnonymousMessage(c, &util.InfoMessage{Account: user})
+		m := c.Receive().Message()
+		accountMessage, ok := m.(*currency.AccountMessage)
+		if !ok {
+			continue
+		}
+		return accountMessage.State[user]
+	}
+}
