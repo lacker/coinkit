@@ -201,10 +201,12 @@ func checkForDeadSocket(c net.Conn) error {
 }
 
 func sendString(address *Address, s string) error {
-	c := NewClient(address)
-	c.connect()
-	fmt.Fprintf(c.conn, s)
-	return checkForDeadSocket(c.conn)
+	conn, err := net.Dial("tcp", address.String())
+	if err != nil {
+		panic(err)
+	}
+	fmt.Fprintf(conn, s)
+	return checkForDeadSocket(conn)
 }
 
 func TestServerOkayWithMalformedMessage(t *testing.T) {
