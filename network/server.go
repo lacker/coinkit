@@ -1,6 +1,7 @@
 package network
 
 import (
+	"bufio"
 	"fmt"
 	"io"
 	"log"
@@ -91,9 +92,10 @@ func (s *Server) SetBalance(user string, amount uint64) {
 // This is likely to include many messages, all separated by endlines.
 func (s *Server) handleConnection(conn net.Conn) {
 	defer conn.Close()
+	reader := bufio.NewReader(conn)
 
 	for {
-		sm, err := util.ReadSignedMessage(conn)
+		sm, err := util.ReadSignedMessage(reader)
 		if err != nil {
 			if !s.shutdown && err != io.EOF {
 				log.Printf("connection error: %v", err)
@@ -117,7 +119,8 @@ func (s *Server) handleConnection(conn net.Conn) {
 // messages.
 // handleMessage is safe to be called from multiple threads, because it dispatches
 // messages to the processing goroutine for processing.
-// If we did not process the message, (nil, false) is returned.
+// If we did not process the message, like if the server is shutting
+// down or we are overloaded, (nil, false) is returned.
 // (nil, true) means we processed the message and there is a nil response.
 func (s *Server) handleMessage(sm *util.SignedMessage) (*util.SignedMessage, bool) {
 	if _, ok := sm.Message().(*util.InfoMessage); ok {
@@ -156,10 +159,10 @@ func (s *Server) retryHandleMessage(sm *util.SignedMessage) (*util.SignedMessage
 	for {
 		m, ok := s.handleMessageOnce(sm)
 		if !ok {
-			return m, ok
+			return nil, false
 		}
 		if m != nil {
-			return m, ok
+			return m, true
 		}
 		select {
 		case <-s.currentBlock:

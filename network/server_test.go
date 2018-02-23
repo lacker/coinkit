@@ -1,6 +1,7 @@
 package network
 
 import (
+	"bufio"
 	"fmt"
 	"io"
 	"log"
@@ -62,8 +63,8 @@ func TestStartStop(t *testing.T) {
 
 // sendMoney waits until the transaction clears
 // it fatals if from doesn't have the money
-func sendMoney(client *Client, from *util.KeyPair, to *util.KeyPair, amount uint64) {
-	account := client.GetAccount(from.PublicKey().String())
+func sendMoney(conn Connection, from *util.KeyPair, to *util.KeyPair, amount uint64) {
+	account := GetAccount(conn, from.PublicKey().String())
 	if account == nil || account.Balance < amount {
 		log.Fatalf("%s did not have enough money", from.PublicKey().String())
 	}
@@ -78,8 +79,8 @@ func sendMoney(client *Client, from *util.KeyPair, to *util.KeyPair, amount uint
 	st := transaction.SignWith(from)
 	tm := currency.NewTransactionMessage(st)
 	sm := util.NewSignedMessage(from, tm)
-	client.SendMessage(sm)
-	client.WaitToClear(from.PublicKey().String(), seq)
+	conn.Send(sm)
+	WaitToClear(conn, from.PublicKey().String(), seq)
 }
 
 func TestSendMoney(t *testing.T) {
@@ -87,9 +88,8 @@ func TestSendMoney(t *testing.T) {
 	start := time.Now()
 	mint := util.NewKeyPairFromSecretPhrase("mint")
 	bob := util.NewKeyPairFromSecretPhrase("bob")
-	client := NewClient(servers[0].LocalhostAddress())
-	sendMoney(client, mint, bob, 100)
-	log.Printf("transaction cleared")
+	conn := NewRedialConnection(servers[0].LocalhostAddress(), nil)
+	sendMoney(conn, mint, bob, 100)
 	elapsed := time.Now().Sub(start).Seconds()
 	if elapsed > 3.0 {
 		t.Fatalf("sending money is too slow: %.2f seconds", elapsed)
@@ -97,13 +97,13 @@ func TestSendMoney(t *testing.T) {
 	go stopServers(servers)
 }
 
-func makeClients(servers []*Server, n int) []*Client {
-	clients := []*Client{}
+func makeConns(servers []*Server, n int) []Connection {
+	conns := []Connection{}
 	for {
 		for _, server := range servers {
-			clients = append(clients, NewClient(server.LocalhostAddress()))
-			if len(clients) == n {
-				return clients
+			conns = append(conns, NewRedialConnection(server.LocalhostAddress(), nil))
+			if len(conns) == n {
+				return conns
 			}
 		}
 	}
@@ -112,22 +112,22 @@ func makeClients(servers []*Server, n int) []*Client {
 // sendMoneyRepeatedly sends one unit of money repeat times and closes the done
 // channel when it is done.
 func sendMoneyRepeatedly(
-	client *Client, from *util.KeyPair, to *util.KeyPair, repeat int, done chan bool) {
+	conn Connection, from *util.KeyPair, to *util.KeyPair, repeat int, done chan bool) {
 	for i := 0; i < repeat; i++ {
-		sendMoney(client, from, to, 1)
+		sendMoney(conn, from, to, 1)
 	}
 	close(done)
 }
 
-func benchmarkSendMoney(numClients int, b *testing.B) {
+func benchmarkSendMoney(numConns int, b *testing.B) {
 	servers := makeServers()
-	clients := makeClients(servers, numClients)
+	conns := makeConns(servers, numConns)
 
 	// Setup
 	kps := []*util.KeyPair{}
 	chans := []chan bool{}
 	mint := util.NewKeyPairFromSecretPhrase("mint")
-	for i := 0; i < numClients; i++ {
+	for i := 0; i < numConns; i++ {
 		kps = append(kps, util.NewKeyPairFromSecretPhrase(fmt.Sprintf("kp%d", i)))
 		chans = append(chans, make(chan bool))
 		for _, server := range servers {
@@ -137,8 +137,8 @@ func benchmarkSendMoney(numClients int, b *testing.B) {
 	b.ResetTimer()
 
 	// Kickoff
-	for i, client := range clients {
-		go sendMoneyRepeatedly(client, kps[i], mint, b.N, chans[i])
+	for i, conn := range conns {
+		go sendMoneyRepeatedly(conn, kps[i], mint, b.N, chans[i])
 	}
 
 	// Wait for the finish
@@ -148,6 +148,12 @@ func benchmarkSendMoney(numClients int, b *testing.B) {
 	for _, server := range servers {
 		server.Stats()
 	}
+
+	// Clean up
+	for _, conn := range conns {
+		conn.Close()
+	}
+	stopServers(servers)
 }
 
 func BenchmarkSendMoney1(b *testing.B) {
@@ -184,7 +190,7 @@ func TestServerOkayWithFakeWellFormattedMessage(t *testing.T) {
 
 func checkForDeadSocket(c net.Conn) error {
 	c.SetReadDeadline(time.Now().Add(100 * time.Millisecond))
-	_, err := util.ReadSignedMessage(c)
+	_, err := util.ReadSignedMessage(bufio.NewReader(c))
 
 	// If our read timed out, let's try again until we get a definitive error.
 	if err, ok := err.(net.Error); ok && err.Timeout() {

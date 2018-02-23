@@ -38,8 +38,9 @@ func WaitToClear(c Connection, user string, sequence uint32) *currency.Account {
 		if account.Sequence >= sequence {
 			return account
 		}
-		log.Printf("waiting for slot %d", m.Slot())
+
 		SendAnonymousMessage(c, &util.InfoMessage{I: m.Slot()})
+		c.Receive()
 	}
 }
 
@@ -49,7 +50,7 @@ func GetAccount(c Connection, user string) *currency.Account {
 		m := c.Receive().Message()
 		accountMessage, ok := m.(*currency.AccountMessage)
 		if !ok {
-			continue
+			log.Fatalf("expected an account message but got: %+v", m)
 		}
 		return accountMessage.State[user]
 	}

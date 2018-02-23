@@ -87,6 +87,7 @@ func WriteSignedMessage(w io.Writer, sm *SignedMessage) {
 // ReadSignedMessage can return a nil message even when there is no error.
 // Specifically, a line with just "ok" indicates no message, but also no error.
 // The caller is responsible for setting any deadlines.
+// TODO: this is double-creating a bufio. Fix once Client is gone
 func ReadSignedMessage(r io.Reader) (*SignedMessage, error) {
 	data, err := bufio.NewReader(r).ReadString('\n')
 	if err != nil {

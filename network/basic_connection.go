@@ -1,6 +1,7 @@
 package network
 
 import (
+	"bufio"
 	"fmt"
 	"log"
 	"net"
@@ -53,15 +54,16 @@ func (c *BasicConnection) IsClosed() bool {
 }
 
 func (c *BasicConnection) runIncoming() {
+	c.conn.SetReadDeadline(time.Now().Add(2 * keepalive * time.Second))
+	reader := bufio.NewReader(c.conn)
 	for {
 		// Wait for 2x the keepalive period
-		c.conn.SetReadDeadline(time.Now().Add(2 * keepalive * time.Second))
-		response, err := util.ReadSignedMessage(c.conn)
+		response, err := util.ReadSignedMessage(reader)
 		if c.closed {
 			break
 		}
 		if err != nil {
-			log.Printf("connection error: %+c", err)
+			log.Printf("connection error: %+v", err)
 			c.Close()
 			break
 		}

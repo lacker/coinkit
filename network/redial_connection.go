@@ -24,12 +24,20 @@ type RedialConnection struct {
 	quitOnce sync.Once
 }
 
-func NewRedialConnection(address *Address, inbox chan *util.SignedMessage) *RedialConnection {
+func NewRedialConnection(address *Address,
+	inbox chan *util.SignedMessage) *RedialConnection {
+	if address == nil {
+		panic("address is nil")
+	}
+	if inbox == nil {
+		inbox = make(chan *util.SignedMessage, 100)
+	}
 	c := &RedialConnection{
-		outbox: make(chan *util.SignedMessage, 100),
-		inbox:  inbox,
-		quit:   make(chan bool),
-		closed: false,
+		address: address,
+		outbox:  make(chan *util.SignedMessage, 100),
+		inbox:   inbox,
+		quit:    make(chan bool),
+		closed:  false,
 	}
 	go c.runOutgoing()
 	return c
@@ -43,6 +51,10 @@ func (c *RedialConnection) Close() {
 		}
 		close(c.quit)
 	})
+}
+
+func (c *RedialConnection) IsClosed() bool {
+	return c.closed
 }
 
 // connect() is not threadsafe and should only be called from the
