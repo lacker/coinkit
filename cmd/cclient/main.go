@@ -20,6 +20,14 @@ import (
 	"strings"
 )
 
+func newConnection() network.Connection {
+	config, _ := network.NewLocalNetwork()
+	address := config.RandomAddress()
+	c := NewRedialConnection(address, nil)
+	log.Printf("connecting to %s", address.String())
+	return c
+}
+
 func newClient() *network.Client {
 	config, _ := network.NewLocalNetwork()
 	address := config.RandomAddress()
