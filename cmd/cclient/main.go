@@ -37,9 +37,10 @@ func newClient() *network.Client {
 }
 
 // Fetches, displays, and returns the status for a user.
+// TODO: test
 func status(user string) *currency.Account {
-	client := newClient()
-	account := client.GetAccount(user)
+	conn := newConnection()
+	account := util.GetAccount(conn, user)
 
 	log.Printf("account data for %s:\n%s", user, spew.Sdump(account))
 	return account
