@@ -1,9 +1,7 @@
 package network
 
 import (
-	"bufio"
 	"fmt"
-	"io"
 	"log"
 	"net"
 	"time"
@@ -90,20 +88,16 @@ func (s *Server) SetBalance(user string, amount uint64) {
 
 // Handles an incoming connection.
 // This is likely to include many messages, all separated by endlines.
-func (s *Server) handleConnection(conn net.Conn) {
-	defer conn.Close()
-	reader := bufio.NewReader(conn)
+func (s *Server) handleConnection(connection net.Conn) {
+	defer connection.Close()
+	conn := NewBasicConnection(connection, make(chan *util.SignedMessage))
 
 	for {
-		sm, err := util.ReadSignedMessage(reader)
-		if err != nil {
-			if !s.shutdown && err != io.EOF {
-				log.Printf("connection error: %v", err)
-			}
-			return
-		}
+		// TODO: make this exit when the server is shutting down
+		sm := conn.Receive()
+
 		if sm == nil {
-			continue
+			return
 		}
 
 		m, ok := s.handleMessage(sm)
@@ -111,7 +105,7 @@ func (s *Server) handleConnection(conn net.Conn) {
 			return
 		}
 
-		util.WriteSignedMessage(conn, m)
+		conn.Send(m)
 	}
 }
 

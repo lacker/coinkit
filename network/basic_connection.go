@@ -106,7 +106,7 @@ func (c *BasicConnection) Send(message *util.SignedMessage) bool {
 }
 
 // Receive returns the next message that is received.
-// It returns nil if the connection gets closed before a message is read.
+// It returns nil iff the connection gets closed before a message is read.
 func (c *BasicConnection) Receive() *util.SignedMessage {
 	select {
 	case m := <-c.inbox:
