@@ -204,7 +204,7 @@ func (s *Server) unsafeUpdateOutgoing() {
 	// Clear the outgoing queue
 	s.getOutgoing()
 
-	// Send our lines to the now-probably-empty queue
+	// Send our messages to the now-probably-empty queue
 	s.outgoing <- out
 }
 
@@ -334,7 +334,7 @@ func (s *Server) broadcastIntermittently() {
 			}
 
 			// When we receive a new outgoing, we only need to send out the
-			// lines that have changed since last time.
+			// messages that have changed since last time.
 			changedMessages := subtract(messages, lastMessages)
 			lastMessages = messages
 			s.broadcast(changedMessages)
