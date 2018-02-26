@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"errors"
 	"fmt"
-	"io"
 	"log"
 	"reflect"
 	"strings"
@@ -87,9 +86,8 @@ func SignedMessageToLine(sm *SignedMessage) string {
 // ReadSignedMessage can return a nil message even when there is no error.
 // Specifically, a line with just "ok" indicates no message, but also no error.
 // The caller is responsible for setting any deadlines.
-// TODO: this is double-creating a bufio. Fix once Client is gone
-func ReadSignedMessage(r io.Reader) (*SignedMessage, error) {
-	data, err := bufio.NewReader(r).ReadString('\n')
+func ReadSignedMessage(r *bufio.Reader) (*SignedMessage, error) {
+	data, err := r.ReadString('\n')
 	if err != nil {
 		return nil, err
 	}
