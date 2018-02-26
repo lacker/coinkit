@@ -5,7 +5,6 @@ import (
 
 	"coinkit/consensus"
 	"coinkit/currency"
-	"coinkit/data"
 	"coinkit/util"
 )
 
@@ -15,7 +14,6 @@ type Node struct {
 	publicKey util.PublicKey
 	chain     *consensus.Chain
 	queue     *currency.TransactionQueue
-	store     *data.DataStore
 }
 
 func NewNode(publicKey util.PublicKey, qs consensus.QuorumSlice) *Node {
@@ -25,17 +23,12 @@ func NewNode(publicKey util.PublicKey, qs consensus.QuorumSlice) *Node {
 		publicKey: publicKey,
 		chain:     consensus.NewEmptyChain(publicKey, qs, queue),
 		queue:     queue,
-		store:     data.NewDataStore(),
 	}
 }
 
 // Slot() returns the slot this node is currently working on
 func (node *Node) Slot() int {
 	return node.chain.Slot()
-}
-
-func (node *Node) DataStore() *data.DataStore {
-	return node.store
 }
 
 // Handle handles an incoming message.
@@ -46,13 +39,6 @@ func (node *Node) Handle(sender string, message util.Message) (util.Message, boo
 		return nil, false
 	}
 	switch m := message.(type) {
-
-	case *data.DataMessage:
-		response := node.store.Handle(m)
-		if response == nil {
-			return nil, false
-		}
-		return response, true
 
 	case *HistoryMessage:
 		node.Handle(sender, m.T)
@@ -124,10 +110,6 @@ func (node *Node) OutgoingMessages() []util.Message {
 	sharing := node.queue.TransactionMessage()
 	if sharing != nil {
 		answer = append(answer, sharing)
-	}
-	d := node.store.DataMessage()
-	if d != nil {
-		answer = append(answer, d)
 	}
 	for _, m := range node.chain.OutgoingMessages() {
 		answer = append(answer, m)
