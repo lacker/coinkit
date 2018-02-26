@@ -125,15 +125,6 @@ func (c *RedialConnection) Send(message *util.SignedMessage) bool {
 
 // Receive returns the next message that is received.
 // It returns nil if the connection gets closed before a message is read.
-func (c *RedialConnection) Receive() *util.SignedMessage {
-	select {
-	case m := <-c.inbox:
-		return m
-	case <-c.quit:
-		return nil
-	}
-}
-
-func (c *RedialConnection) QuitChannel() chan bool {
-	return c.quit
+func (c *RedialConnection) Receive() chan *util.SignedMessage {
+	return recHelper(c.inbox, c.quit)
 }

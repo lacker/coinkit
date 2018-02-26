@@ -93,8 +93,13 @@ func (s *Server) handleConnection(connection net.Conn) {
 	conn := NewBasicConnection(connection, make(chan *util.SignedMessage))
 
 	for {
-		// TODO: make this exit when the server is shutting down
-		sm := conn.Receive()
+		var sm *util.SignedMessage
+		select {
+		case <-s.quit:
+			conn.Close()
+			return
+		case sm = <-conn.Receive():
+		}
 
 		if sm == nil {
 			return

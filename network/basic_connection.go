@@ -107,16 +107,6 @@ func (c *BasicConnection) Send(message *util.SignedMessage) bool {
 
 // Receive returns the next message that is received.
 // It returns nil iff the connection gets closed before a message is read.
-func (c *BasicConnection) Receive() *util.SignedMessage {
-	select {
-	case m := <-c.inbox:
-		return m
-	case <-c.quit:
-		return nil
-	}
-}
-
-// QuitChannel returns a channel that gets closed once, when the channel shuts down.
-func (c *BasicConnection) QuitChannel() chan bool {
-	return c.quit
+func (c *BasicConnection) Receive() chan *util.SignedMessage {
+	return recHelper(c.inbox, c.quit)
 }
