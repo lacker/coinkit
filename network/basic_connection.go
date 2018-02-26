@@ -67,7 +67,10 @@ func (c *BasicConnection) runIncoming() {
 			c.Close()
 			break
 		}
-		if response != nil {
+		if response == nil {
+			panic("connections should not receive nil")
+		}
+		if !response.IsKeepAlive() {
 			c.inbox <- response
 		}
 	}
@@ -82,8 +85,11 @@ func (c *BasicConnection) runOutgoing() {
 			return
 		case <-timer.C:
 			// Send a keepalive ping
-			message = nil
+			message = util.KeepAlive()
 		case message = <-c.outbox:
+			if message == nil {
+				panic("should not send nil messages")
+			}
 		}
 
 		fmt.Fprintf(c.conn, util.SignedMessageToLine(message))
@@ -95,6 +101,9 @@ func (c *BasicConnection) runOutgoing() {
 func (c *BasicConnection) Send(message *util.SignedMessage) bool {
 	if c == nil {
 		panic("cannot send to a nil BasicConnection")
+	}
+	if message == nil {
+		panic("should not send nil messages")
 	}
 	select {
 	case c.outbox <- message:

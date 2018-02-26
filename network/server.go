@@ -109,8 +109,9 @@ func (s *Server) handleConnection(connection net.Conn) {
 		if !ok {
 			return
 		}
-
-		conn.Send(m)
+		if m != nil {
+			conn.Send(m)
+		}
 	}
 }
 

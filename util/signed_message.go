@@ -16,6 +16,10 @@ type SignedMessage struct {
 	messageString string
 	signer        string
 	signature     string
+
+	// Whenever keepalive is true, the SignedMessage has no real content, it's
+	// just a small value used to keep a network connection alive
+	keepalive bool
 }
 
 func NewSignedMessage(kp *KeyPair, message Message) *SignedMessage {
@@ -47,6 +51,10 @@ func (sm *SignedMessage) Serialize() string {
 	return fmt.Sprintf("e:%s:%s:%s", sm.signer, sm.signature, sm.messageString)
 }
 
+func (sm *SignedMessage) IsKeepAlive() bool {
+	return sm.keepalive
+}
+
 func NewSignedMessageFromSerialized(serialized string) (*SignedMessage, error) {
 	parts := strings.SplitN(serialized, ":", 4)
 	if len(parts) != 4 {
@@ -75,9 +83,16 @@ func NewSignedMessageFromSerialized(serialized string) (*SignedMessage, error) {
 	}, nil
 }
 
+func KeepAlive() *SignedMessage {
+	return &SignedMessage{keepalive: true}
+}
+
 // Convert a signed message to one line in a wire format
 func SignedMessageToLine(sm *SignedMessage) string {
 	if sm == nil {
+		panic("do not convert nil messages to lines")
+	}
+	if sm.keepalive {
 		return OK + "\n"
 	}
 	return sm.Serialize() + "\n"
@@ -95,7 +110,7 @@ func ReadSignedMessage(r *bufio.Reader) (*SignedMessage, error) {
 	// Chop the newline
 	serialized := data[:len(data)-1]
 	if serialized == OK {
-		return nil, nil
+		return &SignedMessage{keepalive: true}, nil
 	}
 
 	return NewSignedMessageFromSerialized(serialized)
