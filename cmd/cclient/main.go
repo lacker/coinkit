@@ -2,17 +2,13 @@ package main
 
 import (
 	"bufio"
-	"encoding/hex"
-	"io/ioutil"
 	"log"
 	"os"
 	"strconv"
 
 	"github.com/davecgh/go-spew/spew"
-	"golang.org/x/crypto/sha3"
 
 	"coinkit/currency"
-	"coinkit/data"
 	"coinkit/network"
 	"coinkit/util"
 	"fmt"
@@ -23,15 +19,7 @@ import (
 func newConnection() network.Connection {
 	config, _ := network.NewLocalNetwork()
 	address := config.RandomAddress()
-	c := NewRedialConnection(address, nil)
-	log.Printf("connecting to %s", address.String())
-	return c
-}
-
-func newClient() *network.Client {
-	config, _ := network.NewLocalNetwork()
-	address := config.RandomAddress()
-	c := network.NewClient(address)
+	c := network.NewRedialConnection(address, nil)
 	log.Printf("connecting to %s", address.String())
 	return c
 }
@@ -40,7 +28,7 @@ func newClient() *network.Client {
 // TODO: test
 func status(user string) *currency.Account {
 	conn := newConnection()
-	account := util.GetAccount(conn, user)
+	account := network.GetAccount(conn, user)
 
 	log.Printf("account data for %s:\n%s", user, spew.Sdump(account))
 	return account
@@ -74,8 +62,8 @@ func send(recipient string, amountStr string) {
 	amount := uint64(amountInt)
 	kp := login()
 	user := kp.PublicKey().String()
-	client := newClient()
-	account := client.GetAccount(user)
+	conn := newConnection()
+	account := network.GetAccount(conn, user)
 
 	log.Printf("account data for %s:\n%s", user, spew.Sdump(account))
 
@@ -97,11 +85,11 @@ func send(recipient string, amountStr string) {
 	st := transaction.SignWith(kp)
 	tm := currency.NewTransactionMessage(st)
 	sm := util.NewSignedMessage(kp, tm)
-	client.SendMessage(sm)
+	conn.Send(sm)
 	log.Printf("sending %d to %s", amount, recipient)
 
 	// Wait for our transaction to clear
-	client.WaitToClear(user, seq)
+	network.WaitToClear(conn, user, seq)
 	log.Printf("transaction %d cleared", transaction.Sequence)
 }
 
@@ -121,29 +109,6 @@ func proxy() {
 	log.Printf("Running client proxy on port 9090")
 	http.HandleFunc("/", handler)
 	http.ListenAndServe(":9090", nil)
-}
-
-func upload(filename string) {
-	// Construct a message from the file
-	bytes, err := ioutil.ReadFile(filename)
-	if err != nil {
-		panic(err)
-	}
-	h := sha3.New512()
-	h.Write(bytes)
-	checksum := h.Sum(nil)
-	key := hex.EncodeToString(checksum[:8])
-	log.Printf("uploading file as: %s", key)
-	dmap := make(map[string]string)
-	dmap[key] = string(bytes)
-	message := &data.DataMessage{
-		Data: dmap,
-	}
-
-	kp := util.NewKeyPair()
-	client := newClient()
-	sm := util.NewSignedMessage(kp, message)
-	client.SendMessage(sm)
 }
 
 // cclient runs a client that connects to the coinkit network.
@@ -170,11 +135,6 @@ func main() {
 		send(rest[0], rest[1])
 	case "proxy":
 		proxy()
-	case "upload":
-		if len(rest) != 1 {
-			log.Fatal("Usage: cclient upload <filename>")
-		}
-		upload(rest[0])
 	default:
 		log.Fatalf("unrecognized operation: %s", op)
 	}
