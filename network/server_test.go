@@ -37,8 +37,7 @@ func makeServers() []*Server {
 		server := NewServer(config)
 		server.InitMint()
 
-		// A high number essentially disables the rebroadcasts for these tests.
-		// In theory they should not be necessary unless we have node failures
+		// In theory rebroadcasts should not be necessary unless we have node failures
 		// or lossy communication channels.
 		server.RebroadcastInterval = 4 * time.Second
 
@@ -145,6 +144,7 @@ func benchmarkSendMoney(numConns int, b *testing.B) {
 	for _, ch := range chans {
 		<-ch
 	}
+	log.Printf("work is finished")
 	for _, server := range servers {
 		server.Stats()
 	}

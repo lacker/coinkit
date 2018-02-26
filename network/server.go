@@ -16,17 +16,17 @@ import (
 type Server struct {
 	port    int
 	keyPair *util.KeyPair
-	peers   []*Client
+	peers   []*RedialConnection
 	node    *Node
 
-	// Whenever there is a new batch of outgoing messages, it is serialized
-	// into a list of lines and sent to the outgoing channel
-	outgoing chan []string
+	// Whenever there is a new batch of outgoing messages, it is sent to the
+	// outgoing channel
+	outgoing chan []*util.SignedMessage
 
-	// Messages we are going to handle. These do not require a response
-	messages chan *util.SignedMessage
+	// Messages we are going to handle that do not require a response
+	inbox chan *util.SignedMessage
 
-	// Requests we are going to handle. These require a response
+	// Requests we are going to handle that do require a response
 	requests chan *Request
 
 	listener net.Listener
@@ -49,9 +49,10 @@ type Server struct {
 }
 
 func NewServer(config *ServerConfig) *Server {
-	peers := []*Client{}
+	peers := []*RedialConnection{}
+	inbox := make(chan *util.SignedMessage)
 	for _, address := range config.Network.Nodes {
-		peers = append(peers, NewClient(address))
+		peers = append(peers, NewRedialConnection(address, inbox))
 	}
 	qs := config.Network.QuorumSlice()
 
@@ -63,8 +64,8 @@ func NewServer(config *ServerConfig) *Server {
 		keyPair:             config.KeyPair,
 		peers:               peers,
 		node:                node,
-		outgoing:            make(chan []string, 10),
-		messages:            make(chan *util.SignedMessage),
+		outgoing:            make(chan []*util.SignedMessage, 10),
+		inbox:               inbox,
 		requests:            make(chan *Request),
 		listener:            nil,
 		shutdown:            false,
@@ -176,15 +177,15 @@ func (s *Server) retryHandleMessage(sm *util.SignedMessage) (*util.SignedMessage
 // Flushes the outgoing queue and returns the last value if there is any.
 // Returns [], false if there is none
 // Does not wait
-func (s *Server) getOutgoing() ([]string, bool) {
-	lines := []string{}
+func (s *Server) getOutgoing() ([]*util.SignedMessage, bool) {
+	messages := []*util.SignedMessage{}
 	ok := false
 	for {
 		select {
-		case lines = <-s.outgoing:
+		case messages = <-s.outgoing:
 			ok = true
 		default:
-			return lines, ok
+			return messages, ok
 		}
 	}
 }
@@ -194,20 +195,17 @@ func (s *Server) getOutgoing() ([]string, bool) {
 // Since it deals with the node directly, it should only be called from the
 // message-processing thread.
 func (s *Server) unsafeUpdateOutgoing() {
-	// First encode the outgoing messages into lines
-	out := s.node.OutgoingMessages()
-
-	lines := []string{}
-	for _, m := range out {
-		sm := util.NewSignedMessage(s.keyPair, m)
-		lines = append(lines, util.SignedMessageToLine(sm))
+	// Sign our messages
+	out := []*util.SignedMessage{}
+	for _, m := range s.node.OutgoingMessages() {
+		out = append(out, util.NewSignedMessage(s.keyPair, m))
 	}
 
 	// Clear the outgoing queue
 	s.getOutgoing()
 
 	// Send our lines to the now-probably-empty queue
-	s.outgoing <- lines
+	s.outgoing <- out
 }
 
 // unsafeProcessMessage handles a message by interacting with the node directly.
@@ -250,7 +248,7 @@ func (s *Server) processMessagesForever() {
 				}
 			}
 
-		case message := <-s.messages:
+		case message := <-s.inbox:
 			if message != nil {
 				s.unsafeProcessMessage(message)
 			}
@@ -291,33 +289,35 @@ func (s *Server) acquirePort() {
 	log.Fatalf("could not acquire port %d", s.port)
 }
 
-func (s *Server) broadcastLines(lines []string) {
-	for _, line := range lines {
+func (s *Server) broadcast(messages []*util.SignedMessage) {
+	for _, message := range messages {
 		for _, peer := range s.peers {
-			peer.Send(&Request{
-				Line:     line,
-				Response: s.messages,
-				Timeout:  5 * time.Second,
-			})
+			peer.Send(message)
 		}
 		s.broadcasted += 1
 	}
 }
 
-func scontains(list []string, s string) bool {
-	for _, str := range list {
-		if str == s {
-			return true
+// Return a list of everything in a that is not in b.
+func subtract(a []*util.SignedMessage, b []*util.SignedMessage) []*util.SignedMessage {
+	sigs := make(map[string]bool)
+	for _, m := range b {
+		sigs[m.Signature()] = true
+	}
+	answer := []*util.SignedMessage{}
+	for _, m := range a {
+		if !sigs[m.Signature()] {
+			answer = append(answer, m)
 		}
 	}
-	return false
+	return answer
 }
 
 // broadcastIntermittently() sends outgoing messages every so often. It
 // should be run as a goroutine. This handles both redundancy rebroadcasts and
 // the regular broadcasts of new messages.
 func (s *Server) broadcastIntermittently() {
-	lastLines := []string{}
+	lastMessages := []*util.SignedMessage{}
 
 	for {
 		timer := time.NewTimer(s.RebroadcastInterval)
@@ -326,32 +326,25 @@ func (s *Server) broadcastIntermittently() {
 		case <-s.quit:
 			break
 
-		case lines := <-s.outgoing:
-
-			// See if there are even newer lines
-			newerLines, ok := s.getOutgoing()
+		case messages := <-s.outgoing:
+			// See if there are even newer messages
+			newerMessages, ok := s.getOutgoing()
 			if ok {
-				lines = newerLines
+				messages = newerMessages
 			}
 
 			// When we receive a new outgoing, we only need to send out the
 			// lines that have changed since last time.
-			changedLines := []string{}
-			for _, line := range lines {
-				if !scontains(lastLines, line) {
-					changedLines = append(changedLines, line)
-				}
-			}
-
-			lastLines = lines
-			s.broadcastLines(changedLines)
+			changedMessages := subtract(messages, lastMessages)
+			lastMessages = messages
+			s.broadcast(changedMessages)
 
 		case <-timer.C:
 			// It's time for a rebroadcast. Send out duplicate messages.
 			// This is a backstop against miscellaneous problems. If the
 			// network is functioning perfectly, this isn't necessary.
 			s.Logf("performing a backup rebroadcast")
-			s.broadcastLines(lastLines)
+			s.broadcast(lastMessages)
 		}
 	}
 }

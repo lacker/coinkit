@@ -93,6 +93,9 @@ func (c *BasicConnection) runOutgoing() {
 // Send sends a message, but only if the queue is not full.
 // It returns whether the message entered the outbox.
 func (c *BasicConnection) Send(message *util.SignedMessage) bool {
+	if c == nil {
+		panic("cannot send to a nil BasicConnection")
+	}
 	select {
 	case c.outbox <- message:
 		return true

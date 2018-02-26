@@ -40,6 +40,10 @@ func (sm *SignedMessage) Signer() string {
 	return sm.signer
 }
 
+func (sm *SignedMessage) Signature() string {
+	return sm.signature
+}
+
 func (sm *SignedMessage) Serialize() string {
 	return fmt.Sprintf("e:%s:%s:%s", sm.signer, sm.signature, sm.messageString)
 }

@@ -104,6 +104,9 @@ func (c *RedialConnection) runOutgoing() {
 		}
 
 		c.connect()
+		if c.closed {
+			return
+		}
 		c.conn.Send(message)
 	}
 }
