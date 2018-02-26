@@ -84,10 +84,6 @@ func SignedMessageToLine(sm *SignedMessage) string {
 	return sm.Serialize() + "\n"
 }
 
-func WriteSignedMessage(w io.Writer, sm *SignedMessage) {
-	fmt.Fprintf(w, SignedMessageToLine(sm))
-}
-
 // ReadSignedMessage can return a nil message even when there is no error.
 // Specifically, a line with just "ok" indicates no message, but also no error.
 // The caller is responsible for setting any deadlines.

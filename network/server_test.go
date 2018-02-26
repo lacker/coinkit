@@ -1,11 +1,8 @@
 package network
 
 import (
-	"bufio"
 	"fmt"
-	"io"
 	"log"
-	"net"
 	"testing"
 	"time"
 
@@ -185,58 +182,5 @@ func TestServerOkayWithFakeWellFormattedMessage(t *testing.T) {
 	s.requests <- fakeRequest
 	// This hits the right code path but it feels like we ought to have a
 	// better assertion here
-	go s.Stop()
-}
-
-func checkForDeadSocket(c net.Conn) error {
-	c.SetReadDeadline(time.Now().Add(100 * time.Millisecond))
-	_, err := util.ReadSignedMessage(bufio.NewReader(c))
-
-	// If our read timed out, let's try again until we get a definitive error.
-	if err, ok := err.(net.Error); ok && err.Timeout() {
-		return checkForDeadSocket(c)
-	}
-
-	return err
-}
-
-func sendString(address *Address, s string) error {
-	conn, err := net.Dial("tcp", address.String())
-	if err != nil {
-		panic(err)
-	}
-	fmt.Fprintf(conn, s)
-	return checkForDeadSocket(conn)
-}
-
-func TestServerOkayWithMalformedMessage(t *testing.T) {
-	_, configs := NewUnitTestNetwork()
-	s := NewServer(configs[1])
-	s.ServeInBackground()
-
-	if sendString(s.LocalhostAddress(), "Garbage!\n\n\n") != io.EOF {
-		t.Errorf("Didn't get disconnected after a total garbage message")
-	}
-
-	if sendString(s.LocalhostAddress(), "a:b:c:d\n") != io.EOF {
-		t.Errorf("Didn't get disconnected after a semi-garbage message")
-	}
-
-	goodMessage := "{ \"T\": \"N\", \"M\": { \"I\": 1 } }"
-	kp := util.NewKeyPair()
-	line := fmt.Sprintf("e:%s:%s:%s\n",
-		kp.PublicKey().String(), "notRealSignature", goodMessage)
-
-	if sendString(s.LocalhostAddress(), line) != io.EOF {
-		t.Errorf("Didn't get disconnected after a bad-signature message")
-	}
-
-	line = fmt.Sprintf("e:%s:%s:%s\n",
-		kp.PublicKey().String(), kp.Sign(goodMessage), goodMessage)
-
-	if sendString(s.LocalhostAddress(), line) != nil {
-		t.Errorf("The server should still process a good message")
-	}
-
 	go s.Stop()
 }
