@@ -2,6 +2,7 @@ package util
 
 import (
 	"bufio"
+	"encoding/gob"
 	"errors"
 	"fmt"
 	"io"
@@ -13,14 +14,14 @@ import (
 const OK = "ok"
 
 type SignedMessage struct {
-	message       Message
-	messageString string
-	signer        string
-	signature     string
+	Message       Message
+	MessageString string
+	Signer        string
+	Signature     string
 
 	// Whenever keepalive is true, the SignedMessage has no real content, it's
 	// just a small value used to keep a network connection alive
-	keepalive bool
+	KeepAlive bool
 }
 
 func NewSignedMessage(kp *KeyPair, message Message) *SignedMessage {
@@ -29,31 +30,15 @@ func NewSignedMessage(kp *KeyPair, message Message) *SignedMessage {
 	}
 	ms := EncodeMessage(message)
 	return &SignedMessage{
-		message:       message,
-		messageString: ms,
-		signer:        kp.PublicKey().String(),
-		signature:     kp.Sign(ms),
+		Message:       message,
+		MessageString: ms,
+		Signer:        kp.PublicKey().String(),
+		Signature:     kp.Sign(ms),
 	}
 }
 
-func (sm *SignedMessage) Message() Message {
-	return sm.message
-}
-
-func (sm *SignedMessage) Signer() string {
-	return sm.signer
-}
-
-func (sm *SignedMessage) Signature() string {
-	return sm.signature
-}
-
 func (sm *SignedMessage) Serialize() string {
-	return fmt.Sprintf("e:%s:%s:%s", sm.signer, sm.signature, sm.messageString)
-}
-
-func (sm *SignedMessage) IsKeepAlive() bool {
-	return sm.keepalive
+	return fmt.Sprintf("e:%s:%s:%s", sm.Signer, sm.Signature, sm.MessageString)
 }
 
 func NewSignedMessageFromSerialized(serialized string) (*SignedMessage, error) {
@@ -77,41 +62,29 @@ func NewSignedMessageFromSerialized(serialized string) (*SignedMessage, error) {
 		return nil, err
 	}
 	return &SignedMessage{
-		message:       m,
-		messageString: ms,
-		signer:        signer,
-		signature:     signature,
+		Message:       m,
+		MessageString: ms,
+		Signer:        signer,
+		Signature:     signature,
 	}, nil
 }
 
 func KeepAlive() *SignedMessage {
-	return &SignedMessage{keepalive: true}
+	return &SignedMessage{KeepAlive: true}
 }
 
 func (sm *SignedMessage) Write(w io.Writer) {
-	var data string
-	if sm.keepalive {
-		data = OK + "\n"
-	} else {
-		data = sm.Serialize() + "\n"
+	enc := gob.NewEncoder(w)
+	err := enc.Encode(sm)
+	if err != nil {
+		log.Printf("ignoring error in gob write: %+v", err)
 	}
-	fmt.Fprintf(w, data)
 }
 
-// ReadSignedMessage can return a nil message even when there is no error.
-// Specifically, a line with just "ok" indicates no message, but also no error.
-// The caller is responsible for setting any deadlines.
+// The caller is responsible for setting any deadlines on the reader.
 func ReadSignedMessage(r *bufio.Reader) (*SignedMessage, error) {
-	data, err := r.ReadString('\n')
-	if err != nil {
-		return nil, err
-	}
-
-	// Chop the newline
-	serialized := data[:len(data)-1]
-	if serialized == OK {
-		return &SignedMessage{keepalive: true}, nil
-	}
-
-	return NewSignedMessageFromSerialized(serialized)
+	dec := gob.NewDecoder(r)
+	answer := &SignedMessage{}
+	err := dec.Decode(answer)
+	return answer, err
 }

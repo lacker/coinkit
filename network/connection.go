@@ -25,7 +25,7 @@ func SendAnonymousMessage(c Connection, message *util.InfoMessage) {
 func WaitToClear(c Connection, user string, sequence uint32) *currency.Account {
 	for {
 		SendAnonymousMessage(c, &util.InfoMessage{Account: user})
-		m := (<-c.Receive()).Message()
+		m := (<-c.Receive()).Message
 		accountMessage, ok := m.(*currency.AccountMessage)
 		if !ok {
 			continue
@@ -46,7 +46,7 @@ func WaitToClear(c Connection, user string, sequence uint32) *currency.Account {
 func GetAccount(c Connection, user string) *currency.Account {
 	for {
 		SendAnonymousMessage(c, &util.InfoMessage{Account: user})
-		m := (<-c.Receive()).Message()
+		m := (<-c.Receive()).Message
 		accountMessage, ok := m.(*currency.AccountMessage)
 		if !ok {
 			log.Fatalf("expected an account message but got: %+v", m)

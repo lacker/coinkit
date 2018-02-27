@@ -69,7 +69,7 @@ func (c *BasicConnection) runIncoming() {
 		if response == nil {
 			panic("connections should not receive nil")
 		}
-		if !response.IsKeepAlive() {
+		if !response.KeepAlive {
 			c.inbox <- response
 		}
 	}

@@ -123,7 +123,7 @@ func (s *Server) handleConnection(connection net.Conn) {
 // down or we are overloaded, (nil, false) is returned.
 // (nil, true) means we processed the message and there is a nil response.
 func (s *Server) handleMessage(sm *util.SignedMessage) (*util.SignedMessage, bool) {
-	if _, ok := sm.Message().(*util.InfoMessage); ok {
+	if _, ok := sm.Message.(*util.InfoMessage); ok {
 		return s.retryHandleMessage(sm)
 	}
 	return s.handleMessageOnce(sm)
@@ -211,7 +211,7 @@ func (s *Server) unsafeUpdateOutgoing() {
 // It should be only be called from the message-processing thread.
 func (s *Server) unsafeProcessMessage(m *util.SignedMessage) *util.SignedMessage {
 	prevSlot := s.node.Slot()
-	message, hasResponse := s.node.Handle(m.Signer(), m.Message())
+	message, hasResponse := s.node.Handle(m.Signer, m.Message)
 	postSlot := s.node.Slot()
 	s.unsafeUpdateOutgoing()
 
@@ -301,11 +301,11 @@ func (s *Server) broadcast(messages []*util.SignedMessage) {
 func subtract(a []*util.SignedMessage, b []*util.SignedMessage) []*util.SignedMessage {
 	sigs := make(map[string]bool)
 	for _, m := range b {
-		sigs[m.Signature()] = true
+		sigs[m.Signature] = true
 	}
 	answer := []*util.SignedMessage{}
 	for _, m := range a {
-		if !sigs[m.Signature()] {
+		if !sigs[m.Signature] {
 			answer = append(answer, m)
 		}
 	}
