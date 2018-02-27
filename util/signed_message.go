@@ -3,6 +3,7 @@ package util
 import (
 	"bufio"
 	"encoding/gob"
+	"errors"
 	"io"
 	"log"
 	"reflect"
@@ -10,6 +11,7 @@ import (
 
 const OK = "ok"
 
+// TODO: make Message internal
 type SignedMessage struct {
 	Message       Message
 	MessageString string
@@ -51,5 +53,23 @@ func ReadSignedMessage(r *bufio.Reader) (*SignedMessage, error) {
 	dec := gob.NewDecoder(r)
 	answer := &SignedMessage{}
 	err := dec.Decode(answer)
-	return answer, err
+	if err != nil {
+		return nil, err
+	}
+
+	// Keepalives don't have to be signed
+	if answer.KeepAlive {
+		return answer, nil
+	}
+
+	// Check the signature
+	publicKey, err := ReadPublicKey(answer.Signer)
+	if err != nil {
+		return nil, err
+	}
+	if !Verify(publicKey, answer.MessageString, answer.Signature) {
+		return nil, errors.New("signature failed verification")
+	}
+
+	return answer, nil
 }
