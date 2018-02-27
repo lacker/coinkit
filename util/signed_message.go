@@ -16,9 +16,9 @@ type SignedMessage struct {
 	// passed around on the wire when it doesn't have to be.
 	message Message
 
-	MessageString string
-	Signer        string
-	Signature     string
+	Encoded   []byte
+	Signer    string
+	Signature string
 
 	// Whenever keepalive is true, the SignedMessage has no real content, it's
 	// just a small value used to keep a network connection alive
@@ -29,12 +29,12 @@ func NewSignedMessage(kp *KeyPair, message Message) *SignedMessage {
 	if message == nil || reflect.ValueOf(message).IsNil() {
 		log.Fatal("cannot sign nil message")
 	}
-	ms := EncodeMessage(message)
+	enc := EncodeMessage(message)
 	return &SignedMessage{
-		message:       message,
-		MessageString: ms,
-		Signer:        kp.PublicKey().String(),
-		Signature:     kp.Sign(ms),
+		message:   message,
+		Encoded:   enc,
+		Signer:    kp.PublicKey().String(),
+		Signature: kp.Sign(string(enc)),
 	}
 }
 
@@ -50,7 +50,7 @@ func (sm *SignedMessage) Write(w io.Writer) {
 	enc := gob.NewEncoder(w)
 	err := enc.Encode(sm)
 	if err != nil {
-		log.Printf("ignoring error in gob write: %+v", err)
+		panic(err)
 	}
 }
 
@@ -73,11 +73,11 @@ func ReadSignedMessage(r *bufio.Reader) (*SignedMessage, error) {
 	if err != nil {
 		return nil, err
 	}
-	if !Verify(publicKey, answer.MessageString, answer.Signature) {
+	if !Verify(publicKey, string(answer.Encoded), answer.Signature) {
 		return nil, errors.New("signature failed verification")
 	}
 
-	answer.message, err = DecodeMessage(answer.MessageString)
+	answer.message, err = DecodeMessage(answer.Encoded)
 	if err != nil {
 		return nil, err
 	}
