@@ -11,9 +11,11 @@ import (
 
 const OK = "ok"
 
-// TODO: make Message internal
 type SignedMessage struct {
-	Message       Message
+	// message is internal because it's redundant. This keeps it from being
+	// passed around on the wire when it doesn't have to be.
+	message Message
+
 	MessageString string
 	Signer        string
 	Signature     string
@@ -29,11 +31,15 @@ func NewSignedMessage(kp *KeyPair, message Message) *SignedMessage {
 	}
 	ms := EncodeMessage(message)
 	return &SignedMessage{
-		Message:       message,
+		message:       message,
 		MessageString: ms,
 		Signer:        kp.PublicKey().String(),
 		Signature:     kp.Sign(ms),
 	}
+}
+
+func (sm *SignedMessage) Message() Message {
+	return sm.message
 }
 
 func KeepAlive() *SignedMessage {
@@ -71,5 +77,9 @@ func ReadSignedMessage(r *bufio.Reader) (*SignedMessage, error) {
 		return nil, errors.New("signature failed verification")
 	}
 
+	answer.message, err = DecodeMessage(answer.MessageString)
+	if err != nil {
+		return nil, err
+	}
 	return answer, nil
 }
