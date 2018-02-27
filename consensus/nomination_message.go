@@ -2,7 +2,7 @@ package consensus
 
 import (
 	"strings"
-
+	
 	"coinkit/util"
 )
 

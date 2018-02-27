@@ -10,6 +10,23 @@ import (
 	"coinkit/util"
 )
 
+// FakeMessage implements util.Message but does not get registered
+type FakeMessage struct {
+	Number int
+}
+
+func (m *FakeMessage) Slot() int {
+	return 0
+}
+
+func (m *FakeMessage) MessageType() string {
+	return "Fake"
+}
+
+func (m *FakeMessage) String() string {
+	return "Fake"
+}
+
 func makeServers() []*Server {
 	_, configs := NewUnitTestNetwork()
 	answer := []*Server{}
@@ -146,4 +163,24 @@ func BenchmarkSendMoney10(b *testing.B) {
 
 func BenchmarkSendMoney30(b *testing.B) {
 	benchmarkSendMoney(30, b)
+}
+
+func TestServerOkayWithFakeWellFormattedMessage(t *testing.T) {
+	_, configs := NewUnitTestNetwork()
+	s := NewServer(configs[0])
+
+	m := &FakeMessage{Number: 4}
+	kp := util.NewKeyPairFromSecretPhrase("foo")
+	sm := util.NewSignedMessage(kp, m)
+
+	fakeRequest := &Request{
+		Message:  sm,
+		Response: nil,
+	}
+
+	s.ServeInBackground()
+	s.requests <- fakeRequest
+	// This hits the right code path but it feels like we ought to have a
+	// better assertion here
+	go s.Stop()
 }

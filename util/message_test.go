@@ -1,8 +1,7 @@
 package util
 
 import (
-	"bytes"
-	"encoding/gob"
+	"encoding/json"
 	"testing"
 )
 
@@ -35,10 +34,14 @@ func TestMessageEncoding(t *testing.T) {
 }
 
 func TestDecodingInvalidMessage(t *testing.T) {
-	var b bytes.Buffer
-	enc := gob.NewEncoder(&b)
-	enc.Encode("this string is not a valid message")
-	encoded := b.Bytes()
+	bytes, err := json.Marshal(DecodedMessage{
+		T: "Testing",
+		M: nil,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	encoded := string(bytes)
 	m, err := DecodeMessage(encoded)
 	if err == nil || m != nil {
 		t.Fatal("an encoded nil message should fail to decode")

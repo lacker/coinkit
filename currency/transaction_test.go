@@ -1,6 +1,7 @@
 package currency
 
 import (
+	"encoding/json"
 	"testing"
 
 	"coinkit/util"
@@ -26,7 +27,7 @@ func TestTransactionVerification(t *testing.T) {
 	if !tr.SignWith(kp1).Verify() {
 		t.Fatal("normal verification should work")
 	}
-	bytes := tr.Encode()
+	bytes, _ := json.Marshal(tr)
 	st := &SignedTransaction{
 		Transaction: tr,
 		Signature:   kp2.Sign(string(bytes)),

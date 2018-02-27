@@ -2,8 +2,8 @@ package consensus
 
 import (
 	"fmt"
-	"sort"
 	"strings"
+	"sort"
 
 	"coinkit/util"
 )
@@ -13,7 +13,7 @@ type BallotMessage interface {
 	QuorumSlice() QuorumSlice
 	Phase() Phase
 	MessageType() string
-	Slot() int
+	Slot() int	
 
 	// AcceptAsPrepared tells whether this message implies that the sender
 	// accepts this ballot as prepared
@@ -74,7 +74,7 @@ func (p Phase) String() string {
 	case Externalize:
 		return "Externalize"
 	default:
-		panic(fmt.Sprintf("unknown phase: %d", p))
+		panic(fmt.Sprintf("unknown phase: %+v", p))
 	}
 }
 
