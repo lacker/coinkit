@@ -1,7 +1,8 @@
 package currency
 
 import (
-	"encoding/json"
+	"bytes"
+	"encoding/gob"
 	"fmt"
 	"strings"
 
@@ -39,19 +40,25 @@ type SignedTransaction struct {
 	Signature string
 }
 
+func (t *Transaction) Encode() []byte {
+	var b bytes.Buffer
+	enc := gob.NewEncoder(&b)
+	err := enc.Encode(t)
+	if err != nil {
+		panic("failed to gob-encode transaction")
+	}
+	return b.Bytes()
+}
+
 // Signs the transaction with the provided keypair.
 // The caller must check the keypair is the actual sender.
 func (t *Transaction) SignWith(keyPair *util.KeyPair) *SignedTransaction {
 	if keyPair.PublicKey().String() != t.From {
 		panic("you can only sign your own transactions")
 	}
-	bytes, err := json.Marshal(t)
-	if err != nil {
-		panic("failed to sign transaction because json encoding failed")
-	}
 	return &SignedTransaction{
 		Transaction: t,
-		Signature:   keyPair.Sign(string(bytes)),
+		Signature:   keyPair.Sign(string(t.Encode())),
 	}
 }
 
@@ -62,15 +69,11 @@ func (s *SignedTransaction) Verify() bool {
 	if _, err := util.ReadPublicKey(s.Transaction.To); err != nil {
 		return false
 	}
-	bytes, err := json.Marshal(s.Transaction)
-	if err != nil {
-		return false
-	}
 	pk, err := util.ReadPublicKey(s.Transaction.From)
 	if err != nil {
 		return false
 	}
-	return util.Verify(pk, string(bytes), s.Signature)
+	return util.Verify(pk, string(s.Transaction.Encode()), s.Signature)
 }
 
 // HighestPriorityFirst is a comparator in the emirpasic/gods comparator style.
