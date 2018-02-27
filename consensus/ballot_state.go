@@ -195,7 +195,7 @@ func (s *BallotState) MaybeAcceptAsPrepared(n int, x SlotValue) bool {
 	// Check if accepting this prepare means that we should abort our
 	// votes to commit
 	if s.cn != 0 && s.hn != 0 && s.AcceptedAbort(s.hn, s.b.x) {
-		s.Logf("%s accepts the abort of %d %+v", s.hn, s.b.x)
+		s.Logf("accepts the abort of %d %+v", s.hn, s.b.x)
 		s.cn = 0
 	}
 
