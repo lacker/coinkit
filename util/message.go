@@ -1,10 +1,12 @@
 package util
 
 import (
+	"encoding/gob"
 	"encoding/json"
 	"fmt"
 	"log"
 	"reflect"
+	"strings"
 )
 
 type Message interface {
@@ -12,6 +14,7 @@ type Message interface {
 	Slot() int
 
 	// MessageType returns a unique short string mapping to the type
+	// TODO: drop MessageType
 	MessageType() string
 
 	// String() should return a short, human-readable string
@@ -24,6 +27,21 @@ type Message interface {
 var MessageTypeMap map[string]reflect.Type = make(map[string]reflect.Type)
 
 func RegisterMessageType(m Message) {
+	// We want to remove the path qualifications so that encoding doesn't break on
+	// refactors.
+	// So fullName is something like "*util.FooMessage", and we just want "*FooMessage".
+	fullName := reflect.TypeOf(m).String()
+	parts := strings.Split(fullName, ".")
+	gobName := parts[len(parts)-1]
+	if gobName == "Message" {
+		panic("gobName should not be Message")
+	}
+	if fullName[0] == '*' {
+		gobName = "*" + gobName
+	}
+	gob.RegisterName(gobName, m)
+
+	// TODO: drop the stuff after here
 	name := m.MessageType()
 	_, ok := MessageTypeMap[name]
 	if ok {
