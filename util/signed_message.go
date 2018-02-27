@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"errors"
 	"fmt"
+	"io"
 	"log"
 	"reflect"
 	"strings"
@@ -87,15 +88,14 @@ func KeepAlive() *SignedMessage {
 	return &SignedMessage{keepalive: true}
 }
 
-// Convert a signed message to one line in a wire format
-func SignedMessageToLine(sm *SignedMessage) string {
-	if sm == nil {
-		panic("do not convert nil messages to lines")
-	}
+func (sm *SignedMessage) Write(w io.Writer) {
+	var data string
 	if sm.keepalive {
-		return OK + "\n"
+		data = OK + "\n"
+	} else {
+		data = sm.Serialize() + "\n"
 	}
-	return sm.Serialize() + "\n"
+	fmt.Fprintf(w, data)
 }
 
 // ReadSignedMessage can return a nil message even when there is no error.

@@ -2,7 +2,6 @@ package network
 
 import (
 	"bufio"
-	"fmt"
 	"log"
 	"net"
 	"sync"
@@ -92,7 +91,7 @@ func (c *BasicConnection) runOutgoing() {
 			}
 		}
 
-		fmt.Fprintf(c.conn, util.SignedMessageToLine(message))
+		message.Write(c.conn)
 	}
 }
 
