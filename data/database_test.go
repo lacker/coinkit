@@ -1,6 +1,7 @@
 package data
 
 import (
+	"os"
 	"testing"
 )
 
@@ -19,8 +20,21 @@ func TestSaveAndFetch(t *testing.T) {
 	}
 }
 
+func TestFetchNonexistentBlock(t *testing.T) {
+	db := NewTestDatabase()
+	b := db.GetBlock(100)
+	if b != nil {
+		t.Fatal("block should be nonexistent")
+	}
+}
+
+func TestMain(m *testing.M) {
+	answer := m.Run()
+	db := NewTestDatabase()
+	db.postgres.MustExec("DROP TABLE IF EXISTS blocks")
+	os.Exit(answer)
+}
+
 // TODO: test that:
-// saving and fetching works ok
-// fetching a nonexistent block does not die
 // block slots are enforced to be unique
 // lastblock works

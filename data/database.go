@@ -1,6 +1,7 @@
 package data
 
 import (
+	"database/sql"
 	"fmt"
 	"os/user"
 
@@ -59,6 +60,9 @@ func (db *Database) SaveBlock(b *Block) {
 func (db *Database) GetBlock(slot int) *Block {
 	answer := &Block{}
 	err := db.postgres.Get(answer, "SELECT * FROM blocks WHERE slot=$1", slot)
+	if err == sql.ErrNoRows {
+		return nil
+	}
 	if err != nil {
 		panic(err)
 	}
