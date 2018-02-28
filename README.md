@@ -13,7 +13,16 @@ https://www.stellar.org/papers/stellar-consensus-protocol.pdf
 
 ## How to install it
 
-To run this, first install go on your machine.
+I provide OS X instructions only. Good luck.
+
+First install Postgres.
+
+```
+brew install postgres
+brew services start postgresql
+```
+
+Then install go on your machine.
 
 ```
 brew install go

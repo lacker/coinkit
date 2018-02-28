@@ -6,7 +6,7 @@ import (
 	"coinkit/util"
 )
 
-// Block implements the convergence algorithm for a single block,
+// consensus.Block implements the convergence algorithm for a single block,
 // according to the Stellar Consensus Protocol. See:
 // https://www.stellar.org/papers/stellar-consensus-protocol.pdf
 // Most logic is not in the Block itself, but is delegated to the

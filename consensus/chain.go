@@ -9,7 +9,8 @@ import (
 )
 
 // Chain creates the blockchain, gaining consensus on one Block at a time.
-// Chain is not threadsafe.
+// Chain is not threadsafe. Just make a single goroutine in which your chain
+// can process messages.
 type Chain struct {
 	// The block we are currently working on
 	current *Block
