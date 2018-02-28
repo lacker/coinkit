@@ -4,11 +4,12 @@ import (
 	"os/user"
 
 	"github.com/go-pg/pg"
+	"github.com/go-pg/pg/orm"
 )
 
 // A Database encapsulates a connection to a Postgres database.
 type Database struct {
-	*pg.DB
+	postgres *pg.DB
 }
 
 // Creates a new database handle designed to be used for unit tests.
@@ -18,7 +19,7 @@ func NewTestDatabase() *Database {
 		panic(err)
 	}
 	db := &Database{
-		DB: pg.Connect(&pg.Options{
+		postgres: pg.Connect(&pg.Options{
 			User:     user.Username,
 			Password: "",
 			Database: "test",
@@ -30,7 +31,9 @@ func NewTestDatabase() *Database {
 
 // initialize makes sure the schemas are set up right and panics if not
 func (db *Database) initialize() {
-	err := db.CreateTable(&Block{}, nil)
+	err := db.postgres.CreateTable(&Block{}, &orm.CreateTableOptions{
+		IfNotExists: true,
+	})
 	if err != nil {
 		panic(err)
 	}
