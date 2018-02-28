@@ -7,7 +7,7 @@ type Block struct {
 	// Which block this is
 	Slot int
 
-	// The block data
+	// TODO: what format does this have to be to store the block data?
 	Value string
 
 	// The ballot numbers this node confirmed.
