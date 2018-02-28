@@ -29,12 +29,16 @@ func NewTestDatabase() *Database {
 	return db
 }
 
-// initialize makes sure the schemas are set up right and panics if not
-func (db *Database) initialize() {
-	err := db.postgres.CreateTable(&Block{}, &orm.CreateTableOptions{
+func (db *Database) createTable(obj interface{}) {
+	err := db.postgres.CreateTable(obj, &orm.CreateTableOptions{
 		IfNotExists: true,
 	})
 	if err != nil {
 		panic(err)
 	}
+}
+
+// initialize makes sure the schemas are set up right and panics if not
+func (db *Database) initialize() {
+	db.createTable(&Block{})
 }
