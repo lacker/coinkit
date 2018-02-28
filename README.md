@@ -15,11 +15,12 @@ https://www.stellar.org/papers/stellar-consensus-protocol.pdf
 
 I provide OS X instructions only. Good luck.
 
-First install Postgres.
+First install Postgres and create a test database.
 
 ```
 brew install postgres
 brew services start postgresql
+createdb test
 ```
 
 Then install go on your machine.

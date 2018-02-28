@@ -1,6 +1,8 @@
 package data
 
 import (
+	"os/user"
+
 	"github.com/go-pg/pg"
 )
 
@@ -11,11 +13,25 @@ type Database struct {
 
 // Creates a new database handle designed to be used for unit tests.
 func NewTestDatabase() *Database {
-	return &Database{
+	user, err := user.Current()
+	if err != nil {
+		panic(err)
+	}
+	db := &Database{
 		DB: pg.Connect(&pg.Options{
-			User:     "postgres",
-			Password: "test",
+			User:     user.Username,
+			Password: "",
 			Database: "test",
 		}),
+	}
+	db.initialize()
+	return db
+}
+
+// initialize makes sure the schemas are set up right and panics if not
+func (db *Database) initialize() {
+	err := db.CreateTable(&Block{}, nil)
+	if err != nil {
+		panic(err)
 	}
 }
