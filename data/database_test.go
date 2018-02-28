@@ -13,7 +13,10 @@ func TestSaveAndFetch(t *testing.T) {
 		C:     3,
 		H:     4,
 	}
-	db.SaveBlock(block)
+	err := db.SaveBlock(block)
+	if err != nil {
+		t.Fatal(err)
+	}
 	b2 := db.GetBlock(3)
 	if b2.C != block.C {
 		t.Fatal("block changed: %+v -> %+v", block, b2)
@@ -22,19 +25,42 @@ func TestSaveAndFetch(t *testing.T) {
 
 func TestFetchNonexistentBlock(t *testing.T) {
 	db := NewTestDatabase()
-	b := db.GetBlock(100)
+	b := db.GetBlock(4)
 	if b != nil {
 		t.Fatal("block should be nonexistent")
 	}
 }
 
-func TestMain(m *testing.M) {
-	answer := m.Run()
+func TestCantSaveTwice(t *testing.T) {
 	db := NewTestDatabase()
+	block := &Block{
+		Slot:  4,
+		Value: "hi",
+		C:     1,
+		H:     2,
+	}
+	err := db.SaveBlock(block)
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = db.SaveBlock(block)
+	if err == nil {
+		t.Fatal("a block should not save twice")
+	}
+}
+
+func dropAll(db *Database) {
 	db.postgres.MustExec("DROP TABLE IF EXISTS blocks")
+}
+
+// Clean up both before and after running tests
+func TestMain(m *testing.M) {
+	db := NewTestDatabase()
+	dropAll(db)
+	answer := m.Run()
+	dropAll(db)
 	os.Exit(answer)
 }
 
 // TODO: test that:
-// block slots are enforced to be unique
 // lastblock works
