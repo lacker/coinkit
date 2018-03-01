@@ -49,6 +49,28 @@ func TestCantSaveTwice(t *testing.T) {
 	}
 }
 
+func TestLastBlock(t *testing.T) {
+	db := NewTestDatabase()
+	dropAll(db)
+	db = NewTestDatabase()
+	b := db.LastBlock()
+	if b != nil {
+		t.Fatal("expected last block nil but got %+v", b)
+	}
+	b = &Block{
+		Slot:  5,
+		Value: "five",
+	}
+	err := db.SaveBlock(b)
+	if err != nil {
+		t.Fatal(err)
+	}
+	b2 := db.LastBlock()
+	if b2.Value != b.Value {
+		t.Fatal("b2: %+v", b2)
+	}
+}
+
 func dropAll(db *Database) {
 	db.postgres.MustExec("DROP TABLE IF EXISTS blocks")
 }

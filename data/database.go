@@ -81,3 +81,16 @@ func (db *Database) GetBlock(slot int) *Block {
 	}
 	return answer
 }
+
+// LastBlock returns nil if the database has no blocks in it yet.
+func (db *Database) LastBlock() *Block {
+	answer := &Block{}
+	err := db.postgres.Get(answer, "SELECT * FROM blocks ORDER BY slot DESC LIMIT 1")
+	if err == sql.ErrNoRows {
+		return nil
+	}
+	if err != nil {
+		panic(err)
+	}
+	return answer
+}
