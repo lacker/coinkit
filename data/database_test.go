@@ -8,10 +8,7 @@ import (
 func TestSaveAndFetch(t *testing.T) {
 	db := NewTestDatabase()
 	block := &Block{
-		Slot:  3,
-		Value: "foo",
-		C:     3,
-		H:     4,
+		Slot: 3,
 	}
 	err := db.SaveBlock(block)
 	if err != nil {
@@ -34,10 +31,9 @@ func TestFetchNonexistentBlock(t *testing.T) {
 func TestCantSaveTwice(t *testing.T) {
 	db := NewTestDatabase()
 	block := &Block{
-		Slot:  4,
-		Value: "hi",
-		C:     1,
-		H:     2,
+		Slot: 4,
+		C:    1,
+		H:    2,
 	}
 	err := db.SaveBlock(block)
 	if err != nil {
@@ -58,15 +54,14 @@ func TestLastBlock(t *testing.T) {
 		t.Fatal("expected last block nil but got %+v", b)
 	}
 	b = &Block{
-		Slot:  5,
-		Value: "five",
+		Slot: 5,
 	}
 	err := db.SaveBlock(b)
 	if err != nil {
 		t.Fatal(err)
 	}
 	b2 := db.LastBlock()
-	if b2.Value != b.Value {
+	if b2.Slot != b.Slot {
 		t.Fatal("b2: %+v", b2)
 	}
 }

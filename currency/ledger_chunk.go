@@ -5,7 +5,7 @@ import (
 	"sort"
 
 	"golang.org/x/crypto/sha3"
-	
+
 	"coinkit/consensus"
 )
 
@@ -20,6 +20,13 @@ type LedgerChunk struct {
 	// This only includes account information for the accounts that are
 	// mentioned in the transactions.
 	State map[string]*Account
+}
+
+func NewEmptyChunk() *LedgerChunk {
+	return &LedgerChunk{
+		Transactions: []*SignedTransaction{},
+		State:        make(map[string]*Account),
+	}
 }
 
 func (c *LedgerChunk) Hash() consensus.SlotValue {

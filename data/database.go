@@ -34,7 +34,7 @@ func NewTestDatabase() *Database {
 const schema = `
 CREATE TABLE IF NOT EXISTS blocks (
     slot integer,
-    value text,
+    chunk json,
     c integer,
     h integer
 );
@@ -43,8 +43,8 @@ CREATE UNIQUE INDEX IF NOT EXISTS block_idx ON blocks (slot);
 `
 
 const blockInsert = `
-INSERT INTO blocks (slot, value, c, h)
-VALUES (:slot, :value, :c, :h)
+INSERT INTO blocks (slot, chunk, c, h)
+VALUES (:slot, :chunk, :c, :h)
 `
 
 func isUniquenessError(e error) bool {

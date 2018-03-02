@@ -1,14 +1,17 @@
 package data
 
-import ()
+import (
+	"coinkit/currency"
+)
 
 // data.Block represents how the value for a single block gets stored to the database.
 type Block struct {
 	// Which block this is
 	Slot int
 
-	// TODO: what format does this have to be to store the block data?
-	Value string
+	// The LedgerChunk for this block
+	// TODO: do not let this be nil
+	Chunk *currency.LedgerChunk
 
 	// The ballot numbers this node confirmed.
 	C int
