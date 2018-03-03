@@ -34,7 +34,7 @@ func NewTestDatabase() *Database {
 const schema = `
 CREATE TABLE IF NOT EXISTS blocks (
     slot integer,
-    chunk json,
+    chunk json NOT NULL,
     c integer,
     h integer
 );

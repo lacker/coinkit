@@ -3,12 +3,15 @@ package data
 import (
 	"os"
 	"testing"
+
+	"coinkit/currency"
 )
 
 func TestSaveAndFetch(t *testing.T) {
 	db := NewTestDatabase()
 	block := &Block{
-		Slot: 3,
+		Slot:  3,
+		Chunk: currency.NewEmptyChunk(),
 	}
 	err := db.SaveBlock(block)
 	if err != nil {
@@ -31,9 +34,10 @@ func TestFetchNonexistentBlock(t *testing.T) {
 func TestCantSaveTwice(t *testing.T) {
 	db := NewTestDatabase()
 	block := &Block{
-		Slot: 4,
-		C:    1,
-		H:    2,
+		Slot:  4,
+		Chunk: currency.NewEmptyChunk(),
+		C:     1,
+		H:     2,
 	}
 	err := db.SaveBlock(block)
 	if err != nil {
@@ -54,7 +58,8 @@ func TestLastBlock(t *testing.T) {
 		t.Fatal("expected last block nil but got %+v", b)
 	}
 	b = &Block{
-		Slot: 5,
+		Slot:  5,
+		Chunk: currency.NewEmptyChunk(),
 	}
 	err := db.SaveBlock(b)
 	if err != nil {
