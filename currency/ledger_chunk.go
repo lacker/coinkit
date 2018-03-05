@@ -1,7 +1,10 @@
 package currency
 
 import (
+	"database/sql/driver"
 	"encoding/base64"
+	"encoding/json"
+	"errors"
 	"sort"
 
 	"golang.org/x/crypto/sha3"
@@ -49,4 +52,21 @@ func (c *LedgerChunk) Hash() consensus.SlotValue {
 
 func (c *LedgerChunk) String() string {
 	return StringifyTransactions(c.Transactions)
+}
+
+func (c *LedgerChunk) Value() (driver.Value, error) {
+	bytes, err := json.Marshal(c)
+	return driver.Value(bytes), err
+}
+
+func (c *LedgerChunk) Scan(src interface{}) error {
+	bytes, ok := src.([]byte)
+	if !ok {
+		return errors.New("expected []byte")
+	}
+	err := json.Unmarshal(bytes, c)
+	if err != nil {
+		return err
+	}
+	return nil
 }
