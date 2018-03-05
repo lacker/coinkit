@@ -18,6 +18,7 @@ type Node struct {
 	chain     *consensus.Chain
 	queue     *currency.TransactionQueue
 	database  *data.Database
+	slot      int
 }
 
 func NewNode(
@@ -29,10 +30,11 @@ func NewNode(
 		queue:     queue,
 		database:  db,
 		chain:     consensus.NewEmptyChain(publicKey, qs, queue),
+		slot:      1,
 	}
 
 	if db != nil {
-		db.ForBlocks(func(b *data.Block) {
+		node.slot = db.ForBlocks(func(b *data.Block) {
 			m := b.ExternalizeMessage(qs)
 			node.chain.AlreadyExternalized(m)
 			node.queue.FinalizeChunk(b.Chunk)
@@ -44,7 +46,7 @@ func NewNode(
 
 // Slot() returns the slot this node is currently working on
 func (node *Node) Slot() int {
-	return node.chain.Slot()
+	return node.slot
 }
 
 // Handle handles an incoming message.
@@ -102,8 +104,30 @@ func (node *Node) Handle(sender string, message util.Message) (util.Message, boo
 
 // A helper to handle the messages
 func (node *Node) handleChainMessage(sender string, message util.Message) (util.Message, bool) {
-	response, ok := node.chain.Handle(sender, message)
-	if !ok {
+	response, hasResponse := node.chain.Handle(sender, message)
+
+	if node.chain.Slot() > node.Slot() {
+		// We have advanced.
+		node.slot += 1
+
+		if node.database != nil {
+			// Let's save the old block.
+			last := node.chain.GetLast()
+			chunk := node.queue.OldChunk(last.I)
+			block := &data.Block{
+				Slot:  last.I,
+				C:     last.Cn,
+				H:     last.Hn,
+				Chunk: chunk,
+			}
+			err := node.database.SaveBlock(block)
+			if err != nil {
+				panic(err)
+			}
+		}
+	}
+
+	if !hasResponse {
 		return nil, false
 	}
 

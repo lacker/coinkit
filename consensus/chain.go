@@ -93,6 +93,10 @@ func (c *Chain) Slot() int {
 	return c.current.slot
 }
 
+func (c *Chain) GetLast() *ExternalizeMessage {
+	return c.history[c.Slot()-1]
+}
+
 // AlreadyExternalized handles the case where the slot we are working on is
 // already externalized. The caller must know this.
 func (c *Chain) AlreadyExternalized(m *ExternalizeMessage) {

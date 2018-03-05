@@ -142,9 +142,17 @@ func (q *TransactionQueue) SetBalance(owner string, balance uint64) {
 	q.accounts.SetBalance(owner, balance)
 }
 
-func (q *TransactionQueue) OldChunkMessage(slot int) *TransactionMessage {
+func (q *TransactionQueue) OldChunk(slot int) *LedgerChunk {
 	chunk, ok := q.oldChunks[slot]
 	if !ok {
+		return nil
+	}
+	return chunk
+}
+
+func (q *TransactionQueue) OldChunkMessage(slot int) *TransactionMessage {
+	chunk := q.OldChunk(slot)
+	if chunk == nil {
 		return nil
 	}
 	chunks := make(map[consensus.SlotValue]*LedgerChunk)
