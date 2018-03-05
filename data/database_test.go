@@ -65,6 +65,11 @@ func TestLastBlock(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	b.Slot = 6
+	err = db.SaveBlock(b)
+	if err != nil {
+		t.Fatal(err)
+	}
 	b2 := db.LastBlock()
 	if b2.Slot != b.Slot {
 		t.Fatal("b2: %+v", b2)
@@ -83,6 +88,3 @@ func TestMain(m *testing.M) {
 	dropAll(db)
 	os.Exit(answer)
 }
-
-// TODO: test that:
-// lastblock works
