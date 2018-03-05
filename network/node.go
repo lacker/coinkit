@@ -11,6 +11,8 @@ import (
 
 // Node is the logical container for everything one node in the network handles.
 // Node is not threadsafe.
+// Everything within Node should be deterministic, for ease of testing. No channels
+// or network connections. Database usage is okay though.
 type Node struct {
 	publicKey util.PublicKey
 	chain     *consensus.Chain
@@ -18,21 +20,26 @@ type Node struct {
 	database  *data.Database
 }
 
-func NewNode(publicKey util.PublicKey, qs consensus.QuorumSlice) *Node {
+func NewNode(
+	publicKey util.PublicKey, qs consensus.QuorumSlice, db *data.Database) *Node {
 	queue := currency.NewTransactionQueue(publicKey)
 
-	return &Node{
+	node := &Node{
 		publicKey: publicKey,
-		chain:     consensus.NewEmptyChain(publicKey, qs, queue),
 		queue:     queue,
+		database:  db,
+		chain:     consensus.NewEmptyChain(publicKey, qs, queue),
 	}
-}
 
-func (node *Node) SetDatabase(db *data.Database) {
-	if node.database != nil {
-		panic("may not set database multiple times")
+	if db != nil {
+		db.ForBlocks(func(b *data.Block) {
+			m := b.ExternalizeMessage(qs)
+			node.chain.AlreadyExternalized(m)
+			node.queue.FinalizeChunk(b.Chunk)
+		})
 	}
-	// XXX
+
+	return node
 }
 
 // Slot() returns the slot this node is currently working on

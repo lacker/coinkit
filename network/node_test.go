@@ -45,7 +45,7 @@ func TestNodeCatchup(t *testing.T) {
 	qs, names := consensus.MakeTestQuorumSlice(4)
 	nodes := []*Node{}
 	for _, name := range names {
-		node := NewNode(name, qs)
+		node := NewNode(name, qs, nil)
 		node.queue.SetBalance(kp.PublicKey().String(), 100)
 		nodes = append(nodes, node)
 	}
@@ -128,7 +128,7 @@ func nodeFuzzTest(seed int64, t *testing.T) {
 	qs, names := consensus.MakeTestQuorumSlice(4)
 	nodes := []*Node{}
 	for _, name := range names {
-		node := NewNode(name, qs)
+		node := NewNode(name, qs, nil)
 		for _, client := range clients {
 			node.queue.SetBalance(client.PublicKey().String(), initialMoney)
 		}

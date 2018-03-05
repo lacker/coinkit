@@ -54,7 +54,7 @@ func NewServer(config *ServerConfig) *Server {
 	qs := config.Network.QuorumSlice()
 
 	// At the start, all money is in the "mint" account
-	node := NewNode(config.KeyPair.PublicKey(), qs)
+	node := NewNode(config.KeyPair.PublicKey(), qs, nil)
 
 	return &Server{
 		port:                config.Port,

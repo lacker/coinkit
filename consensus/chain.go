@@ -15,9 +15,9 @@ type Chain struct {
 	// The block we are currently working on
 	current *Block
 
-	// Maps slot number to previous blocks
-	// Every block in here should be externalized
-	history map[int]*Block
+	// history tracks blocks that have already been externalized
+	// TODO: just hold a single past block
+	history map[int]*ExternalizeMessage
 
 	// The quorum logic we use for future blocks
 	D QuorumSlice
@@ -48,9 +48,9 @@ func (c *Chain) Handle(sender string, message util.Message) (util.Message, bool)
 
 	// Handle info messages
 	if _, ok := message.(*util.InfoMessage); ok {
-		block := c.history[slot]
-		if block != nil {
-			return block.external, true
+		external := c.history[slot]
+		if external != nil {
+			return external, true
 		}
 		return nil, false
 	}
@@ -61,7 +61,7 @@ func (c *Chain) Handle(sender string, message util.Message) (util.Message, bool)
 			// This block is done, let's move on to the next one
 			c.Logf("advancing to slot %d", slot+1)
 			c.values.Finalize(c.current.external.X)
-			c.history[slot] = c.current
+			c.history[slot] = c.current.external
 			c.current = NewBlock(c.publicKey, c.D, slot+1, c.values)
 		}
 		return nil, false
@@ -74,10 +74,10 @@ func (c *Chain) Handle(sender string, message util.Message) (util.Message, bool)
 	}
 
 	// The sender is behind. Let's send them info for the old block
-	oldBlock := c.history[slot]
-	if oldBlock != nil {
-		c.Logf("sending a catchup for slot %d", oldBlock.external.I)
-		return oldBlock.external, true
+	oldExternal := c.history[slot]
+	if oldExternal != nil {
+		c.Logf("sending a catchup for slot %d", oldExternal.I)
+		return oldExternal, true
 	}
 
 	// We can't help the sender catch up
@@ -93,10 +93,20 @@ func (c *Chain) Slot() int {
 	return c.current.slot
 }
 
+// AlreadyExternalized handles the case where the slot we are working on is
+// already externalized. The caller must know this.
+func (c *Chain) AlreadyExternalized(m *ExternalizeMessage) {
+	if m.I != c.Slot() {
+		panic("slot mismatch")
+	}
+	c.history[m.I] = m
+	c.current = NewBlock(c.publicKey, c.D, m.I+1, c.values)
+}
+
 func NewEmptyChain(publicKey util.PublicKey, qs QuorumSlice, vs ValueStore) *Chain {
 	return &Chain{
 		current:   NewBlock(publicKey, qs, 1, vs),
-		history:   make(map[int]*Block),
+		history:   make(map[int]*ExternalizeMessage),
 		D:         qs,
 		values:    vs,
 		publicKey: publicKey,
@@ -114,7 +124,7 @@ func (c *Chain) OutgoingMessages() []util.Message {
 	prev := c.history[c.current.slot-1]
 	if prev != nil {
 		// We also send out the externalize data for the previous block
-		answer = append(answer, prev.OutgoingMessages()...)
+		answer = append(answer, prev)
 	}
 
 	return answer

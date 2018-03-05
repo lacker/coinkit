@@ -1,6 +1,7 @@
 package data
 
 import (
+	"coinkit/consensus"
 	"coinkit/currency"
 )
 
@@ -15,4 +16,14 @@ type Block struct {
 	// The ballot numbers this node confirmed.
 	C int
 	H int
+}
+
+func (b *Block) ExternalizeMessage(d consensus.QuorumSlice) *consensus.ExternalizeMessage {
+	return &consensus.ExternalizeMessage{
+		I:  b.Slot,
+		X:  b.Chunk.Hash(),
+		Cn: b.C,
+		Hn: b.H,
+		D:  d,
+	}
 }

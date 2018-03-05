@@ -45,8 +45,8 @@ func checkProgress(chains []*Chain, limit int, t *testing.T) {
 		chain := chains[i]
 		for j := 1; j <= limit; j++ {
 			// Check that this chain agrees with the first one for slot j
-			blockValue := chain.history[j].external.X
-			firstValue := first.history[j].external.X
+			blockValue := chain.history[j].X
+			firstValue := first.history[j].X
 			if blockValue != firstValue {
 				log.Printf("%s externalized %+v for slot %d",
 					first.publicKey, firstValue, j)
