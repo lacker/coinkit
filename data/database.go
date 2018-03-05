@@ -3,6 +3,7 @@ package data
 import (
 	"database/sql"
 	"fmt"
+	"log"
 	"os/user"
 	"strings"
 
@@ -93,4 +94,27 @@ func (db *Database) LastBlock() *Block {
 		panic(err)
 	}
 	return answer
+}
+
+// ForBlocks calls f on each block in the db, from lowest to highest number.
+// It returns the number of blocks that were processed.
+func (db *Database) ForBlocks(f func(b *Block)) int {
+	slot := 0
+	rows, err := db.postgres.Queryx("SELECT * FROM blocks ORDER BY slot")
+	if err != nil {
+		panic(err)
+	}
+	for rows.Next() {
+		b := &Block{}
+		err := rows.StructScan(b)
+		if err != nil {
+			panic(err)
+		}
+		if b.Slot != slot+1 {
+			log.Fatal("missing block with slot %d", slot+1)
+		}
+		slot += 1
+		f(b)
+	}
+	return slot
 }

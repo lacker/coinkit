@@ -76,6 +76,30 @@ func TestLastBlock(t *testing.T) {
 	}
 }
 
+func TestForBlocks(t *testing.T) {
+	db := NewTestDatabase()
+	dropAll(db)
+	db = NewTestDatabase()
+	for i := 1; i <= 5; i++ {
+		b := &Block{
+			Slot:  i,
+			Chunk: currency.NewEmptyChunk(),
+			C:     7,
+		}
+		if db.SaveBlock(b) != nil {
+			t.Fatal("block could not save")
+		}
+	}
+	count := db.ForBlocks(func(b *Block) {
+		if b.C != 7 {
+			t.Fatal("expected C = 7")
+		}
+	})
+	if count != 5 {
+		t.Fatal("expected count = 5")
+	}
+}
+
 func dropAll(db *Database) {
 	db.postgres.MustExec("DROP TABLE IF EXISTS blocks")
 }

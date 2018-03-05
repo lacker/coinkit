@@ -5,6 +5,7 @@ import (
 
 	"coinkit/consensus"
 	"coinkit/currency"
+	"coinkit/data"
 	"coinkit/util"
 )
 
@@ -14,6 +15,7 @@ type Node struct {
 	publicKey util.PublicKey
 	chain     *consensus.Chain
 	queue     *currency.TransactionQueue
+	database  *data.Database
 }
 
 func NewNode(publicKey util.PublicKey, qs consensus.QuorumSlice) *Node {
@@ -24,6 +26,13 @@ func NewNode(publicKey util.PublicKey, qs consensus.QuorumSlice) *Node {
 		chain:     consensus.NewEmptyChain(publicKey, qs, queue),
 		queue:     queue,
 	}
+}
+
+func (node *Node) SetDatabase(db *data.Database) {
+	if node.database != nil {
+		panic("may not set database multiple times")
+	}
+	// XXX
 }
 
 // Slot() returns the slot this node is currently working on
