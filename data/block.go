@@ -10,7 +10,6 @@ type Block struct {
 	Slot int
 
 	// The LedgerChunk for this block
-	// TODO: do not let this be nil
 	Chunk *currency.LedgerChunk
 
 	// The ballot numbers this node confirmed.
