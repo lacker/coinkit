@@ -91,6 +91,10 @@ func TestNodeCatchup(t *testing.T) {
 	}
 }
 
+func TestNodeRestarting(t *testing.T) {
+	// TODO
+}
+
 func nodeFuzzTest(seed int64, t *testing.T) {
 	initialMoney := uint64(4)
 

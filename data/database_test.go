@@ -50,9 +50,8 @@ func TestCantSaveTwice(t *testing.T) {
 }
 
 func TestLastBlock(t *testing.T) {
+	DropTestData()
 	db := NewTestDatabase()
-	dropAll(db)
-	db = NewTestDatabase()
 	b := db.LastBlock()
 	if b != nil {
 		t.Fatal("expected last block nil but got %+v", b)
@@ -77,9 +76,8 @@ func TestLastBlock(t *testing.T) {
 }
 
 func TestForBlocks(t *testing.T) {
+	DropTestData()
 	db := NewTestDatabase()
-	dropAll(db)
-	db = NewTestDatabase()
 	for i := 1; i <= 5; i++ {
 		b := &Block{
 			Slot:  i,
@@ -100,15 +98,10 @@ func TestForBlocks(t *testing.T) {
 	}
 }
 
-func dropAll(db *Database) {
-	db.postgres.MustExec("DROP TABLE IF EXISTS blocks")
-}
-
 // Clean up both before and after running tests
 func TestMain(m *testing.M) {
-	db := NewTestDatabase()
-	dropAll(db)
+	DropTestData()
 	answer := m.Run()
-	dropAll(db)
+	DropTestData()
 	os.Exit(answer)
 }

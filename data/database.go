@@ -118,3 +118,8 @@ func (db *Database) ForBlocks(f func(b *Block)) int {
 	}
 	return slot
 }
+
+func DropTestData() {
+	db := NewTestDatabase()
+	db.postgres.MustExec("DROP TABLE IF EXISTS blocks")
+}
