@@ -54,7 +54,9 @@ func NewServer(config *ServerConfig) *Server {
 	qs := config.Network.QuorumSlice()
 
 	// At the start, all money is in the "mint" account
-	node := NewNode(config.KeyPair.PublicKey(), qs, nil)
+	mint := util.NewKeyPairFromSecretPhrase("mint")
+	node := NewNodeWithMint(config.KeyPair.PublicKey(), qs, nil,
+		mint.PublicKey(), currency.TotalMoney)
 
 	return &Server{
 		port:                config.Port,
@@ -77,12 +79,8 @@ func (s *Server) Logf(format string, a ...interface{}) {
 	util.Logf("SE", s.keyPair.PublicKey().ShortName(), format, a...)
 }
 
-func (s *Server) InitMint() {
-	mint := util.NewKeyPairFromSecretPhrase("mint")
-	s.SetBalance(mint.PublicKey().String(), currency.TotalMoney)
-}
-
-func (s *Server) SetBalance(user string, amount uint64) {
+// Only use for testing
+func (s *Server) setBalance(user string, amount uint64) {
 	s.node.queue.SetBalance(user, amount)
 }
 

@@ -32,7 +32,6 @@ func makeServers() []*Server {
 	answer := []*Server{}
 	for _, config := range configs {
 		server := NewServer(config)
-		server.InitMint()
 
 		// In theory rebroadcasts should not be necessary unless we have node failures
 		// or lossy communication channels.
@@ -127,7 +126,7 @@ func benchmarkSendMoney(numConns int, b *testing.B) {
 		kps = append(kps, util.NewKeyPairFromSecretPhrase(fmt.Sprintf("kp%d", i)))
 		chans = append(chans, make(chan bool))
 		for _, server := range servers {
-			server.SetBalance(kps[i].PublicKey().String(), uint64(b.N))
+			server.setBalance(kps[i].PublicKey().String(), uint64(b.N))
 		}
 	}
 	b.ResetTimer()
