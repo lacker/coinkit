@@ -5,6 +5,7 @@ import (
 	"crypto"
 	"crypto/rand"
 	"encoding/base64"
+	"encoding/json"
 
 	"golang.org/x/crypto/ed25519"
 	"golang.org/x/crypto/sha3"
@@ -44,8 +45,45 @@ func NewKeyPairFromSecretPhrase(phrase string) *KeyPair {
 	}
 }
 
+type SerializedKeyPair struct {
+	Public  string
+	Private string
+}
+
+func NewKeyPairFromSerialized(serialized []byte) *KeyPair {
+	s := &SerializedKeyPair{}
+	err := json.Unmarshal(serialized, s)
+	if err != nil {
+		panic(err)
+	}
+	priv, err := base64.RawStdEncoding.DecodeString(s.Private)
+	if err != nil {
+		panic(err)
+	}
+	pub, err := ReadPublicKey(s.Public)
+	if err != nil {
+		panic(err)
+	}
+	return &KeyPair{
+		publicKey:  pub,
+		privateKey: priv,
+	}
+}
+
 func (kp *KeyPair) PublicKey() PublicKey {
 	return kp.publicKey
+}
+
+func (kp *KeyPair) Serialize() []byte {
+	s := &SerializedKeyPair{
+		Public:  kp.publicKey.String(),
+		Private: base64.RawStdEncoding.EncodeToString(kp.privateKey),
+	}
+	bytes, err := json.Marshal(s)
+	if err != nil {
+		panic(err)
+	}
+	return bytes
 }
 
 // Interprets the message as utf8, then returns the signature as base64.

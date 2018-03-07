@@ -1,6 +1,7 @@
 package util
 
 import (
+	"bytes"
 	"testing"
 )
 
@@ -51,5 +52,17 @@ func TestNewKeyPairFromSecretPhrase(t *testing.T) {
 		if Verify(kp.PublicKey(), message2, sig1) {
 			t.Fatal("this should not verify")
 		}
+	}
+}
+
+func TestSerializingKeyPair(t *testing.T) {
+	kp := NewKeyPairFromSecretPhrase("boopaboop")
+	s := kp.Serialize()
+	kp2 := NewKeyPairFromSerialized(s)
+	if !kp.publicKey.Equal(kp2.publicKey) {
+		t.Fatal("public keys not equal")
+	}
+	if bytes.Compare(kp.privateKey, kp2.privateKey) != 0 {
+		t.Fatal("private keys not equal")
 	}
 }

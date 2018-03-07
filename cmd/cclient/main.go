@@ -25,7 +25,6 @@ func newConnection() network.Connection {
 }
 
 // Fetches, displays, and returns the status for a user.
-// TODO: test
 func status(user string) *currency.Account {
 	conn := newConnection()
 	account := network.GetAccount(conn, user)
