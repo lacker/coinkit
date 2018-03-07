@@ -1,6 +1,7 @@
 package network
 
 import (
+	"encoding/json"
 	"fmt"
 	"math"
 	"math/rand"
@@ -19,7 +20,33 @@ func (a *Address) String() string {
 	return fmt.Sprintf("%s:%d", a.Host, a.Port)
 }
 
+type Config struct {
+	// Nodes maps the public key to the address the node is expected to be at.
+	Nodes map[string]*Address
+
+	// Threshold defines the quorum for the network
+	Threshold int
+}
+
+func NewConfigFromSerialized(serialized []byte) *Config {
+	c := &Config{}
+	err := json.Unmarshal(serialized, c)
+	if err != nil {
+		panic(err)
+	}
+	return c
+}
+
+func (c *Config) Serialize() []byte {
+	bytes, err := json.MarshalIndent(c, "", "  ")
+	if err != nil {
+		panic(err)
+	}
+	return append(bytes, '\n')
+}
+
 // Configuration for a network
+// TODO: deprecate in favor of Config
 type NetworkConfig struct {
 	// Nodes that are accepting external connections for this network
 	Nodes []*Address
@@ -30,6 +57,7 @@ type NetworkConfig struct {
 }
 
 // Configuration for a particular server running part of the network
+// TODO: deprecate in favor of Config
 type ServerConfig struct {
 	Network *NetworkConfig
 
