@@ -16,21 +16,31 @@ type Database struct {
 	postgres *sqlx.DB
 }
 
-// Creates a new database handle designed to be used for unit tests.
-func NewTestDatabase(i int) *Database {
+// Creates a database by connecting locally to a postgres instance with no password.
+func NewNoPasswordDatabase(name string) *Database {
 	user, err := user.Current()
 	if err != nil {
 		panic(err)
 	}
 	postgres := sqlx.MustConnect(
 		"postgres",
-		fmt.Sprintf("user=%s dbname=test%d sslmode=disable", user.Username, i))
+		fmt.Sprintf("user=%s dbname=%s sslmode=disable", user.Username, name))
 
 	db := &Database{
 		postgres: postgres,
 	}
 	db.initialize()
 	return db
+}
+
+// Creates a new database handle designed to be used for unit tests.
+func NewTestDatabase(i int) *Database {
+	return NewNoPasswordDatabase(fmt.Sprintf("test%d", i))
+}
+
+// Creates a new database handle designed to be used for the local cluster.
+func NewLocalDatabase(i int) *Database {
+	return NewNoPasswordDatabase(fmt.Sprintf("local%d", i))
 }
 
 const schema = `
