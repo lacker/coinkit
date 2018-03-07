@@ -8,7 +8,7 @@ import (
 )
 
 func TestSaveAndFetch(t *testing.T) {
-	db := NewTestDatabase()
+	db := NewTestDatabase(0)
 	block := &Block{
 		Slot:  3,
 		Chunk: currency.NewEmptyChunk(),
@@ -24,7 +24,7 @@ func TestSaveAndFetch(t *testing.T) {
 }
 
 func TestFetchNonexistentBlock(t *testing.T) {
-	db := NewTestDatabase()
+	db := NewTestDatabase(0)
 	b := db.GetBlock(4)
 	if b != nil {
 		t.Fatal("block should be nonexistent")
@@ -32,7 +32,7 @@ func TestFetchNonexistentBlock(t *testing.T) {
 }
 
 func TestCantSaveTwice(t *testing.T) {
-	db := NewTestDatabase()
+	db := NewTestDatabase(0)
 	block := &Block{
 		Slot:  4,
 		Chunk: currency.NewEmptyChunk(),
@@ -50,8 +50,8 @@ func TestCantSaveTwice(t *testing.T) {
 }
 
 func TestLastBlock(t *testing.T) {
-	DropTestData()
-	db := NewTestDatabase()
+	DropTestData(0)
+	db := NewTestDatabase(0)
 	b := db.LastBlock()
 	if b != nil {
 		t.Fatal("expected last block nil but got %+v", b)
@@ -76,8 +76,8 @@ func TestLastBlock(t *testing.T) {
 }
 
 func TestForBlocks(t *testing.T) {
-	DropTestData()
-	db := NewTestDatabase()
+	DropTestData(0)
+	db := NewTestDatabase(0)
 	for i := 1; i <= 5; i++ {
 		b := &Block{
 			Slot:  i,
@@ -100,8 +100,8 @@ func TestForBlocks(t *testing.T) {
 
 // Clean up both before and after running tests
 func TestMain(m *testing.M) {
-	DropTestData()
+	DropTestData(0)
 	answer := m.Run()
-	DropTestData()
+	DropTestData(0)
 	os.Exit(answer)
 }

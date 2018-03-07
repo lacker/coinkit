@@ -20,7 +20,10 @@ First install Postgres and create a test database.
 ```
 brew install postgres
 brew services start postgresql
-createdb test
+createdb test0
+createdb test1
+createdb test2
+createdb test3
 ```
 
 Then install go on your machine.

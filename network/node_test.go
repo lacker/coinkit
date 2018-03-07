@@ -108,17 +108,37 @@ func TestNodeRestarting(t *testing.T) {
 	}
 
 	// Send 10 to Bob
-	tr := &currency.Transaction{
-		From:     mint.PublicKey().String(),
-		Sequence: 1,
-		To:       bob.PublicKey().String(),
-		Amount:   10,
-		Fee:      0,
+	m := newSendMessage(mint, bob, 1, 10)
+	nodes[0].Handle(mint.PublicKey().String(), m)
+	for i := 0; i < 10; i++ {
+		sendNodeToNodeMessages(nodes[0], nodes[1], t)
+		sendNodeToNodeMessages(nodes[0], nodes[2], t)
+		sendNodeToNodeMessages(nodes[1], nodes[2], t)
+		sendNodeToNodeMessages(nodes[1], nodes[0], t)
+		sendNodeToNodeMessages(nodes[2], nodes[0], t)
+		sendNodeToNodeMessages(nodes[2], nodes[1], t)
 	}
-	ts := []*currency.SignedTransaction{tr.SignWith(mint)}
-	_ = currency.NewTransactionMessage(ts...)
 
-	// TODO
+	// Knock out and replace node 1
+	// nodes[1] = NewNode(names[1], qs, nil)
+
+	// Send another 10 to Bob
+	m = newSendMessage(mint, bob, 2, 10)
+	nodes[0].Handle(mint.PublicKey().String(), m)
+
+	// Even without node 3 the network should continue
+	for i := 0; i < 10; i++ {
+		sendNodeToNodeMessages(nodes[0], nodes[1], t)
+		sendNodeToNodeMessages(nodes[0], nodes[2], t)
+		sendNodeToNodeMessages(nodes[1], nodes[2], t)
+		sendNodeToNodeMessages(nodes[1], nodes[0], t)
+		sendNodeToNodeMessages(nodes[2], nodes[0], t)
+		sendNodeToNodeMessages(nodes[2], nodes[1], t)
+	}
+
+	if nodes[1].queue.MaxBalance() != 980 {
+		t.Fatalf("recovery failed")
+	}
 }
 
 func nodeFuzzTest(seed int64, t *testing.T) {

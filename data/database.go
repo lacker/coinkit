@@ -17,13 +17,14 @@ type Database struct {
 }
 
 // Creates a new database handle designed to be used for unit tests.
-func NewTestDatabase() *Database {
+func NewTestDatabase(i int) *Database {
 	user, err := user.Current()
 	if err != nil {
 		panic(err)
 	}
 	postgres := sqlx.MustConnect(
-		"postgres", fmt.Sprintf("user=%s dbname=test sslmode=disable", user.Username))
+		"postgres",
+		fmt.Sprintf("user=%s dbname=test%d sslmode=disable", user.Username, i))
 
 	db := &Database{
 		postgres: postgres,
@@ -119,7 +120,7 @@ func (db *Database) ForBlocks(f func(b *Block)) int {
 	return slot
 }
 
-func DropTestData() {
-	db := NewTestDatabase()
+func DropTestData(i int) {
+	db := NewTestDatabase(i)
 	db.postgres.MustExec("DROP TABLE IF EXISTS blocks")
 }
