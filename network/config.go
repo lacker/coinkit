@@ -80,7 +80,7 @@ const MaxUnitTestPort = 8999
 
 var nextUnitTestPort = MinUnitTestPort
 
-// Avoids port contention which slows down the tests that use ports
+// Avoids port contention which slows down the tests that use ports.
 func NewUnitTestNetwork() (*NetworkConfig, []*ServerConfig) {
 	rand.Seed(int64(time.Now().Nanosecond()))
 	num := 4
@@ -90,16 +90,6 @@ func NewUnitTestNetwork() (*NetworkConfig, []*ServerConfig) {
 	n, s := NewLocalhostNetwork(nextUnitTestPort, num, rand.Int())
 	nextUnitTestPort += num
 	return n, s
-}
-
-// This miner is aware of the local network but still anonymous.
-func NewMinerConfig() *ServerConfig {
-	networkConfig, _ := NewLocalNetwork()
-	return &ServerConfig{
-		Network: networkConfig,
-		Port:    9999,
-		KeyPair: util.NewKeyPair(),
-	}
 }
 
 func NewLocalNetwork() (*NetworkConfig, []*ServerConfig) {

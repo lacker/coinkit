@@ -5,6 +5,7 @@ import (
 	"os"
 	"strconv"
 
+	"coinkit/data"
 	"coinkit/network"
 )
 
@@ -27,6 +28,7 @@ func main() {
 	}
 
 	_, configs := network.NewLocalNetwork()
-	s := network.NewServer(configs[arg])
+	db := data.NewLocalDatabase(arg)
+	s := network.NewServer(configs[arg], db)
 	s.ServeForever()
 }

@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"coinkit/currency"
+	"coinkit/data"
 	"coinkit/util"
 )
 
@@ -45,7 +46,7 @@ type Server struct {
 	RebroadcastInterval time.Duration
 }
 
-func NewServer(config *ServerConfig) *Server {
+func NewServer(config *ServerConfig, db *data.Database) *Server {
 	peers := []*RedialConnection{}
 	inbox := make(chan *util.SignedMessage)
 	for _, address := range config.Network.Nodes {
@@ -55,7 +56,7 @@ func NewServer(config *ServerConfig) *Server {
 
 	// At the start, all money is in the "mint" account
 	mint := util.NewKeyPairFromSecretPhrase("mint")
-	node := NewNodeWithMint(config.KeyPair.PublicKey(), qs, nil,
+	node := NewNodeWithMint(config.KeyPair.PublicKey(), qs, db,
 		mint.PublicKey(), currency.TotalMoney)
 
 	return &Server{

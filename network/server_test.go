@@ -31,7 +31,8 @@ func makeServers() []*Server {
 	_, configs := NewUnitTestNetwork()
 	answer := []*Server{}
 	for _, config := range configs {
-		server := NewServer(config)
+		// TODO: give the servers databases
+		server := NewServer(config, nil)
 
 		// In theory rebroadcasts should not be necessary unless we have node failures
 		// or lossy communication channels.
@@ -166,7 +167,7 @@ func BenchmarkSendMoney30(b *testing.B) {
 
 func TestServerOkayWithFakeWellFormattedMessage(t *testing.T) {
 	_, configs := NewUnitTestNetwork()
-	s := NewServer(configs[0])
+	s := NewServer(configs[0], nil)
 
 	m := &FakeMessage{Number: 4}
 	kp := util.NewKeyPairFromSecretPhrase("foo")
