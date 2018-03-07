@@ -1,34 +1,61 @@
 package main
 
 import (
+	"flag"
+	"io/ioutil"
 	"log"
-	"os"
-	"strconv"
 
 	"coinkit/data"
 	"coinkit/network"
+	"coinkit/util"
 )
 
 // cserver runs a coinkit server.
 
-func usage() {
-	log.Fatal("Usage: cserver <i> where i is in [0, 1, 2, 3]")
-}
-
 func main() {
-	if len(os.Args) < 2 {
-		usage()
-	}
-	arg, err := strconv.Atoi(os.Args[1])
-	if err != nil {
-		log.Fatal(err)
-	}
-	if arg < 0 || arg > 3 {
-		usage()
+	var databaseFilename string
+	var keyPairFilename string
+	var networkFilename string
+
+	flag.StringVar(&databaseFilename,
+		"database", "", "the file to load database config from")
+	flag.StringVar(&keyPairFilename,
+		"keypair", "", "the file to load keypair config from")
+	flag.StringVar(&networkFilename,
+		"network", "", "the file to load network config from")
+	flag.Parse()
+
+	if databaseFilename == "" {
+		log.Fatal("the --database flag must be set")
 	}
 
-	config, kps := network.NewLocalNetwork()
-	db := data.NewLocalDatabase(arg)
-	s := network.NewServer(kps[arg], config, db)
+	if keyPairFilename == "" {
+		log.Fatal("the --keypair flag must be set")
+	}
+
+	if networkFilename == "" {
+		log.Fatal("the --network flag must be set")
+	}
+
+	bytes, err := ioutil.ReadFile(databaseFilename)
+	if err != nil {
+		panic(err)
+	}
+	dbConfig := data.NewConfigFromSerialized(bytes)
+
+	bytes, err = ioutil.ReadFile(keyPairFilename)
+	if err != nil {
+		panic(err)
+	}
+	kp := util.NewKeyPairFromSerialized(bytes)
+
+	bytes, err = ioutil.ReadFile(networkFilename)
+	if err != nil {
+		panic(err)
+	}
+	net := network.NewConfigFromSerialized(bytes)
+
+	db := data.NewDatabase(dbConfig)
+	s := network.NewServer(kp, net, db)
 	s.ServeForever()
 }
