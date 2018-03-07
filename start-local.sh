@@ -7,6 +7,10 @@ if [ ! -d "$LOGS" ]; then
     exit 1
 fi
 
+if [ `pwd | sed s/.*src//` != "/coinkit" ]; then
+   echo "please run this from the coinkit directory"
+fi
+
 RUNNING=`pgrep ^cserver`
 if [ -n "$RUNNING" ]
 then
@@ -26,7 +30,10 @@ fi
 
 for i in `seq 0 3`;
 do
-    nohup cserver $i &> $LOGS/cserver$i.log &
+    ARGS="--database=./local/database$i.json"
+    ARGS="$ARGS --keypair=./local/keypair$i.json"
+    ARGS="$ARGS --network=./local/network.json"
+    nohup cserver $ARGS &> $LOGS/cserver$i.log &
 done 
 
 sleep 0.1

@@ -3,6 +3,7 @@ package network
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"math"
 	"math/rand"
 	"time"
@@ -32,6 +33,7 @@ func NewConfigFromSerialized(serialized []byte) *Config {
 	c := &Config{}
 	err := json.Unmarshal(serialized, c)
 	if err != nil {
+		log.Printf("bad network config: %s", string(serialized))
 		panic(err)
 	}
 	return c
