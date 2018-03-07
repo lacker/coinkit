@@ -46,22 +46,22 @@ type Server struct {
 	RebroadcastInterval time.Duration
 }
 
-func NewServer(config *ServerConfig, db *data.Database) *Server {
+func NewServer(keyPair *util.KeyPair, config *Config, db *data.Database) *Server {
 	peers := []*RedialConnection{}
 	inbox := make(chan *util.SignedMessage)
-	for _, address := range config.Network.Nodes {
+	for _, address := range config.PeerAddresses(keyPair) {
 		peers = append(peers, NewRedialConnection(address, inbox))
 	}
-	qs := config.Network.QuorumSlice()
+	qs := config.QuorumSlice()
 
 	// At the start, all money is in the "mint" account
 	mint := util.NewKeyPairFromSecretPhrase("mint")
-	node := NewNodeWithMint(config.KeyPair.PublicKey(), qs, db,
+	node := NewNodeWithMint(keyPair.PublicKey(), qs, db,
 		mint.PublicKey(), currency.TotalMoney)
 
 	return &Server{
-		port:                config.Port,
-		keyPair:             config.KeyPair,
+		port:                config.Port(keyPair.PublicKey().String()),
+		keyPair:             keyPair,
 		peers:               peers,
 		node:                node,
 		outgoing:            make(chan []*util.SignedMessage, 10),

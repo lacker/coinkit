@@ -27,8 +27,8 @@ func main() {
 		usage()
 	}
 
-	_, configs := network.NewLocalNetwork()
+	config, kps := network.NewLocalNetwork()
 	db := data.NewLocalDatabase(arg)
-	s := network.NewServer(configs[arg], db)
+	s := network.NewServer(kps[arg], config, db)
 	s.ServeForever()
 }

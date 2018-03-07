@@ -7,13 +7,13 @@ import (
 
 func TestSerializingConfig(t *testing.T) {
 	c := &Config{
-		Nodes:     make(map[string]*Address),
+		Servers:   make(map[string]*Address),
 		Threshold: 3,
 	}
-	c.Nodes["a"] = &Address{Host: "a", Port: 1}
-	c.Nodes["b"] = &Address{Host: "b", Port: 2}
-	c.Nodes["c"] = &Address{Host: "c", Port: 3}
-	c.Nodes["d"] = &Address{Host: "d", Port: 4}
+	c.Servers["a"] = &Address{Host: "a", Port: 1}
+	c.Servers["b"] = &Address{Host: "b", Port: 2}
+	c.Servers["c"] = &Address{Host: "c", Port: 3}
+	c.Servers["d"] = &Address{Host: "d", Port: 4}
 
 	s := c.Serialize()
 	c2 := NewConfigFromSerialized(s)
