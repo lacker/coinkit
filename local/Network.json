@@ -1,0 +1,21 @@
+{
+    Servers: {
+	"0xf5138d1de5046cdd3810a8d597b7781c00f5533120d7c958d48a319eb4f776e6c8d9": {
+	    Host: "127.0.0.1",
+	    Port: 9000
+	},
+	"0xed019c7dcc2ef0ce0b853781c55d147d60f0a1bca2ab0bbb774a203a8b36534a4e0e": {
+	    Host: "127.0.0.1",
+	    Port: 9001
+	},
+	"0xb3b304b3c05fdee0533e91a84a5ec56d4b3f14ff8319e9570a224933a760ae52f091": {
+	    Host: "127.0.0.1",
+	    Port: 9002
+	},
+	"0x352f5f621e60062f8552772a812244737f6f3a14be362856a1d8f66a9792e5fcb113": {
+	    Host: "127.0.0.1",
+	    Port: 9003
+	}
+    },
+    Threshold: 3
+}

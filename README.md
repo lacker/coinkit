@@ -110,4 +110,5 @@ go test ./network -run=zzz -bench=BenchmarkSendMoney30$ -benchtime=20s
 * `consensus`: The logic to run the SCP. This is how blocks are formed.
 * `currency`: The financial logic for accounts to process transactions.
 * `data`: The code that interacts with Postgres to store past blocks.
+* `local`: Configuration for running a testnet with all nodes on the local machine.
 * `network`: The networking wrapper to run a server and communicate with peers.

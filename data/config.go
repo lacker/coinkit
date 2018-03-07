@@ -21,6 +21,7 @@ func NewTestConfig(i int) *Config {
 	}
 }
 
+// TODO: deprecate
 func NewLocalConfig(i int) *Config {
 	return &Config{
 		Database: fmt.Sprintf("local%d", i),
