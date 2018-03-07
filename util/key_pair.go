@@ -79,11 +79,11 @@ func (kp *KeyPair) Serialize() []byte {
 		Public:  kp.publicKey.String(),
 		Private: base64.RawStdEncoding.EncodeToString(kp.privateKey),
 	}
-	bytes, err := json.Marshal(s)
+	bytes, err := json.MarshalIndent(s, "", "  ")
 	if err != nil {
 		panic(err)
 	}
-	return bytes
+	return append(bytes, '\n')
 }
 
 // Interprets the message as utf8, then returns the signature as base64.
