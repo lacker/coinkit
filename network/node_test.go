@@ -8,6 +8,7 @@ import (
 
 	"coinkit/consensus"
 	"coinkit/currency"
+	"coinkit/data"
 	"coinkit/util"
 )
 
@@ -101,8 +102,10 @@ func TestNodeRestarting(t *testing.T) {
 	bob := util.NewKeyPairFromSecretPhrase("bob")
 	qs, names := consensus.MakeTestQuorumSlice(4)
 	nodes := []*Node{}
-	for _, name := range names {
-		node := NewNode(name, qs, nil)
+	for i, name := range names {
+		data.DropTestData(i)
+		db := data.NewTestDatabase(i)
+		node := NewNodeWithMint(name, qs, db, mint.PublicKey(), 1000)
 		node.queue.SetBalance(mint.PublicKey().String(), 1000)
 		nodes = append(nodes, node)
 	}
@@ -120,7 +123,7 @@ func TestNodeRestarting(t *testing.T) {
 	}
 
 	// Knock out and replace node 1
-	// nodes[1] = NewNode(names[1], qs, nil)
+	nodes[1] = NewNodeWithMint(names[1], qs, data.NewTestDatabase(1), mint.PublicKey(), 1000)
 
 	// Send another 10 to Bob
 	m = newSendMessage(mint, bob, 2, 10)

@@ -21,9 +21,14 @@ type Node struct {
 	slot      int
 }
 
-func NewNode(
-	publicKey util.PublicKey, qs consensus.QuorumSlice, db *data.Database) *Node {
+// Creates a node for a blockchain that starts with one mint account having a balance.
+func NewNodeWithMint(publicKey util.PublicKey, qs consensus.QuorumSlice,
+	db *data.Database, mint util.PublicKey, balance uint64) *Node {
+
 	queue := currency.NewTransactionQueue(publicKey)
+	if balance != 0 {
+		queue.SetBalance(mint.String(), balance)
+	}
 
 	node := &Node{
 		publicKey: publicKey,
@@ -34,14 +39,22 @@ func NewNode(
 	}
 
 	if db != nil {
-		node.slot = db.ForBlocks(func(b *data.Block) {
+		loaded := db.ForBlocks(func(b *data.Block) {
 			m := b.ExternalizeMessage(qs)
 			node.chain.AlreadyExternalized(m)
 			node.queue.FinalizeChunk(b.Chunk)
 		})
+		log.Printf("loaded %d old blocks from the database", loaded)
+		node.slot = loaded + 1
 	}
 
 	return node
+}
+
+func NewNode(
+	publicKey util.PublicKey, qs consensus.QuorumSlice, db *data.Database) *Node {
+	var invalid util.PublicKey
+	return NewNodeWithMint(publicKey, qs, db, invalid, 0)
 }
 
 // Slot() returns the slot this node is currently working on
