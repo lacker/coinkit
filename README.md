@@ -20,10 +20,6 @@ First install Postgres and create a test database.
 ```
 brew install postgres
 brew services start postgresql
-createdb test0
-createdb test1
-createdb test2
-createdb test3
 ```
 
 Then install go on your machine.
@@ -41,9 +37,12 @@ I suggest adding `$GOPATH/bin` to your `$PATH` - if you don't, you'll have to ru
 `$GOPATH/bin/cclient` instead of just `cclient`, and so on.
 
 ```
-# First install dependencies
+# Install dependencies
 cd ~/go/src/coinkit
 go get -t ./...
+
+# Create databases
+./create-databases.sh
 
 # Run the unit tests
 go test ./...
