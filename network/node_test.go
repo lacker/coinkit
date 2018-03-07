@@ -39,6 +39,10 @@ func maxAccountBalance(nodes []*Node) uint64 {
 	return answer
 }
 
+func newSendMessage(from *util.KeyPair, to *util.KeyPair, amount int) *util.SignedMessage {
+	return nil
+}
+
 func TestNodeCatchup(t *testing.T) {
 	kp := util.NewKeyPairFromSecretPhrase("client")
 	kp2 := util.NewKeyPairFromSecretPhrase("bob")
@@ -92,6 +96,27 @@ func TestNodeCatchup(t *testing.T) {
 }
 
 func TestNodeRestarting(t *testing.T) {
+	mint := util.NewKeyPairFromSecretPhrase("mint")
+	bob := util.NewKeyPairFromSecretPhrase("bob")
+	qs, names := consensus.MakeTestQuorumSlice(4)
+	nodes := []*Node{}
+	for _, name := range names {
+		node := NewNode(name, qs, nil)
+		node.queue.SetBalance(mint.PublicKey().String(), 1000)
+		nodes = append(nodes, node)
+	}
+
+	// Send 10 to Bob
+	tr := &currency.Transaction{
+		From:     mint.PublicKey().String(),
+		Sequence: 1,
+		To:       bob.PublicKey().String(),
+		Amount:   10,
+		Fee:      0,
+	}
+	ts := []*currency.SignedTransaction{tr.SignWith(mint)}
+	_ = currency.NewTransactionMessage(ts...)
+
 	// TODO
 }
 
