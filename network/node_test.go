@@ -39,8 +39,17 @@ func maxAccountBalance(nodes []*Node) uint64 {
 	return answer
 }
 
-func newSendMessage(from *util.KeyPair, to *util.KeyPair, amount int) *util.SignedMessage {
-	return nil
+func newSendMessage(from *util.KeyPair, to *util.KeyPair, seq int, amount int) util.Message {
+
+	tr := &currency.Transaction{
+		From:     from.PublicKey().String(),
+		Sequence: uint32(seq),
+		To:       to.PublicKey().String(),
+		Amount:   uint64(amount),
+		Fee:      0,
+	}
+	ts := []*currency.SignedTransaction{tr.SignWith(from)}
+	return currency.NewTransactionMessage(ts...)
 }
 
 func TestNodeCatchup(t *testing.T) {
@@ -56,15 +65,7 @@ func TestNodeCatchup(t *testing.T) {
 
 	// Run a few rounds with the first three nodes
 	for round := 1; round <= 3; round++ {
-		tr := &currency.Transaction{
-			From:     kp.PublicKey().String(),
-			Sequence: uint32(round),
-			To:       kp2.PublicKey().String(),
-			Amount:   1,
-			Fee:      0,
-		}
-		ts := []*currency.SignedTransaction{tr.SignWith(kp)}
-		m := currency.NewTransactionMessage(ts...)
+		m := newSendMessage(kp, kp2, round, 1)
 		nodes[0].Handle(kp.PublicKey().String(), m)
 		for i := 0; i < 10; i++ {
 			sendNodeToNodeMessages(nodes[0], nodes[1], t)
