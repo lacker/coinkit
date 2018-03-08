@@ -21,14 +21,6 @@ func NewTestConfig(i int) *Config {
 	}
 }
 
-// TODO: deprecate
-func NewLocalConfig(i int) *Config {
-	return &Config{
-		Database: fmt.Sprintf("local%d", i),
-		User:     "$USER",
-	}
-}
-
 func NewConfigFromSerialized(serialized []byte) *Config {
 	c := &Config{}
 	err := json.Unmarshal(serialized, c)

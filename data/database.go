@@ -38,11 +38,6 @@ func NewTestDatabase(i int) *Database {
 	return NewDatabase(NewTestConfig(i))
 }
 
-// Creates a new database handle designed to be used for the local cluster.
-func NewLocalDatabase(i int) *Database {
-	return NewDatabase(NewLocalConfig(i))
-}
-
 const schema = `
 CREATE TABLE IF NOT EXISTS blocks (
     slot integer,
