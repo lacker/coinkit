@@ -1,6 +1,8 @@
-# Deploying to Google Cloud Platform
+# Running a testnet
 
-This directory is operational tools for running the alpha testnet, deploying to GCP.
+This directory contains operational tools for running the alpha testnet.
+
+This instructions specifically explain how to deploy a miner to the Google Cloud Platform.
 
 ### 1. Set up a GCP account and install the Cloud Tools
 
