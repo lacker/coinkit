@@ -1,9 +1,11 @@
 package network
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"net"
+	"net/http"
 	"time"
 
 	"coinkit/currency"
@@ -373,6 +375,25 @@ func (s *Server) ServeInBackground() {
 	go s.processMessagesForever()
 	go s.listen()
 	go s.broadcastIntermittently()
+}
+
+// ServeHealthzInBackground spawns a goroutine to serve a /healthz url.
+// It simply returns "OK" as long as the server is running.
+func (s *Server) ServeHealthzInBackground(port int) {
+	http.HandleFunc("/healthz", func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprintf(w, "OK\n")
+	})
+
+	srv := &http.Server{
+		Addr: fmt.Sprintf(":%d", port),
+	}
+
+	go srv.ListenAndServe()
+
+	go func() {
+		<-s.quit
+		srv.Shutdown(context.Background())
+	}()
 }
 
 func (s *Server) Stats() {

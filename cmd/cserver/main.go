@@ -16,18 +16,16 @@ func main() {
 	var databaseFilename string
 	var keyPairFilename string
 	var networkFilename string
+	var healthz int
 
 	flag.StringVar(&databaseFilename,
-		"database", "", "the file to load database config from")
+		"database", "", "optional. the file to load database config from")
 	flag.StringVar(&keyPairFilename,
 		"keypair", "", "the file to load keypair config from")
 	flag.StringVar(&networkFilename,
 		"network", "", "the file to load network config from")
+	flag.IntVar(&healthz, "healthz", 0, "the port to serve /healthz on")
 	flag.Parse()
-
-	if databaseFilename == "" {
-		log.Fatal("the --database flag must be set")
-	}
 
 	if keyPairFilename == "" {
 		log.Fatal("the --keypair flag must be set")
@@ -37,13 +35,17 @@ func main() {
 		log.Fatal("the --network flag must be set")
 	}
 
-	bytes, err := ioutil.ReadFile(databaseFilename)
-	if err != nil {
-		panic(err)
+	var db *data.Database
+	if databaseFilename != "" {
+		bytes, err := ioutil.ReadFile(databaseFilename)
+		if err != nil {
+			panic(err)
+		}
+		dbConfig := data.NewConfigFromSerialized(bytes)
+		db = data.NewDatabase(dbConfig)
 	}
-	dbConfig := data.NewConfigFromSerialized(bytes)
 
-	bytes, err = ioutil.ReadFile(keyPairFilename)
+	bytes, err := ioutil.ReadFile(keyPairFilename)
 	if err != nil {
 		panic(err)
 	}
@@ -55,7 +57,9 @@ func main() {
 	}
 	net := network.NewConfigFromSerialized(bytes)
 
-	db := data.NewDatabase(dbConfig)
 	s := network.NewServer(kp, net, db)
+	if healthz != 0 {
+		s.ServeHealthzInBackground(healthz)
+	}
 	s.ServeForever()
 }
