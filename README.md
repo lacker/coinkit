@@ -29,8 +29,8 @@ brew install go
 ```
 
 You will need to set up a `GOPATH`, and then clone this repo into the `src`
-directory under your gopath. If you have no other preference, I suggest making
-`~/go` your `GOPATH` and cloning this repo into `~/go/src/coinkit`.
+directory under your gopath. I suggest making `~/go` your `GOPATH`. Then, you
+should clone this repo into `$GOPATH/src/github.com/lacker/coinkit`.
 
 When you build this repo, it creates multiple binaries in `$GOPATH/bin`.
 I suggest adding `$GOPATH/bin` to your `$PATH` - if you don't, you'll have to run
@@ -38,7 +38,7 @@ I suggest adding `$GOPATH/bin` to your `$PATH` - if you don't, you'll have to ru
 
 ```
 # Install dependencies
-cd ~/go/src/coinkit
+cd ~/go/src/github.com/lacker/coinkit
 go get -t ./...
 
 # Create databases
@@ -53,7 +53,7 @@ go install ./...
 
 ## How to run it
 
-Commands are from the `~/go/src/coinkit` directory.
+Commands are from the `~/go/src/github.com/lacker/coinkit` directory.
 
 To run a local cluster of four cservers:
 
