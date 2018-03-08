@@ -116,7 +116,7 @@ func NewLocalhostNetwork(
 }
 
 const MinUnitTestPort = 2000
-const MaxUnitTestPort = 8999
+const MaxUnitTestPort = 6999
 
 var nextUnitTestPort = MinUnitTestPort
 
@@ -132,6 +132,7 @@ func NewUnitTestNetwork() (*Config, []*util.KeyPair) {
 	return config, kps
 }
 
-func NewLocalNetwork() (*Config, []*util.KeyPair) {
-	return NewLocalhostNetwork(9000, 4, 0)
+func NewLocalNetworkConfig() *Config {
+	config, _ := NewLocalhostNetwork(9000, 4, 0)
+	return config
 }

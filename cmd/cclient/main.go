@@ -17,7 +17,7 @@ import (
 )
 
 func newConnection() network.Connection {
-	config, _ := network.NewLocalNetwork()
+	config := network.NewLocalNetworkConfig()
 	address := config.RandomAddress()
 	c := network.NewRedialConnection(address, nil)
 	log.Printf("connecting to %s", address.String())
