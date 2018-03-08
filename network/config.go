@@ -66,7 +66,11 @@ func (c *Config) QuorumSlice() consensus.QuorumSlice {
 }
 
 func (c *Config) Port(publicKey string) int {
-	return c.Servers[publicKey].Port
+	addr := c.Servers[publicKey]
+	if addr == nil {
+		log.Fatalf("No port could be found for %s in the network config.", publicKey)
+	}
+	return addr.Port
 }
 
 func (c *Config) RandomAddress() *Address {
