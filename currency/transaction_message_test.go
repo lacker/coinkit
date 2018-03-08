@@ -3,7 +3,7 @@ package currency
 import (
 	"testing"
 
-	"coinkit/util"
+	"github.com/lacker/coinkit/util"
 )
 
 func TestTransactionMessages(t *testing.T) {

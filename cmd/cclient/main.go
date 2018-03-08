@@ -8,9 +8,9 @@ import (
 
 	"github.com/davecgh/go-spew/spew"
 
-	"coinkit/currency"
-	"coinkit/network"
-	"coinkit/util"
+	"github.com/lacker/coinkit/currency"
+	"github.com/lacker/coinkit/network"
+	"github.com/lacker/coinkit/util"
 	"fmt"
 	"net/http"
 	"strings"
@@ -116,7 +116,7 @@ func proxy() {
 	http.ListenAndServe(":9090", nil)
 }
 
-// cclient runs a client that connects to the coinkit network.
+// cclient runs a client that connects to the github.com/lacker/coinkit network.
 func main() {
 	if len(os.Args) < 2 {
 		log.Fatal("Usage: cclient {generate,proxy,send,status} ...")

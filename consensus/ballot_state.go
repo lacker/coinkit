@@ -4,7 +4,7 @@ import (
 	"log"
 	"sort"
 
-	"coinkit/util"
+	"github.com/lacker/coinkit/util"
 )
 
 // The ballot state for the Stellar Consensus Protocol.

@@ -4,7 +4,7 @@ import (
 	"os"
 	"testing"
 
-	"coinkit/currency"
+	"github.com/lacker/coinkit/currency"
 )
 
 func TestSaveAndFetch(t *testing.T) {

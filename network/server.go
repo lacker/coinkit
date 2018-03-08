@@ -8,9 +8,9 @@ import (
 	"net/http"
 	"time"
 
-	"coinkit/currency"
-	"coinkit/data"
-	"coinkit/util"
+	"github.com/lacker/coinkit/currency"
+	"github.com/lacker/coinkit/data"
+	"github.com/lacker/coinkit/util"
 )
 
 type Server struct {

@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"testing"
 
-	"coinkit/util"
+	"github.com/lacker/coinkit/util"
 )
 
 func TestTestTransactionVerifies(t *testing.T) {

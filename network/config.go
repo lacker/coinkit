@@ -8,8 +8,8 @@ import (
 	"math/rand"
 	"time"
 
-	"coinkit/consensus"
-	"coinkit/util"
+	"github.com/lacker/coinkit/consensus"
+	"github.com/lacker/coinkit/util"
 )
 
 type Address struct {

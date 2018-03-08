@@ -3,10 +3,10 @@ package network
 import (
 	"log"
 
-	"coinkit/consensus"
-	"coinkit/currency"
-	"coinkit/data"
-	"coinkit/util"
+	"github.com/lacker/coinkit/consensus"
+	"github.com/lacker/coinkit/currency"
+	"github.com/lacker/coinkit/data"
+	"github.com/lacker/coinkit/util"
 )
 
 // Node is the logical container for everything one node in the network handles.

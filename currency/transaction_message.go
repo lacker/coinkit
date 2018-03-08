@@ -5,8 +5,8 @@ import (
 	"sort"
 	"strings"
 
-	"coinkit/consensus"
-	"coinkit/util"
+	"github.com/lacker/coinkit/consensus"
+	"github.com/lacker/coinkit/util"
 )
 
 // A TransactionMessage has a list of transactions. Each of the transactions

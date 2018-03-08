@@ -3,7 +3,7 @@ package consensus
 import (
 	"strings"
 	
-	"coinkit/util"
+	"github.com/lacker/coinkit/util"
 )
 
 // The nomination message format of the Stellar Consensus Protocol.

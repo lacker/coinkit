@@ -6,8 +6,8 @@ import (
 	"testing"
 	"time"
 
-	"coinkit/currency"
-	"coinkit/util"
+	"github.com/lacker/coinkit/currency"
+	"github.com/lacker/coinkit/util"
 )
 
 // FakeMessage implements util.Message but does not get registered

@@ -3,8 +3,8 @@ package network
 import (
 	"log"
 
-	"coinkit/currency"
-	"coinkit/util"
+	"github.com/lacker/coinkit/currency"
+	"github.com/lacker/coinkit/util"
 )
 
 type Connection interface {

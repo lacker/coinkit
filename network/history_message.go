@@ -3,9 +3,9 @@ package network
 import (
 	"fmt"
 
-	"coinkit/consensus"
-	"coinkit/currency"
-	"coinkit/util"
+	"github.com/lacker/coinkit/consensus"
+	"github.com/lacker/coinkit/currency"
+	"github.com/lacker/coinkit/util"
 )
 
 // A HistoryMessage is sent when the other node is far behind and needs to catch up

@@ -6,10 +6,10 @@ import (
 	"math/rand"
 	"testing"
 
-	"coinkit/consensus"
-	"coinkit/currency"
-	"coinkit/data"
-	"coinkit/util"
+	"github.com/lacker/coinkit/consensus"
+	"github.com/lacker/coinkit/currency"
+	"github.com/lacker/coinkit/data"
+	"github.com/lacker/coinkit/util"
 )
 
 func sendNodeToNodeMessages(source *Node, target *Node, t *testing.T) {

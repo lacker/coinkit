@@ -3,7 +3,7 @@ package network
 import (
 	"time"
 
-	"coinkit/util"
+	"github.com/lacker/coinkit/util"
 )
 
 // The convention for handling a Request is that you send the response

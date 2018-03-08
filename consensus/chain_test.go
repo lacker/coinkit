@@ -5,7 +5,7 @@ import (
 	"math/rand"
 	"testing"
 
-	"coinkit/util"
+	"github.com/lacker/coinkit/util"
 )
 
 // Simulate the sending of messages from source to target

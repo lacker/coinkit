@@ -5,7 +5,7 @@ import (
 	"strings"
 	"sort"
 
-	"coinkit/util"
+	"github.com/lacker/coinkit/util"
 )
 
 // See page 23 of the protocol paper for a description of balloting.

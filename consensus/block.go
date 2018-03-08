@@ -3,7 +3,7 @@ package consensus
 import (
 	"log"
 
-	"coinkit/util"
+	"github.com/lacker/coinkit/util"
 )
 
 // consensus.Block implements the convergence algorithm for a single block,

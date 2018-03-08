@@ -7,7 +7,7 @@ import (
 	"sync"
 	"time"
 
-	"coinkit/util"
+	"github.com/lacker/coinkit/util"
 )
 
 // How frequently in seconds to send keepalive pings

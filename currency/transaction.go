@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strings"
 
-	"coinkit/util"
+	"github.com/lacker/coinkit/util"
 )
 
 type Transaction struct {

@@ -6,7 +6,7 @@ import (
 	"math/rand"
 	"testing"
 
-	"coinkit/util"
+	"github.com/lacker/coinkit/util"
 
 	"github.com/davecgh/go-spew/spew"
 )

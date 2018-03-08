@@ -5,9 +5,9 @@ import (
 	"io/ioutil"
 	"log"
 
-	"coinkit/data"
-	"coinkit/network"
-	"coinkit/util"
+	"github.com/lacker/coinkit/data"
+	"github.com/lacker/coinkit/network"
+	"github.com/lacker/coinkit/util"
 )
 
 // cserver runs a coinkit server.

@@ -9,7 +9,7 @@ import (
 
 	"golang.org/x/crypto/sha3"
 
-	"coinkit/consensus"
+	"github.com/lacker/coinkit/consensus"
 )
 
 // MaxChunkSize defines how many items can be put in a chunk

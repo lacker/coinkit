@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"coinkit/util"
+	"github.com/lacker/coinkit/util"
 )
 
 // An AccountMessage is used for sharing information about the state of

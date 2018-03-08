@@ -3,7 +3,7 @@ package consensus
 import (
 	"fmt"
 
-	"coinkit/util"
+	"github.com/lacker/coinkit/util"
 )
 
 type QuorumSlice struct {

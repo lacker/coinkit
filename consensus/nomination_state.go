@@ -1,7 +1,7 @@
 package consensus
 
 import (
-	"coinkit/util"
+	"github.com/lacker/coinkit/util"
 )
 
 // The nomination state for the Stellar Consensus Protocol.

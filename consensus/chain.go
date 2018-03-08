@@ -5,7 +5,7 @@ import (
 
 	"github.com/davecgh/go-spew/spew"
 
-	"coinkit/util"
+	"github.com/lacker/coinkit/util"
 )
 
 // Chain creates the blockchain, gaining consensus on one Block at a time.

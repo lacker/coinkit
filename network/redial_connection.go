@@ -6,7 +6,7 @@ import (
 	"sync"
 	"time"
 
-	"coinkit/util"
+	"github.com/lacker/coinkit/util"
 )
 
 // A RedialConnection is a Connection that will automatically redial when there

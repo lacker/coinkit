@@ -3,7 +3,7 @@ package currency
 import (
 	"testing"
 
-	"coinkit/util"
+	"github.com/lacker/coinkit/util"
 )
 
 func TestFullQueue(t *testing.T) {
