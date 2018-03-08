@@ -28,6 +28,13 @@ gcloud config set project coinkitalpha
 gcloud config set compute/zone us-central1-a
 ```
 
+It is handy to have `PROJECT_ID` set to the name of your GCP project in your shell,
+so add this to your bash config:
+
+```
+export PROJECT_ID="$(gcloud config get-value project -q)"
+```
+
 ### 2. Install Docker
 
 https://www.docker.com/community-edition
@@ -55,11 +62,3 @@ Server:
   Experimental:	true
 ```
 
-### 3. Install Kubernetes
-
-```
-$ brew install kubernetes-cli
-...
-$ kubectl version
-Client Version: version.Info{Major:"1", Minor:"9", GitVersion:"v1.9.3", GitCommit:"d2835416544f298c919e2ead3be3d0864b52323b", GitTreeState:"clean", BuildDate:"2018-02-09T21:51:54Z", GoVersion:"go1.9.4", Compiler:"gc", Platform:"darwin/amd64"}
-```
