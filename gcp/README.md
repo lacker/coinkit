@@ -1,9 +1,9 @@
 # Deploying to Google Cloud Platform
 
-First, set up a GCP account and install the Cloud Tools.
+1. Set up a GCP account and install the Cloud Tools.
 
 https://cloud.google.com/sdk/docs/
 
-Install Docker:
+2. Install Docker:
 
 https://www.docker.com/community-edition
