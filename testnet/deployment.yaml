@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: cserver
-        image: gcr.io/coinkitalpha/cserver
+        image: gcr.io/PROJECT_ID/cserver
         ports:
         - containerPort: 8000
         - containerPort: 9000

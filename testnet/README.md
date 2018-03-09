@@ -102,11 +102,8 @@ gcloud container clusters create testnet --num-nodes=1
 To deploy a `cserver` to your cluster, run:
 
 ```
-kubectl apply -f ./deployment.yaml
+./deploy.sh
 ```
-
-TODO: this actually grabs the image from *my* container registry. It
-seems like this should use everyone's own image.
 
 This same command should also update the deployment, when a new
 "latest" image exists or when the yaml file has been updated.
