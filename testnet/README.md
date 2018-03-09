@@ -108,19 +108,37 @@ To deploy a `cserver` to your cluster, run:
 This same command should also update the deployment, when a new
 "latest" image exists or when the yaml file has been updated.
 
-Once the cserver deployment exists, expose it to the internet, with a
-load balancer service named `cservice`:
+TODO: change below here, the load balancer is needless. Try setting up
+service.yaml somehow instead
+
+
+XXX TRY:
+kubectl apply -f ./service.yaml
+XXX BUT:
+i'm pretty sure the labels are wrong. I don't know what they are
+supposed to be for, but I don't see how the service can attach to the deployment.
+
+# Bad instructions:
+
+Now we expose our deployment to the internet with a
+load balancer service named `loadbalancer`:
 
 ```
-kubectl expose deployment cserver-deployment --type=LoadBalancer --name=cservice
+kubectl expose deployment cserver --type=LoadBalancer --name=loadbalancer
 ```
 
-To figure out what its external IP is:
+To see what its external IP is:
 
 ```
-kubectl get services cservice
+kubectl get services loadbalancer
 ```
 
-It might take a little while to bind to an external IP. Once it binds,
+It might take a couple minutes to bind to your external IP. Once it binds,
 check `your.ip.address:8000/healthz` in your browser. If it says `OK`,
 you are successfully running a cserver.
+
+To make this a static IP address, the easiest way is to go to
+https://console.cloud.google.com/projectselector/networking/addresses/list
+and use the GUI to change it to "static". It's the one listed as a
+"forwarding rule". I couldn't figure out how to
+do this from the CLI, but I'm sure there is a way :P
