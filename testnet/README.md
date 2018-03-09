@@ -64,3 +64,58 @@ Server:
   Experimental:	true
 ```
 
+### 3. Make a container image
+
+From the `testnet` directory, first you need to build it:
+
+```
+docker build --no-cache -t gcr.io/${PROJECT_ID}/cserver .
+```
+
+The `--no-cache` is needed because the build process grabs fresh code from GitHub, and
+if you enable the cache it'll keep using your old code.
+
+TODO: right now this only builds a miner with one hardcoded set of credentials. I need
+to find a way to pass these credentials in.
+TODO: this also does not connect to a database, and it should
+
+Then upload it to Google's container registry:
+
+```
+gcloud docker -- push gcr.io/${PROJECT_ID}/cserver
+```
+
+### 4. Start running stuff on your cluster
+
+First, let's make a cluster named "testnet". Once you run this, it'll
+start charging you money. A standard node is about $25 a month.
+
+```
+gcloud container clusters create testnet --num-nodes=1
+```
+
+To deploy a `cserver` to your cluster, run:
+
+```
+kubectl apply -f ./deployment.yaml
+```
+
+This same command should also update the deployment, when a new
+"latest" image exists or when the yaml file has been updated.
+
+Once the cserver deployment exists, expose it to the internet, with a
+load balancer service named `cservice`:
+
+```
+kubectl expose deployment cserver-deployment --type=LoadBalancer --name=cservice
+```
+
+To figure out what its external IP is:
+
+```
+kubectl get services cservice
+```
+
+It might take a little while to bind to an external IP. Once it binds,
+check `your.ip.address:8000/healthz` in your browser. If it says `OK`,
+you are successfully running a cserver.
