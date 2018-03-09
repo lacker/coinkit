@@ -4,6 +4,11 @@ This directory contains operational tools for running the alpha testnet.
 
 This instructions specifically explain how to deploy a miner to the Google Cloud Platform.
 
+Estimated cost for keeping one miner running using these instructions:
+* n1-standard-1 for the app servers is $25 a month
+* db-f1-micro for the database is $8 a month
+* 100 GB of storage is another $9 a month
+
 ### 1. Set up a GCP account and install the Cloud Tools
 
 https://cloud.google.com/sdk/docs/
