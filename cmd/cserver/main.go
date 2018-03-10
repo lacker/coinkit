@@ -59,7 +59,7 @@ func main() {
 
 	s := network.NewServer(kp, net, db)
 	if healthz != 0 {
-		s.ServeHealthzInBackground(healthz)
+		s.ServeHttpInBackground(healthz)
 	}
 	s.ServeForever()
 }
