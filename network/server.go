@@ -377,11 +377,16 @@ func (s *Server) ServeInBackground() {
 	go s.broadcastIntermittently()
 }
 
-// ServeHealthzInBackground spawns a goroutine to serve a /healthz url.
-// It simply returns "OK" as long as the server is running.
-func (s *Server) ServeHealthzInBackground(port int) {
+// ServeHttpInBackground spawns a goroutine to serve the /somethingz urls.
+func (s *Server) ServeHttpInBackground(port int) {
+	// /healthz just returns OK as long as the server is healthy
 	http.HandleFunc("/healthz", func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "OK\n")
+	})
+
+	// /statusz returns more detailed information about this server
+	http.HandleFunc("/statusz", func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprintf(w, "TODO: put status here\n")
 	})
 
 	srv := &http.Server{
