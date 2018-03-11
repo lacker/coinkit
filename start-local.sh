@@ -7,7 +7,7 @@ if [ ! -d "$LOGS" ]; then
     exit 1
 fi
 
-if [ `pwd | sed s/.*src//` != "/github.com/lacker/coinkit" ]; then
+if [[ `pwd | sed s/.*src//` != *coinkit ]]; then
     echo "please run this from the coinkit directory"
     exit 1
 fi
@@ -36,7 +36,7 @@ do
     ARGS="$ARGS --network=./local/network.json"
     ARGS="$ARGS --healthz=800$i"
     nohup cserver $ARGS &> $LOGS/cserver$i.log &
-done 
+done
 
 sleep 0.1
 ps aux | grep [^a-z]cserver | grep -v grep
