@@ -30,8 +30,8 @@ gcloud components install kubectl
 Choose a name for your gcloud coinkit project and create it:
 
 ```
-gcloud projects create your_coinkit_project_name
-gcloud config set project your_coinkit_project_name
+gcloud projects create your-coinkit-project-name
+gcloud config set project your-coinkit-project-name
 ```
 
 It is handy to have `PROJECT_ID` set to the name of your GCP project in your shell,
