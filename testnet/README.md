@@ -47,7 +47,7 @@ It seemed like Iowa "A" was the best place, so I set the `gcloud` defaults with:
 gcloud config set compute/zone us-central1-a
 ```
 
-Enable billing for you project: https://cloud.google.com/billing/docs/how-to/modify-project
+Enable billing for your project: https://cloud.google.com/billing/docs/how-to/modify-project
 
 Add `Kubernetes Engine` and `Container Registry` API access to your project:
 
@@ -132,7 +132,7 @@ XXX BUT:
 i'm pretty sure the labels are wrong. I don't know what they are
 supposed to be for, but I don't see how the service can attach to the deployment.
 
-# Bad instructions:
+# XXX things dont work below here maybe
 
 Now we expose our deployment to the internet with a
 load balancer service named `loadbalancer`:
