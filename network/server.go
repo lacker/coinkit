@@ -386,7 +386,9 @@ func (s *Server) ServeHttpInBackground(port int) {
 
 	// /statusz returns more detailed information about this server
 	http.HandleFunc("/statusz", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintf(w, "TODO: put status here\n")
+		fmt.Fprintf(w, "%.1fs uptime\n", s.Uptime())
+		fmt.Fprintf(w, "%d messages broadcasted\n", s.broadcasted)
+		fmt.Fprintf(w, "current slot: %d\n", s.node.Slot())
 	})
 
 	srv := &http.Server{
@@ -401,9 +403,14 @@ func (s *Server) ServeHttpInBackground(port int) {
 	}()
 }
 
+// Uptime returns uptime in seconds
+func (s *Server) Uptime() float64 {
+	return time.Now().Sub(s.start).Seconds()
+}
+
 func (s *Server) Stats() {
 	s.Logf("server stats:")
-	s.Logf("%.1fs uptime", time.Now().Sub(s.start).Seconds())
+	s.Logf("%.1fs uptime", s.Uptime())
 	s.Logf("%d messages broadcasted", s.broadcasted)
 	s.node.Stats()
 }
