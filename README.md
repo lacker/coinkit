@@ -17,6 +17,8 @@ I provide OS X instructions only. Good luck.
 
 First install Postgres and create a test database.
 
+NOTE: this might have to be Postgres 10+, I don't know.
+
 ```
 brew install postgres
 brew services start postgresql
@@ -90,6 +92,8 @@ To start off with, all the money is in one account where the passphrase is "mint
 If you're just poking around, I recommend sending some money from the mint
 to an account of your own and then checking your account's balance as a little
 exercise.
+
+To check the servers' health, go to `http://127.0.01:8000/healthz` in your browser. (Or 8001/8002/8003 for the other three servers.)
 
 ## Benchmarking
 

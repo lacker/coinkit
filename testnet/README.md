@@ -114,17 +114,18 @@ service.yaml somehow instead
 
 XXX TRY:
 kubectl apply -f ./service.yaml
+
 XXX BUT:
 i'm pretty sure the labels are wrong. I don't know what they are
 supposed to be for, but I don't see how the service can attach to the deployment.
 
-# Bad instructions:
+# XXX things dont work below here maybe
 
 Now we expose our deployment to the internet with a
 load balancer service named `loadbalancer`:
 
 ```
-kubectl expose deployment cserver --type=LoadBalancer --name=loadbalancer
+kubectl expose deployment cserver-deployment --type=LoadBalancer --name=loadbalancer
 ```
 
 To see what its external IP is:
