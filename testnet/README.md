@@ -128,6 +128,7 @@ service.yaml somehow instead
 
 XXX TRY:
 kubectl apply -f ./service.yaml
+
 XXX BUT:
 i'm pretty sure the labels are wrong. I don't know what they are
 supposed to be for, but I don't see how the service can attach to the deployment.
