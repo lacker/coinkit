@@ -27,19 +27,33 @@ Also use `gcloud` to install Kubernetes:
 gcloud components install kubectl
 ```
 
-My GCP project was named "coinkitalpha" and it seemed like Iowa "A" was the best place, so
-I set the `gcloud` defaults with:
+Choose a name for your gcloud coinkit project and create it:
 
 ```
-gcloud config set project coinkitalpha
-gcloud config set compute/zone us-central1-a
+gcloud projects create your-coinkit-project-name
+gcloud config set project your-coinkit-project-name
 ```
 
 It is handy to have `PROJECT_ID` set to the name of your GCP project in your shell,
-so add this to your bash config:
+so add this to your bash config and source it:
 
 ```
 export PROJECT_ID="$(gcloud config get-value project -q)"
+```
+
+It seemed like Iowa "A" was the best place, so I set the `gcloud` defaults with:
+
+```
+gcloud config set compute/zone us-central1-a
+```
+
+Enable billing for your project: https://cloud.google.com/billing/docs/how-to/modify-project
+
+Add `Kubernetes Engine` and `Container Registry` API access to your project:
+
+```
+gcloud services enable container.googleapis.com
+gcloud services enable containerregistry.googleapis.com
 ```
 
 ### 2. Install Docker

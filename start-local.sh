@@ -36,7 +36,7 @@ do
     ARGS="$ARGS --network=./local/network.json"
     ARGS="$ARGS --healthz=800$i"
     nohup cserver $ARGS &> $LOGS/cserver$i.log &
-done 
+done
 
 sleep 0.1
 ps aux | grep [^a-z]cserver | grep -v grep
