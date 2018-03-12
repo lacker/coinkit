@@ -16,7 +16,7 @@ func main() {
 	var databaseFilename string
 	var keyPairFilename string
 	var networkFilename string
-	var healthz int
+	var httpPort int
 
 	flag.StringVar(&databaseFilename,
 		"database", "", "optional. the file to load database config from")
@@ -24,7 +24,7 @@ func main() {
 		"keypair", "", "the file to load keypair config from")
 	flag.StringVar(&networkFilename,
 		"network", "", "the file to load network config from")
-	flag.IntVar(&healthz, "healthz", 0, "the port to serve /healthz on")
+	flag.IntVar(&httpPort, "http", 0, "the port to serve /healthz etc on")
 	flag.Parse()
 
 	if keyPairFilename == "" {
@@ -58,8 +58,8 @@ func main() {
 	net := network.NewConfigFromSerialized(bytes)
 
 	s := network.NewServer(kp, net, db)
-	if healthz != 0 {
-		s.ServeHttpInBackground(healthz)
+	if httpPort != 0 {
+		s.ServeHttpInBackground(httpPort)
 	}
 	s.ServeForever()
 }

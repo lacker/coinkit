@@ -34,7 +34,7 @@ do
     ARGS="--database=./local/database$i.json"
     ARGS="$ARGS --keypair=./local/keypair$i.json"
     ARGS="$ARGS --network=./local/network.json"
-    ARGS="$ARGS --healthz=800$i"
+    ARGS="$ARGS --http=800$i"
     nohup cserver $ARGS &> $LOGS/cserver$i.log &
 done
 

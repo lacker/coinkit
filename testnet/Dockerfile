@@ -9,7 +9,7 @@ RUN go install ./...
 ENTRYPOINT [ "cserver", \
              "--keypair=./testnet/keypair0.json", \
 	     "--network=./testnet/network.json", \
-	     "--healthz=8000" ]
+	     "--http=8000" ]
 
 # Healthz
 EXPOSE 8000
