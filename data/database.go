@@ -6,6 +6,7 @@ import (
 	"log"
 	"os/user"
 	"strings"
+	"sync"
 
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
@@ -14,6 +15,7 @@ import (
 // A Database encapsulates a connection to a Postgres database.
 type Database struct {
 	postgres *sqlx.DB
+	lock     sync.Mutex
 }
 
 func NewDatabase(config *Config) *Database {
@@ -60,7 +62,9 @@ func isUniquenessError(e error) bool {
 
 // initialize makes sure the schemas are set up right and panics if not
 func (db *Database) initialize() {
+	db.lock.Lock()
 	db.postgres.MustExec(schema)
+	db.lock.Unlock()
 }
 
 // SaveBlock returns an error if it failed because this block is already saved.
