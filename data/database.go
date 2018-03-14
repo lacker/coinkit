@@ -12,10 +12,11 @@ import (
 	_ "github.com/lib/pq"
 )
 
+var databaseInitLock sync.Mutex
+
 // A Database encapsulates a connection to a Postgres database.
 type Database struct {
 	postgres *sqlx.DB
-	lock     sync.Mutex
 }
 
 func NewDatabase(config *Config) *Database {
@@ -62,9 +63,9 @@ func isUniquenessError(e error) bool {
 
 // initialize makes sure the schemas are set up right and panics if not
 func (db *Database) initialize() {
-	db.lock.Lock()
+	databaseInitLock.Lock()
 	db.postgres.MustExec(schema)
-	db.lock.Unlock()
+	databaseInitLock.Unlock()
 }
 
 // SaveBlock returns an error if it failed because this block is already saved.
