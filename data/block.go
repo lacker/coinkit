@@ -1,6 +1,8 @@
 package data
 
 import (
+	"encoding/json"
+
 	"github.com/lacker/coinkit/consensus"
 	"github.com/lacker/coinkit/currency"
 )
@@ -26,4 +28,12 @@ func (b *Block) ExternalizeMessage(d consensus.QuorumSlice) *consensus.Externali
 		Hn: b.H,
 		D:  d,
 	}
+}
+
+func (b *Block) String() string {
+	bytes, err := json.MarshalIndent(b, "", "  ")
+	if err != nil {
+		panic(err)
+	}
+	return string(append(bytes, '\n'))
 }
