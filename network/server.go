@@ -42,6 +42,8 @@ type Server struct {
 	// A counter of how many messages we have broadcasted
 	broadcasted int
 
+	db *data.Database
+
 	start time.Time
 
 	// How often we send out a rebroadcast, resending our redundant data
@@ -74,6 +76,7 @@ func NewServer(keyPair *util.KeyPair, config *Config, db *data.Database) *Server
 		quit:                make(chan bool),
 		currentBlock:        make(chan bool),
 		broadcasted:         0,
+		db:                  db,
 		RebroadcastInterval: time.Second,
 	}
 }
@@ -389,6 +392,12 @@ func (s *Server) ServeHttpInBackground(port int) {
 		fmt.Fprintf(w, "%.1fs uptime\n", s.Uptime())
 		fmt.Fprintf(w, "%d messages broadcasted\n", s.broadcasted)
 		fmt.Fprintf(w, "current slot: %d\n", s.node.Slot())
+		last := s.db.LastBlock()
+		if last == nil {
+			fmt.Fprintf(w, "last block: nil\n")
+		} else {
+			fmt.Fprintf(w, "last block: %s", last.String())
+		}
 	})
 
 	srv := &http.Server{
