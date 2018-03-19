@@ -25,6 +25,7 @@ type BasicConnection struct {
 	closed   bool
 	quitOnce sync.Once
 	start    time.Time
+	stop     time.Time
 }
 
 // NewBasicConnection creates a new logical connection given a network connection.
@@ -46,6 +47,7 @@ func NewBasicConnection(conn net.Conn, inbox chan *util.SignedMessage) *BasicCon
 func (c *BasicConnection) Close() {
 	c.quitOnce.Do(func() {
 		c.closed = true
+		c.stop = time.Now()
 		close(c.quit)
 	})
 }
