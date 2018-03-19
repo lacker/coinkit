@@ -27,7 +27,8 @@ func NewDatabase(config *Config) *Database {
 	username := strings.Replace(config.User, "$USER", user.Username, 1)
 	postgres := sqlx.MustConnect(
 		"postgres",
-		fmt.Sprintf("user=%s dbname=%s sslmode=disable", username, config.Database))
+		fmt.Sprintf("host=%s port=%d user=%s dbname=%s sslmode=disable",
+			config.Host, config.Port, username, config.Database))
 
 	db := &Database{
 		postgres: postgres,
