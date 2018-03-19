@@ -14,4 +14,4 @@ spec:
       protocol: TCP
       nodePort: 30900
   selector:
-    app: cservice
+    app: cserver

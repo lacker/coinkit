@@ -122,38 +122,30 @@ To deploy a `cserver` to your cluster, run:
 This same command should also update the deployment, when a new
 "latest" image exists or when the yaml file has been updated.
 
-TODO: change below here, the load balancer is needless. Try setting up
-service.yaml somehow instead
+To expose the `cserver` to public internet ports, you need to create a kubernetes service
+and a firewall:
 
-
-XXX TRY:
+```
 kubectl apply -f ./service.yaml
-
-XXX BUT:
-i'm pretty sure the labels are wrong. I don't know what they are
-supposed to be for, but I don't see how the service can attach to the deployment.
-
-# XXX things dont work below here maybe
-
-Now we expose our deployment to the internet with a
-load balancer service named `loadbalancer`:
-
-```
-kubectl expose deployment cserver-deployment --type=LoadBalancer --name=loadbalancer
+gcloud compute firewall-rules create cfirewall --allow tcp:30800,tcp:30900
 ```
 
-To see what its external IP is:
+To find the external ip, run
 
 ```
-kubectl get services loadbalancer
+gcloud compute instances list
 ```
 
-It might take a couple minutes to bind to your external IP. Once it binds,
-check `your.ip.address:8000/healthz` in your browser. If it says `OK`,
-you are successfully running a cserver.
+Then go to `your.external.ip:30800/healthz` in the browser. You should see an `OK`.
+Port `30800` is where status information is, port `30900` runs the peer-to-peer protocol.
 
-To make this a static IP address, the easiest way is to go to
-https://console.cloud.google.com/projectselector/networking/addresses/list
-and use the GUI to change it to "static". It's the one listed as a
-"forwarding rule". I couldn't figure out how to
-do this from the CLI, but I'm sure there is a way :P
+### 5. Cleaning up
+
+If you don't want to keep things running, you can shut down the deployment, the service,
+and the cluster itself:
+
+```
+kubectl delete service cservice
+kubectl delete deployment cserver-deployment
+gcloud container clusters delete testnet
+```
