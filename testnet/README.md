@@ -85,24 +85,15 @@ Server:
 
 ### 3. Make a container image
 
-From the `testnet` directory, first you need to build it:
+From the `testnet` directory, build a container and upload it to Google's container
+registry with:
 
 ```
-docker build --no-cache -t gcr.io/${PROJECT_ID}/cserver .
+./build.sh
 ```
 
-The `--no-cache` is needed because the build process grabs fresh code from GitHub, and
-if you enable the cache it'll keep using your old code.
-
-TODO: right now this only builds a miner with one hardcoded set of credentials. I need
-to find a way to pass these credentials in.
-TODO: this also does not connect to a database, and it should
-
-Then upload it to Google's container registry:
-
-```
-gcloud docker -- push gcr.io/${PROJECT_ID}/cserver
-```
+The container and its presence on the registry is specific to your project, so this
+won't interfere with other peoples' builds.
 
 ### 4. Start running stuff on your cluster
 
@@ -141,9 +132,12 @@ Port `30800` is where status information is, port `30900` runs the peer-to-peer 
 
 ### 5. Updating the server
 
-To deploy a new server, first create a new Docker image by following step 3.
+When you've updated the code, just rebuild a container image and redeploy.
 
-Then, run `./deploy.sh` to deploy a new one.
+```
+./build.sh
+./deploy.sh
+```
 
 ### 6. Cleaning up
 
@@ -155,3 +149,5 @@ kubectl delete service cservice
 kubectl delete deployment cserver-deployment
 gcloud container clusters delete testnet
 ```
+
+You can leave the firewall rules running.

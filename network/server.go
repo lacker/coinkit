@@ -392,11 +392,13 @@ func (s *Server) ServeHttpInBackground(port int) {
 		fmt.Fprintf(w, "%.1fs uptime\n", s.Uptime())
 		fmt.Fprintf(w, "%d messages broadcasted\n", s.broadcasted)
 		fmt.Fprintf(w, "current slot: %d\n", s.node.Slot())
-		last := s.db.LastBlock()
-		if last == nil {
-			fmt.Fprintf(w, "last block: nil\n")
-		} else {
-			fmt.Fprintf(w, "last block: %s", last.String())
+		if s.db != nil {
+			last := s.db.LastBlock()
+			if last == nil {
+				fmt.Fprintf(w, "last block: nil\n")
+			} else {
+				fmt.Fprintf(w, "last block: %s", last.String())
+			}
 		}
 	})
 
