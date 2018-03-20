@@ -25,10 +25,10 @@ func NewDatabase(config *Config) *Database {
 		panic(err)
 	}
 	username := strings.Replace(config.User, "$USER", user.Username, 1)
-	postgres := sqlx.MustConnect(
-		"postgres",
-		fmt.Sprintf("host=%s port=%d user=%s dbname=%s sslmode=disable",
-			config.Host, config.Port, username, config.Database))
+	info := fmt.Sprintf("host=%s port=%d user=%s dbname=%s sslmode=disable",
+		config.Host, config.Port, username, config.Database)
+	log.Printf("connecting to postgres with %s", info)
+	postgres := sqlx.MustConnect("postgres", info)
 
 	db := &Database{
 		postgres: postgres,
