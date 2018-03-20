@@ -2,7 +2,11 @@ package util
 
 import (
 	"log"
+	"os"
 )
+
+// This is the one default global logger.
+var Logger = log.New(os.Stderr, "", log.LstdFlags)
 
 func Shorten(name string) string {
 	length := len(name)
@@ -14,5 +18,5 @@ func Shorten(name string) string {
 
 // Send logging through here so that it's easier to manage
 func Logf(tag string, publicKey string, format string, a ...interface{}) {
-	log.Printf(tag + " " + Shorten(publicKey) + " " + format, a...)
+	Logger.Printf(tag+" "+Shorten(publicKey)+" "+format, a...)
 }
