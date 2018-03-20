@@ -1,8 +1,6 @@
 package network
 
 import (
-	"log"
-
 	"github.com/lacker/coinkit/consensus"
 	"github.com/lacker/coinkit/currency"
 	"github.com/lacker/coinkit/data"
@@ -44,7 +42,7 @@ func NewNodeWithMint(publicKey util.PublicKey, qs consensus.QuorumSlice,
 			node.chain.AlreadyExternalized(m)
 			node.queue.FinalizeChunk(b.Chunk)
 		})
-		log.Printf("loaded %d old blocks from the database", loaded)
+		util.Logger.Printf("loaded %d old blocks from the database", loaded)
 		node.slot = loaded + 1
 	}
 
@@ -110,7 +108,7 @@ func (node *Node) Handle(sender string, message util.Message) (util.Message, boo
 		return answer, ok
 
 	default:
-		log.Printf("unrecognized message: %+v", m)
+		util.Logger.Printf("unrecognized message: %+v", m)
 		return nil, false
 	}
 }

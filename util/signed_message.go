@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"log"
 	"reflect"
 	"strings"
 )
@@ -25,7 +24,7 @@ type SignedMessage struct {
 
 func NewSignedMessage(kp *KeyPair, message Message) *SignedMessage {
 	if message == nil || reflect.ValueOf(message).IsNil() {
-		log.Fatal("cannot sign nil message")
+		Logger.Fatal("cannot sign nil message")
 	}
 	ms := EncodeMessage(message)
 	return &SignedMessage{

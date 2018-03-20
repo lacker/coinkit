@@ -1,8 +1,6 @@
 package network
 
 import (
-	"log"
-
 	"github.com/lacker/coinkit/currency"
 	"github.com/lacker/coinkit/util"
 )
@@ -49,7 +47,7 @@ func GetAccount(c Connection, user string) *currency.Account {
 		m := (<-c.Receive()).Message()
 		accountMessage, ok := m.(*currency.AccountMessage)
 		if !ok {
-			log.Fatalf("expected an account message but got: %+v", m)
+			util.Logger.Fatalf("expected an account message but got: %+v", m)
 		}
 		return accountMessage.State[user]
 	}

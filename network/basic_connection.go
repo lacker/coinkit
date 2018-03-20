@@ -2,7 +2,6 @@ package network
 
 import (
 	"bufio"
-	"log"
 	"net"
 	"sync"
 	"time"
@@ -66,7 +65,7 @@ func (c *BasicConnection) runIncoming() {
 			break
 		}
 		if err != nil {
-			log.Printf("connection error: %+v", err)
+			util.Logger.Printf("connection error: %+v", err)
 			c.Close()
 			break
 		}
@@ -112,7 +111,7 @@ func (c *BasicConnection) Send(message *util.SignedMessage) bool {
 	case c.outbox <- message:
 		return true
 	default:
-		log.Printf("Connection outbox overloaded, dropping message")
+		util.Logger.Printf("Connection outbox overloaded, dropping message")
 		return false
 	}
 }

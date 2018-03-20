@@ -2,7 +2,6 @@ package network
 
 import (
 	"fmt"
-	"log"
 	"testing"
 	"time"
 
@@ -61,7 +60,7 @@ func TestStartStop(t *testing.T) {
 func sendMoney(conn Connection, from *util.KeyPair, to *util.KeyPair, amount uint64) {
 	account := GetAccount(conn, from.PublicKey().String())
 	if account == nil || account.Balance < amount {
-		log.Fatalf("%s did not have enough money", from.PublicKey().String())
+		util.Logger.Fatalf("%s did not have enough money", from.PublicKey().String())
 	}
 	seq := account.Sequence + 1
 	transaction := &currency.Transaction{
@@ -140,7 +139,7 @@ func benchmarkSendMoney(numConns int, b *testing.B) {
 	for _, ch := range chans {
 		<-ch
 	}
-	log.Printf("work is finished")
+	util.Logger.Printf("work is finished")
 	for _, server := range servers {
 		server.Stats()
 	}

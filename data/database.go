@@ -3,13 +3,14 @@ package data
 import (
 	"database/sql"
 	"fmt"
-	"log"
 	"os/user"
 	"strings"
 	"sync"
 
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
+
+	"github.com/lacker/coinkit/util"
 )
 
 var databaseInitLock sync.Mutex
@@ -27,7 +28,7 @@ func NewDatabase(config *Config) *Database {
 	username := strings.Replace(config.User, "$USER", user.Username, 1)
 	info := fmt.Sprintf("host=%s port=%d user=%s dbname=%s sslmode=disable",
 		config.Host, config.Port, username, config.Database)
-	log.Printf("connecting to postgres with %s", info)
+	util.Logger.Printf("connecting to postgres with %s", info)
 	postgres := sqlx.MustConnect("postgres", info)
 
 	db := &Database{
@@ -123,7 +124,7 @@ func (db *Database) ForBlocks(f func(b *Block)) int {
 			panic(err)
 		}
 		if b.Slot != slot+1 {
-			log.Fatal("missing block with slot %d", slot+1)
+			util.Logger.Fatal("missing block with slot %d", slot+1)
 		}
 		slot += 1
 		f(b)

@@ -3,7 +3,6 @@ package network
 import (
 	"context"
 	"fmt"
-	"log"
 	"net"
 	"net/http"
 	"time"
@@ -151,7 +150,7 @@ func (s *Server) handleMessageOnce(sm *util.SignedMessage) (*util.SignedMessage,
 	case <-s.quit:
 		return nil, false
 	case <-timer.C:
-		log.Fatalf("the processing goroutine got overloaded")
+		util.Logger.Fatalf("the processing goroutine got overloaded")
 		return nil, false
 	}
 }
@@ -269,7 +268,7 @@ func (s *Server) listen() {
 			break
 		}
 		if err != nil {
-			log.Print("incoming connection error: ", err)
+			util.Logger.Print("incoming connection error: ", err)
 			continue
 		}
 		go s.handleConnection(conn)
@@ -289,7 +288,7 @@ func (s *Server) acquirePort() {
 		}
 		time.Sleep(time.Millisecond * time.Duration(50))
 	}
-	log.Fatalf("could not acquire port %d", s.port)
+	util.Logger.Fatalf("could not acquire port %d", s.port)
 }
 
 func (s *Server) broadcast(messages []*util.SignedMessage) {

@@ -1,8 +1,6 @@
 package currency
 
 import (
-	"log"
-
 	"github.com/emirpasic/gods/sets/treeset"
 
 	"github.com/lacker/coinkit/consensus"
@@ -99,7 +97,7 @@ func (q *TransactionQueue) Add(t *SignedTransaction) bool {
 	if q.set.Size() > QueueLimit {
 		it := q.set.Iterator()
 		if !it.Last() {
-			log.Fatal("logical failure with treeset")
+			util.Logger.Fatal("logical failure with treeset")
 		}
 		worst := it.Value()
 		q.set.Remove(worst)
@@ -270,7 +268,7 @@ func (q *TransactionQueue) Combine(list []consensus.SlotValue) consensus.SlotVal
 	for _, v := range list {
 		chunk := q.chunks[v]
 		if chunk == nil {
-			log.Fatalf("%s cannot combine unknown chunk %s", q.publicKey, v)
+			util.Logger.Fatalf("%s cannot combine unknown chunk %s", q.publicKey, v)
 		}
 		for _, t := range chunk.Transactions {
 			set.Add(t)

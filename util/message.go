@@ -3,7 +3,6 @@ package util
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"reflect"
 )
 
@@ -27,19 +26,19 @@ func RegisterMessageType(m Message) {
 	name := m.MessageType()
 	_, ok := MessageTypeMap[name]
 	if ok {
-		log.Fatalf("message type registered multiple times: %s", name)
+		Logger.Fatalf("message type registered multiple times: %s", name)
 	}
 	mv := reflect.ValueOf(m)
 	if mv.Kind() != reflect.Ptr {
-		log.Fatalf("RegisterMessageType should only be called on pointers")
+		Logger.Fatalf("RegisterMessageType should only be called on pointers")
 	}
 
 	sv := mv.Elem()
 	if sv.Kind() != reflect.Struct {
-		log.Fatalf("RegisterMessageType should be called on pointers to structs")
+		Logger.Fatalf("RegisterMessageType should be called on pointers to structs")
 	}
 
-	// log.Printf("registering %s -> %+v", name, sv.Type())
+	// Logger.Printf("registering %s -> %+v", name, sv.Type())
 	MessageTypeMap[name] = sv.Type()
 }
 
@@ -101,7 +100,7 @@ func EncodeThenDecode(message Message) Message {
 	encoded := EncodeMessage(message)
 	m, err := DecodeMessage(encoded)
 	if err != nil {
-		log.Fatal("encode-then-decode error:", err)
+		Logger.Fatal("encode-then-decode error:", err)
 	}
 	return m
 }

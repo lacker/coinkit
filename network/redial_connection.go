@@ -1,7 +1,6 @@
 package network
 
 import (
-	"log"
 	"net"
 	"sync"
 	"time"
@@ -117,7 +116,7 @@ func (c *RedialConnection) Send(message *util.SignedMessage) bool {
 	case c.outbox <- message:
 		return true
 	default:
-		log.Printf(
+		util.Logger.Printf(
 			"RedialConnection outbox overloaded, dropping message")
 		return false
 	}

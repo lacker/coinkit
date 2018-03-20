@@ -2,9 +2,10 @@ package consensus
 
 import (
 	"fmt"
-	"log"
 	"sort"
 	"strings"
+
+	"github.com/lacker/coinkit/util"
 )
 
 // This is an id for the full slot value. The ValueStore should be able to
@@ -16,7 +17,7 @@ func AssertNoDupes(list []SlotValue) {
 	for _, v := range list {
 		s := string(v)
 		if m[s] {
-			log.Fatalf("dupe in %+v", list)
+			util.Logger.Fatalf("dupe in %+v", list)
 		}
 		m[s] = true
 	}

@@ -2,7 +2,6 @@ package network
 
 import (
 	"fmt"
-	"log"
 	"math/rand"
 	"testing"
 
@@ -20,9 +19,9 @@ func sendNodeToNodeMessages(source *Node, target *Node, t *testing.T) {
 		if ok {
 			x, ok := source.Handle(target.publicKey.String(), response)
 			if ok {
-				log.Printf("initial message: %+v", message)
-				log.Printf("response message: %+v", response)
-				log.Printf("re-response message: %+v", x)
+				util.Logger.Printf("initial message: %+v", message)
+				util.Logger.Printf("response message: %+v", response)
+				util.Logger.Printf("re-response message: %+v", x)
 				t.Fatal("infinite response loop")
 			}
 		}
@@ -189,7 +188,7 @@ func nodeFuzzTest(seed int64, t *testing.T) {
 	}
 
 	rand.Seed(seed ^ 789789)
-	log.Printf("fuzz testing nodes with seed %d", seed)
+	util.Logger.Printf("fuzz testing nodes with seed %d", seed)
 	for i := 0; i <= 10000; i++ {
 		if rand.Intn(2) == 0 {
 			// Pick a random pair of nodes to exchange messages
