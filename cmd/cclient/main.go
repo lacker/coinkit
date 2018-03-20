@@ -2,16 +2,15 @@ package main
 
 import (
 	"bufio"
-	"log"
 	"os"
 	"strconv"
 
 	"github.com/davecgh/go-spew/spew"
 
+	"fmt"
 	"github.com/lacker/coinkit/currency"
 	"github.com/lacker/coinkit/network"
 	"github.com/lacker/coinkit/util"
-	"fmt"
 	"net/http"
 	"strings"
 )
@@ -20,7 +19,7 @@ func newConnection() network.Connection {
 	config := network.NewLocalNetworkConfig()
 	address := config.RandomAddress()
 	c := network.NewRedialConnection(address, nil)
-	log.Printf("connecting to %s", address.String())
+	util.Logger.Printf("connecting to %s", address.String())
 	return c
 }
 
@@ -29,7 +28,7 @@ func status(user string) *currency.Account {
 	conn := newConnection()
 	account := network.GetAccount(conn, user)
 
-	log.Printf("account data for %s:\n%s", user, spew.Sdump(account))
+	util.Logger.Printf("account data for %s:\n%s", user, spew.Sdump(account))
 	return account
 }
 
@@ -42,27 +41,27 @@ func ourStatus() {
 func generate() {
 	kp := login()
 	os.Stdout.Write(kp.Serialize())
-	log.Printf("key pair generation complete")
+	util.Logger.Printf("key pair generation complete")
 }
 
 // Ask the user for a passphrase to log in.
 func login() *util.KeyPair {
-	log.Printf("please enter your passphrase:")
+	util.Logger.Printf("please enter your passphrase:")
 	scanner := bufio.NewScanner(os.Stdin)
 	scanner.Scan()
 	phrase := scanner.Text()
 	kp := util.NewKeyPairFromSecretPhrase(phrase)
-	log.Printf("hello. your name is %s", kp.PublicKey().String())
+	util.Logger.Printf("hello. your name is %s", kp.PublicKey().String())
 	return kp
 }
 
 func send(recipient string, amountStr string) {
 	amountInt, err := strconv.Atoi(amountStr)
 	if err != nil {
-		log.Fatalf("could not convert %s to a number", amountStr)
+		util.Logger.Fatalf("could not convert %s to a number", amountStr)
 	}
 	if _, err := util.ReadPublicKey(recipient); err != nil {
-		log.Fatalf("invalid address: %s", recipient)
+		util.Logger.Fatalf("invalid address: %s", recipient)
 	}
 	amount := uint64(amountInt)
 	kp := login()
@@ -70,10 +69,10 @@ func send(recipient string, amountStr string) {
 	conn := newConnection()
 	account := network.GetAccount(conn, user)
 
-	log.Printf("account data for %s:\n%s", user, spew.Sdump(account))
+	util.Logger.Printf("account data for %s:\n%s", user, spew.Sdump(account))
 
 	if account.Balance < amount {
-		log.Fatalf("cannot send %d when our account only has %d",
+		util.Logger.Fatalf("cannot send %d when our account only has %d",
 			amount, account.Balance)
 	}
 
@@ -91,11 +90,11 @@ func send(recipient string, amountStr string) {
 	tm := currency.NewTransactionMessage(st)
 	sm := util.NewSignedMessage(kp, tm)
 	conn.Send(sm)
-	log.Printf("sending %d to %s", amount, recipient)
+	util.Logger.Printf("sending %d to %s", amount, recipient)
 
 	// Wait for our transaction to clear
 	network.WaitToClear(conn, user, seq)
-	log.Printf("transaction %d cleared", transaction.Sequence)
+	util.Logger.Printf("transaction %d cleared", transaction.Sequence)
 }
 
 func handler(w http.ResponseWriter, r *http.Request) {
@@ -111,7 +110,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 }
 
 func proxy() {
-	log.Printf("Running client proxy on port 9090")
+	util.Logger.Printf("Running client proxy on port 9090")
 	http.HandleFunc("/", handler)
 	http.ListenAndServe(":9090", nil)
 }
@@ -119,7 +118,7 @@ func proxy() {
 // cclient runs a client that connects to the github.com/lacker/coinkit network.
 func main() {
 	if len(os.Args) < 2 {
-		log.Fatal("Usage: cclient {generate,proxy,send,status} ...")
+		util.Logger.Fatal("Usage: cclient {generate,proxy,send,status} ...")
 	}
 	op := os.Args[1]
 	rest := os.Args[2:]
@@ -127,7 +126,7 @@ func main() {
 
 	case "status":
 		if len(rest) > 1 {
-			log.Fatal("Usage: cclient status [publickey]")
+			util.Logger.Fatal("Usage: cclient status [publickey]")
 		}
 		if len(rest) == 0 {
 			ourStatus()
@@ -137,13 +136,13 @@ func main() {
 
 	case "send":
 		if len(rest) != 2 {
-			log.Fatal("Usage: cclient send <user> <amount>")
+			util.Logger.Fatal("Usage: cclient send <user> <amount>")
 		}
 		send(rest[0], rest[1])
 
 	case "generate":
 		if len(rest) != 0 {
-			log.Fatal("Usage: cclient generate")
+			util.Logger.Fatal("Usage: cclient generate")
 		}
 		generate()
 
@@ -151,6 +150,6 @@ func main() {
 		proxy()
 
 	default:
-		log.Fatalf("unrecognized operation: %s", op)
+		util.Logger.Fatalf("unrecognized operation: %s", op)
 	}
 }
