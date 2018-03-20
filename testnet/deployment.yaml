@@ -18,3 +18,6 @@ spec:
         ports:
         - containerPort: 8000
         - containerPort: 9000
+        env:
+        - name: DEPLOY_TIME
+          value: 'THE_DEPLOY_TIME'

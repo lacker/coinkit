@@ -139,7 +139,13 @@ gcloud compute instances list
 Then go to `your.external.ip:30800/healthz` in the browser. You should see an `OK`.
 Port `30800` is where status information is, port `30900` runs the peer-to-peer protocol.
 
-### 5. Cleaning up
+### 5. Updating the server
+
+To deploy a new server, first create a new Docker image by following step 3.
+
+Then, run `./deploy.sh` to deploy a new one.
+
+### 6. Cleaning up
 
 If you don't want to keep things running, you can shut down the deployment, the service,
 and the cluster itself:
