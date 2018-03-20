@@ -387,6 +387,10 @@ func (s *Server) ServeHttpInBackground(port int) {
 		fmt.Fprintf(w, "OK\n")
 	})
 
+	http.HandleFunc("/uptimez", func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprintf(w, "%.2f\n", s.Uptime())
+	})
+
 	// /statusz returns more detailed information about this server
 	http.HandleFunc("/statusz", func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "%.1fs uptime\n", s.Uptime())

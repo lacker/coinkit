@@ -85,6 +85,9 @@ Server:
 
 ### 3. Make a container image
 
+The process always deploys whatever the latest code on `github.com/lacker/coinkit` is,
+so get your changes into master first.
+
 From the `testnet` directory, build a container and upload it to Google's container
 registry with:
 
