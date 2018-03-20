@@ -1,8 +1,11 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"io/ioutil"
+
+	"cloud.google.com/go/logging"
 
 	"github.com/lacker/coinkit/data"
 	"github.com/lacker/coinkit/network"
@@ -15,6 +18,8 @@ func main() {
 	var databaseFilename string
 	var keyPairFilename string
 	var networkFilename string
+	var logProject string
+	var logName string
 	var httpPort int
 
 	flag.StringVar(&databaseFilename,
@@ -24,7 +29,19 @@ func main() {
 	flag.StringVar(&networkFilename,
 		"network", "", "the file to load network config from")
 	flag.IntVar(&httpPort, "http", 0, "the port to serve /healthz etc on")
+	flag.StringVar(&logProject, "logproject", "", "the Google Cloud project to log to")
+	flag.StringVar(&logName, "logname", "cserver-log",
+		"the Google Cloud log name to log to")
 	flag.Parse()
+
+	if logProject != "" {
+		client, err := logging.NewClient(context.Background(), logProject)
+		if err != nil {
+			util.Logger.Fatal("Failed to create logging client: %+v", err)
+		}
+		defer client.Close()
+		util.Logger = client.Logger(logName).StandardLogger(logging.Info)
+	}
 
 	if keyPairFilename == "" {
 		util.Logger.Fatal("the --keypair flag must be set")
