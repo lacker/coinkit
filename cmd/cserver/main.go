@@ -3,7 +3,6 @@ package main
 import (
 	"flag"
 	"io/ioutil"
-	"log"
 
 	"github.com/lacker/coinkit/data"
 	"github.com/lacker/coinkit/network"
@@ -28,11 +27,11 @@ func main() {
 	flag.Parse()
 
 	if keyPairFilename == "" {
-		log.Fatal("the --keypair flag must be set")
+		util.Logger.Fatal("the --keypair flag must be set")
 	}
 
 	if networkFilename == "" {
-		log.Fatal("the --network flag must be set")
+		util.Logger.Fatal("the --network flag must be set")
 	}
 
 	var db *data.Database

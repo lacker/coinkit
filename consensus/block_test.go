@@ -1,7 +1,6 @@
 package consensus
 
 import (
-	"log"
 	"math"
 	"math/rand"
 	"testing"
@@ -213,7 +212,7 @@ func nominationConverged(blocks []*Block) bool {
 
 func blockFuzzTest(blocks []*Block, seed int64, t *testing.T) {
 	rand.Seed(seed ^ 1234569)
-	log.Printf("fuzz testing blocks with seed %d", seed)
+	util.Logger.Printf("fuzz testing blocks with seed %d", seed)
 	for i := 0; i < 10000; i++ {
 		j := rand.Intn(len(blocks))
 		k := rand.Intn(len(blocks))
@@ -223,33 +222,33 @@ func blockFuzzTest(blocks []*Block, seed int64, t *testing.T) {
 			return
 		}
 		if i%1000 == 0 {
-			log.Printf("done round: %d", i)
+			util.Logger.Printf("done round: %d", i)
 		}
 	}
 
 	if !nominationConverged(blocks) {
-		log.Printf("nomination did not converge")
+		util.Logger.Printf("nomination did not converge")
 		for i := 0; i < len(blocks); i++ {
-			log.Printf("--------------------------------------------------------------------------")
+			util.Logger.Printf("--------------------------------------------------------------------------")
 			if blocks[i].nState != nil {
 				blocks[i].nState.Show()
 			}
 		}
 
-		log.Printf("**************************************************************************")
+		util.Logger.Printf("**************************************************************************")
 
 		t.Fatalf("fuzz testing with seed %d, nomination did not converge", seed)
 	}
 
-	log.Printf("balloting did not converge")
+	util.Logger.Printf("balloting did not converge")
 	for i := 0; i < len(blocks); i++ {
-		log.Printf("--------------------------------------------------------------------------")
+		util.Logger.Printf("--------------------------------------------------------------------------")
 		if blocks[i].bState != nil {
 			blocks[i].bState.Show()
 		}
 	}
 
-	log.Printf("**************************************************************************")
+	util.Logger.Printf("**************************************************************************")
 	t.Fatalf("fuzz testing with seed %d, ballots did not converge", seed)
 }
 

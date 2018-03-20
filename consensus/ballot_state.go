@@ -1,7 +1,6 @@
 package consensus
 
 import (
-	"log"
 	"sort"
 
 	"github.com/lacker/coinkit/util"
@@ -181,7 +180,7 @@ func (s *BallotState) MaybeAcceptAsPrepared(n int, x SlotValue) bool {
 		s.p = ballot
 	} else if s.p.x == x {
 		if n <= s.p.n {
-			log.Fatal("should have short circuited already")
+			util.Logger.Fatal("should have short circuited already")
 		}
 		s.p = ballot
 	} else if n >= s.p.n {
@@ -284,7 +283,7 @@ func (s *BallotState) MaybeConfirmAsPrepared(n int, x SlotValue) bool {
 
 	if s.cn > 0 && x != s.b.x {
 		s.Show()
-		log.Fatalf("we are voting to commit but must confirm a contradiction")
+		util.Logger.Fatalf("we are voting to commit but must confirm a contradiction")
 	}
 
 	// This value is now our default for future rounds
@@ -644,13 +643,13 @@ func (s *BallotState) HasMessage() bool {
 func (s *BallotState) AssertValid() {
 	if s.cn > s.hn {
 		s.Show()
-		log.Fatalf("c should be <= h")
+		util.Logger.Fatalf("c should be <= h")
 	}
 
 	if s.p != nil && s.pPrime != nil && s.p.x == s.pPrime.x {
 		s.Logf("p: %+v", s.p)
 		s.Logf("pPrime: %+v", s.pPrime)
-		log.Fatalf("p and p prime should not be compatible")
+		util.Logger.Fatalf("p and p prime should not be compatible")
 	}
 
 	if s.b != nil && s.phase == Prepare {
@@ -659,14 +658,14 @@ func (s *BallotState) AssertValid() {
 			s.Logf("c: %d", s.cn)
 			s.Logf("h: %d", s.hn)
 			s.Logf("p: %+v", s.p)
-			log.Fatalf("the vote to commit should have been aborted")
+			util.Logger.Fatalf("the vote to commit should have been aborted")
 		}
 		if s.pPrime != nil && s.b.x != s.pPrime.x && s.cn != 0 && s.hn <= s.pPrime.n {
 			s.Logf("b: %+v", s.b)
 			s.Logf("c: %d", s.cn)
 			s.Logf("h: %d", s.hn)
 			s.Logf("pPrime: %+v", s.pPrime)
-			log.Fatalf("the vote to commit should have been aborted")
+			util.Logger.Fatalf("the vote to commit should have been aborted")
 		}
 	}
 
@@ -674,7 +673,7 @@ func (s *BallotState) AssertValid() {
 		if s.last != nil && s.b.x != s.last.x && s.last.n > s.b.n {
 			s.Logf("last b: %+v", s.last)
 			s.Logf("curr b: %+v", s.b)
-			log.Fatalf("monotonicity violation")
+			util.Logger.Fatalf("monotonicity violation")
 		}
 
 		s.last = s.b

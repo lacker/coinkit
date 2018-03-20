@@ -1,8 +1,6 @@
 package consensus
 
 import (
-	"log"
-
 	"github.com/davecgh/go-spew/spew"
 
 	"github.com/lacker/coinkit/util"
@@ -43,7 +41,7 @@ func (c *Chain) Handle(sender string, message util.Message) (util.Message, bool)
 
 	slot := message.Slot()
 	if slot == 0 {
-		log.Fatalf("slot should not be zero in %s", message)
+		util.Logger.Fatalf("slot should not be zero in %s", message)
 	}
 
 	// Handle info messages
@@ -139,12 +137,12 @@ func (chain *Chain) Stats() {
 }
 
 func (chain *Chain) Log() {
-	log.Printf("--------------------------------------------------------------------------")
-	log.Printf("%s is working on slot %d", chain.publicKey, chain.current.slot)
+	util.Logger.Printf("--------------------------------------------------------------------------")
+	util.Logger.Printf("%s is working on slot %d", chain.publicKey, chain.current.slot)
 	if chain.current.bState != nil {
 		chain.current.bState.Show()
 	} else {
-		log.Printf("spew: %s", spew.Sdump(chain))
+		util.Logger.Printf("spew: %s", spew.Sdump(chain))
 	}
 }
 
@@ -152,5 +150,5 @@ func LogChains(chains []*Chain) {
 	for _, chain := range chains {
 		chain.Log()
 	}
-	log.Printf("**************************************************************************")
+	util.Logger.Printf("**************************************************************************")
 }

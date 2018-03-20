@@ -1,8 +1,6 @@
 package consensus
 
 import (
-	"log"
-
 	"github.com/lacker/coinkit/util"
 )
 
@@ -54,7 +52,7 @@ func (block *Block) AssertValid() {
 	block.bState.AssertValid()
 	if block.bState.phase == Externalize && block.external == nil {
 		block.bState.Show()
-		log.Fatalf("this block has externalized but block.external is not set")
+		util.Logger.Fatalf("this block has externalized but block.external is not set")
 	}
 }
 
@@ -110,7 +108,7 @@ func (b *Block) Handle(sender string, message util.Message) {
 	case *ExternalizeMessage:
 		b.bState.Handle(sender, m)
 	default:
-		log.Printf("unrecognized message: %v", m)
+		util.Logger.Printf("unrecognized message: %v", m)
 	}
 
 	if b.bState.phase == Externalize && b.external == nil {

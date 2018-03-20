@@ -1,7 +1,6 @@
 package consensus
 
 import (
-	"log"
 	"math/rand"
 	"testing"
 
@@ -20,7 +19,7 @@ func chainSend(source *Chain, target *Chain) {
 		if ok {
 			_, ok := source.Handle(target.publicKey.String(), response)
 			if ok {
-				log.Fatal("infinite response loop")
+				util.Logger.Fatal("infinite response loop")
 			}
 		}
 	}
@@ -48,9 +47,9 @@ func checkProgress(chains []*Chain, limit int, t *testing.T) {
 			blockValue := chain.history[j].X
 			firstValue := first.history[j].X
 			if blockValue != firstValue {
-				log.Printf("%s externalized %+v for slot %d",
+				util.Logger.Printf("%s externalized %+v for slot %d",
 					first.publicKey, firstValue, j)
-				log.Printf("%s externalized %+v for slot %d",
+				util.Logger.Printf("%s externalized %+v for slot %d",
 					chain.publicKey, blockValue, j)
 				t.Fatal("this cannot be")
 			}
@@ -72,7 +71,7 @@ func progress(chains []*Chain) int {
 func chainFuzzTest(chains []*Chain, seed int64, t *testing.T) {
 	limit := 10
 	rand.Seed(seed ^ 46372837824)
-	log.Printf("fuzz testing chains with seed %d", seed)
+	util.Logger.Printf("fuzz testing chains with seed %d", seed)
 	for i := 1; i <= 10000; i++ {
 		j := rand.Intn(len(chains))
 		k := rand.Intn(len(chains))
@@ -81,7 +80,7 @@ func chainFuzzTest(chains []*Chain, seed int64, t *testing.T) {
 			break
 		}
 		if i%1000 == 0 {
-			log.Printf("done round: %d ************************************", i)
+			util.Logger.Printf("done round: %d ************************************", i)
 		}
 	}
 
