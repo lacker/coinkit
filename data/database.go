@@ -70,6 +70,11 @@ func (db *Database) initialize() {
 	databaseInitLock.Unlock()
 }
 
+func (db *Database) TotalBlockSize() string {
+	result := db.postgres.MustExec("SELECT pg_size_pretty(pg_database_size('blocks'));")
+	return fmt.Sprintf("%+v", result)
+}
+
 // SaveBlock returns an error if it failed because this block is already saved.
 // It panics if there is a fundamental database problem.
 func (db *Database) SaveBlock(b *Block) error {
