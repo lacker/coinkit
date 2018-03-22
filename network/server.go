@@ -400,8 +400,9 @@ func (s *Server) ServeHttpInBackground(port int) {
 			if last == nil {
 				fmt.Fprintf(w, "last block: nil\n")
 			} else {
-				fmt.Fprintf(w, "last block: %s", last.String())
+				fmt.Fprintf(w, "last block: %s\n", last.String())
 			}
+			fmt.Fprintf(w, "%s\n", s.db.TotalBlockSize())
 		}
 	})
 
