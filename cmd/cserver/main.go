@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"flag"
+	"fmt"
 	"io/ioutil"
 
 	"cloud.google.com/go/logging"
@@ -41,7 +42,7 @@ func main() {
 		}
 		defer client.Close()
 		util.Logger = client.Logger(logName).StandardLogger(logging.Info)
-		util.Logger.Println("using Google Cloud logging")
+		util.LogType = fmt.Sprintf("google/%s/%s", logProject, logName)
 	}
 
 	if keyPairFilename == "" {

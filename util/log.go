@@ -8,6 +8,8 @@ import (
 // This is the one default global logger.
 var Logger = log.New(os.Stderr, "", log.LstdFlags)
 
+var LogType = "default"
+
 func Shorten(name string) string {
 	length := len(name)
 	if length > 6 {
