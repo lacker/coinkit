@@ -41,6 +41,7 @@ func main() {
 		}
 		defer client.Close()
 		util.Logger = client.Logger(logName).StandardLogger(logging.Info)
+		util.Logger.Println("using Google Cloud logging")
 	}
 
 	if keyPairFilename == "" {

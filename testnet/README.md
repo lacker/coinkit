@@ -101,11 +101,13 @@ won't interfere with other peoples' builds.
 
 ### 4. Start running stuff on your cluster
 
-First, let's make a cluster named "testnet". Once you run this, it'll
+Logging is useful, and you have to enable it when you create the cluster. Enable logging for your project by going to https://console.cloud.google.com/flows/enableapi?apiid=logging.googleapis.com .
+
+Then let's make the cluster, named "testnet". Once you run this, it'll
 start charging you money. A standard node is about $25 a month.
 
 ```
-gcloud container clusters create testnet --num-nodes=1
+gcloud container clusters create testnet --num-nodes=1 --scopes https://www.googleapis.com/auth/logging.write
 ```
 
 To deploy a `cserver` to your cluster, run:
