@@ -42,7 +42,7 @@ func main() {
 		}
 		defer client.Close()
 		util.Logger = client.Logger(logName).StandardLogger(logging.Info)
-		util.LogType = fmt.Sprintf("google/%s/%s", logProject, logName)
+		util.LogType = fmt.Sprintf("projects/%s/logs/%s", logProject, logName)
 	}
 
 	if keyPairFilename == "" {
