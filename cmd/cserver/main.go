@@ -19,7 +19,7 @@ func main() {
 	var databaseFilename string
 	var keyPairFilename string
 	var networkFilename string
-	var logProject string
+	var project string
 	var logName string
 	var httpPort int
 
@@ -30,19 +30,19 @@ func main() {
 	flag.StringVar(&networkFilename,
 		"network", "", "the file to load network config from")
 	flag.IntVar(&httpPort, "http", 0, "the port to serve /healthz etc on")
-	flag.StringVar(&logProject, "logproject", "", "the Google Cloud project to log to")
+	flag.StringVar(&project, "project", "", "the Google Cloud project to log to")
 	flag.StringVar(&logName, "logname", "cserver-log",
 		"the Google Cloud log name to log to")
 	flag.Parse()
 
 	if logProject != "" {
-		client, err := logging.NewClient(context.Background(), logProject)
+		client, err := logging.NewClient(context.Background(), project)
 		if err != nil {
 			util.Logger.Fatal("Failed to create logging client: %+v", err)
 		}
 		defer client.Close()
 		util.Logger = client.Logger(logName).StandardLogger(logging.Info)
-		util.LogType = fmt.Sprintf("projects/%s/logs/%s", logProject, logName)
+		util.LogType = fmt.Sprintf("projects/%s/logs/%s", project, logName)
 	}
 
 	if keyPairFilename == "" {
