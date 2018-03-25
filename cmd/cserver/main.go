@@ -35,7 +35,7 @@ func main() {
 		"the Google Cloud log name to log to")
 	flag.Parse()
 
-	if logProject != "" {
+	if project != "" {
 		client, err := logging.NewClient(context.Background(), project)
 		if err != nil {
 			util.Logger.Fatal("Failed to create logging client: %+v", err)
