@@ -8,7 +8,6 @@ fi
 # The `--no-cache` is needed because the build process grabs fresh code from GitHub, and
 # if you enable the cache it'll keep using your old code.
 docker build \
-       --build-arg PROJECT_ID=$PROJECT_ID \
        --no-cache \
        -t gcr.io/${PROJECT_ID}/cserver \
        .

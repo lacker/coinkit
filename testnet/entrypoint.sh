@@ -6,5 +6,5 @@
 cserver \
     --keypair=./testnet/keypair0.json \
     --network=./testnet/network.json \
-    --http=8000 \
-    --project=$PROJECT_ID
+    --http=8000
+
