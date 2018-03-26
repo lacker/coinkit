@@ -395,7 +395,6 @@ func (s *Server) ServeHttpInBackground(port int) {
 		fmt.Fprintf(w, "%.1fs uptime\n", s.Uptime())
 		fmt.Fprintf(w, "%d messages broadcasted\n", s.broadcasted)
 		fmt.Fprintf(w, "current slot: %d\n", s.node.Slot())
-		fmt.Fprintf(w, "logging to %s\n", util.LogType)
 		if s.db != nil {
 			last := s.db.LastBlock()
 			if last == nil {

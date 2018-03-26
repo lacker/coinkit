@@ -6,5 +6,6 @@
 cserver \
     --keypair=./testnet/keypair0.json \
     --network=./testnet/network.json \
+    --logtostdout \
     --http=8000
 

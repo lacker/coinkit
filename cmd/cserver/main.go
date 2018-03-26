@@ -3,6 +3,8 @@ package main
 import (
 	"flag"
 	"io/ioutil"
+	"log"
+	"os"
 
 	"github.com/lacker/coinkit/data"
 	"github.com/lacker/coinkit/network"
@@ -16,6 +18,7 @@ func main() {
 	var keyPairFilename string
 	var networkFilename string
 	var httpPort int
+	var logToStdOut bool
 
 	flag.StringVar(&databaseFilename,
 		"database", "", "optional. the file to load database config from")
@@ -24,6 +27,7 @@ func main() {
 	flag.StringVar(&networkFilename,
 		"network", "", "the file to load network config from")
 	flag.IntVar(&httpPort, "http", 0, "the port to serve /healthz etc on")
+	flag.BoolVar(&logToStdOut, "logtostdout", false, "whether to log to stdout")
 
 	flag.Parse()
 
@@ -33,6 +37,10 @@ func main() {
 
 	if networkFilename == "" {
 		util.Logger.Fatal("the --network flag must be set")
+	}
+
+	if logToStdOut {
+		util.Logger = log.New(os.Stdout, "", log.LstdFlags)
 	}
 
 	var db *data.Database
