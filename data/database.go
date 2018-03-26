@@ -5,15 +5,13 @@ import (
 	"fmt"
 	"os/user"
 	"strings"
-	"sync"
+	"time"
 
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
 
 	"github.com/lacker/coinkit/util"
 )
-
-var databaseInitLock sync.Mutex
 
 // A Database encapsulates a connection to a Postgres database.
 type Database struct {
@@ -65,9 +63,21 @@ func isUniquenessError(e error) bool {
 
 // initialize makes sure the schemas are set up right and panics if not
 func (db *Database) initialize() {
-	databaseInitLock.Lock()
-	db.postgres.MustExec(schema)
-	databaseInitLock.Unlock()
+	// There are some strange errors on initialization that I don't understand.
+	// Just sleep a bit and retry.
+	errors := 0
+	for {
+		_, err := db.postgres.Exec(schema)
+		if err == nil {
+			if errors > 0 {
+				util.Logger.Printf("db init retry successful")
+			}
+			return
+		}
+		util.Logger.Printf("db init error: %s", err)
+		errors += 1
+		time.Sleep(time.Millisecond * time.Duration(200*errors))
+	}
 }
 
 func (db *Database) TotalBlockSize() string {
