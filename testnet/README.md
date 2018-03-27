@@ -132,20 +132,12 @@ You need a "service account" for this database. Create one at https://console.cl
 
 Create a service account with the "Cloud SQL Client" role. Name it `sql-client` and select "Furnish a new private key" using `JSON` type. Hang on to the json file that your browser downloads.
 
-Now you need to create a proxy user. For the database `db0` I named the user `proxyuser0`.
+Now you need to create a proxy user. For the database `db0` name the user `proxyuser0`.
 Use that password you noted when you created the database instance.
 
 ```
 gcloud sql users create proxyuser0 host --instance=db0 --password=[PASSWORD]
 ```
-
-Now you need the "connection name". Run
-
-```
-gcloud sql instances describe db0 | grep connectionName
-```
-
-It should be three things separated by colons. Mine was `coinkitalpha:us-central1:db0`.
 
 Now we need to create some Kubernetes secrets. Both the service account and the proxy user require secrets to use them. The service account can be shared among multiple databases, but the proxy user is tied to a specific database.
 
@@ -198,7 +190,11 @@ When you've updated the code, just rebuild a container image and redeploy.
 ./deploy.sh
 ```
 
-### 8. Cleaning up
+### 8. Running more servers
+
+TODO: explain how to run more than a single node
+
+### 9. Cleaning up
 
 If you don't want to keep things running, you can shut down the deployment, the service,
 and the cluster itself:
