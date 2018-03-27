@@ -128,6 +128,8 @@ Generate a random password, but take note of it.
 
 I edited the resources to be the minimum, 1 shared cpu and 0.6 GB memory.
 
+Go to the management UI for your database, from https://console.cloud.google.com/sql/instances . Go to Databases, Create a database, and name it "prod".
+
 You need a "service account" for this database. Create one at https://console.cloud.google.com/projectselector/iam-admin/serviceaccounts
 
 Create a service account with the "Cloud SQL Client" role. Name it `sql-client` and select "Furnish a new private key" using `JSON` type. Hang on to the json file that your browser downloads.
