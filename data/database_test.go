@@ -99,7 +99,7 @@ func TestForBlocks(t *testing.T) {
 	}
 }
 
-func TestTotalBlockSize(t *testing.T) {
+func TestTotalSizeInfo(t *testing.T) {
 	DropTestData(0)
 	db := NewTestDatabase(0)
 	b := &Block{
