@@ -393,20 +393,23 @@ func (s *Server) ServeHttpInBackground(port int) {
 
 	// /statusz returns more detailed information about this server
 	http.HandleFunc("/statusz", func(w http.ResponseWriter, r *http.Request) {
+		util.Logger.Print("got /statusz request")
 		fmt.Fprintf(w, "%.1fs uptime\n", s.Uptime())
 		fmt.Fprintf(w, "%d messages broadcasted\n", s.broadcasted)
 		fmt.Fprintf(w, "current slot: %d\n", s.node.Slot())
 		fmt.Fprintf(w, "DB_USER: %s\n", os.Getenv("DB_USER"))
 		fmt.Fprintf(w, "DB_PASSWORD: %s\n", os.Getenv("DB_PASSWORD"))
-		if s.db != nil {
-			last := s.db.LastBlock()
-			if last == nil {
-				fmt.Fprintf(w, "last block: nil\n")
-			} else {
-				fmt.Fprintf(w, "last block: %s\n", last.String())
+		/*
+			if s.db != nil {
+				last := s.db.LastBlock()
+				if last == nil {
+					fmt.Fprintf(w, "last block: nil\n")
+				} else {
+					fmt.Fprintf(w, "last block: %s\n", last.String())
+				}
+				fmt.Fprintf(w, "%s\n", s.db.TotalBlockSize())
 			}
-			fmt.Fprintf(w, "%s\n", s.db.TotalBlockSize())
-		}
+		*/
 	})
 
 	srv := &http.Server{
