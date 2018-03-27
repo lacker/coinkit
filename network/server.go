@@ -398,18 +398,15 @@ func (s *Server) ServeHttpInBackground(port int) {
 		fmt.Fprintf(w, "%d messages broadcasted\n", s.broadcasted)
 		fmt.Fprintf(w, "current slot: %d\n", s.node.Slot())
 		fmt.Fprintf(w, "DB_USER: %s\n", os.Getenv("DB_USER"))
-		fmt.Fprintf(w, "DB_PASSWORD: %s\n", os.Getenv("DB_PASSWORD"))
-		/*
-			if s.db != nil {
-				last := s.db.LastBlock()
-				if last == nil {
-					fmt.Fprintf(w, "last block: nil\n")
-				} else {
-					fmt.Fprintf(w, "last block: %s\n", last.String())
-				}
-				fmt.Fprintf(w, "%s\n", s.db.TotalBlockSize())
+		if s.db != nil {
+			last := s.db.LastBlock()
+			if last == nil {
+				fmt.Fprintf(w, "last block: nil\n")
+			} else {
+				fmt.Fprintf(w, "last block: %s\n", last.String())
 			}
-		*/
+			fmt.Fprintf(w, "%s\n", s.db.TotalSizeInfo())
+		}
 	})
 
 	srv := &http.Server{

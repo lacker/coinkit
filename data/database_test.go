@@ -1,6 +1,7 @@
 package data
 
 import (
+	"log"
 	"os"
 	"testing"
 
@@ -96,6 +97,20 @@ func TestForBlocks(t *testing.T) {
 	if count != 5 {
 		t.Fatal("expected count = 5")
 	}
+}
+
+func TestTotalBlockSize(t *testing.T) {
+	DropTestData(0)
+	db := NewTestDatabase(0)
+	b := &Block{
+		Slot:  1,
+		Chunk: currency.NewEmptyChunk(),
+		C:     8,
+	}
+	if db.SaveBlock(b) != nil {
+		t.Fatal("could not save")
+	}
+	log.Print(db.TotalSizeInfo())
 }
 
 // Clean up both before and after running tests
