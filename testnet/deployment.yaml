@@ -1,23 +1,46 @@
 apiVersion: apps/v1beta2
 kind: Deployment
 metadata:
-  name: cserver-deployment
+  name: cserver0-deployment
 spec:
   selector:
     matchLabels:
-      app: cserver
+      app: cserver0
   replicas: 1
   template:
     metadata:
       labels:
-        app: cserver
+        app: cserver0
     spec:
       containers:
-      - name: cserver
+      - name: cserver0
         image: gcr.io/PROJECT_ID/cserver
         ports:
         - containerPort: 8000
         - containerPort: 9000
         env:
-        - name: DEPLOY_TIME
-          value: 'THE_DEPLOY_TIME'
+        - name: FORCE_REDEPLOY
+          value: 'DEPLOY_TIME'
+        - name: DB_USER
+          valueFrom:
+            secretKeyRef:
+              name: cloudsql-db0-credentials
+              key: username
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: cloudsql-db0-credentials
+              key: password
+      - name: cloudsql-proxy
+        image: gcr.io/cloudsql-docker/gce-proxy:1.11
+        command: ["/cloud_sql_proxy",
+                  "-instances=CONNECTION_NAME=tcp:5432",
+                  "-credential_file=/secrets/cloudsql/credentials.json"]
+        volumeMounts:
+          - name: cloudsql-instance-credentials
+            mountPath: /secrets/cloudsql
+            readOnly: true
+      volumes:
+        - name: cloudsql-instance-credentials
+          secret:
+            secretName: cloudsql-instance-credentials

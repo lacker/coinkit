@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/lacker/coinkit/currency"
@@ -395,6 +396,8 @@ func (s *Server) ServeHttpInBackground(port int) {
 		fmt.Fprintf(w, "%.1fs uptime\n", s.Uptime())
 		fmt.Fprintf(w, "%d messages broadcasted\n", s.broadcasted)
 		fmt.Fprintf(w, "current slot: %d\n", s.node.Slot())
+		fmt.Fprintf(w, "DB_USER: %s\n", os.Getenv("DB_USER"))
+		fmt.Fprintf(w, "DB_PASSWORD: %s\n", os.Getenv("DB_PASSWORD"))
 		if s.db != nil {
 			last := s.db.LastBlock()
 			if last == nil {

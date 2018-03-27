@@ -3,6 +3,7 @@ package data
 import (
 	"encoding/json"
 	"fmt"
+	"os"
 )
 
 // Information we need for database access
@@ -18,6 +19,9 @@ type Config struct {
 
 	// The port the database is on
 	Port int
+
+	// The database password
+	Password string
 }
 
 func NewTestConfig(i int) *Config {
@@ -26,6 +30,24 @@ func NewTestConfig(i int) *Config {
 		User:     "$USER",
 		Host:     "127.0.0.1",
 		Port:     5432,
+	}
+}
+
+// Prod databases are configured via environment variables.
+// Returns nil if the environment variables are not set.
+func NewProdConfig() *Config {
+	user := os.Getenv("DB_USER")
+	password := os.Getenv("DB_PASSWORD")
+	if len(user) == 0 || len(password) == 0 {
+		return nil
+	}
+
+	return &Config{
+		Database: "prod",
+		User:     user,
+		Host:     "127.0.0.1",
+		Port:     5432,
+		Password: password,
 	}
 }
 

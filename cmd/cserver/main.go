@@ -44,12 +44,15 @@ func main() {
 	}
 
 	var db *data.Database
-	if databaseFilename != "" {
+	dbConfig := data.NewProdConfig()
+	if dbConfig == nil && databaseFilename != "" {
 		bytes, err := ioutil.ReadFile(databaseFilename)
 		if err != nil {
 			panic(err)
 		}
-		dbConfig := data.NewConfigFromSerialized(bytes)
+		dbConfig = data.NewConfigFromSerialized(bytes)
+	}
+	if dbConfig != nil {
 		db = data.NewDatabase(dbConfig)
 	}
 
