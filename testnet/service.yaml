@@ -3,15 +3,13 @@ kind: Service
 metadata:
   name: cservice0
 spec:
-  type: NodePort
+  type: LoadBalancer
   ports:
     - port: 8000
       name: http
-      protocol: TCP
-      nodePort: 30800
+      targetPort: 8000
     - port: 9000
       name: p2p
-      protocol: TCP
-      nodePort: 30900
+      targetPort: 9000
   selector:
     app: cserver0

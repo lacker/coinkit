@@ -7,7 +7,8 @@ This instructions specifically explain how to deploy a miner to the Google Cloud
 Estimated cost for keeping one miner running using these instructions:
 * n1-standard-1 for the app servers is $25 a month
 * db-f1-micro for the database is $8 a month
-* 100 GB of storage is another $9 a month
+* 100 GB of database storage is another $9 a month
+* Load balancing is $18 a month
 
 ### 1. Set up a GCP account and install the Cloud Tools
 
@@ -108,7 +109,7 @@ Enable logging at: https://console.cloud.google.com/flows/enableapi?apiid=loggin
 Enable SQL at: https://console.cloud.google.com/flows/enableapi?apiid=sqladmin
 
 Then let's make the cluster, named "testnet". Once you run this, it'll
-start charging you money. The setup here is pretty dinky, and it should be about $35 a month, but proceed at your own risk.
+start charging you money.
 
 ```
 gcloud container clusters create testnet --num-nodes=1 --scopes https://www.googleapis.com/auth/logging.write
@@ -166,22 +167,23 @@ To deploy a `cserver` to your cluster, run:
 This same command should also update the deployment, when a new
 "latest" image exists or when the yaml file has been updated.
 
-To expose the `cserver` to public internet ports, you need to create a kubernetes service
-and a firewall:
+To expose the `cserver` to public internet ports, you need to create a load balancer:
 
 ```
 kubectl apply -f ./service.yaml
-gcloud compute firewall-rules create cfirewall --allow tcp:30800,tcp:30900
 ```
 
-To find the external ip, run
+To find the external ip, run:
 
 ```
-gcloud compute instances list
+kubectl get services
 ```
 
-Then go to `your.external.ip:30800/healthz` in the browser. You should see an `OK`.
-Port `30800` is where status information is, port `30900` runs the peer-to-peer protocol.
+Once it displays an external ip, go to `your.external.ip:30800/healthz` in the browser.
+You should see an `OK`.
+Port `8000` is where status information is, port `9000` runs the peer-to-peer protocol.
+
+You're going to want this IP to be static. Go to https://console.cloud.google.com/networking/addresses/list and use the dropdown to make this static. As long as you don't delete the load balancing service, it'll keep the same IP.
 
 ### 7. Updating the server
 
