@@ -405,7 +405,7 @@ func (s *Server) ServeHttpInBackground(port int) {
 			} else {
 				fmt.Fprintf(w, "last block: %s\n", last.String())
 			}
-			fmt.Fprintf(w, "%s\n", s.db.TotalSizeInfo())
+			fmt.Fprintf(w, "total database size: %s\n", s.db.TotalSizeInfo())
 		}
 	})
 

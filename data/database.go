@@ -15,6 +15,7 @@ import (
 
 // A Database encapsulates a connection to a Postgres database.
 type Database struct {
+	name     string
 	postgres *sqlx.DB
 }
 
@@ -35,6 +36,7 @@ func NewDatabase(config *Config) *Database {
 
 	db := &Database{
 		postgres: postgres,
+		name:     config.Database,
 	}
 	db.initialize()
 	return db
@@ -84,29 +86,16 @@ func (db *Database) initialize() {
 	}
 }
 
-const sizeQuery = `
-SELECT
-    table_name,
-    pg_size_pretty(table_size) AS table_size,
-    pg_size_pretty(indexes_size) AS indexes_size,
-    pg_size_pretty(total_size) AS total_size
-FROM (
-    SELECT
-        table_name,
-        pg_table_size(table_name) AS table_size,
-        pg_indexes_size(table_name) AS indexes_size,
-        pg_total_relation_size(table_name) AS total_size
-    FROM (
-        SELECT ('"' || table_schema || '"."' || table_name || '"') AS table_name
-        FROM information_schema.tables
-    ) AS all_tables
-    ORDER BY total_size DESC
-) AS pretty_sizes;
-`
-
 func (db *Database) TotalSizeInfo() string {
-	result := db.postgres.MustExec(sizeQuery)
-	return fmt.Sprintf("%+v", result)
+	var answer string
+	err := db.postgres.Get(
+		&answer,
+		"SELECT pg_size_pretty(pg_database_size($1))",
+		db.name)
+	if err != nil {
+		return err.Error()
+	}
+	return answer
 }
 
 // SaveBlock returns an error if it failed because this block is already saved.
