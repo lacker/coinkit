@@ -189,6 +189,8 @@ Port `8000` is where status information is, port `9000` runs the peer-to-peer pr
 
 You're going to want this IP to be static. Go to https://console.cloud.google.com/networking/addresses/list and use the dropdown to make this static. Name it something like `cservice0-ip`, because the IP is attached to the service. As long as you don't delete the load balancing service, it'll keep the same IP.
 
+Once you have a static ip, it's a good time to set an A record for some domain to point to it. That will give you a host name (like `0.alphatest.network`) that you can share with other nodes.
+
 ### 7. Updating the server
 
 When you've updated the code, just rebuild a container image and redeploy.
