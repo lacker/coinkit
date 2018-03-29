@@ -1,19 +1,19 @@
 apiVersion: apps/v1beta2
 kind: Deployment
 metadata:
-  name: cserver0-deployment
+  name: cserverX-deployment
 spec:
   selector:
     matchLabels:
-      app: cserver0
+      app: cserverX
   replicas: 1
   template:
     metadata:
       labels:
-        app: cserver0
+        app: cserverX
     spec:
       containers:
-      - name: cserver0
+      - name: cserverX
         image: gcr.io/PROJECT_ID/cserver
         ports:
         - containerPort: 8000
@@ -24,12 +24,12 @@ spec:
         - name: DB_USER
           valueFrom:
             secretKeyRef:
-              name: cloudsql-db0-credentials
+              name: cloudsql-dbX-credentials
               key: username
         - name: DB_PASSWORD
           valueFrom:
             secretKeyRef:
-              name: cloudsql-db0-credentials
+              name: cloudsql-dbX-credentials
               key: password
       - name: cloudsql-proxy
         image: gcr.io/cloudsql-docker/gce-proxy:1.11

@@ -123,6 +123,8 @@ gcloud compute firewall-rules create cfirewall --allow tcp:30800,tcp:30900
 
 ### 5. Start a database
 
+These scripts are designed to deploy multiple miners to one cluster. The miners are differentiated by a number in `{0,1,2,3}`. From here on out, the instructions explain how to deploy miner 0, but if you want multiples just replace the 0 with a different number.
+
 Create a new database instance at https://console.cloud.google.com/projectselector/sql/instances . Pick postgres. Name it `db0` - that is your "instance name".
 
 Generate a random password, but take note of it.
@@ -150,6 +152,8 @@ To create a secret for the service account, named `cloudsql-instance-credentials
 kubectl create secret generic cloudsql-instance-credentials --from-file=credentials.json=that-json-file-you-downloaded.json
 ```
 
+If you have multiple miners, the same `cloudsql-instance-credentials` will be used for all of them.
+
 For the proxy user, create a secret named `cloudsql-db0-credentials` with:
 
 ```
@@ -161,7 +165,7 @@ kubectl create secret generic cloudsql-db0-credentials --from-literal=username=p
 To deploy a `cserver` to your cluster, run:
 
 ```
-./deploy.sh
+./deploy.sh 0
 ```
 
 This same command should also update the deployment, when a new
@@ -191,7 +195,7 @@ When you've updated the code, just rebuild a container image and redeploy.
 
 ```
 ./build.sh
-./deploy.sh
+./deploy.sh 0
 ```
 
 ### 8. Running more servers
