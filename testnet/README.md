@@ -171,11 +171,13 @@ To deploy a `cserver` to your cluster, run:
 This same command should also update the deployment, when a new
 "latest" image exists or when the yaml file has been updated.
 
-To expose the `cserver` to public internet ports, you need to create a load balancer:
+To expose the `cserver` to public internet ports, you need to create a load balancer, which you can do with the `expose.sh` script:
 
 ```
-kubectl apply -f ./service.yaml
+./expose.sh 0
 ```
+
+You only need to expose it once; you don't need to run that on every deploy.
 
 To find the external ip, run:
 
