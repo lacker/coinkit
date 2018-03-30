@@ -220,7 +220,7 @@ When you've updated the code, just rebuild a container image and redeploy.
 
 ### 5. Running more miners
 
-To run another miner, just use a different number in `{0, 1, 2, 3}` when running these steps.
+To run another miner, you'll have to add more nodes to your cluster. One node per miner. Then just use a different number in `{0, 1, 2, 3}` when running these steps.
 
 # Cleaning up
 
