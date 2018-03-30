@@ -233,6 +233,4 @@ kubectl delete deployment cserver0-deployment
 gcloud container clusters delete testnet
 ```
 
-You can leave the firewall rules running for free.
-
-You can delete the database from the UI, but be aware that you can't recreate one with the same name for a week or so.
+You can delete databases from the UI, but be aware that you can't recreate one with the same name for a week or so.
