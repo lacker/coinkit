@@ -107,8 +107,9 @@ func TestTotalSizeInfo(t *testing.T) {
 		Chunk: currency.NewEmptyChunk(),
 		C:     8,
 	}
-	if db.SaveBlock(b) != nil {
-		t.Fatal("could not save")
+	err := db.SaveBlock(b)
+	if err != nil {
+		t.Fatalf("could not save. got error: %s", err)
 	}
 	log.Print(db.TotalSizeInfo())
 }
