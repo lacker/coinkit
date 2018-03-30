@@ -398,6 +398,7 @@ func (s *Server) ServeHttpInBackground(port int) {
 		fmt.Fprintf(w, "%d messages broadcasted\n", s.broadcasted)
 		fmt.Fprintf(w, "current slot: %d\n", s.node.Slot())
 		fmt.Fprintf(w, "DB_USER: %s\n", os.Getenv("DB_USER"))
+		fmt.Fprintf(w, "public key: %s\n", s.keyPair.PublicKey())
 		if s.db != nil {
 			last := s.db.LastBlock()
 			if last == nil {
