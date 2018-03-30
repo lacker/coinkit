@@ -20,7 +20,7 @@ spec:
         - containerPort: 9000
         volumeMounts:
           - name: keypairX
-            mountPath: /secrets/keypair.json
+            mountPath: /secrets/keypair
             readOnly: true
         env:
         - name: FORCE_REDEPLOY
