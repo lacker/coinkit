@@ -1,7 +1,7 @@
 {
     "Servers": {
-	"0x52bb862ae8c8be66808214ae69f3c83b880716d2494f7d8cbc947dcdf126d7da2860": {
-	    "Host": "127.0.0.1",
+	"0xf51c1be5c0e4bd62fdaa8669b42b3c730c0baa4d0ed414f8cf0811c68952e53a8406": {
+	    "Host": "0.alphatest.network",
 	    "Port": 9000
 	},
 	"invalid1": {
