@@ -17,8 +17,6 @@ CONNECTION_NAME=`gcloud sql instances describe $DB | grep connectionName | sed '
 
 echo sql connection name: $CONNECTION_NAME
 
-exit 0
-
 sed s/PROJECT_ID/$PROJECT_ID/g ./deployment.yaml \
     | sed "s/cserverX/$APP/g" \
     | sed "s/dbX/$DB/g" \
