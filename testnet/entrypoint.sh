@@ -4,7 +4,7 @@
 # the Google cloud platform from the coinkit directory.
 
 cserver \
-    --keypair=./testnet/keypair0.json \
+    --keypair=/secrets/keypair.json \
     --network=./testnet/network.json \
     --logtostdout \
     --http=8000
