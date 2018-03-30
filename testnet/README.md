@@ -201,7 +201,7 @@ To find the external ip, run:
 kubectl get services
 ```
 
-Once it displays an external ip, go to `your.external.ip:30800/healthz` in the browser.
+Once it displays an external ip, go to `your.external.ip:8000/healthz` in the browser.
 You should see an `OK`.
 Port `8000` is where status information is, port `9000` runs the peer-to-peer protocol.
 
