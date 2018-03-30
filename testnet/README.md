@@ -10,6 +10,10 @@ Estimated cost for keeping one miner running using these instructions:
 * 100 GB of database storage is another $9 a month
 * Load balancing is $18 a month
 
+# Running a cluster on GCP
+
+A single cluster can support multiple miners.
+
 ### 1. Set up a GCP account and install the Cloud Tools
 
 https://cloud.google.com/sdk/docs/
@@ -115,13 +119,25 @@ start charging you money.
 gcloud container clusters create testnet --num-nodes=1 --scopes https://www.googleapis.com/auth/logging.write
 ```
 
-You will also need a firewall opening ports to the outside world:
+# Running a miner on your cluster
+
+### 1. Generate a keypair for your miner
+
+To generate a keypair, run:
 
 ```
-gcloud compute firewall-rules create cfirewall --allow tcp:30800,tcp:30900
+cclient generate > keypair0.json
 ```
 
-### 5. Start a database
+Then type in a bunch of random letters. Save `keypair0.json` somewhere secret.
+
+To make this secret available to kubernetes, run:
+
+```
+kubectl create secret generic keypair0 --from-file=./keypair0.json
+```
+
+### 2. Start a database
 
 These scripts are designed to deploy multiple miners to one cluster. The miners are differentiated by a number in `{0,1,2,3}`. From here on out, the instructions explain how to deploy miner 0, but if you want multiples just replace the 0 with a different number.
 
@@ -160,7 +176,7 @@ For the proxy user, create a secret named `cloudsql-db0-credentials` with:
 kubectl create secret generic cloudsql-db0-credentials --from-literal=username=proxyuser0 --from-literal=password=[PASSWORD]
 ```
 
-### 6. Deploy a cserver to your cluster
+### 3. Deploy a cserver to your cluster
 
 To deploy a `cserver` to your cluster, run:
 
@@ -193,7 +209,7 @@ You're going to want this IP to be static. Go to https://console.cloud.google.co
 
 Once you have a static ip, it's a good time to set an A record for some domain to point to it. That will give you a host name (like `0.alphatest.network`) that you can share with other nodes.
 
-### 7. Updating the server
+### 4. Updating the server
 
 When you've updated the code, just rebuild a container image and redeploy.
 
@@ -202,11 +218,11 @@ When you've updated the code, just rebuild a container image and redeploy.
 ./deploy.sh 0
 ```
 
-### 8. Running more servers
+### 5. Running more miners
 
-TODO: explain how to run more than a single node
+To run another miner, just use a different number in `{0, 1, 2, 3}` when running these steps.
 
-### 9. Cleaning up
+# Cleaning up
 
 If you don't want to keep things running, you can shut down the deployment, the service,
 and the cluster itself:
