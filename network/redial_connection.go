@@ -56,6 +56,10 @@ func (c *RedialConnection) IsClosed() bool {
 	return c.closed
 }
 
+func (c *RedialConnection) IsConnected() bool {
+	return c.conn != nil && !c.conn.IsClosed()
+}
+
 // connect() is not threadsafe and should only be called from the
 // runOutgoing thread
 func (c *RedialConnection) connect() {
