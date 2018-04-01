@@ -90,6 +90,16 @@ func (s *Server) setBalance(user string, amount uint64) {
 	s.node.queue.SetBalance(user, amount)
 }
 
+func (s *Server) numPeersConnected() int {
+	answer := 0
+	for _, peer := range s.peers {
+		if peer.IsConnected() {
+			answer += 1
+		}
+	}
+	return answer
+}
+
 // Handles an incoming connection.
 // This is likely to include many messages, all separated by endlines.
 func (s *Server) handleConnection(connection net.Conn) {
