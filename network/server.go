@@ -64,7 +64,7 @@ func NewServer(keyPair *util.KeyPair, config *Config, db *data.Database) *Server
 		mint.PublicKey(), currency.TotalMoney)
 
 	return &Server{
-		port:                config.Port(keyPair.PublicKey().String()),
+		port:                config.GetPort(keyPair.PublicKey().String(), 9000),
 		keyPair:             keyPair,
 		peers:               peers,
 		node:                node,

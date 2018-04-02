@@ -64,10 +64,11 @@ func (c *Config) QuorumSlice() consensus.QuorumSlice {
 	return consensus.MakeQuorumSlice(members, c.Threshold)
 }
 
-func (c *Config) Port(publicKey string) int {
+func (c *Config) GetPort(publicKey string, defaultPort int) int {
 	addr := c.Servers[publicKey]
 	if addr == nil {
-		util.Logger.Fatalf("No port could be found for %s in the network config.", publicKey)
+		util.Logger.Printf("No port could be found for %s in the network config.", publicKey)
+		return defaultPort
 	}
 	return addr.Port
 }
