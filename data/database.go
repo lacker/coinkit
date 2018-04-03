@@ -56,6 +56,13 @@ CREATE TABLE IF NOT EXISTS blocks (
 );
 
 CREATE UNIQUE INDEX IF NOT EXISTS block_idx ON blocks (slot);
+
+CREATE TABLE IF NOT EXISTS documents (
+    id bigint,
+    data json NOT NULL
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS id_idx ON documents (id);
 `
 
 const blockInsert = `
@@ -82,6 +89,9 @@ func (db *Database) initialize() {
 		}
 		util.Logger.Printf("db init error: %s", err)
 		errors += 1
+		if errors >= 10 {
+			panic("too many db errors")
+		}
 		time.Sleep(time.Millisecond * time.Duration(200*errors))
 	}
 }
@@ -163,4 +173,5 @@ func (db *Database) ForBlocks(f func(b *Block)) int {
 func DropTestData(i int) {
 	db := NewTestDatabase(i)
 	db.postgres.MustExec("DROP TABLE IF EXISTS blocks")
+	db.postgres.MustExec("DROP TABLE IF EXISTS documents")
 }
