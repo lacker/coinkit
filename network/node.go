@@ -131,7 +131,7 @@ func (node *Node) handleChainMessage(sender string, message util.Message) (util.
 				H:     last.Hn,
 				Chunk: chunk,
 			}
-			err := node.database.SaveBlock(block)
+			err := node.database.InsertBlock(block)
 			if err != nil {
 				panic(err)
 			}

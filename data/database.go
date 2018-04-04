@@ -55,24 +55,16 @@ CREATE TABLE IF NOT EXISTS blocks (
     h integer
 );
 
-CREATE UNIQUE INDEX IF NOT EXISTS block_idx ON blocks (slot);
+CREATE UNIQUE INDEX IF NOT EXISTS block_slot_idx ON blocks (slot);
 
 CREATE TABLE IF NOT EXISTS documents (
     id bigint,
-    data json NOT NULL
+    data jsonb NOT NULL
 );
 
-CREATE UNIQUE INDEX IF NOT EXISTS id_idx ON documents (id);
+CREATE UNIQUE INDEX IF NOT EXISTS document_id_idx ON documents (id);
+CREATE INDEX IF NOT EXISTS document_data_idx ON documents USING gin (data jsonb_path_ops);
 `
-
-const blockInsert = `
-INSERT INTO blocks (slot, chunk, c, h)
-VALUES (:slot, :chunk, :c, :h)
-`
-
-func isUniquenessError(e error) bool {
-	return strings.Contains(e.Error(), "duplicate key value violates unique constraint")
-}
 
 // initialize makes sure the schemas are set up right and panics if not
 func (db *Database) initialize() {
@@ -89,7 +81,7 @@ func (db *Database) initialize() {
 		}
 		util.Logger.Printf("db init error: %s", err)
 		errors += 1
-		if errors >= 10 {
+		if errors >= 3 {
 			panic("too many db errors")
 		}
 		time.Sleep(time.Millisecond * time.Duration(200*errors))
@@ -108,9 +100,18 @@ func (db *Database) TotalSizeInfo() string {
 	return answer
 }
 
-// SaveBlock returns an error if it failed because this block is already saved.
+const blockInsert = `
+INSERT INTO blocks (slot, chunk, c, h)
+VALUES (:slot, :chunk, :c, :h)
+`
+
+func isUniquenessError(e error) bool {
+	return strings.Contains(e.Error(), "duplicate key value violates unique constraint")
+}
+
+// InsertBlock returns an error if it failed because this block is already saved.
 // It panics if there is a fundamental database problem.
-func (db *Database) SaveBlock(b *Block) error {
+func (db *Database) InsertBlock(b *Block) error {
 	_, err := db.postgres.NamedExec(blockInsert, b)
 	if err != nil {
 		if isUniquenessError(err) {
@@ -168,6 +169,43 @@ func (db *Database) ForBlocks(f func(b *Block)) int {
 		f(b)
 	}
 	return slot
+}
+
+const documentInsert = `
+INSERT INTO documents (id, data)
+VALUES (:id, :data)
+`
+
+// InsertDocument returns an error if it failed because there is already a document with
+// this id.
+// It panics if there is a fundamental database problem.
+func (db *Database) InsertDocument(d *Document) error {
+	_, err := db.postgres.NamedExec(documentInsert, d)
+	if err != nil {
+		if isUniquenessError(err) {
+			return err
+		}
+		panic(err)
+	}
+	return nil
+}
+
+func (db *Database) GetDocuments(match map[string]interface{}, limit int) []*Document {
+	rows, err := db.postgres.Queryx(
+		"SELECT * FROM documents WHERE data @> $1 LIMIT $2", match, limit)
+	if err != nil {
+		panic(err)
+	}
+	answer := []*Document{}
+	for rows.Next() {
+		d := &Document{}
+		err := rows.StructScan(d)
+		if err != nil {
+			panic(err)
+		}
+		answer = append(answer, d)
+	}
+	return answer
 }
 
 func DropTestData(i int) {

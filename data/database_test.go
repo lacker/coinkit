@@ -8,13 +8,13 @@ import (
 	"github.com/lacker/coinkit/currency"
 )
 
-func TestSaveAndFetch(t *testing.T) {
+func TestInsertAndGet(t *testing.T) {
 	db := NewTestDatabase(0)
 	block := &Block{
 		Slot:  3,
 		Chunk: currency.NewEmptyChunk(),
 	}
-	err := db.SaveBlock(block)
+	err := db.InsertBlock(block)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -24,7 +24,7 @@ func TestSaveAndFetch(t *testing.T) {
 	}
 }
 
-func TestFetchNonexistentBlock(t *testing.T) {
+func TestGetNonexistentBlock(t *testing.T) {
 	db := NewTestDatabase(0)
 	b := db.GetBlock(4)
 	if b != nil {
@@ -32,7 +32,7 @@ func TestFetchNonexistentBlock(t *testing.T) {
 	}
 }
 
-func TestCantSaveTwice(t *testing.T) {
+func TestCantInsertTwice(t *testing.T) {
 	db := NewTestDatabase(0)
 	block := &Block{
 		Slot:  4,
@@ -40,11 +40,11 @@ func TestCantSaveTwice(t *testing.T) {
 		C:     1,
 		H:     2,
 	}
-	err := db.SaveBlock(block)
+	err := db.InsertBlock(block)
 	if err != nil {
 		t.Fatal(err)
 	}
-	err = db.SaveBlock(block)
+	err = db.InsertBlock(block)
 	if err == nil {
 		t.Fatal("a block should not save twice")
 	}
@@ -61,12 +61,12 @@ func TestLastBlock(t *testing.T) {
 		Slot:  5,
 		Chunk: currency.NewEmptyChunk(),
 	}
-	err := db.SaveBlock(b)
+	err := db.InsertBlock(b)
 	if err != nil {
 		t.Fatal(err)
 	}
 	b.Slot = 6
-	err = db.SaveBlock(b)
+	err = db.InsertBlock(b)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -85,7 +85,7 @@ func TestForBlocks(t *testing.T) {
 			Chunk: currency.NewEmptyChunk(),
 			C:     7,
 		}
-		if db.SaveBlock(b) != nil {
+		if db.InsertBlock(b) != nil {
 			t.Fatal("block could not save")
 		}
 	}
@@ -107,7 +107,7 @@ func TestTotalSizeInfo(t *testing.T) {
 		Chunk: currency.NewEmptyChunk(),
 		C:     8,
 	}
-	err := db.SaveBlock(b)
+	err := db.InsertBlock(b)
 	if err != nil {
 		t.Fatalf("could not save. got error: %s", err)
 	}
