@@ -167,10 +167,11 @@ func databaseForBenchmarking() *Database {
 func BenchmarkOneConstraint(b *testing.B) {
 	db := databaseForBenchmarking()
 	b.ResetTimer()
-	for c := 0; c < b.N; c++ {
+	for i := 0; i < b.N; i++ {
+		c := i%(benchmarkMax*benchmarkMax) + 1
 		docs := db.GetDocuments(map[string]interface{}{"c": c}, 2)
 		if len(docs) != 1 {
-			log.Fatalf("expected one doc but got: %+v", docs)
+			log.Fatalf("expected one doc for c = %d but got: %+v", c, docs)
 		}
 	}
 }
@@ -178,9 +179,9 @@ func BenchmarkOneConstraint(b *testing.B) {
 func BenchmarkTwoConstraints(b *testing.B) {
 	db := databaseForBenchmarking()
 	b.ResetTimer()
-	for c := 0; c < b.N; c++ {
-		a := c % benchmarkMax
-		b := ((c - a) / benchmarkMax) % benchmarkMax
+	for i := 0; i < b.N; i++ {
+		a := i % benchmarkMax
+		b := ((i - a) / benchmarkMax) % benchmarkMax
 		docs := db.GetDocuments(map[string]interface{}{"a": a, "b": b}, 2)
 		if len(docs) != 1 {
 			log.Fatalf("expected one doc but got: %+v", docs)
