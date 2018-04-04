@@ -135,6 +135,59 @@ func TestGetDocuments(t *testing.T) {
 	}
 }
 
+const benchmarkMax = 400
+
+func databaseForBenchmarking() *Database {
+	DropTestData(0)
+	db := NewTestDatabase(0)
+	log.Printf("populating db for benchmarking")
+	items := 0
+	for a := 0; a < benchmarkMax; a++ {
+		if a != 0 && a%10 == 0 {
+			log.Printf("inserted %d items", items)
+		}
+		for b := 0; b < benchmarkMax; b++ {
+			c := b*benchmarkMax + a + 1
+			d := NewDocument(uint64(c), map[string]interface{}{
+				"a": a,
+				"b": b,
+				"c": c,
+			})
+			err := db.InsertDocument(d)
+			if err != nil {
+				log.Fatal(err)
+			}
+			items++
+		}
+	}
+	log.Printf("database is populated with %d items", items)
+	return db
+}
+
+func BenchmarkOneConstraint(b *testing.B) {
+	db := databaseForBenchmarking()
+	b.ResetTimer()
+	for c := 0; c < b.N; c++ {
+		docs := db.GetDocuments(map[string]interface{}{"c": c}, 2)
+		if len(docs) != 1 {
+			log.Fatalf("expected one doc but got: %+v", docs)
+		}
+	}
+}
+
+func BenchmarkTwoConstraints(b *testing.B) {
+	db := databaseForBenchmarking()
+	b.ResetTimer()
+	for c := 0; c < b.N; c++ {
+		a := c % benchmarkMax
+		b := ((c - a) / benchmarkMax) % benchmarkMax
+		docs := db.GetDocuments(map[string]interface{}{"a": a, "b": b}, 2)
+		if len(docs) != 1 {
+			log.Fatalf("expected one doc but got: %+v", docs)
+		}
+	}
+}
+
 // Clean up both before and after running tests
 func TestMain(m *testing.M) {
 	DropTestData(0)

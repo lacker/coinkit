@@ -31,6 +31,12 @@ If you want to clear the local databases to restart their blockchain:
 
 The unit tests will clear the test databases by themselves.
 
+# Benchmarking
+
+```
+go test ./data -run=zzz -bench=BenchmarkQueries -benchtime=60s
+```
+
 # Maintenance
 
 TODO: write some tips for miners on how to keep their databases well-maintained
