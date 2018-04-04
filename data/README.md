@@ -39,6 +39,8 @@ go test ./data -run=zzz -bench=BenchmarkOneConstraint -benchtime=60s
 go test ./data -run=zzz -bench=BenchmarkTwoConstraints -benchtime=60s
 ```
 
+The two take about the same time on my Macbook, 35 ms per op.
+
 # Maintenance
 
 TODO: write some tips for miners on how to keep their databases well-maintained
