@@ -135,6 +135,15 @@ func TestGetDocuments(t *testing.T) {
 	}
 }
 
+func TestGetDocumentsNoResults(t *testing.T) {
+	DropTestData(0)
+	db := NewTestDatabase(0)
+	docs := db.GetDocuments(map[string]interface{}{"blorp": "hi"}, 3)
+	if len(docs) != 0 {
+		t.Fatalf("expected zero docs but got: %+v", docs)
+	}
+}
+
 const benchmarkMax = 400
 
 func databaseForBenchmarking() *Database {

@@ -45,6 +45,8 @@ It will take some number of minutes, so be patient.
 
 The performance of the two is about the same time on my Macbook, 35 ms per op.
 
+TODO: is that ridiculously bad, such that I must be missing something?
+
 # Maintenance
 
 TODO: write some tips for miners on how to keep their databases well-maintained
