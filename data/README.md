@@ -34,7 +34,9 @@ The unit tests will clear the test databases by themselves.
 # Benchmarking
 
 ```
-go test ./data -run=zzz -bench=BenchmarkQueries -benchtime=60s
+go test ./data -run=zzz -bench=BenchmarkOneConstraint -benchtime=60s
+
+go test ./data -run=zzz -bench=BenchmarkTwoConstraints -benchtime=60s
 ```
 
 # Maintenance
