@@ -2,6 +2,7 @@ package data
 
 import (
 	"database/sql"
+	"encoding/json"
 	"fmt"
 	"os/user"
 	"strings"
@@ -191,8 +192,12 @@ func (db *Database) InsertDocument(d *Document) error {
 }
 
 func (db *Database) GetDocuments(match map[string]interface{}, limit int) []*Document {
+	bytes, err := json.Marshal(match)
+	if err != nil {
+		panic(err)
+	}
 	rows, err := db.postgres.Queryx(
-		"SELECT * FROM documents WHERE data @> $1 LIMIT $2", match, limit)
+		"SELECT * FROM documents WHERE data @> $1 LIMIT $2", string(bytes), limit)
 	if err != nil {
 		panic(err)
 	}

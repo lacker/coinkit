@@ -114,6 +114,27 @@ func TestTotalSizeInfo(t *testing.T) {
 	log.Print(db.TotalSizeInfo())
 }
 
+func TestGetDocuments(t *testing.T) {
+	DropTestData(0)
+	db := NewTestDatabase(0)
+	for a := 1; a <= 2; a++ {
+		for b := 1; b <= 2; b++ {
+			d := NewDocument(uint64(10*a+b), map[string]interface{}{
+				"a": a,
+				"b": b,
+			})
+			err := db.InsertDocument(d)
+			if err != nil {
+				t.Fatal(err)
+			}
+		}
+	}
+	docs := db.GetDocuments(map[string]interface{}{"a": 2, "b": 1}, 2)
+	if len(docs) != 1 {
+		t.Fatalf("expected one doc but got: %+v", docs)
+	}
+}
+
 // Clean up both before and after running tests
 func TestMain(m *testing.M) {
 	DropTestData(0)

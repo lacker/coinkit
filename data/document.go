@@ -2,6 +2,8 @@ package data
 
 import (
 	"encoding/json"
+
+	"github.com/jmoiron/sqlx/types"
 )
 
 type Document struct {
@@ -11,7 +13,7 @@ type Document struct {
 	// Some fields are required on every object:
 	// id: a unique integer
 	// TODO: collection, owner, createdAt, updatedAt
-	Data map[string]interface{}
+	Data types.JSONText
 
 	// Every document has a unique id. It is stored twice in the
 	// database to enforce uniqueness.
@@ -26,11 +28,18 @@ func (d *Document) String() string {
 	return string(append(bytes, '\n'))
 }
 
-func NewDocument(id uint64) *Document {
+func NewDocument(id uint64, data map[string]interface{}) *Document {
+	fullData := map[string]interface{}{"id": id}
+	for key, value := range data {
+		fullData[key] = value
+	}
+	bytes, err := json.Marshal(fullData)
+	if err != nil {
+		panic(err)
+	}
+
 	return &Document{
-		Data: map[string]interface{}{
-			"id": id,
-		},
-		Id: id,
+		Data: types.JSONText(bytes),
+		Id:   id,
 	}
 }
