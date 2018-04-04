@@ -33,10 +33,12 @@ The unit tests will clear the test databases by themselves.
 
 # Benchmarking
 
-To run all the query benchmarks:
+To run the query benchmarks:
 
 ```
-go test ./data -run=zzz -bench=Benchmark.*Constraint -benchtime=60s
+go test ./data -run=zzz -bench=BenchmarkOneConstraint -benchtime=60s
+
+go test ./data -run=zzz -bench=BenchmarkTwoConstraints -benchtime=60s
 ```
 
 It will take some number of minutes, so be patient.
