@@ -47,6 +47,13 @@ func (t *Transaction) Signer() string {
 	return t.From
 }
 
+func (t *Transaction) Verify() bool {
+	if _, err := util.ReadPublicKey(t.To); err != nil {
+		return false
+	}
+	return true
+}
+
 // Signs the transaction with the provided keypair.
 // The caller must check the keypair is the actual sender.
 func (t *Transaction) SignWith(keyPair *util.KeyPair) *SignedTransaction {

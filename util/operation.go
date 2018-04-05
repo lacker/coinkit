@@ -21,6 +21,11 @@ type Operation interface {
 
 	// Signer() is the public key of the user who needs to sign this operation
 	Signer() string
+
+	// Verify() should do any internal checking that this operation can do to
+	// make sure it is valid. This doesn't include checking against data in the
+	// blockchain.
+	Verify() bool
 }
 
 // OperationTypeMap maps into struct types whose pointer-types implement Operation.

@@ -21,6 +21,10 @@ func (op *TestingOperation) Signer() string {
 	return "Fake Sender"
 }
 
+func (op *TestingOperation) Verify() bool {
+	return true
+}
+
 func init() {
 	RegisterOperationType(&TestingOperation{})
 }
