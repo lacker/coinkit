@@ -69,6 +69,8 @@ CREATE INDEX IF NOT EXISTS document_data_idx ON documents USING gin (data jsonb_
 
 // initialize makes sure the schemas are set up right and panics if not
 func (db *Database) initialize() {
+	log.Printf("initializing database %s", db.name)
+
 	// There are some strange errors on initialization that I don't understand.
 	// Just sleep a bit and retry.
 	errors := 0
@@ -215,6 +217,7 @@ func (db *Database) GetDocuments(match map[string]interface{}, limit int) []*Doc
 
 func DropTestData(i int) {
 	db := NewTestDatabase(i)
+	log.Printf("clearing test database %s", db.name)
 	db.postgres.MustExec("DROP TABLE IF EXISTS blocks")
 	db.postgres.MustExec("DROP TABLE IF EXISTS documents")
 }
