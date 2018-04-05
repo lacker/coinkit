@@ -18,7 +18,7 @@ func TestTransactionVerification(t *testing.T) {
 	kp1 := util.NewKeyPairFromSecretPhrase("bloop1")
 	kp2 := util.NewKeyPairFromSecretPhrase("bloop2")
 	tr := &Transaction{
-		From:     kp1.PublicKey().String(),
+		Signer:   kp1.PublicKey().String(),
 		Sequence: 1,
 		To:       kp2.PublicKey().String(),
 		Amount:   uint64(10),

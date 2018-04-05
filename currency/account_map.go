@@ -69,7 +69,7 @@ func (m *AccountMap) Set(key string, account *Account) {
 
 // Validate returns whether this transaction is valid
 func (m *AccountMap) Validate(t *Transaction) bool {
-	account := m.Get(t.From)
+	account := m.Get(t.Signer)
 	if account == nil {
 		return false
 	}
@@ -98,7 +98,7 @@ func (m *AccountMap) Process(t *Transaction) bool {
 	if !m.Validate(t) {
 		return false
 	}
-	source := m.Get(t.From)
+	source := m.Get(t.Signer)
 	target := m.Get(t.To)
 	if target == nil {
 		target = &Account{}
@@ -111,7 +111,7 @@ func (m *AccountMap) Process(t *Transaction) bool {
 		Sequence: target.Sequence,
 		Balance:  target.Balance + t.Amount,
 	}
-	m.Set(t.From, newSource)
+	m.Set(t.Signer, newSource)
 	m.Set(t.To, newTarget)
 	return true
 }

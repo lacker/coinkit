@@ -78,7 +78,7 @@ func send(recipient string, amountStr string) {
 
 	seq := account.Sequence + 1
 	transaction := &currency.Transaction{
-		From:     user,
+		Signer:   user,
 		Sequence: seq,
 		To:       recipient,
 		Amount:   amount,

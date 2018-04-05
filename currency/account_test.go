@@ -8,10 +8,10 @@ func TestTransactionProcessing(t *testing.T) {
 	m := NewAccountMap()
 	payBob := &Transaction{
 		Sequence: 1,
-		Amount: 100,
-		Fee: 3,
-		From: "alice",
-		To: "bob",
+		Amount:   100,
+		Fee:      3,
+		Signer:   "alice",
+		To:       "bob",
 	}
 	if m.Validate(payBob) {
 		t.Fatalf("alice should not be able to pay bob with no account")

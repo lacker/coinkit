@@ -241,7 +241,7 @@ func (q *TransactionQueue) NewChunk(
 		if validator.Process(t.Transaction) {
 			transactions = append(transactions, t)
 		}
-		state[t.From] = validator.Get(t.From)
+		state[t.Signer] = validator.Get(t.Signer)
 		state[t.To] = validator.Get(t.To)
 		if len(transactions) == MaxChunkSize {
 			break

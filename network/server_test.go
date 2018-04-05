@@ -64,7 +64,7 @@ func sendMoney(conn Connection, from *util.KeyPair, to *util.KeyPair, amount uin
 	}
 	seq := account.Sequence + 1
 	transaction := &currency.Transaction{
-		From:     from.PublicKey().String(),
+		Signer:   from.PublicKey().String(),
 		Sequence: account.Sequence + 1,
 		To:       to.PublicKey().String(),
 		Amount:   amount,

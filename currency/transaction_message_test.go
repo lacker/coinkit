@@ -13,14 +13,14 @@ func TestTransactionMessages(t *testing.T) {
 		Sequence: 1,
 		Amount:   100,
 		Fee:      2,
-		From:     kp1.PublicKey().String(),
+		Signer:   kp1.PublicKey().String(),
 		To:       kp2.PublicKey().String(),
 	}
 	t2 := Transaction{
 		Sequence: 1,
 		Amount:   50,
 		Fee:      2,
-		From:     kp2.PublicKey().String(),
+		Signer:   kp2.PublicKey().String(),
 		To:       kp1.PublicKey().String(),
 	}
 	s1 := t1.SignWith(kp1)

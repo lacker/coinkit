@@ -42,7 +42,7 @@ func maxAccountBalance(nodes []*Node) uint64 {
 func newSendMessage(from *util.KeyPair, to *util.KeyPair, seq int, amount int) util.Message {
 
 	tr := &currency.Transaction{
-		From:     from.PublicKey().String(),
+		Signer:   from.PublicKey().String(),
 		Sequence: uint32(seq),
 		To:       to.PublicKey().String(),
 		Amount:   uint64(amount),
@@ -164,7 +164,7 @@ func nodeFuzzTest(seed int64, t *testing.T) {
 		ts := []*currency.SignedTransaction{}
 		for seq := uint32(1); seq < uint32(initialMoney); seq++ {
 			t := &currency.Transaction{
-				From:     client.PublicKey().String(),
+				Signer:   client.PublicKey().String(),
 				Sequence: seq,
 				To:       neighbor.PublicKey().String(),
 				Amount:   1,

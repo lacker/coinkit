@@ -10,7 +10,7 @@ import (
 
 type Transaction struct {
 	// Who is sending this money
-	From string
+	Signer string
 
 	// The sequence number for this transaction
 	Sequence uint32
@@ -28,7 +28,7 @@ type Transaction struct {
 
 func (t *Transaction) String() string {
 	return fmt.Sprintf("send %d from %s -> %s, seq %d fee %d",
-		t.Amount, util.Shorten(t.From), util.Shorten(t.To), t.Sequence, t.Fee)
+		t.Amount, util.Shorten(t.Signer), util.Shorten(t.To), t.Sequence, t.Fee)
 }
 
 type SignedTransaction struct {
@@ -44,7 +44,7 @@ func (t *Transaction) OperationType() string {
 }
 
 func (t *Transaction) GetSigner() string {
-	return t.From
+	return t.Signer
 }
 
 func (t *Transaction) Verify() bool {
@@ -57,7 +57,7 @@ func (t *Transaction) Verify() bool {
 // Signs the transaction with the provided keypair.
 // The caller must check the keypair is the actual sender.
 func (t *Transaction) SignWith(keyPair *util.KeyPair) *SignedTransaction {
-	if keyPair.PublicKey().String() != t.From {
+	if keyPair.PublicKey().String() != t.Signer {
 		panic("you can only sign your own transactions")
 	}
 	bytes, err := json.Marshal(t)
@@ -81,7 +81,7 @@ func (s *SignedTransaction) Verify() bool {
 	if err != nil {
 		return false
 	}
-	pk, err := util.ReadPublicKey(s.Transaction.From)
+	pk, err := util.ReadPublicKey(s.Transaction.Signer)
 	if err != nil {
 		return false
 	}
@@ -117,7 +117,7 @@ func makeTestTransaction(n int) *SignedTransaction {
 	kp := util.NewKeyPairFromSecretPhrase(fmt.Sprintf("blorp %d", n))
 	dest := util.NewKeyPairFromSecretPhrase("destination")
 	t := &Transaction{
-		From:     kp.PublicKey().String(),
+		Signer:   kp.PublicKey().String(),
 		Sequence: 1,
 		To:       dest.PublicKey().String(),
 		Amount:   uint64(n),
