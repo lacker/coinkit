@@ -6,6 +6,12 @@ import (
 	"reflect"
 )
 
+// Operation is an interface for things that can be serialized onto the blockchain.
+// Logically, the blockchain can be thought of as a sequence of operations. Any
+// other data on the blockchain besides the sequence of operations is just for
+// efficiency.
+// The implementation is pretty similar to Message; maybe they would be less
+// cut-n-pastey if I could figure out how to be smarter about it.
 // TODO: make a Transaction an Operation
 // TODO: make LedgerChunk take a list of operations
 // TODO: add data-specific operations
@@ -21,7 +27,7 @@ type Operation interface {
 var OperationTypeMap map[string]reflect.Type = make(map[string]reflect.Type)
 
 func RegisterOperationType(op Operation) {
-	name := op.MessageType()
+	name := op.OperationType()
 	_, ok := OperationTypeMap[name]
 	if ok {
 		Logger.Fatalf("operation type registered multiple times: %s", name)
@@ -32,4 +38,56 @@ func RegisterOperationType(op Operation) {
 	}
 
 	OperationTypeMap[name] = opv.Type()
+}
+
+// DecodedOperation is just used for the encoding process.
+type DecodedOperation struct {
+	// The type of the operation
+	T string
+
+	// The operation itself
+	O Operation
+}
+
+type PartiallyDecodedOperation struct {
+	T string
+	O json.RawMessage
+}
+
+func EncodeOperation(op Operation) string {
+	if op == nil || reflect.ValueOf(op).IsNil() {
+		panic("you should not EncodeOperation(nil)")
+	}
+	bytes, err := json.Marshal(DecodedOperation{
+		T: op.OperationType(),
+		O: op,
+	})
+	if err != nil {
+		panic(err)
+	}
+	return string(bytes)
+}
+
+func DecodeOperation(encoded string) (Operation, error) {
+	bytes := []byte(encoded)
+	var pdo PartiallyDecodedOperation
+	err := json.Unmarshal(bytes, &pdo)
+	if err != nil {
+		return nil, err
+	}
+
+	opType, ok := OperationTypeMap[pdo.T]
+	if !ok {
+		return nil, fmt.Errorf("unregistered op type: %s", pdo.T)
+	}
+	op := reflect.New(opType).Interface().(Operation)
+	err = json.Unmarshal(pdo.O, &op)
+	if err != nil {
+		return nil, err
+	}
+	if op == nil {
+		return nil, fmt.Errorf("it looks like a nil operation got encoded")
+	}
+
+	return op, nil
 }

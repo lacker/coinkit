@@ -6,6 +6,10 @@ import (
 	"reflect"
 )
 
+// Message is an interface for the network-level communication between nodes.
+// Any message sent from node to node should be a Message.
+// The implementation is pretty similar to Operation; maybe they would share more code
+// if I could figure out how to do that intelligently.
 type Message interface {
 	// Slot returns 0 if the message doesn't relate to a particular slot
 	Slot() int
@@ -42,8 +46,7 @@ func RegisterMessageType(m Message) {
 	MessageTypeMap[name] = sv.Type()
 }
 
-// DecodedMessage is useful for json encoding and decoding, but not necessarily
-// needed outside this file. Try using EncodeMessage and DecodeMessage directly.
+// DecodedMessage is just used for the encoding process.
 type DecodedMessage struct {
 	// The type of the message
 	T string
@@ -89,7 +92,7 @@ func DecodeMessage(encoded string) (Message, error) {
 		return nil, err
 	}
 	if m == nil {
-		return nil, fmt.Errorf("it looks like a nil got encoded")
+		return nil, fmt.Errorf("it looks like a nil message got encoded")
 	}
 
 	return m, nil
