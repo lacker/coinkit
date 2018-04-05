@@ -157,7 +157,7 @@ func blockSend(source *Block, target *Block) {
 	}
 	messages := source.OutgoingMessages()
 	for _, message := range messages {
-		m := util.EncodeThenDecode(message)
+		m := util.EncodeThenDecodeMessage(message)
 		target.Handle(source.publicKey.String(), m)
 	}
 }

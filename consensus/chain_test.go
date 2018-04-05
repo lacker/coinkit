@@ -14,7 +14,7 @@ func chainSend(source *Chain, target *Chain) {
 	}
 	messages := source.OutgoingMessages()
 	for _, message := range messages {
-		m := util.EncodeThenDecode(message)
+		m := util.EncodeThenDecodeMessage(message)
 		response, ok := target.Handle(source.publicKey.String(), m)
 		if ok {
 			_, ok := source.Handle(target.publicKey.String(), response)

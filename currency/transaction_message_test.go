@@ -27,7 +27,7 @@ func TestTransactionMessages(t *testing.T) {
 	s2 := t2.SignWith(kp2)
 	message := NewTransactionMessage(s1, s2)
 
-	m := util.EncodeThenDecode(message).(*TransactionMessage)
+	m := util.EncodeThenDecodeMessage(message).(*TransactionMessage)
 	if len(m.Transactions) != 2 {
 		t.Fatal("expected len m.Transactions to be 2")
 	}

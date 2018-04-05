@@ -14,7 +14,7 @@ import (
 func sendNodeToNodeMessages(source *Node, target *Node, t *testing.T) {
 	messages := source.OutgoingMessages()
 	for _, message := range messages {
-		m := util.EncodeThenDecode(message)
+		m := util.EncodeThenDecodeMessage(message)
 		response, ok := target.Handle(source.publicKey.String(), m)
 		if ok {
 			x, ok := source.Handle(target.publicKey.String(), response)

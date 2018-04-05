@@ -99,7 +99,7 @@ func DecodeMessage(encoded string) (Message, error) {
 }
 
 // Useful for simulating a network transit
-func EncodeThenDecode(message Message) Message {
+func EncodeThenDecodeMessage(message Message) Message {
 	encoded := EncodeMessage(message)
 	m, err := DecodeMessage(encoded)
 	if err != nil {
