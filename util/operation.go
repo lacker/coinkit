@@ -12,9 +12,6 @@ import (
 // efficiency.
 // The implementation is pretty similar to Message; maybe they would be less
 // cut-n-pastey if I could figure out how to be smarter about it.
-// TODO: make a Transaction an Operation
-// TODO: make LedgerChunk take a list of operations
-// TODO: add data-specific operations
 type Operation interface {
 	// OperationType() returns a unique short string mapping to the operation type
 	OperationType() string
@@ -22,9 +19,8 @@ type Operation interface {
 	// String() should return a short, human-readable string
 	String() string
 
-	// Sender() is the public key of the user who is sending this operation to the
-	// blockchain
-	Sender() string
+	// Signer() is the public key of the user who needs to sign this operation
+	Signer() string
 }
 
 // OperationTypeMap maps into struct types whose pointer-types implement Operation.

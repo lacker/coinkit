@@ -39,6 +39,14 @@ type SignedTransaction struct {
 	Signature string
 }
 
+func (t *Transaction) OperationType() string {
+	return "T"
+}
+
+func (t *Transaction) Signer() string {
+	return t.From
+}
+
 // Signs the transaction with the provided keypair.
 // The caller must check the keypair is the actual sender.
 func (t *Transaction) SignWith(keyPair *util.KeyPair) *SignedTransaction {
@@ -123,4 +131,8 @@ func StringifyTransactions(transactions []*SignedTransaction) string {
 		parts = append(parts, t.String())
 	}
 	return fmt.Sprintf("(%s)", strings.Join(parts, "; "))
+}
+
+func init() {
+	util.RegisterOperationType(&Transaction{})
 }

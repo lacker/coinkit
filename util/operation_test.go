@@ -17,7 +17,7 @@ func (op *TestingOperation) String() string {
 	return "Testing"
 }
 
-func (op *TestingOperation) Sender() string {
+func (op *TestingOperation) Signer() string {
 	return "Fake Sender"
 }
 
