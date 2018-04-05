@@ -44,7 +44,7 @@ func (s *SignedOperation) Verify() bool {
 	if err != nil {
 		return false
 	}
-	if !Verify(pk, string(bytes), s.Operation.Signer()) {
+	if !VerifySignature(pk, string(bytes), s.Operation.Signer()) {
 		return false
 	}
 	if !s.Operation.Verify() {

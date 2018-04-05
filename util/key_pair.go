@@ -96,7 +96,7 @@ func (kp *KeyPair) Sign(message string) string {
 }
 
 // message is handled as utf8, the signature is base64.
-func Verify(publicKey PublicKey, message string, signature string) bool {
+func VerifySignature(publicKey PublicKey, message string, signature string) bool {
 	pub := publicKey.WithoutChecksum()
 	if len(pub) != ed25519.PublicKeySize {
 		return false

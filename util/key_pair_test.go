@@ -7,7 +7,7 @@ import (
 
 func TestRejectingGarbage(t *testing.T) {
 	randomKey := NewKeyPair().PublicKey()
-	if Verify(randomKey, "message", "garbagesig") {
+	if VerifySignature(randomKey, "message", "garbagesig") {
 		t.Fatal("this should not have been verified")
 	}
 }
@@ -18,16 +18,16 @@ func TestNewKeyPair(t *testing.T) {
 	sig1 := kp.Sign(message1)
 	message2 := "Another message"
 	sig2 := kp.Sign(message2)
-	if !Verify(kp.PublicKey(), message1, sig1) {
+	if !VerifySignature(kp.PublicKey(), message1, sig1) {
 		t.Fatal("this should verify")
 	}
-	if !Verify(kp.PublicKey(), message2, sig2) {
+	if !VerifySignature(kp.PublicKey(), message2, sig2) {
 		t.Fatal("this should verify")
 	}
-	if Verify(kp.PublicKey(), message1, sig2) {
+	if VerifySignature(kp.PublicKey(), message1, sig2) {
 		t.Fatal("this should not verify")
 	}
-	if Verify(kp.PublicKey(), message2, sig1) {
+	if VerifySignature(kp.PublicKey(), message2, sig1) {
 		t.Fatal("this should not verify")
 	}
 }
@@ -40,16 +40,16 @@ func TestNewKeyPairFromSecretPhrase(t *testing.T) {
 	message2 := "Another message"
 	sig2 := kp1.Sign(message2)
 	for _, kp := range []*KeyPair{kp1, kp2} {
-		if !Verify(kp.PublicKey(), message1, sig1) {
+		if !VerifySignature(kp.PublicKey(), message1, sig1) {
 			t.Fatal("this should verify")
 		}
-		if !Verify(kp.PublicKey(), message2, sig2) {
+		if !VerifySignature(kp.PublicKey(), message2, sig2) {
 			t.Fatal("this should verify")
 		}
-		if Verify(kp.PublicKey(), message1, sig2) {
+		if VerifySignature(kp.PublicKey(), message1, sig2) {
 			t.Fatal("this should not verify")
 		}
-		if Verify(kp.PublicKey(), message2, sig1) {
+		if VerifySignature(kp.PublicKey(), message2, sig1) {
 			t.Fatal("this should not verify")
 		}
 	}

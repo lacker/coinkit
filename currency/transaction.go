@@ -85,7 +85,7 @@ func (s *SignedTransaction) Verify() bool {
 	if err != nil {
 		return false
 	}
-	return util.Verify(pk, string(bytes), s.Signature)
+	return util.VerifySignature(pk, string(bytes), s.Signature)
 }
 
 // HighestPriorityFirst is a comparator in the emirpasic/gods comparator style.
