@@ -22,7 +22,7 @@ type SignedMessage struct {
 	keepalive bool
 }
 
-func NewSignedMessage(kp *KeyPair, message Message) *SignedMessage {
+func NewSignedMessage(message Message, kp *KeyPair) *SignedMessage {
 	if message == nil || reflect.ValueOf(message).IsNil() {
 		Logger.Fatal("cannot sign nil message")
 	}

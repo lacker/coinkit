@@ -17,6 +17,10 @@ func (op *TestingOperation) String() string {
 	return "Testing"
 }
 
+func (op *TestingOperation) Sender() string {
+	return "Fake Sender"
+}
+
 func init() {
 	RegisterOperationType(&TestingOperation{})
 }

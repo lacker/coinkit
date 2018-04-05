@@ -7,7 +7,7 @@ import (
 func TestSignedMessage(t *testing.T) {
 	m := &TestingMessage{Number: 4}
 	kp := NewKeyPairFromSecretPhrase("foo")
-	sm := NewSignedMessage(kp, m)
+	sm := NewSignedMessage(m, kp)
 	str := sm.Serialize()
 	sm2, err := NewSignedMessageFromSerialized(str)
 	if sm2 == nil {

@@ -15,7 +15,7 @@ type Connection interface {
 // SendAnonymousMessage uses a new random key to send a single message.
 func SendAnonymousMessage(c Connection, message *util.InfoMessage) {
 	kp := util.NewKeyPair()
-	sm := util.NewSignedMessage(kp, message)
+	sm := util.NewSignedMessage(message, kp)
 	c.Send(sm)
 }
 

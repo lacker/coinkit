@@ -211,7 +211,7 @@ func (s *Server) unsafeUpdateOutgoing() {
 	// Sign our messages
 	out := []*util.SignedMessage{}
 	for _, m := range s.node.OutgoingMessages() {
-		out = append(out, util.NewSignedMessage(s.keyPair, m))
+		out = append(out, util.NewSignedMessage(m, s.keyPair))
 	}
 
 	// Clear the outgoing queue
@@ -238,7 +238,7 @@ func (s *Server) unsafeProcessMessage(m *util.SignedMessage) *util.SignedMessage
 	if !hasResponse {
 		return nil
 	}
-	sm := util.NewSignedMessage(s.keyPair, message)
+	sm := util.NewSignedMessage(message, s.keyPair)
 	return sm
 }
 

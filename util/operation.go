@@ -21,6 +21,10 @@ type Operation interface {
 
 	// String() should return a short, human-readable string
 	String() string
+
+	// Sender() is the public key of the user who is sending this operation to the
+	// blockchain
+	Sender() string
 }
 
 // OperationTypeMap maps into struct types whose pointer-types implement Operation.

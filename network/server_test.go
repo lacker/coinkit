@@ -72,7 +72,7 @@ func sendMoney(conn Connection, from *util.KeyPair, to *util.KeyPair, amount uin
 	}
 	st := transaction.SignWith(from)
 	tm := currency.NewTransactionMessage(st)
-	sm := util.NewSignedMessage(from, tm)
+	sm := util.NewSignedMessage(tm, from)
 	conn.Send(sm)
 	WaitToClear(conn, from.PublicKey().String(), seq)
 }
@@ -169,7 +169,7 @@ func TestServerOkayWithFakeWellFormattedMessage(t *testing.T) {
 
 	m := &FakeMessage{Number: 4}
 	kp := util.NewKeyPairFromSecretPhrase("foo")
-	sm := util.NewSignedMessage(kp, m)
+	sm := util.NewSignedMessage(m, kp)
 
 	fakeRequest := &Request{
 		Message:  sm,
