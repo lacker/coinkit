@@ -103,7 +103,7 @@ func EncodeThenDecodeMessage(message Message) Message {
 	encoded := EncodeMessage(message)
 	m, err := DecodeMessage(encoded)
 	if err != nil {
-		Logger.Fatal("encode-then-decode error:", err)
+		Logger.Fatal("EncodeThenDecodeMessage error:", err)
 	}
 	return m
 }

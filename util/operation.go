@@ -37,7 +37,12 @@ func RegisterOperationType(op Operation) {
 		Logger.Fatalf("RegisterOperationType should only be called on pointers")
 	}
 
-	OperationTypeMap[name] = opv.Type()
+	sv := opv.Elem()
+	if sv.Kind() != reflect.Struct {
+		Logger.Fatalf("RegisterOperationType should be called on pointers to structs")
+	}
+
+	OperationTypeMap[name] = sv.Type()
 }
 
 // DecodedOperation is just used for the encoding process.
@@ -90,4 +95,14 @@ func DecodeOperation(encoded string) (Operation, error) {
 	}
 
 	return op, nil
+}
+
+// Useful for testing
+func EncodeThenDecodeOperation(operation Operation) Operation {
+	encoded := EncodeOperation(operation)
+	op, err := DecodeOperation(encoded)
+	if err != nil {
+		Logger.Fatal("EncodeThenDecodeOperation error:", err)
+	}
+	return op
 }
