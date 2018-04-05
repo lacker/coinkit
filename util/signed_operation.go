@@ -18,7 +18,7 @@ func NewSignedOperation(op Operation, kp *KeyPair) *SignedOperation {
 		Logger.Fatal("cannot sign nil operation")
 	}
 
-	if kp.PublicKey().String() != op.Signer() {
+	if kp.PublicKey().String() != op.GetSigner() {
 		Logger.Fatal("you can only sign your own operations")
 	}
 
@@ -26,9 +26,10 @@ func NewSignedOperation(op Operation, kp *KeyPair) *SignedOperation {
 	if err != nil {
 		Logger.Fatal("failed to sign operation because json encoding failed")
 	}
+	sig := kp.Sign(string(bytes))
 	return &SignedOperation{
 		Operation: op,
-		Signature: kp.Sign(string(bytes)),
+		Signature: sig,
 	}
 }
 
@@ -36,7 +37,7 @@ func (s *SignedOperation) Verify() bool {
 	if s.Operation == nil || reflect.ValueOf(s.Operation).IsNil() {
 		return false
 	}
-	pk, err := ReadPublicKey(s.Operation.Signer())
+	pk, err := ReadPublicKey(s.Operation.GetSigner())
 	if err != nil {
 		return false
 	}
@@ -44,7 +45,7 @@ func (s *SignedOperation) Verify() bool {
 	if err != nil {
 		return false
 	}
-	if !VerifySignature(pk, string(bytes), s.Operation.Signer()) {
+	if !VerifySignature(pk, string(bytes), s.Signature) {
 		return false
 	}
 	if !s.Operation.Verify() {

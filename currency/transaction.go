@@ -40,10 +40,10 @@ type SignedTransaction struct {
 }
 
 func (t *Transaction) OperationType() string {
-	return "T"
+	return "Transaction"
 }
 
-func (t *Transaction) Signer() string {
+func (t *Transaction) GetSigner() string {
 	return t.From
 }
 

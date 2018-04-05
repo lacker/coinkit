@@ -7,6 +7,7 @@ import (
 
 type TestingOperation struct {
 	Number int
+	Signer string
 }
 
 func (op *TestingOperation) OperationType() string {
@@ -17,8 +18,8 @@ func (op *TestingOperation) String() string {
 	return "Testing"
 }
 
-func (op *TestingOperation) Signer() string {
-	return "Fake Sender"
+func (op *TestingOperation) GetSigner() string {
+	return op.Signer
 }
 
 func (op *TestingOperation) Verify() bool {
