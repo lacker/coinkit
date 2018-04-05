@@ -1,14 +1,13 @@
 package consensus
 
 import (
+	"crypto/sha512"
 	"encoding/base64"
 	"sort"
-
-	"golang.org/x/crypto/sha3"
 )
 
 func HashString(x string) string {
-	h := sha3.New512()
+	h := sha512.New512_256()
 	hashBytes := h.Sum([]byte(x))
 	return base64.RawStdEncoding.EncodeToString(hashBytes)
 }

@@ -2,10 +2,9 @@ package util
 
 import (
 	"bytes"
+	"crypto/sha512"
 	"encoding/hex"
 	"errors"
-
-	"golang.org/x/crypto/sha3"
 )
 
 // The last two bytes are a checksum.
@@ -16,7 +15,7 @@ func checkBytes(input []byte) []byte {
 	if len(input) != 32 {
 		panic("checkBytes called on bad-length input")
 	}
-	h := sha3.New512()
+	h := sha512.New512_256()
 	h.Write(input)
 	return h.Sum(nil)[:2]
 }

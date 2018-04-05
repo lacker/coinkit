@@ -4,11 +4,11 @@ import (
 	"bytes"
 	"crypto"
 	"crypto/rand"
+	"crypto/sha512"
 	"encoding/base64"
 	"encoding/json"
 
 	"golang.org/x/crypto/ed25519"
-	"golang.org/x/crypto/sha3"
 )
 
 type KeyPair struct {
@@ -31,7 +31,7 @@ func NewKeyPair() *KeyPair {
 func NewKeyPairFromSecretPhrase(phrase string) *KeyPair {
 	// ed25519 needs 32 bytes of "entropy".
 	// Use the hash of the phrase for that.
-	h := sha3.New512()
+	h := sha512.New512_256()
 	h.Write([]byte(phrase))
 	checksum := h.Sum(nil)
 	reader := bytes.NewReader(checksum)
