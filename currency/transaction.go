@@ -47,6 +47,14 @@ func (t *Transaction) GetSigner() string {
 	return t.Signer
 }
 
+func (t *Transaction) GetFee() uint64 {
+	return t.Fee
+}
+
+func (t *Transaction) GetSequence() uint32 {
+	return t.Sequence
+}
+
 func (t *Transaction) Verify() bool {
 	if _, err := util.ReadPublicKey(t.To); err != nil {
 		return false

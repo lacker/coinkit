@@ -26,6 +26,13 @@ type Operation interface {
 	// make sure it is valid. This doesn't include checking against data in the
 	// blockchain.
 	Verify() bool
+
+	// GetFee() returns how much the signer is willing to pay to prioritize this op
+	GetFee() uint64
+
+	// GetSequence() returns the number in sequence that this operation is for the signer
+	// This prevents most replay attacks
+	GetSequence() uint32
 }
 
 // OperationTypeMap maps into struct types whose pointer-types implement Operation.
