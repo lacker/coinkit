@@ -10,7 +10,7 @@ type SignedOperation struct {
 	Operation
 
 	// The type of the operation
-	T string
+	Type string
 
 	// The signature to prove that the sender has signed this
 	// Nil if the transaction has not been signed
@@ -41,7 +41,7 @@ func NewSignedOperation(op Operation, kp *KeyPair) *SignedOperation {
 
 type partiallyUnmarshaledSignedOperation struct {
 	Operation json.RawMessage
-	T         string
+	Type      string
 	Signature string
 }
 
@@ -51,9 +51,9 @@ func (s *SignedOperation) UnmarshalJSON(data []byte) error {
 	if err != nil {
 		return err
 	}
-	opType, ok := OperationTypeMap[partial.T]
+	opType, ok := OperationTypeMap[partial.Type]
 	if !ok {
-		return fmt.Errorf("unregistered op type: %s", partial.T)
+		return fmt.Errorf("unregistered op type: %s", partial.Type)
 	}
 	op := reflect.New(opType).Interface().(Operation)
 	err = json.Unmarshal(partial.Operation, &op)
@@ -68,18 +68,18 @@ func (s *SignedOperation) UnmarshalJSON(data []byte) error {
 	if err != nil {
 		return err
 	}
-	if !VerifySignature(pk, partial.T+string(partial.Operation), partial.Signature) {
+	if !VerifySignature(pk, partial.Type+string(partial.Operation), partial.Signature) {
 		return fmt.Errorf("invalid signature on SignedOperation")
 	}
 
 	// It's valid
 	s.Operation = op
-	s.T = partial.T
+	s.Type = partial.Type
 	s.Signature = partial.Signature
 	return nil
 }
 
-// TODO: make sure we don't redundantly verify the signature and key here, I suspect we do
+// TODO: can we get rid of this because verification happens on decode now
 func (s *SignedOperation) Verify() bool {
 	if s.Operation == nil || reflect.ValueOf(s.Operation).IsNil() {
 		return false
