@@ -60,7 +60,10 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	kp := util.NewKeyPairFromSerialized(bytes)
+	kp, err := util.DeserializeKeyPair(bytes)
+	if err != nil {
+		util.Logger.Fatalf("the keypair in %s is invalid: %s", keyPairFilename, err)
+	}
 
 	bytes, err = ioutil.ReadFile(networkFilename)
 	if err != nil {

@@ -58,7 +58,10 @@ func TestNewKeyPairFromSecretPhrase(t *testing.T) {
 func TestSerializingKeyPair(t *testing.T) {
 	kp := NewKeyPairFromSecretPhrase("boopaboop")
 	s := kp.Serialize()
-	kp2 := NewKeyPairFromSerialized(s)
+	kp2, err := DeserializeKeyPair(s)
+	if err != nil {
+		t.Fatalf("could not deserialize keypair: %s", err)
+	}
 	if !kp.publicKey.Equal(kp2.publicKey) {
 		t.Fatal("public keys not equal")
 	}

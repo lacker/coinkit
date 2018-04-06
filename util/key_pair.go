@@ -50,24 +50,25 @@ type SerializedKeyPair struct {
 	Private string
 }
 
-func NewKeyPairFromSerialized(serialized []byte) *KeyPair {
+func DeserializeKeyPair(serialized []byte) (*KeyPair, error) {
 	s := &SerializedKeyPair{}
 	err := json.Unmarshal(serialized, s)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 	priv, err := base64.RawStdEncoding.DecodeString(s.Private)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 	pub, err := ReadPublicKey(s.Public)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
-	return &KeyPair{
+	kp := &KeyPair{
 		publicKey:  pub,
 		privateKey: priv,
 	}
+	return kp, nil
 }
 
 func (kp *KeyPair) PublicKey() PublicKey {
