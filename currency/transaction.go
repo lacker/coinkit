@@ -1,7 +1,6 @@
 package currency
 
 import (
-	"encoding/json"
 	"fmt"
 
 	"github.com/lacker/coinkit/util"
@@ -30,14 +29,6 @@ func (t *Transaction) String() string {
 		t.Amount, util.Shorten(t.Signer), util.Shorten(t.To), t.Sequence, t.Fee)
 }
 
-type SignedTransaction struct {
-	*Transaction
-
-	// The signature to prove that the sender has signed this
-	// Nil if the transaction has not been signed
-	Signature string
-}
-
 func (t *Transaction) OperationType() string {
 	return "Transaction"
 }
@@ -59,40 +50,6 @@ func (t *Transaction) Verify() bool {
 		return false
 	}
 	return true
-}
-
-// Signs the transaction with the provided keypair.
-// The caller must check the keypair is the actual sender.
-func (t *Transaction) SignWith(keyPair *util.KeyPair) *SignedTransaction {
-	if keyPair.PublicKey().String() != t.Signer {
-		panic("you can only sign your own transactions")
-	}
-	bytes, err := json.Marshal(t)
-	if err != nil {
-		panic("failed to sign transaction because json encoding failed")
-	}
-	return &SignedTransaction{
-		Transaction: t,
-		Signature:   keyPair.Sign(string(bytes)),
-	}
-}
-
-func (s *SignedTransaction) Verify() bool {
-	if s.Transaction == nil {
-		return false
-	}
-	if _, err := util.ReadPublicKey(s.Transaction.To); err != nil {
-		return false
-	}
-	bytes, err := json.Marshal(s.Transaction)
-	if err != nil {
-		return false
-	}
-	pk, err := util.ReadPublicKey(s.Transaction.Signer)
-	if err != nil {
-		return false
-	}
-	return util.VerifySignature(pk, string(bytes), s.Signature)
 }
 
 func makeTestTransaction(n int) *util.SignedOperation {

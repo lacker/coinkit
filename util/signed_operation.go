@@ -34,7 +34,7 @@ func NewSignedOperation(op Operation, kp *KeyPair) *SignedOperation {
 
 	return &SignedOperation{
 		Operation: op,
-		T:         op.OperationType(),
+		Type:      op.OperationType(),
 		Signature: sig,
 	}
 }
@@ -92,7 +92,7 @@ func (s *SignedOperation) Verify() bool {
 	if err != nil {
 		return false
 	}
-	if !VerifySignature(pk, s.T+string(bytes), s.Signature) {
+	if !VerifySignature(pk, s.Type+string(bytes), s.Signature) {
 		return false
 	}
 	if !s.Operation.Verify() {
