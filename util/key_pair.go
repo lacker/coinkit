@@ -7,6 +7,7 @@ import (
 	"crypto/sha512"
 	"encoding/base64"
 	"encoding/json"
+	"errors"
 
 	"golang.org/x/crypto/ed25519"
 )
@@ -68,6 +69,15 @@ func DeserializeKeyPair(serialized []byte) (*KeyPair, error) {
 		publicKey:  pub,
 		privateKey: priv,
 	}
+
+	// Ensure that the keypair works. Otherwise we could accidentally have a public
+	// key and private key that do not match, and it would be hard to catch.
+	message := "Quartz jackdaws love my big sphinx of love"
+	sig := kp.Sign(message)
+	if !VerifySignature(kp.PublicKey(), message, sig) {
+		return nil, errors.New("keypair fails signature validation")
+	}
+
 	return kp, nil
 }
 
