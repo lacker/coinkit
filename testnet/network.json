@@ -1,6 +1,6 @@
 {
     "Servers": {
-	"0xf51c1be5c0e4bd62fdaa8669b42b3c730c0baa4d0ed414f8cf0811c68952e53a8406": {
+	"0x006bbfe5681e38f88c6f50d980484de6883d09f1fb7bd50b0c5ff87d324d4d69d404": {
 	    "Host": "0.alphatest.network",
 	    "Port": 9000
 	},
