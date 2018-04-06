@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"crypto/sha512"
 	"encoding/hex"
-	"errors"
+	"fmt"
 )
 
 // The last two bytes are a checksum.
@@ -59,10 +59,10 @@ func (pk PublicKey) Equal(other PublicKey) bool {
 func ReadPublicKey(input string) (PublicKey, error) {
 	var invalid PublicKey
 	if len(input) != 70 {
-		return invalid, errors.New("public key strings are 70 characters long")
+		return invalid, fmt.Errorf("public key %s should be 70 characters long", input)
 	}
 	if input[:2] != "0x" {
-		return invalid, errors.New("public key strings should start with 0x")
+		return invalid, fmt.Errorf("public key %s should start with 0x", input)
 	}
 	bs, err := hex.DecodeString(input[2:])
 	if err != nil {
@@ -71,7 +71,7 @@ func ReadPublicKey(input string) (PublicKey, error) {
 	var answer PublicKey
 	copy(answer[:], bs)
 	if !answer.Validate() {
-		return invalid, errors.New("bad checksum")
+		return invalid, fmt.Errorf("public key %s has a bad checksum", input)
 	}
 	return answer, nil
 }
