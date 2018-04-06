@@ -56,16 +56,12 @@ func main() {
 		db = data.NewDatabase(dbConfig)
 	}
 
-	bytes, err := ioutil.ReadFile(keyPairFilename)
+	kp, err := util.ReadKeyPairFromFile(keyPairFilename)
 	if err != nil {
-		panic(err)
-	}
-	kp, err := util.DeserializeKeyPair(bytes)
-	if err != nil {
-		util.Logger.Fatalf("the keypair in %s is invalid: %s", keyPairFilename, err)
+		util.Logger.Fatal(err)
 	}
 
-	bytes, err = ioutil.ReadFile(networkFilename)
+	bytes, err := ioutil.ReadFile(networkFilename)
 	if err != nil {
 		panic(err)
 	}

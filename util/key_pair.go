@@ -8,6 +8,8 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"errors"
+	"fmt"
+	"io/ioutil"
 
 	"golang.org/x/crypto/ed25519"
 )
@@ -78,6 +80,18 @@ func DeserializeKeyPair(serialized []byte) (*KeyPair, error) {
 		return nil, errors.New("keypair fails signature validation")
 	}
 
+	return kp, nil
+}
+
+func ReadKeyPairFromFile(filename string) (*KeyPair, error) {
+	bytes, err := ioutil.ReadFile(filename)
+	if err != nil {
+		return nil, err
+	}
+	kp, err := DeserializeKeyPair(bytes)
+	if err != nil {
+		return nil, fmt.Errorf("the keypair in %s is invalid: %s", filename, err)
+	}
 	return kp, nil
 }
 

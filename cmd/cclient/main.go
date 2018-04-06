@@ -44,6 +44,14 @@ func generate() {
 	util.Logger.Printf("key pair generation complete")
 }
 
+func validate(filename string) {
+	kp, err := util.ReadKeyPairFromFile(filename)
+	if err != nil {
+		util.Logger.Fatal(err)
+	}
+	util.Logger.Printf("key pair for %s is valid", kp.PublicKey().String())
+}
+
 // Ask the user for a passphrase to log in.
 func login() *util.KeyPair {
 	util.Logger.Printf("please enter your passphrase:")
@@ -109,13 +117,6 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func proxy() {
-	util.Logger.Printf("Running client proxy on port 9090")
-	http.HandleFunc("/", handler)
-	http.ListenAndServe(":9090", nil)
-}
-
-// cclient runs a client that connects to the github.com/lacker/coinkit network.
 func main() {
 	if len(os.Args) < 2 {
 		util.Logger.Fatal("Usage: cclient {generate,proxy,send,status} ...")
@@ -146,8 +147,11 @@ func main() {
 		}
 		generate()
 
-	case "proxy":
-		proxy()
+	case "validate":
+		if len(rest) != 1 {
+			util.Logger.Fatal("Usage: cclient validate <path/to/keypair.json>")
+		}
+		validate(rest[0])
 
 	default:
 		util.Logger.Fatalf("unrecognized operation: %s", op)
