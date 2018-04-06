@@ -3,7 +3,6 @@ package currency
 import (
 	"encoding/json"
 	"fmt"
-	"strings"
 
 	"github.com/lacker/coinkit/util"
 )
@@ -96,32 +95,7 @@ func (s *SignedTransaction) Verify() bool {
 	return util.VerifySignature(pk, string(bytes), s.Signature)
 }
 
-// HighestPriorityFirst is a comparator in the emirpasic/gods comparator style.
-// Negative return indicates a < b
-// Positive return indicates a > b
-// Comparison indicates overall "priority" putting the highest priority first.
-// This means that when a has a higher fee than b, a < b.
-func HighestPriorityFirst(a, b interface{}) int {
-	s1 := a.(*SignedTransaction)
-	s2 := b.(*SignedTransaction)
-
-	switch {
-	case s1.Transaction.Fee > s2.Transaction.Fee:
-		// s1 is higher priority. so a < b
-		return -1
-	case s1.Transaction.Fee < s2.Transaction.Fee:
-		return 1
-	case s1.Signature < s2.Signature:
-		// s1 is higher priority
-		return -1
-	case s1.Signature > s2.Signature:
-		return 1
-	default:
-		return 0
-	}
-}
-
-func makeTestTransaction(n int) *SignedTransaction {
+func makeTestTransaction(n int) *util.SignedOperation {
 	kp := util.NewKeyPairFromSecretPhrase(fmt.Sprintf("blorp %d", n))
 	dest := util.NewKeyPairFromSecretPhrase("destination")
 	t := &Transaction{
@@ -131,21 +105,7 @@ func makeTestTransaction(n int) *SignedTransaction {
 		Amount:   uint64(n),
 		Fee:      uint64(n),
 	}
-	return t.SignWith(kp)
-}
-
-func StringifyTransactions(transactions []*SignedTransaction) string {
-	parts := []string{}
-	limit := 2
-	for i, t := range transactions {
-		if i >= limit {
-			parts = append(parts, fmt.Sprintf("and %d more",
-				len(transactions)-limit))
-			break
-		}
-		parts = append(parts, t.String())
-	}
-	return fmt.Sprintf("(%s)", strings.Join(parts, "; "))
+	return util.NewSignedOperation(t, kp)
 }
 
 func init() {

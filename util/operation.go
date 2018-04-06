@@ -4,14 +4,13 @@ import (
 	"encoding/json"
 	"fmt"
 	"reflect"
+	"strings"
 )
 
 // Operation is an interface for things that can be serialized onto the blockchain.
 // Logically, the blockchain can be thought of as a sequence of operations. Any
 // other data on the blockchain besides the sequence of operations is just for
 // efficiency.
-// The implementation is pretty similar to Message; maybe they would be less
-// cut-n-pastey if I could figure out how to be smarter about it.
 type Operation interface {
 	// OperationType() returns a unique short string mapping to the operation type
 	OperationType() string
@@ -66,6 +65,8 @@ type DecodedOperation struct {
 	O Operation
 }
 
+// TODO: Scrap encoding and decoding here
+
 type PartiallyDecodedOperation struct {
 	T string
 	O json.RawMessage
@@ -117,4 +118,17 @@ func EncodeThenDecodeOperation(operation Operation) Operation {
 		Logger.Fatal("EncodeThenDecodeOperation error:", err)
 	}
 	return op
+}
+
+func StringifyOperations(ops []*SignedOperation) string {
+	parts := []string{}
+	limit := 2
+	for i, op := range ops {
+		if i >= limit {
+			parts = append(parts, fmt.Sprintf("and %d more", len(ops)-limit))
+			break
+		}
+		parts = append(parts, op.Operation.String())
+	}
+	return fmt.Sprintf("(%s)", strings.Join(parts, "; "))
 }

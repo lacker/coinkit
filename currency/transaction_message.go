@@ -16,8 +16,8 @@ import (
 
 type TransactionMessage struct {
 	// Should be sorted and non-nil
-	// Only contains transactions that were not previously sent
-	Transactions []*SignedTransaction
+	// Only contains operations that were not previously sent
+	Operations []*util.SignedOperation
 
 	// Contains any chunks that might be in the immediately following messages
 	Chunks map[consensus.SlotValue]*LedgerChunk
@@ -28,7 +28,7 @@ func (m *TransactionMessage) Slot() int {
 }
 
 func (m *TransactionMessage) MessageType() string {
-	return "T"
+	return "Operation"
 }
 
 func (m *TransactionMessage) String() string {
@@ -36,19 +36,19 @@ func (m *TransactionMessage) String() string {
 	for name, _ := range m.Chunks {
 		cnames = append(cnames, util.Shorten(string(name)))
 	}
-	return fmt.Sprintf("trans %s chunks (%s)",
-		StringifyTransactions(m.Transactions), strings.Join(cnames, ","))
+	return fmt.Sprintf("op %s chunks (%s)",
+		util.StringifyOperations(m.Operations), strings.Join(cnames, ","))
 }
 
 // Orders the transactions
-func NewTransactionMessage(ts ...*SignedTransaction) *TransactionMessage {
-	sort.Slice(ts, func(i, j int) bool {
-		return HighestPriorityFirst(ts[i], ts[j]) < 0
+func NewTransactionMessage(ops ...*util.SignedOperation) *TransactionMessage {
+	sort.Slice(ops, func(i, j int) bool {
+		return util.HighestFeeFirst(ops[i], ops[j]) < 0
 	})
 
 	return &TransactionMessage{
-		Transactions: ts,
-		Chunks: make(map[consensus.SlotValue]*LedgerChunk),
+		Operations: ops,
+		Chunks:     make(map[consensus.SlotValue]*LedgerChunk),
 	}
 }
 

@@ -46,7 +46,7 @@ type TransactionQueue struct {
 func NewTransactionQueue(publicKey util.PublicKey) *TransactionQueue {
 	return &TransactionQueue{
 		publicKey: publicKey,
-		set:       treeset.NewWith(HighestPriorityFirst),
+		set:       treeset.NewWith(util.HighestFeeFirst),
 		chunks:    make(map[consensus.SlotValue]*LedgerChunk),
 		oldChunks: make(map[int]*LedgerChunk),
 		accounts:  NewAccountMap(),
@@ -58,10 +58,10 @@ func NewTransactionQueue(publicKey util.PublicKey) *TransactionQueue {
 
 // Returns the top n items in the queue
 // If the queue does not have enough, return as many as we can
-func (q *TransactionQueue) Top(n int) []*SignedTransaction {
-	answer := []*SignedTransaction{}
+func (q *TransactionQueue) Top(n int) []*util.SignedOperation {
+	answer := []*util.SignedOperation{}
 	for _, item := range q.set.Values() {
-		answer = append(answer, item.(*SignedTransaction))
+		answer = append(answer, item.(*util.SignedOperation))
 		if len(answer) == n {
 			break
 		}
@@ -69,30 +69,31 @@ func (q *TransactionQueue) Top(n int) []*SignedTransaction {
 	return answer
 }
 
-// Remove removes a transaction from the queue
-func (q *TransactionQueue) Remove(t *SignedTransaction) {
-	if t == nil {
+// Remove removes an operation from the queue
+func (q *TransactionQueue) Remove(op *util.SignedOperation) {
+	if op == nil {
 		return
 	}
-	q.set.Remove(t)
+	q.set.Remove(op)
 }
 
 func (q *TransactionQueue) Logf(format string, a ...interface{}) {
 	util.Logf("TQ", q.publicKey.ShortName(), format, a...)
 }
 
-// Add adds a transaction to the queue
+// Add adds an operation to the queue
 // If it isn't valid, we just discard it.
 // We don't constantly revalidate so it's possible we have invalid
-// transactions in the queue.
+// operations in the queue, if a higher-fee operation that conflicts with a particular
+// operation is added after it is.
 // Returns whether any changes were made.
-func (q *TransactionQueue) Add(t *SignedTransaction) bool {
-	if !q.Validate(t) || q.Contains(t) {
+func (q *TransactionQueue) Add(op *util.SignedOperation) bool {
+	if !q.Validate(op) || q.Contains(op) {
 		return false
 	}
 
-	q.Logf("saw a new transaction: %s", t.Transaction)
-	q.set.Add(t)
+	q.Logf("saw a new operation: %s", op.Operation)
+	q.set.Add(op)
 
 	if q.set.Size() > QueueLimit {
 		it := q.set.Iterator()
@@ -103,30 +104,30 @@ func (q *TransactionQueue) Add(t *SignedTransaction) bool {
 		q.set.Remove(worst)
 	}
 
-	return q.Contains(t)
+	return q.Contains(op)
 }
 
-func (q *TransactionQueue) Contains(t *SignedTransaction) bool {
-	return q.set.Contains(t)
+func (q *TransactionQueue) Contains(op *util.SignedOperation) bool {
+	return q.set.Contains(op)
 }
 
-func (q *TransactionQueue) Transactions() []*SignedTransaction {
-	answer := []*SignedTransaction{}
-	for _, t := range q.set.Values() {
-		answer = append(answer, t.(*SignedTransaction))
+func (q *TransactionQueue) Operations() []*util.SignedOperation {
+	answer := []*util.SignedOperation{}
+	for _, op := range q.set.Values() {
+		answer = append(answer, op.(*util.SignedOperation))
 	}
 	return answer
 }
 
 // TransactionMessage returns the pending transactions we want to share with other nodes.
 func (q *TransactionQueue) TransactionMessage() *TransactionMessage {
-	ts := q.Transactions()
-	if len(ts) == 0 && len(q.chunks) == 0 {
+	ops := q.Operations()
+	if len(ops) == 0 && len(q.chunks) == 0 {
 		return nil
 	}
 	return &TransactionMessage{
-		Transactions: ts,
-		Chunks:       q.chunks,
+		Operations: ops,
+		Chunks:     q.chunks,
 	}
 }
 
@@ -156,8 +157,8 @@ func (q *TransactionQueue) OldChunkMessage(slot int) *TransactionMessage {
 	chunks := make(map[consensus.SlotValue]*LedgerChunk)
 	chunks[chunk.Hash()] = chunk
 	return &TransactionMessage{
-		Transactions: []*SignedTransaction{},
-		Chunks:       chunks,
+		Operations: []*util.SignedOperation{},
+		Chunks:     chunks,
 	}
 }
 
@@ -181,9 +182,9 @@ func (q *TransactionQueue) HandleTransactionMessage(m *TransactionMessage) bool 
 	}
 
 	updated := false
-	if m.Transactions != nil {
-		for _, t := range m.Transactions {
-			updated = updated || q.Add(t)
+	if m.Operations != nil {
+		for _, op := range m.Operations {
+			updated = updated || q.Add(op)
 		}
 	}
 	if m.Chunks != nil {
@@ -209,15 +210,15 @@ func (q *TransactionQueue) Size() int {
 	return q.set.Size()
 }
 
-func (q *TransactionQueue) Validate(t *SignedTransaction) bool {
-	return t != nil && t.Verify() && q.accounts.Validate(t.Transaction)
+func (q *TransactionQueue) Validate(op *util.SignedOperation) bool {
+	return op != nil && op.Verify() && q.accounts.Validate(op.Operation)
 }
 
 // Revalidate checks all pending transactions to see if they are still valid
 func (q *TransactionQueue) Revalidate() {
-	for _, t := range q.Transactions() {
-		if !q.Validate(t) {
-			q.Remove(t)
+	for _, op := range q.Operations() {
+		if !q.Validate(op) {
+			q.Remove(op)
 		}
 	}
 }
@@ -228,31 +229,36 @@ func (q *TransactionQueue) Revalidate() {
 // Returns "", nil if there were no valid transactions.
 // This adds a cache entry to q.chunks
 func (q *TransactionQueue) NewChunk(
-	ts []*SignedTransaction) (consensus.SlotValue, *LedgerChunk) {
-	var last *SignedTransaction
-	transactions := []*SignedTransaction{}
+	ops []*util.SignedOperation) (consensus.SlotValue, *LedgerChunk) {
+
+	var last *util.SignedOperation
+	validOps := []*util.SignedOperation{}
 	validator := q.accounts.CowCopy()
 	state := make(map[string]*Account)
-	for _, t := range ts {
-		if last != nil && HighestPriorityFirst(last, t) >= 0 {
+	for _, op := range ops {
+		if last != nil && util.HighestFeeFirst(last, op) >= 0 {
 			panic("NewLedgerChunk called on non-sorted list")
 		}
-		last = t
-		if validator.Process(t.Transaction) {
-			transactions = append(transactions, t)
+		last = op
+		if validator.Process(op.Operation) {
+			validOps = append(validOps, op)
 		}
-		state[t.Signer] = validator.Get(t.Signer)
-		state[t.To] = validator.Get(t.To)
-		if len(transactions) == MaxChunkSize {
+		state[op.GetSigner()] = validator.Get(op.GetSigner())
+
+		if t, ok := op.Operation.(*Transaction); ok {
+			state[t.To] = validator.Get(t.To)
+		}
+
+		if len(validOps) == MaxChunkSize {
 			break
 		}
 	}
-	if len(transactions) == 0 {
+	if len(ops) == 0 {
 		return consensus.SlotValue(""), nil
 	}
 	chunk := &LedgerChunk{
-		Transactions: transactions,
-		State:        state,
+		Operations: ops,
+		State:      state,
 	}
 	key := chunk.Hash()
 	if _, ok := q.chunks[key]; !ok {
@@ -264,21 +270,21 @@ func (q *TransactionQueue) NewChunk(
 }
 
 func (q *TransactionQueue) Combine(list []consensus.SlotValue) consensus.SlotValue {
-	set := treeset.NewWith(HighestPriorityFirst)
+	set := treeset.NewWith(util.HighestFeeFirst)
 	for _, v := range list {
 		chunk := q.chunks[v]
 		if chunk == nil {
 			util.Logger.Fatalf("%s cannot combine unknown chunk %s", q.publicKey, v)
 		}
-		for _, t := range chunk.Transactions {
-			set.Add(t)
+		for _, op := range chunk.Operations {
+			set.Add(op)
 		}
 	}
-	transactions := []*SignedTransaction{}
-	for _, t := range set.Values() {
-		transactions = append(transactions, t.(*SignedTransaction))
+	ops := []*util.SignedOperation{}
+	for _, op := range set.Values() {
+		ops = append(ops, op.(*util.SignedOperation))
 	}
-	value, chunk := q.NewChunk(transactions)
+	value, chunk := q.NewChunk(ops)
 	if chunk == nil {
 		panic("combining valid chunks led to nothing")
 	}
@@ -311,7 +317,7 @@ func (q *TransactionQueue) Finalize(v consensus.SlotValue) {
 	}
 
 	q.oldChunks[q.slot] = chunk
-	q.finalized += len(chunk.Transactions)
+	q.finalized += len(chunk.Operations)
 	q.last = v
 	q.chunks = make(map[consensus.SlotValue]*LedgerChunk)
 	q.slot += 1
@@ -324,7 +330,7 @@ func (q *TransactionQueue) Last() consensus.SlotValue {
 
 // SuggestValue returns a chunk that is keyed by its hash
 func (q *TransactionQueue) SuggestValue() (consensus.SlotValue, bool) {
-	key, chunk := q.NewChunk(q.Transactions())
+	key, chunk := q.NewChunk(q.Operations())
 	if chunk == nil {
 		q.Logf("has no suggestion")
 		return consensus.SlotValue(""), false
@@ -343,9 +349,9 @@ func (q *TransactionQueue) Stats() {
 }
 
 func (q *TransactionQueue) Log() {
-	ts := q.Transactions()
-	q.Logf("has %d pending transactions:", len(ts))
-	for _, t := range ts {
-		q.Logf("%s", t.Transaction)
+	ops := q.Operations()
+	q.Logf("has %d pending operations:", len(ops))
+	for _, op := range ops {
+		q.Logf("%s", op.Operation)
 	}
 }

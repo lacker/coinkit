@@ -1,6 +1,8 @@
 package currency
 
-import ()
+import (
+	"github.com/lacker/coinkit/util"
+)
 
 // Used to map a public key to its Account
 type AccountMap struct {
@@ -67,8 +69,12 @@ func (m *AccountMap) Set(key string, account *Account) {
 	m.data[key] = account
 }
 
-// Validate returns whether this transaction is valid
-func (m *AccountMap) Validate(t *Transaction) bool {
+// Validate returns whether this operation is valid
+func (m *AccountMap) Validate(op util.Operation) bool {
+	t, ok := op.(*Transaction)
+	if !ok {
+		panic("AccountMap cannot validate non-Transaction operations")
+	}
 	account := m.Get(t.Signer)
 	if account == nil {
 		return false
@@ -94,7 +100,11 @@ func (m *AccountMap) SetBalance(owner string, amount uint64) {
 }
 
 // Process returns false if the transaction cannot be processed
-func (m *AccountMap) Process(t *Transaction) bool {
+func (m *AccountMap) Process(op util.Operation) bool {
+	t, ok := op.(*Transaction)
+	if !ok {
+		panic("AccountMap cannot process non-Transaction operations")
+	}
 	if !m.Validate(t) {
 		return false
 	}
@@ -123,12 +133,12 @@ func (m *AccountMap) ProcessChunk(chunk *LedgerChunk) bool {
 	if chunk == nil {
 		return false
 	}
-	if len(chunk.Transactions) > MaxChunkSize {
+	if len(chunk.Operations) > MaxChunkSize {
 		return false
 	}
 
-	for _, t := range chunk.Transactions {
-		if t == nil || !t.Verify() || !m.Process(t.Transaction) {
+	for _, t := range chunk.Transactions() {
+		if t == nil || !t.Verify() || !m.Process(t) {
 			return false
 		}
 	}

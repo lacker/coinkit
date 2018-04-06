@@ -2,11 +2,15 @@ package util
 
 import (
 	"encoding/json"
+	"fmt"
 	"reflect"
 )
 
 type SignedOperation struct {
-	Operation Operation
+	Operation
+
+	// The type of the operation
+	T string
 
 	// The signature to prove that the sender has signed this
 	// Nil if the transaction has not been signed
@@ -26,13 +30,56 @@ func NewSignedOperation(op Operation, kp *KeyPair) *SignedOperation {
 	if err != nil {
 		Logger.Fatal("failed to sign operation because json encoding failed")
 	}
-	sig := kp.Sign(string(bytes))
+	sig := kp.Sign(op.OperationType() + string(bytes))
+
 	return &SignedOperation{
 		Operation: op,
+		T:         op.OperationType(),
 		Signature: sig,
 	}
 }
 
+type partiallyUnmarshaledSignedOperation struct {
+	Operation json.RawMessage
+	T         string
+	Signature string
+}
+
+func (s *SignedOperation) UnmarshalJSON(data []byte) error {
+	var partial partiallyUnmarshaledSignedOperation
+	err := json.Unmarshal(data, &partial)
+	if err != nil {
+		return err
+	}
+	opType, ok := OperationTypeMap[partial.T]
+	if !ok {
+		return fmt.Errorf("unregistered op type: %s", partial.T)
+	}
+	op := reflect.New(opType).Interface().(Operation)
+	err = json.Unmarshal(partial.Operation, &op)
+	if err != nil {
+		return err
+	}
+	if op == nil {
+		return fmt.Errorf("decoding a nil operation is not valid")
+	}
+
+	pk, err := ReadPublicKey(op.GetSigner())
+	if err != nil {
+		return err
+	}
+	if !VerifySignature(pk, partial.T+string(partial.Operation), partial.Signature) {
+		return fmt.Errorf("invalid signature on SignedOperation")
+	}
+
+	// It's valid
+	s.Operation = op
+	s.T = partial.T
+	s.Signature = partial.Signature
+	return nil
+}
+
+// TODO: make sure we don't redundantly verify the signature and key here, I suspect we do
 func (s *SignedOperation) Verify() bool {
 	if s.Operation == nil || reflect.ValueOf(s.Operation).IsNil() {
 		return false
@@ -45,7 +92,7 @@ func (s *SignedOperation) Verify() bool {
 	if err != nil {
 		return false
 	}
-	if !VerifySignature(pk, string(bytes), s.Signature) {
+	if !VerifySignature(pk, s.T+string(bytes), s.Signature) {
 		return false
 	}
 	if !s.Operation.Verify() {
@@ -53,4 +100,29 @@ func (s *SignedOperation) Verify() bool {
 	}
 
 	return true
+}
+
+// HighestPriorityFirst is a comparator in the emirpasic/gods comparator style.
+// Negative return indicates a < b
+// Positive return indicates a > b
+// Comparison indicates overall "priority" putting the highest priority first.
+// This means that when a has a higher fee than b, a < b.
+func HighestFeeFirst(a, b interface{}) int {
+	s1 := a.(*SignedOperation)
+	s2 := b.(*SignedOperation)
+
+	switch {
+	case s1.Operation.GetFee() > s2.Operation.GetFee():
+		// s1 is higher priority. so a < b
+		return -1
+	case s1.Operation.GetFee() < s2.Operation.GetFee():
+		return 1
+	case s1.Signature < s2.Signature:
+		// s1 is higher priority
+		return -1
+	case s1.Signature > s2.Signature:
+		return 1
+	default:
+		return 0
+	}
 }

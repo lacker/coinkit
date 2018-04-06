@@ -48,8 +48,8 @@ func newSendMessage(from *util.KeyPair, to *util.KeyPair, seq int, amount int) u
 		Amount:   uint64(amount),
 		Fee:      0,
 	}
-	ts := []*currency.SignedTransaction{tr.SignWith(from)}
-	return currency.NewTransactionMessage(ts...)
+	op := util.NewSignedOperation(tr, from)
+	return currency.NewTransactionMessage(op)
 }
 
 func TestNodeCatchup(t *testing.T) {
@@ -161,18 +161,18 @@ func nodeFuzzTest(seed int64, t *testing.T) {
 		// with a fee of 1, many times.
 		// This should always end up with everyone having 1 money.
 		// Proof is left as an exercise to the reader :D
-		ts := []*currency.SignedTransaction{}
+		ops := []*util.SignedOperation{}
 		for seq := uint32(1); seq < uint32(initialMoney); seq++ {
-			t := &currency.Transaction{
+			tr := &currency.Transaction{
 				Signer:   client.PublicKey().String(),
 				Sequence: seq,
 				To:       neighbor.PublicKey().String(),
 				Amount:   1,
 				Fee:      1,
 			}
-			ts = append(ts, t.SignWith(client))
+			ops = append(ops, util.NewSignedOperation(tr, client))
 		}
-		m := currency.NewTransactionMessage(ts...)
+		m := currency.NewTransactionMessage(ops...)
 		clientMessages = append(clientMessages, m)
 	}
 

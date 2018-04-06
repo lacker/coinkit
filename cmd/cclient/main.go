@@ -93,9 +93,9 @@ func send(recipient string, amountStr string) {
 		Fee:      0,
 	}
 
-	// Send our transaction to the network
-	st := transaction.SignWith(kp)
-	tm := currency.NewTransactionMessage(st)
+	// Send our operation to the network
+	op := util.NewSignedOperation(transaction, kp)
+	tm := currency.NewTransactionMessage(op)
 	sm := util.NewSignedMessage(tm, kp)
 	conn.Send(sm)
 	util.Logger.Printf("sending %d to %s", amount, recipient)

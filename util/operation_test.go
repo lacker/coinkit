@@ -38,6 +38,8 @@ func init() {
 	RegisterOperationType(&TestingOperation{})
 }
 
+// TODO: scrap below here
+
 func TestOperationEncoding(t *testing.T) {
 	op := &TestingOperation{Number: 5}
 	op2 := EncodeThenDecodeOperation(op).(*TestingOperation)
