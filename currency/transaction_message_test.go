@@ -9,14 +9,14 @@ import (
 func TestTransactionMessages(t *testing.T) {
 	kp1 := util.NewKeyPairFromSecretPhrase("key pair 1")
 	kp2 := util.NewKeyPairFromSecretPhrase("key pair 2")
-	t1 := &Transaction{
+	t1 := &SendOperation{
 		Sequence: 1,
 		Amount:   100,
 		Fee:      2,
 		Signer:   kp1.PublicKey().String(),
 		To:       kp2.PublicKey().String(),
 	}
-	t2 := &Transaction{
+	t2 := &SendOperation{
 		Sequence: 1,
 		Amount:   50,
 		Fee:      2,

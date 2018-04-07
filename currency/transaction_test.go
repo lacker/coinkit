@@ -4,8 +4,8 @@ import (
 	"testing"
 )
 
-func TestTestTransactionVerifies(t *testing.T) {
-	st := makeTestTransaction(0)
+func TestMakeTestSendOperation(t *testing.T) {
+	st := makeTestSendOperation(0)
 	if !st.Verify() {
 		t.Fatal("should verify")
 	}

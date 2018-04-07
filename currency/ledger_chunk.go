@@ -71,12 +71,12 @@ func (c *LedgerChunk) Scan(src interface{}) error {
 	return nil
 }
 
-// Returns only the operations that are transactions
+// Returns only the operations that are send operations
 // TODO: get rid of this
-func (c *LedgerChunk) Transactions() []*Transaction {
-	answer := []*Transaction{}
+func (c *LedgerChunk) SendOperations() []*SendOperation {
+	answer := []*SendOperation{}
 	for _, op := range c.Operations {
-		t, ok := op.Operation.(*Transaction)
+		t, ok := op.Operation.(*SendOperation)
 		if ok {
 			answer = append(answer, t)
 		}

@@ -63,7 +63,7 @@ func sendMoney(conn Connection, from *util.KeyPair, to *util.KeyPair, amount uin
 		util.Logger.Fatalf("%s did not have enough money", from.PublicKey().String())
 	}
 	seq := account.Sequence + 1
-	transaction := &currency.Transaction{
+	transaction := &currency.SendOperation{
 		Signer:   from.PublicKey().String(),
 		Sequence: account.Sequence + 1,
 		To:       to.PublicKey().String(),

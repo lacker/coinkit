@@ -6,7 +6,7 @@ import (
 	"github.com/lacker/coinkit/util"
 )
 
-type Transaction struct {
+type SendOperation struct {
 	// Who is sending this money
 	Signer string
 
@@ -24,38 +24,38 @@ type Transaction struct {
 	Fee uint64
 }
 
-func (t *Transaction) String() string {
+func (t *SendOperation) String() string {
 	return fmt.Sprintf("send %d from %s -> %s, seq %d fee %d",
 		t.Amount, util.Shorten(t.Signer), util.Shorten(t.To), t.Sequence, t.Fee)
 }
 
-func (t *Transaction) OperationType() string {
-	return "Transaction"
+func (t *SendOperation) OperationType() string {
+	return "Send"
 }
 
-func (t *Transaction) GetSigner() string {
+func (t *SendOperation) GetSigner() string {
 	return t.Signer
 }
 
-func (t *Transaction) GetFee() uint64 {
+func (t *SendOperation) GetFee() uint64 {
 	return t.Fee
 }
 
-func (t *Transaction) GetSequence() uint32 {
+func (t *SendOperation) GetSequence() uint32 {
 	return t.Sequence
 }
 
-func (t *Transaction) Verify() bool {
+func (t *SendOperation) Verify() bool {
 	if _, err := util.ReadPublicKey(t.To); err != nil {
 		return false
 	}
 	return true
 }
 
-func makeTestTransaction(n int) *util.SignedOperation {
+func makeTestSendOperation(n int) *util.SignedOperation {
 	kp := util.NewKeyPairFromSecretPhrase(fmt.Sprintf("blorp %d", n))
 	dest := util.NewKeyPairFromSecretPhrase("destination")
-	t := &Transaction{
+	t := &SendOperation{
 		Signer:   kp.PublicKey().String(),
 		Sequence: 1,
 		To:       dest.PublicKey().String(),
@@ -66,5 +66,5 @@ func makeTestTransaction(n int) *util.SignedOperation {
 }
 
 func init() {
-	util.RegisterOperationType(&Transaction{})
+	util.RegisterOperationType(&SendOperation{})
 }

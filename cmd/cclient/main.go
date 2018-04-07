@@ -85,7 +85,7 @@ func send(recipient string, amountStr string) {
 	}
 
 	seq := account.Sequence + 1
-	transaction := &currency.Transaction{
+	op := &currency.SendOperation{
 		Signer:   user,
 		Sequence: seq,
 		To:       recipient,
@@ -94,15 +94,15 @@ func send(recipient string, amountStr string) {
 	}
 
 	// Send our operation to the network
-	op := util.NewSignedOperation(transaction, kp)
-	tm := currency.NewTransactionMessage(op)
+	sop := util.NewSignedOperation(op, kp)
+	tm := currency.NewTransactionMessage(sop)
 	sm := util.NewSignedMessage(tm, kp)
 	conn.Send(sm)
 	util.Logger.Printf("sending %d to %s", amount, recipient)
 
-	// Wait for our transaction to clear
+	// Wait for our send operation to clear
 	network.WaitToClear(conn, user, seq)
-	util.Logger.Printf("transaction %d cleared", transaction.Sequence)
+	util.Logger.Printf("op %d cleared", op.GetSequence())
 }
 
 func handler(w http.ResponseWriter, r *http.Request) {

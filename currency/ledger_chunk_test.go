@@ -7,10 +7,10 @@ import (
 )
 
 func TestLedgerChunkHashing(t *testing.T) {
-	t1 := makeTestTransaction(1)
-	t1copy := makeTestTransaction(1)
-	t2 := makeTestTransaction(2)
-	t3 := makeTestTransaction(3)
+	t1 := makeTestSendOperation(1)
+	t1copy := makeTestSendOperation(1)
+	t2 := makeTestSendOperation(2)
+	t3 := makeTestSendOperation(3)
 	a1 := &Account{Sequence: 1, Balance: 2}
 	a1copy := &Account{Sequence: 1, Balance: 2}
 	a2 := &Account{Sequence: 1, Balance: 20}

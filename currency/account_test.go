@@ -6,7 +6,7 @@ import (
 
 func TestTransactionProcessing(t *testing.T) {
 	m := NewAccountMap()
-	payBob := &Transaction{
+	payBob := &SendOperation{
 		Sequence: 1,
 		Amount:   100,
 		Fee:      3,

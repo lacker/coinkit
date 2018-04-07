@@ -245,7 +245,7 @@ func (q *TransactionQueue) NewChunk(
 		}
 		state[op.GetSigner()] = validator.Get(op.GetSigner())
 
-		if t, ok := op.Operation.(*Transaction); ok {
+		if t, ok := op.Operation.(*SendOperation); ok {
 			state[t.To] = validator.Get(t.To)
 		}
 

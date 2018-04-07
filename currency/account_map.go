@@ -71,9 +71,9 @@ func (m *AccountMap) Set(key string, account *Account) {
 
 // Validate returns whether this operation is valid
 func (m *AccountMap) Validate(op util.Operation) bool {
-	t, ok := op.(*Transaction)
+	t, ok := op.(*SendOperation)
 	if !ok {
-		panic("AccountMap cannot validate non-Transaction operations")
+		panic("AccountMap cannot validate non-SendOperation operations")
 	}
 	account := m.Get(t.Signer)
 	if account == nil {
@@ -101,9 +101,9 @@ func (m *AccountMap) SetBalance(owner string, amount uint64) {
 
 // Process returns false if the transaction cannot be processed
 func (m *AccountMap) Process(op util.Operation) bool {
-	t, ok := op.(*Transaction)
+	t, ok := op.(*SendOperation)
 	if !ok {
-		panic("AccountMap cannot process non-Transaction operations")
+		panic("AccountMap cannot process non-SendOperation operations")
 	}
 	if !m.Validate(t) {
 		return false
@@ -137,8 +137,8 @@ func (m *AccountMap) ProcessChunk(chunk *LedgerChunk) bool {
 		return false
 	}
 
-	for _, t := range chunk.Transactions() {
-		if t == nil || !t.Verify() || !m.Process(t) {
+	for _, op := range chunk.SendOperations() {
+		if op == nil || !op.Verify() || !m.Process(op) {
 			return false
 		}
 	}
