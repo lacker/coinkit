@@ -14,7 +14,7 @@ import (
 type Node struct {
 	publicKey util.PublicKey
 	chain     *consensus.Chain
-	queue     *currency.TransactionQueue
+	queue     *currency.OperationQueue
 	database  *data.Database
 	slot      int
 }
@@ -23,7 +23,7 @@ type Node struct {
 func NewNodeWithMint(publicKey util.PublicKey, qs consensus.QuorumSlice,
 	db *data.Database, mint util.PublicKey, balance uint64) *Node {
 
-	queue := currency.NewTransactionQueue(publicKey)
+	queue := currency.NewOperationQueue(publicKey)
 	if balance != 0 {
 		queue.SetBalance(mint.String(), balance)
 	}
