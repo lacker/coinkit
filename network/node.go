@@ -70,7 +70,7 @@ func (node *Node) Handle(sender string, message util.Message) (util.Message, boo
 	switch m := message.(type) {
 
 	case *HistoryMessage:
-		node.Handle(sender, m.T)
+		node.Handle(sender, m.O)
 		node.Handle(sender, m.E)
 		return nil, false
 
@@ -88,8 +88,8 @@ func (node *Node) Handle(sender string, message util.Message) (util.Message, boo
 		}
 		return nil, false
 
-	case *currency.TransactionMessage:
-		if node.queue.HandleTransactionMessage(m) {
+	case *currency.OperationMessage:
+		if node.queue.HandleOperationMessage(m) {
 			node.chain.ValueStoreUpdated()
 		}
 		return nil, false
@@ -148,9 +148,9 @@ func (node *Node) handleChainMessage(sender string, message util.Message) (util.
 	}
 
 	// Augment externalize messages into history messages
-	t := node.queue.OldChunkMessage(externalize.I)
+	om := node.queue.OldChunkMessage(externalize.I)
 	return &HistoryMessage{
-		T: t,
+		O: om,
 		E: externalize,
 		I: externalize.I,
 	}, true
@@ -158,7 +158,7 @@ func (node *Node) handleChainMessage(sender string, message util.Message) (util.
 
 func (node *Node) OutgoingMessages() []util.Message {
 	answer := []util.Message{}
-	sharing := node.queue.TransactionMessage()
+	sharing := node.queue.OperationMessage()
 	if sharing != nil {
 		answer = append(answer, sharing)
 	}

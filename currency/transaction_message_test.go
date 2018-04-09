@@ -6,7 +6,7 @@ import (
 	"github.com/lacker/coinkit/util"
 )
 
-func TestTransactionMessages(t *testing.T) {
+func TestOperationMessages(t *testing.T) {
 	kp1 := util.NewKeyPairFromSecretPhrase("key pair 1")
 	kp2 := util.NewKeyPairFromSecretPhrase("key pair 2")
 	t1 := &SendOperation{
@@ -25,9 +25,9 @@ func TestTransactionMessages(t *testing.T) {
 	}
 	s1 := util.NewSignedOperation(t1, kp1)
 	s2 := util.NewSignedOperation(t2, kp2)
-	message := NewTransactionMessage(s1, s2)
+	message := NewOperationMessage(s1, s2)
 
-	m := util.EncodeThenDecodeMessage(message).(*TransactionMessage)
+	m := util.EncodeThenDecodeMessage(message).(*OperationMessage)
 	if len(m.Operations) != 2 {
 		t.Fatal("expected len m.Operations to be 2")
 	}

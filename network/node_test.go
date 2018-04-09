@@ -49,7 +49,7 @@ func newSendMessage(from *util.KeyPair, to *util.KeyPair, seq int, amount int) u
 		Fee:      0,
 	}
 	op := util.NewSignedOperation(tr, from)
-	return currency.NewTransactionMessage(op)
+	return currency.NewOperationMessage(op)
 }
 
 func TestNodeCatchup(t *testing.T) {
@@ -153,7 +153,7 @@ func nodeFuzzTest(seed int64, t *testing.T) {
 		clients = append(clients, kp)
 	}
 
-	clientMessages := []*currency.TransactionMessage{}
+	clientMessages := []*currency.OperationMessage{}
 	for i, client := range clients {
 		neighbor := clients[(i+1)%len(clients)]
 
@@ -172,7 +172,7 @@ func nodeFuzzTest(seed int64, t *testing.T) {
 			}
 			ops = append(ops, util.NewSignedOperation(tr, client))
 		}
-		m := currency.NewTransactionMessage(ops...)
+		m := currency.NewOperationMessage(ops...)
 		clientMessages = append(clientMessages, m)
 	}
 

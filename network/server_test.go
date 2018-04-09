@@ -71,8 +71,8 @@ func sendMoney(conn Connection, from *util.KeyPair, to *util.KeyPair, amount uin
 		Fee:      0,
 	}
 	op := util.NewSignedOperation(transaction, from)
-	tm := currency.NewTransactionMessage(op)
-	sm := util.NewSignedMessage(tm, from)
+	om := currency.NewOperationMessage(op)
+	sm := util.NewSignedMessage(om, from)
 	conn.Send(sm)
 	WaitToClear(conn, from.PublicKey().String(), seq)
 }

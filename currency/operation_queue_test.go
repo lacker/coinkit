@@ -32,17 +32,17 @@ func TestFullQueue(t *testing.T) {
 	}
 }
 
-func TestTransactionMessage(t *testing.T) {
+func TestOperationMessage(t *testing.T) {
 	kp := util.NewKeyPair()
 	q := NewOperationQueue(kp.PublicKey())
-	if q.TransactionMessage() != nil {
-		t.Fatal("there should be no transaction message with an empty queue")
+	if q.OperationMessage() != nil {
+		t.Fatal("there should be no operation message with an empty queue")
 	}
 	op := makeTestSendOperation(0)
 	tr := op.Operation.(*SendOperation)
 	q.accounts.SetBalance(tr.Signer, 10*tr.Amount)
 	q.Add(op)
-	if q.TransactionMessage() == nil {
-		t.Fatal("there should be a transaction message after we add one operation")
+	if q.OperationMessage() == nil {
+		t.Fatal("there should be an operation message after we add one operation")
 	}
 }

@@ -13,7 +13,7 @@ import (
 
 type HistoryMessage struct {
 	I int
-	T *currency.TransactionMessage
+	O *currency.OperationMessage
 	E *consensus.ExternalizeMessage
 }
 
@@ -26,7 +26,7 @@ func (m *HistoryMessage) MessageType() string {
 }
 
 func (m *HistoryMessage) String() string {
-	return fmt.Sprintf("history i=%d: %s %s", m.I, m.T, m.E)
+	return fmt.Sprintf("history i=%d: %s %s", m.I, m.O, m.E)
 }
 
 func init() {

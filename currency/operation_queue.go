@@ -119,13 +119,13 @@ func (q *OperationQueue) Operations() []*util.SignedOperation {
 	return answer
 }
 
-// TransactionMessage returns the pending transactions we want to share with other nodes.
-func (q *OperationQueue) TransactionMessage() *TransactionMessage {
+// OperationMessage returns the pending transactions we want to share with other nodes.
+func (q *OperationQueue) OperationMessage() *OperationMessage {
 	ops := q.Operations()
 	if len(ops) == 0 && len(q.chunks) == 0 {
 		return nil
 	}
-	return &TransactionMessage{
+	return &OperationMessage{
 		Operations: ops,
 		Chunks:     q.chunks,
 	}
@@ -149,14 +149,14 @@ func (q *OperationQueue) OldChunk(slot int) *LedgerChunk {
 	return chunk
 }
 
-func (q *OperationQueue) OldChunkMessage(slot int) *TransactionMessage {
+func (q *OperationQueue) OldChunkMessage(slot int) *OperationMessage {
 	chunk := q.OldChunk(slot)
 	if chunk == nil {
 		return nil
 	}
 	chunks := make(map[consensus.SlotValue]*LedgerChunk)
 	chunks[chunk.Hash()] = chunk
-	return &TransactionMessage{
+	return &OperationMessage{
 		Operations: []*util.SignedOperation{},
 		Chunks:     chunks,
 	}
@@ -174,9 +174,9 @@ func (q *OperationQueue) HandleInfoMessage(m *util.InfoMessage) *AccountMessage 
 	return output
 }
 
-// Handles a transaction message from another node.
+// Handles an operation message from another node.
 // Returns whether it made any internal updates.
-func (q *OperationQueue) HandleTransactionMessage(m *TransactionMessage) bool {
+func (q *OperationQueue) HandleOperationMessage(m *OperationMessage) bool {
 	if m == nil {
 		return false
 	}
@@ -214,7 +214,7 @@ func (q *OperationQueue) Validate(op *util.SignedOperation) bool {
 	return op != nil && op.Verify() && q.accounts.Validate(op.Operation)
 }
 
-// Revalidate checks all pending transactions to see if they are still valid
+// Revalidate checks all pending operations to see if they are still valid
 func (q *OperationQueue) Revalidate() {
 	for _, op := range q.Operations() {
 		if !q.Validate(op) {
@@ -223,10 +223,10 @@ func (q *OperationQueue) Revalidate() {
 	}
 }
 
-// NewLedgerChunk creates a ledger chunk from a list of signed transactions.
-// The list should already be sorted and deduped and the signed transactions
+// NewLedgerChunk creates a ledger chunk from a list of signed operations.
+// The list should already be sorted and deduped and the signed operations
 // should be verified.
-// Returns "", nil if there were no valid transactions.
+// Returns "", nil if there were no valid operations.
 // This adds a cache entry to q.chunks
 func (q *OperationQueue) NewChunk(
 	ops []*util.SignedOperation) (consensus.SlotValue, *LedgerChunk) {
@@ -345,7 +345,7 @@ func (q *OperationQueue) ValidateValue(v consensus.SlotValue) bool {
 }
 
 func (q *OperationQueue) Stats() {
-	q.Logf("%d transactions finalized", q.finalized)
+	q.Logf("%d operations finalized", q.finalized)
 }
 
 func (q *OperationQueue) Log() {

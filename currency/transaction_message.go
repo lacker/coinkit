@@ -9,12 +9,12 @@ import (
 	"github.com/lacker/coinkit/util"
 )
 
-// A TransactionMessage has a list of transactions. Each of the transactions
-// is separately signed by the sender, so that a TransactionMessage can be
-// used not just to inform the network you would like to make a transaction,
-// but also for nodes to share a set of known transaction messages.
+// An OperationMessage has a list of operations. Each of the operations
+// is separately signed by the sender, so that an OperationMessage can be
+// used not just to inform the network you would like to issue an opertion,
+// but also for nodes to share a set of known pending operations.
 
-type TransactionMessage struct {
+type OperationMessage struct {
 	// Should be sorted and non-nil
 	// Only contains operations that were not previously sent
 	Operations []*util.SignedOperation
@@ -23,15 +23,15 @@ type TransactionMessage struct {
 	Chunks map[consensus.SlotValue]*LedgerChunk
 }
 
-func (m *TransactionMessage) Slot() int {
+func (m *OperationMessage) Slot() int {
 	return 0
 }
 
-func (m *TransactionMessage) MessageType() string {
+func (m *OperationMessage) MessageType() string {
 	return "Operation"
 }
 
-func (m *TransactionMessage) String() string {
+func (m *OperationMessage) String() string {
 	cnames := []string{}
 	for name, _ := range m.Chunks {
 		cnames = append(cnames, util.Shorten(string(name)))
@@ -41,17 +41,17 @@ func (m *TransactionMessage) String() string {
 }
 
 // Orders the transactions
-func NewTransactionMessage(ops ...*util.SignedOperation) *TransactionMessage {
+func NewOperationMessage(ops ...*util.SignedOperation) *OperationMessage {
 	sort.Slice(ops, func(i, j int) bool {
 		return util.HighestFeeFirst(ops[i], ops[j]) < 0
 	})
 
-	return &TransactionMessage{
+	return &OperationMessage{
 		Operations: ops,
 		Chunks:     make(map[consensus.SlotValue]*LedgerChunk),
 	}
 }
 
 func init() {
-	util.RegisterMessageType(&TransactionMessage{})
+	util.RegisterMessageType(&OperationMessage{})
 }
