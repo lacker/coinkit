@@ -11,6 +11,8 @@ if [[ ! "$1" =~ [0-3] ]]; then
 fi
 
 SERVICE=cservice$1
+SERVER=cserver$1
 
 sed "s/cserviceX/$SERVICE/g" ./service.yaml \
+    | sed "s/cserverX/$SERVER/g" \
     | kubectl apply -f -
