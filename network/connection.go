@@ -19,7 +19,7 @@ func SendAnonymousMessage(c Connection, message *util.InfoMessage) {
 	c.Send(sm)
 }
 
-// WaitToClear waits for the transaction with this sequence number to clear.
+// WaitToClear waits for the operation with this sequence number to clear.
 func WaitToClear(c Connection, user string, sequence uint32) *currency.Account {
 	for {
 		SendAnonymousMessage(c, &util.InfoMessage{Account: user})

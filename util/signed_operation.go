@@ -13,7 +13,7 @@ type SignedOperation struct {
 	Type string
 
 	// The signature to prove that the sender has signed this
-	// Nil if the transaction has not been signed
+	// Nil if the operation has not been signed
 	Signature string
 }
 

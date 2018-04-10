@@ -99,7 +99,7 @@ func (m *AccountMap) SetBalance(owner string, amount uint64) {
 	m.Set(owner, &Account{Sequence: sequence, Balance: amount})
 }
 
-// Process returns false if the transaction cannot be processed
+// Process returns false if the operation cannot be processed
 func (m *AccountMap) Process(op util.Operation) bool {
 	t, ok := op.(*SendOperation)
 	if !ok {
@@ -128,7 +128,7 @@ func (m *AccountMap) Process(op util.Operation) bool {
 
 // ProcessChunk returns false if the whole chunk cannot be processed.
 // In this situation, the account map may be left with only some of
-// the transactions in the chunk processed.
+// the operations in the chunk processed and would in practice have to be discarded.
 func (m *AccountMap) ProcessChunk(chunk *LedgerChunk) bool {
 	if chunk == nil {
 		return false

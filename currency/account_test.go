@@ -4,7 +4,7 @@ import (
 	"testing"
 )
 
-func TestTransactionProcessing(t *testing.T) {
+func TestSendOperationProcessing(t *testing.T) {
 	m := NewAccountMap()
 	payBob := &SendOperation{
 		Sequence: 1,

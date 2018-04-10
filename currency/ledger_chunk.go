@@ -19,9 +19,9 @@ const MaxChunkSize = 100
 type LedgerChunk struct {
 	Operations []*util.SignedOperation
 
-	// The state of accounts after these transactions have been processed.
+	// The state of accounts after these operations have been processed.
 	// This only includes account information for the accounts that are
-	// mentioned in the transactions.
+	// mentioned in the operations.
 	State map[string]*Account
 }
 

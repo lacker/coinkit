@@ -40,7 +40,7 @@ func (m *OperationMessage) String() string {
 		util.StringifyOperations(m.Operations), strings.Join(cnames, ","))
 }
 
-// Orders the transactions
+// Orders the operations
 func NewOperationMessage(ops ...*util.SignedOperation) *OperationMessage {
 	sort.Slice(ops, func(i, j int) bool {
 		return util.HighestFeeFirst(ops[i], ops[j]) < 0

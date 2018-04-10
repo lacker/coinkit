@@ -55,7 +55,7 @@ func TestStartStop(t *testing.T) {
 	stopServers(moreServers)
 }
 
-// sendMoney waits until the transaction clears
+// sendMoney waits until the operation clears
 // it fatals if from doesn't have the money
 func sendMoney(conn Connection, from *util.KeyPair, to *util.KeyPair, amount uint64) {
 	account := GetAccount(conn, from.PublicKey().String())
@@ -63,15 +63,15 @@ func sendMoney(conn Connection, from *util.KeyPair, to *util.KeyPair, amount uin
 		util.Logger.Fatalf("%s did not have enough money", from.PublicKey().String())
 	}
 	seq := account.Sequence + 1
-	transaction := &currency.SendOperation{
+	operation := &currency.SendOperation{
 		Signer:   from.PublicKey().String(),
 		Sequence: account.Sequence + 1,
 		To:       to.PublicKey().String(),
 		Amount:   amount,
 		Fee:      0,
 	}
-	op := util.NewSignedOperation(transaction, from)
-	om := currency.NewOperationMessage(op)
+	sop := util.NewSignedOperation(operation, from)
+	om := currency.NewOperationMessage(sop)
 	sm := util.NewSignedMessage(om, from)
 	conn.Send(sm)
 	WaitToClear(conn, from.PublicKey().String(), seq)

@@ -13,8 +13,8 @@ const OneBillion = 1000 * OneMillion
 const TotalMoney = NumCoins * OneBillion
 
 type Account struct {
-	// The sequence id of the last transaction authorized by this account.
-	// 0 means there have never been any authorized transactions.
+	// The sequence id of the last operation authorized by this account.
+	// 0 means there have never been any authorized operations.
 	// Used to prevent replay attacks.
 	Sequence uint32
 

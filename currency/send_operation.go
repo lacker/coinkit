@@ -10,7 +10,7 @@ type SendOperation struct {
 	// Who is sending this money
 	Signer string
 
-	// The sequence number for this transaction
+	// The sequence number for this operation
 	Sequence uint32
 
 	// Who is receiving this money

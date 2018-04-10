@@ -10,14 +10,14 @@ import (
 // QueueLimit defines how many items will be held in the queue at a time
 const QueueLimit = 1000
 
-// OperationQueue keeps the transactions that are pending but have neither
+// OperationQueue keeps the operations that are pending but have neither
 // been rejected nor confirmed.
 // OperationQueue is not threadsafe.
 type OperationQueue struct {
 	// Just for logging
 	publicKey util.PublicKey
 
-	// The pool of pending transactions.
+	// The pool of pending operations.
 	set *treeset.Set
 
 	// The ledger chunks that are being considered
@@ -28,7 +28,7 @@ type OperationQueue struct {
 	// They are indexed by slot
 	oldChunks map[int]*LedgerChunk
 
-	// accounts is used to validate transactions
+	// accounts is used to validate operations
 	// For now this is the actual authentic store of account data
 	// TODO: get this into a real database
 	accounts *AccountMap
@@ -39,7 +39,7 @@ type OperationQueue struct {
 	// The current slot we are working on
 	slot int
 
-	// A count of the number of transactions this queue has finalized
+	// A count of the number of operations this queue has finalized
 	finalized int
 }
 
@@ -119,7 +119,7 @@ func (q *OperationQueue) Operations() []*util.SignedOperation {
 	return answer
 }
 
-// OperationMessage returns the pending transactions we want to share with other nodes.
+// OperationMessage returns the pending operations we want to share with other nodes.
 func (q *OperationQueue) OperationMessage() *OperationMessage {
 	ops := q.Operations()
 	if len(ops) == 0 && len(q.chunks) == 0 {
