@@ -26,7 +26,7 @@ func TestFullQueue(t *testing.T) {
 		q.Remove(makeTestSendOperation(i))
 	}
 	q.Add(nil)
-	q.Add(&util.SignedOperation{})
+	q.Add(&SignedOperation{})
 	if q.Size() != 0 {
 		t.Fatalf("queue should be empty")
 	}

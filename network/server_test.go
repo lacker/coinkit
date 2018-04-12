@@ -70,7 +70,7 @@ func sendMoney(conn Connection, from *util.KeyPair, to *util.KeyPair, amount uin
 		Amount:   amount,
 		Fee:      0,
 	}
-	sop := util.NewSignedOperation(operation, from)
+	sop := data.NewSignedOperation(operation, from)
 	om := data.NewOperationMessage(sop)
 	sm := util.NewSignedMessage(om, from)
 	conn.Send(sm)

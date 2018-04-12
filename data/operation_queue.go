@@ -46,7 +46,7 @@ type OperationQueue struct {
 func NewOperationQueue(publicKey util.PublicKey) *OperationQueue {
 	return &OperationQueue{
 		publicKey: publicKey,
-		set:       treeset.NewWith(util.HighestFeeFirst),
+		set:       treeset.NewWith(HighestFeeFirst),
 		chunks:    make(map[consensus.SlotValue]*LedgerChunk),
 		oldChunks: make(map[int]*LedgerChunk),
 		accounts:  NewAccountMap(),
@@ -58,10 +58,10 @@ func NewOperationQueue(publicKey util.PublicKey) *OperationQueue {
 
 // Returns the top n items in the queue
 // If the queue does not have enough, return as many as we can
-func (q *OperationQueue) Top(n int) []*util.SignedOperation {
-	answer := []*util.SignedOperation{}
+func (q *OperationQueue) Top(n int) []*SignedOperation {
+	answer := []*SignedOperation{}
 	for _, item := range q.set.Values() {
-		answer = append(answer, item.(*util.SignedOperation))
+		answer = append(answer, item.(*SignedOperation))
 		if len(answer) == n {
 			break
 		}
@@ -70,7 +70,7 @@ func (q *OperationQueue) Top(n int) []*util.SignedOperation {
 }
 
 // Remove removes an operation from the queue
-func (q *OperationQueue) Remove(op *util.SignedOperation) {
+func (q *OperationQueue) Remove(op *SignedOperation) {
 	if op == nil {
 		return
 	}
@@ -87,7 +87,7 @@ func (q *OperationQueue) Logf(format string, a ...interface{}) {
 // operations in the queue, if a higher-fee operation that conflicts with a particular
 // operation is added after it is.
 // Returns whether any changes were made.
-func (q *OperationQueue) Add(op *util.SignedOperation) bool {
+func (q *OperationQueue) Add(op *SignedOperation) bool {
 	if !q.Validate(op) || q.Contains(op) {
 		return false
 	}
@@ -107,14 +107,14 @@ func (q *OperationQueue) Add(op *util.SignedOperation) bool {
 	return q.Contains(op)
 }
 
-func (q *OperationQueue) Contains(op *util.SignedOperation) bool {
+func (q *OperationQueue) Contains(op *SignedOperation) bool {
 	return q.set.Contains(op)
 }
 
-func (q *OperationQueue) Operations() []*util.SignedOperation {
-	answer := []*util.SignedOperation{}
+func (q *OperationQueue) Operations() []*SignedOperation {
+	answer := []*SignedOperation{}
 	for _, op := range q.set.Values() {
-		answer = append(answer, op.(*util.SignedOperation))
+		answer = append(answer, op.(*SignedOperation))
 	}
 	return answer
 }
@@ -157,7 +157,7 @@ func (q *OperationQueue) OldChunkMessage(slot int) *OperationMessage {
 	chunks := make(map[consensus.SlotValue]*LedgerChunk)
 	chunks[chunk.Hash()] = chunk
 	return &OperationMessage{
-		Operations: []*util.SignedOperation{},
+		Operations: []*SignedOperation{},
 		Chunks:     chunks,
 	}
 }
@@ -210,7 +210,7 @@ func (q *OperationQueue) Size() int {
 	return q.set.Size()
 }
 
-func (q *OperationQueue) Validate(op *util.SignedOperation) bool {
+func (q *OperationQueue) Validate(op *SignedOperation) bool {
 	return op != nil && op.Verify() && q.accounts.Validate(op.Operation)
 }
 
@@ -229,14 +229,14 @@ func (q *OperationQueue) Revalidate() {
 // Returns "", nil if there were no valid operations.
 // This adds a cache entry to q.chunks
 func (q *OperationQueue) NewChunk(
-	ops []*util.SignedOperation) (consensus.SlotValue, *LedgerChunk) {
+	ops []*SignedOperation) (consensus.SlotValue, *LedgerChunk) {
 
-	var last *util.SignedOperation
-	validOps := []*util.SignedOperation{}
+	var last *SignedOperation
+	validOps := []*SignedOperation{}
 	validator := q.accounts.CowCopy()
 	state := make(map[string]*Account)
 	for _, op := range ops {
-		if last != nil && util.HighestFeeFirst(last, op) >= 0 {
+		if last != nil && HighestFeeFirst(last, op) >= 0 {
 			panic("NewLedgerChunk called on non-sorted list")
 		}
 		last = op
@@ -270,7 +270,7 @@ func (q *OperationQueue) NewChunk(
 }
 
 func (q *OperationQueue) Combine(list []consensus.SlotValue) consensus.SlotValue {
-	set := treeset.NewWith(util.HighestFeeFirst)
+	set := treeset.NewWith(HighestFeeFirst)
 	for _, v := range list {
 		chunk := q.chunks[v]
 		if chunk == nil {
@@ -280,9 +280,9 @@ func (q *OperationQueue) Combine(list []consensus.SlotValue) consensus.SlotValue
 			set.Add(op)
 		}
 	}
-	ops := []*util.SignedOperation{}
+	ops := []*SignedOperation{}
 	for _, op := range set.Values() {
-		ops = append(ops, op.(*util.SignedOperation))
+		ops = append(ops, op.(*SignedOperation))
 	}
 	value, chunk := q.NewChunk(ops)
 	if chunk == nil {

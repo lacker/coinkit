@@ -23,8 +23,8 @@ func TestOperationMessages(t *testing.T) {
 		Signer:   kp2.PublicKey().String(),
 		To:       kp1.PublicKey().String(),
 	}
-	s1 := util.NewSignedOperation(t1, kp1)
-	s2 := util.NewSignedOperation(t2, kp2)
+	s1 := NewSignedOperation(t1, kp1)
+	s2 := NewSignedOperation(t2, kp2)
 	message := NewOperationMessage(s1, s2)
 
 	m := util.EncodeThenDecodeMessage(message).(*OperationMessage)

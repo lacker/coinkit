@@ -1,8 +1,6 @@
 package data
 
-import (
-	"github.com/lacker/coinkit/util"
-)
+import ()
 
 // Used to map a public key to its Account
 type AccountMap struct {
@@ -70,7 +68,7 @@ func (m *AccountMap) Set(key string, account *Account) {
 }
 
 // Validate returns whether this operation is valid
-func (m *AccountMap) Validate(op util.Operation) bool {
+func (m *AccountMap) Validate(op Operation) bool {
 	t, ok := op.(*SendOperation)
 	if !ok {
 		panic("AccountMap cannot validate non-SendOperation operations")
@@ -100,7 +98,7 @@ func (m *AccountMap) SetBalance(owner string, amount uint64) {
 }
 
 // Process returns false if the operation cannot be processed
-func (m *AccountMap) Process(op util.Operation) bool {
+func (m *AccountMap) Process(op Operation) bool {
 	t, ok := op.(*SendOperation)
 	if !ok {
 		panic("AccountMap cannot process non-SendOperation operations")

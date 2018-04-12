@@ -52,7 +52,7 @@ func (t *SendOperation) Verify() bool {
 	return true
 }
 
-func makeTestSendOperation(n int) *util.SignedOperation {
+func makeTestSendOperation(n int) *SignedOperation {
 	kp := util.NewKeyPairFromSecretPhrase(fmt.Sprintf("blorp %d", n))
 	dest := util.NewKeyPairFromSecretPhrase("destination")
 	t := &SendOperation{
@@ -62,9 +62,9 @@ func makeTestSendOperation(n int) *util.SignedOperation {
 		Amount:   uint64(n),
 		Fee:      uint64(n),
 	}
-	return util.NewSignedOperation(t, kp)
+	return NewSignedOperation(t, kp)
 }
 
 func init() {
-	util.RegisterOperationType(&SendOperation{})
+	RegisterOperationType(&SendOperation{})
 }

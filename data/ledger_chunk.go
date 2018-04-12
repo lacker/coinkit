@@ -9,7 +9,6 @@ import (
 	"sort"
 
 	"github.com/lacker/coinkit/consensus"
-	"github.com/lacker/coinkit/util"
 )
 
 // MaxChunkSize defines how many items can be put in a chunk
@@ -17,7 +16,7 @@ const MaxChunkSize = 100
 
 // A LedgerChunk is the information in one block of the blockchain.
 type LedgerChunk struct {
-	Operations []*util.SignedOperation
+	Operations []*SignedOperation
 
 	// The state of accounts after these operations have been processed.
 	// This only includes account information for the accounts that are
@@ -27,7 +26,7 @@ type LedgerChunk struct {
 
 func NewEmptyChunk() *LedgerChunk {
 	return &LedgerChunk{
-		Operations: []*util.SignedOperation{},
+		Operations: []*SignedOperation{},
 		State:      make(map[string]*Account),
 	}
 }
@@ -51,7 +50,7 @@ func (c *LedgerChunk) Hash() consensus.SlotValue {
 }
 
 func (c *LedgerChunk) String() string {
-	return util.StringifyOperations(c.Operations)
+	return StringifyOperations(c.Operations)
 }
 
 func (c *LedgerChunk) Value() (driver.Value, error) {

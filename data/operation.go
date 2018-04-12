@@ -1,10 +1,12 @@
-package util
+package data
 
 import (
 	"encoding/json"
 	"fmt"
 	"reflect"
 	"strings"
+
+	"github.com/lacker/coinkit/util"
 )
 
 // Operation is an interface for things that can be serialized onto the blockchain.
@@ -41,16 +43,16 @@ func RegisterOperationType(op Operation) {
 	name := op.OperationType()
 	_, ok := OperationTypeMap[name]
 	if ok {
-		Logger.Fatalf("operation type registered multiple times: %s", name)
+		util.Logger.Fatalf("operation type registered multiple times: %s", name)
 	}
 	opv := reflect.ValueOf(op)
 	if opv.Kind() != reflect.Ptr {
-		Logger.Fatalf("RegisterOperationType should only be called on pointers")
+		util.Logger.Fatalf("RegisterOperationType should only be called on pointers")
 	}
 
 	sv := opv.Elem()
 	if sv.Kind() != reflect.Struct {
-		Logger.Fatalf("RegisterOperationType should be called on pointers to structs")
+		util.Logger.Fatalf("RegisterOperationType should be called on pointers to structs")
 	}
 
 	OperationTypeMap[name] = sv.Type()
@@ -115,7 +117,7 @@ func EncodeThenDecodeOperation(operation Operation) Operation {
 	encoded := EncodeOperation(operation)
 	op, err := DecodeOperation(encoded)
 	if err != nil {
-		Logger.Fatal("EncodeThenDecodeOperation error:", err)
+		util.Logger.Fatal("EncodeThenDecodeOperation error:", err)
 	}
 	return op
 }

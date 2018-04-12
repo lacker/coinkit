@@ -2,8 +2,6 @@ package data
 
 import (
 	"testing"
-
-	"github.com/lacker/coinkit/util"
 )
 
 func TestLedgerChunkHashing(t *testing.T) {
@@ -16,7 +14,7 @@ func TestLedgerChunkHashing(t *testing.T) {
 	a2 := &Account{Sequence: 1, Balance: 20}
 
 	chunk1 := &LedgerChunk{
-		Operations: []*util.SignedOperation{t1, t2},
+		Operations: []*SignedOperation{t1, t2},
 		State: map[string]*Account{
 			"a1": a1,
 			"a2": a2,
@@ -24,7 +22,7 @@ func TestLedgerChunkHashing(t *testing.T) {
 	}
 
 	chunk1copy := &LedgerChunk{
-		Operations: []*util.SignedOperation{t1copy, t2},
+		Operations: []*SignedOperation{t1copy, t2},
 		State: map[string]*Account{
 			"a1": a1copy,
 			"a2": a2,
@@ -32,7 +30,7 @@ func TestLedgerChunkHashing(t *testing.T) {
 	}
 
 	chunk2 := &LedgerChunk{
-		Operations: []*util.SignedOperation{t1, t3},
+		Operations: []*SignedOperation{t1, t3},
 		State: map[string]*Account{
 			"a1": a1,
 			"a2": a2,
@@ -40,7 +38,7 @@ func TestLedgerChunkHashing(t *testing.T) {
 	}
 
 	chunk3 := &LedgerChunk{
-		Operations: []*util.SignedOperation{t1, t2},
+		Operations: []*SignedOperation{t1, t2},
 		State: map[string]*Account{
 			"a1": a2,
 			"a2": a1,
@@ -48,7 +46,7 @@ func TestLedgerChunkHashing(t *testing.T) {
 	}
 
 	chunk4 := &LedgerChunk{
-		Operations: []*util.SignedOperation{t1},
+		Operations: []*SignedOperation{t1},
 		State: map[string]*Account{
 			"a1": a1,
 			"a2": a2,

@@ -94,7 +94,7 @@ func send(recipient string, amountStr string) {
 	}
 
 	// Send our operation to the network
-	sop := util.NewSignedOperation(op, kp)
+	sop := data.NewSignedOperation(op, kp)
 	om := data.NewOperationMessage(sop)
 	sm := util.NewSignedMessage(om, kp)
 	conn.Send(sm)

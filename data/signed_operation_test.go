@@ -1,13 +1,14 @@
-package util
+package data
 
 import (
 	"encoding/json"
-
 	"testing"
+
+	"github.com/lacker/coinkit/util"
 )
 
 func TestSignedOperation(t *testing.T) {
-	kp := NewKeyPairFromSecretPhrase("yo")
+	kp := util.NewKeyPairFromSecretPhrase("yo")
 	op := &TestingOperation{
 		Number: 8,
 		Signer: kp.PublicKey().String(),
@@ -19,7 +20,7 @@ func TestSignedOperation(t *testing.T) {
 }
 
 func TestSignedOperationJson(t *testing.T) {
-	kp := NewKeyPairFromSecretPhrase("hi")
+	kp := util.NewKeyPairFromSecretPhrase("hi")
 	op := &TestingOperation{
 		Number: 9,
 		Signer: kp.PublicKey().String(),

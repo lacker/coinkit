@@ -47,7 +47,7 @@ func newSendMessage(from *util.KeyPair, to *util.KeyPair, seq int, amount int) u
 		Amount:   uint64(amount),
 		Fee:      0,
 	}
-	op := util.NewSignedOperation(tr, from)
+	op := data.NewSignedOperation(tr, from)
 	return data.NewOperationMessage(op)
 }
 
@@ -160,7 +160,7 @@ func nodeFuzzTest(seed int64, t *testing.T) {
 		// with a fee of 1, many times.
 		// This should always end up with everyone having 1 money.
 		// Proof is left as an exercise to the reader :D
-		ops := []*util.SignedOperation{}
+		ops := []*data.SignedOperation{}
 		for seq := uint32(1); seq < uint32(initialMoney); seq++ {
 			tr := &data.SendOperation{
 				Signer:   client.PublicKey().String(),
@@ -169,7 +169,7 @@ func nodeFuzzTest(seed int64, t *testing.T) {
 				Amount:   1,
 				Fee:      1,
 			}
-			ops = append(ops, util.NewSignedOperation(tr, client))
+			ops = append(ops, data.NewSignedOperation(tr, client))
 		}
 		m := data.NewOperationMessage(ops...)
 		clientMessages = append(clientMessages, m)

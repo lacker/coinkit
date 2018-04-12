@@ -17,7 +17,7 @@ import (
 type OperationMessage struct {
 	// Should be sorted and non-nil
 	// Only contains operations that were not previously sent
-	Operations []*util.SignedOperation
+	Operations []*SignedOperation
 
 	// Contains any chunks that might be in the immediately following messages
 	Chunks map[consensus.SlotValue]*LedgerChunk
@@ -37,13 +37,13 @@ func (m *OperationMessage) String() string {
 		cnames = append(cnames, util.Shorten(string(name)))
 	}
 	return fmt.Sprintf("op %s chunks (%s)",
-		util.StringifyOperations(m.Operations), strings.Join(cnames, ","))
+		StringifyOperations(m.Operations), strings.Join(cnames, ","))
 }
 
 // Orders the operations
-func NewOperationMessage(ops ...*util.SignedOperation) *OperationMessage {
+func NewOperationMessage(ops ...*SignedOperation) *OperationMessage {
 	sort.Slice(ops, func(i, j int) bool {
-		return util.HighestFeeFirst(ops[i], ops[j]) < 0
+		return HighestFeeFirst(ops[i], ops[j]) < 0
 	})
 
 	return &OperationMessage{

@@ -1,9 +1,11 @@
-package util
+package data
 
 import (
 	"encoding/json"
 	"fmt"
 	"reflect"
+
+	"github.com/lacker/coinkit/util"
 )
 
 type SignedOperation struct {
@@ -17,18 +19,18 @@ type SignedOperation struct {
 	Signature string
 }
 
-func NewSignedOperation(op Operation, kp *KeyPair) *SignedOperation {
+func NewSignedOperation(op Operation, kp *util.KeyPair) *SignedOperation {
 	if op == nil || reflect.ValueOf(op).IsNil() {
-		Logger.Fatal("cannot sign nil operation")
+		util.Logger.Fatal("cannot sign nil operation")
 	}
 
 	if kp.PublicKey().String() != op.GetSigner() {
-		Logger.Fatal("you can only sign your own operations")
+		util.Logger.Fatal("you can only sign your own operations")
 	}
 
 	bytes, err := json.Marshal(op)
 	if err != nil {
-		Logger.Fatal("failed to sign operation because json encoding failed")
+		util.Logger.Fatal("failed to sign operation because json encoding failed")
 	}
 	sig := kp.Sign(op.OperationType() + string(bytes))
 
@@ -64,11 +66,12 @@ func (s *SignedOperation) UnmarshalJSON(data []byte) error {
 		return fmt.Errorf("decoding a nil operation is not valid")
 	}
 
-	pk, err := ReadPublicKey(op.GetSigner())
+	pk, err := util.ReadPublicKey(op.GetSigner())
 	if err != nil {
 		return err
 	}
-	if !VerifySignature(pk, partial.Type+string(partial.Operation), partial.Signature) {
+	if !util.VerifySignature(pk, partial.Type+string(partial.Operation),
+		partial.Signature) {
 		return fmt.Errorf("invalid signature on SignedOperation")
 	}
 
@@ -84,7 +87,7 @@ func (s *SignedOperation) Verify() bool {
 	if s.Operation == nil || reflect.ValueOf(s.Operation).IsNil() {
 		return false
 	}
-	pk, err := ReadPublicKey(s.Operation.GetSigner())
+	pk, err := util.ReadPublicKey(s.Operation.GetSigner())
 	if err != nil {
 		return false
 	}
@@ -92,7 +95,7 @@ func (s *SignedOperation) Verify() bool {
 	if err != nil {
 		return false
 	}
-	if !VerifySignature(pk, s.Type+string(bytes), s.Signature) {
+	if !util.VerifySignature(pk, s.Type+string(bytes), s.Signature) {
 		return false
 	}
 	if !s.Operation.Verify() {
