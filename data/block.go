@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 
 	"github.com/lacker/coinkit/consensus"
-	"github.com/lacker/coinkit/currency"
 )
 
 // data.Block represents how the value for a single block gets stored to the database.
@@ -13,7 +12,7 @@ type Block struct {
 	Slot int
 
 	// The LedgerChunk for this block
-	Chunk *currency.LedgerChunk
+	Chunk *LedgerChunk
 
 	// The ballot numbers this node confirmed.
 	C int

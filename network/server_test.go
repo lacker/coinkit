@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/lacker/coinkit/currency"
+	"github.com/lacker/coinkit/data"
 	"github.com/lacker/coinkit/util"
 )
 
@@ -63,7 +63,7 @@ func sendMoney(conn Connection, from *util.KeyPair, to *util.KeyPair, amount uin
 		util.Logger.Fatalf("%s did not have enough money", from.PublicKey().String())
 	}
 	seq := account.Sequence + 1
-	operation := &currency.SendOperation{
+	operation := &data.SendOperation{
 		Signer:   from.PublicKey().String(),
 		Sequence: account.Sequence + 1,
 		To:       to.PublicKey().String(),
@@ -71,7 +71,7 @@ func sendMoney(conn Connection, from *util.KeyPair, to *util.KeyPair, amount uin
 		Fee:      0,
 	}
 	sop := util.NewSignedOperation(operation, from)
-	om := currency.NewOperationMessage(sop)
+	om := data.NewOperationMessage(sop)
 	sm := util.NewSignedMessage(om, from)
 	conn.Send(sm)
 	WaitToClear(conn, from.PublicKey().String(), seq)

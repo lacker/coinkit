@@ -8,7 +8,6 @@ import (
 	"os"
 	"time"
 
-	"github.com/lacker/coinkit/currency"
 	"github.com/lacker/coinkit/data"
 	"github.com/lacker/coinkit/util"
 )
@@ -61,7 +60,7 @@ func NewServer(keyPair *util.KeyPair, config *Config, db *data.Database) *Server
 	// At the start, all money is in the "mint" account
 	mint := util.NewKeyPairFromSecretPhrase("mint")
 	node := NewNodeWithMint(keyPair.PublicKey(), qs, db,
-		mint.PublicKey(), currency.TotalMoney)
+		mint.PublicKey(), data.TotalMoney)
 
 	return &Server{
 		port:                config.GetPort(keyPair.PublicKey().String(), 9000),

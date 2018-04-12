@@ -1,4 +1,4 @@
-package currency
+package data
 
 import (
 	"testing"

@@ -8,7 +8,7 @@ import (
 	"github.com/davecgh/go-spew/spew"
 
 	"fmt"
-	"github.com/lacker/coinkit/currency"
+	"github.com/lacker/coinkit/data"
 	"github.com/lacker/coinkit/network"
 	"github.com/lacker/coinkit/util"
 	"net/http"
@@ -24,7 +24,7 @@ func newConnection() network.Connection {
 }
 
 // Fetches, displays, and returns the status for a user.
-func status(user string) *currency.Account {
+func status(user string) *data.Account {
 	conn := newConnection()
 	account := network.GetAccount(conn, user)
 
@@ -85,7 +85,7 @@ func send(recipient string, amountStr string) {
 	}
 
 	seq := account.Sequence + 1
-	op := &currency.SendOperation{
+	op := &data.SendOperation{
 		Signer:   user,
 		Sequence: seq,
 		To:       recipient,
@@ -95,7 +95,7 @@ func send(recipient string, amountStr string) {
 
 	// Send our operation to the network
 	sop := util.NewSignedOperation(op, kp)
-	om := currency.NewOperationMessage(sop)
+	om := data.NewOperationMessage(sop)
 	sm := util.NewSignedMessage(om, kp)
 	conn.Send(sm)
 	util.Logger.Printf("sending %d to %s", amount, recipient)

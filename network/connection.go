@@ -1,7 +1,7 @@
 package network
 
 import (
-	"github.com/lacker/coinkit/currency"
+	"github.com/lacker/coinkit/data"
 	"github.com/lacker/coinkit/util"
 )
 
@@ -20,11 +20,11 @@ func SendAnonymousMessage(c Connection, message *util.InfoMessage) {
 }
 
 // WaitToClear waits for the operation with this sequence number to clear.
-func WaitToClear(c Connection, user string, sequence uint32) *currency.Account {
+func WaitToClear(c Connection, user string, sequence uint32) *data.Account {
 	for {
 		SendAnonymousMessage(c, &util.InfoMessage{Account: user})
 		m := (<-c.Receive()).Message()
-		accountMessage, ok := m.(*currency.AccountMessage)
+		accountMessage, ok := m.(*data.AccountMessage)
 		if !ok {
 			continue
 		}
@@ -41,11 +41,11 @@ func WaitToClear(c Connection, user string, sequence uint32) *currency.Account {
 	}
 }
 
-func GetAccount(c Connection, user string) *currency.Account {
+func GetAccount(c Connection, user string) *data.Account {
 	for {
 		SendAnonymousMessage(c, &util.InfoMessage{Account: user})
 		m := (<-c.Receive()).Message()
-		accountMessage, ok := m.(*currency.AccountMessage)
+		accountMessage, ok := m.(*data.AccountMessage)
 		if !ok {
 			util.Logger.Fatalf("expected an account message but got: %+v", m)
 		}

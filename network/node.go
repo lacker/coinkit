@@ -2,7 +2,6 @@ package network
 
 import (
 	"github.com/lacker/coinkit/consensus"
-	"github.com/lacker/coinkit/currency"
 	"github.com/lacker/coinkit/data"
 	"github.com/lacker/coinkit/util"
 )
@@ -14,7 +13,7 @@ import (
 type Node struct {
 	publicKey util.PublicKey
 	chain     *consensus.Chain
-	queue     *currency.OperationQueue
+	queue     *data.OperationQueue
 	database  *data.Database
 	slot      int
 }
@@ -23,7 +22,7 @@ type Node struct {
 func NewNodeWithMint(publicKey util.PublicKey, qs consensus.QuorumSlice,
 	db *data.Database, mint util.PublicKey, balance uint64) *Node {
 
-	queue := currency.NewOperationQueue(publicKey)
+	queue := data.NewOperationQueue(publicKey)
 	if balance != 0 {
 		queue.SetBalance(mint.String(), balance)
 	}
@@ -74,7 +73,7 @@ func (node *Node) Handle(sender string, message util.Message) (util.Message, boo
 		node.Handle(sender, m.E)
 		return nil, false
 
-	case *currency.AccountMessage:
+	case *data.AccountMessage:
 		return nil, false
 
 	case *util.InfoMessage:
@@ -88,7 +87,7 @@ func (node *Node) Handle(sender string, message util.Message) (util.Message, boo
 		}
 		return nil, false
 
-	case *currency.OperationMessage:
+	case *data.OperationMessage:
 		if node.queue.HandleOperationMessage(m) {
 			node.chain.ValueStoreUpdated()
 		}

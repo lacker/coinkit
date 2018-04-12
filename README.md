@@ -112,8 +112,7 @@ go test ./network -run=zzz -bench=BenchmarkSendMoney30$ -benchtime=20s
 
 * `cmd`: The code for the command-line tools, `cserver` and `cclient`.
 * `consensus`: The logic to run the SCP. This is how blocks are formed.
-* `currency`: Logic that relates to sending money.
-* `data`: The code that interacts with Postgres to store past blocks.
+* `data`: The code that handles operations for data manipulation.
 * `local`: Configuration for running a testnet with all nodes on the local machine.
 * `network`: The networking wrapper to run a server and communicate with peers.
-* `util`: Data formats, encryption logic, that sort of thing.
+* `util`: Encryption logic, tools used in lots of places, that sort of thing.

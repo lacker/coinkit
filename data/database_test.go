@@ -4,15 +4,13 @@ import (
 	"log"
 	"os"
 	"testing"
-
-	"github.com/lacker/coinkit/currency"
 )
 
 func TestInsertAndGet(t *testing.T) {
 	db := NewTestDatabase(0)
 	block := &Block{
 		Slot:  3,
-		Chunk: currency.NewEmptyChunk(),
+		Chunk: NewEmptyChunk(),
 	}
 	err := db.InsertBlock(block)
 	if err != nil {
@@ -36,7 +34,7 @@ func TestCantInsertTwice(t *testing.T) {
 	db := NewTestDatabase(0)
 	block := &Block{
 		Slot:  4,
-		Chunk: currency.NewEmptyChunk(),
+		Chunk: NewEmptyChunk(),
 		C:     1,
 		H:     2,
 	}
@@ -59,7 +57,7 @@ func TestLastBlock(t *testing.T) {
 	}
 	b = &Block{
 		Slot:  5,
-		Chunk: currency.NewEmptyChunk(),
+		Chunk: NewEmptyChunk(),
 	}
 	err := db.InsertBlock(b)
 	if err != nil {
@@ -82,7 +80,7 @@ func TestForBlocks(t *testing.T) {
 	for i := 1; i <= 5; i++ {
 		b := &Block{
 			Slot:  i,
-			Chunk: currency.NewEmptyChunk(),
+			Chunk: NewEmptyChunk(),
 			C:     7,
 		}
 		if db.InsertBlock(b) != nil {
@@ -104,7 +102,7 @@ func TestTotalSizeInfo(t *testing.T) {
 	db := NewTestDatabase(0)
 	b := &Block{
 		Slot:  1,
-		Chunk: currency.NewEmptyChunk(),
+		Chunk: NewEmptyChunk(),
 		C:     8,
 	}
 	err := db.InsertBlock(b)

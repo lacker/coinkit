@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/lacker/coinkit/consensus"
-	"github.com/lacker/coinkit/currency"
+	"github.com/lacker/coinkit/data"
 	"github.com/lacker/coinkit/util"
 )
 
@@ -13,7 +13,7 @@ import (
 
 type HistoryMessage struct {
 	I int
-	O *currency.OperationMessage
+	O *data.OperationMessage
 	E *consensus.ExternalizeMessage
 }
 

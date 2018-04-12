@@ -6,7 +6,6 @@ import (
 	"testing"
 
 	"github.com/lacker/coinkit/consensus"
-	"github.com/lacker/coinkit/currency"
 	"github.com/lacker/coinkit/data"
 	"github.com/lacker/coinkit/util"
 )
@@ -41,7 +40,7 @@ func maxAccountBalance(nodes []*Node) uint64 {
 
 func newSendMessage(from *util.KeyPair, to *util.KeyPair, seq int, amount int) util.Message {
 
-	tr := &currency.SendOperation{
+	tr := &data.SendOperation{
 		Signer:   from.PublicKey().String(),
 		Sequence: uint32(seq),
 		To:       to.PublicKey().String(),
@@ -49,7 +48,7 @@ func newSendMessage(from *util.KeyPair, to *util.KeyPair, seq int, amount int) u
 		Fee:      0,
 	}
 	op := util.NewSignedOperation(tr, from)
-	return currency.NewOperationMessage(op)
+	return data.NewOperationMessage(op)
 }
 
 func TestNodeCatchup(t *testing.T) {
@@ -153,7 +152,7 @@ func nodeFuzzTest(seed int64, t *testing.T) {
 		clients = append(clients, kp)
 	}
 
-	clientMessages := []*currency.OperationMessage{}
+	clientMessages := []*data.OperationMessage{}
 	for i, client := range clients {
 		neighbor := clients[(i+1)%len(clients)]
 
@@ -163,7 +162,7 @@ func nodeFuzzTest(seed int64, t *testing.T) {
 		// Proof is left as an exercise to the reader :D
 		ops := []*util.SignedOperation{}
 		for seq := uint32(1); seq < uint32(initialMoney); seq++ {
-			tr := &currency.SendOperation{
+			tr := &data.SendOperation{
 				Signer:   client.PublicKey().String(),
 				Sequence: seq,
 				To:       neighbor.PublicKey().String(),
@@ -172,7 +171,7 @@ func nodeFuzzTest(seed int64, t *testing.T) {
 			}
 			ops = append(ops, util.NewSignedOperation(tr, client))
 		}
-		m := currency.NewOperationMessage(ops...)
+		m := data.NewOperationMessage(ops...)
 		clientMessages = append(clientMessages, m)
 	}
 

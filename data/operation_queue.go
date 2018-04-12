@@ -1,4 +1,4 @@
-package currency
+package data
 
 import (
 	"github.com/emirpasic/gods/sets/treeset"
