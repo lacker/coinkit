@@ -35,8 +35,8 @@ func TestMessageEncoding(t *testing.T) {
 
 func TestDecodingInvalidMessage(t *testing.T) {
 	bytes, err := json.Marshal(DecodedMessage{
-		T: "Testing",
-		M: nil,
+		Type:    "Testing",
+		Message: nil,
 	})
 	if err != nil {
 		t.Fatal(err)

@@ -52,15 +52,15 @@ func RegisterMessageType(m Message) {
 // DecodedMessage is just used for the encoding process.
 type DecodedMessage struct {
 	// The type of the message
-	T string
+	Type string
 
 	// The message itself
-	M Message
+	Message Message
 }
 
 type PartiallyDecodedMessage struct {
-	T string
-	M json.RawMessage
+	Type    string
+	Message json.RawMessage
 }
 
 func EncodeMessage(m Message) string {
@@ -68,8 +68,8 @@ func EncodeMessage(m Message) string {
 		panic("you should not EncodeMessage(nil)")
 	}
 	bytes, err := json.Marshal(DecodedMessage{
-		T: m.MessageType(),
-		M: m,
+		Type:    m.MessageType(),
+		Message: m,
 	})
 	if err != nil {
 		panic(err)
@@ -85,12 +85,12 @@ func DecodeMessage(encoded string) (Message, error) {
 		return nil, err
 	}
 
-	messageType, ok := MessageTypeMap[pdm.T]
+	messageType, ok := MessageTypeMap[pdm.Type]
 	if !ok {
-		return nil, fmt.Errorf("unregistered message type: %s", pdm.T)
+		return nil, fmt.Errorf("unregistered message type: %s", pdm.Type)
 	}
 	m := reflect.New(messageType).Interface().(Message)
-	err = json.Unmarshal(pdm.M, &m)
+	err = json.Unmarshal(pdm.Message, &m)
 	if err != nil {
 		return nil, err
 	}
