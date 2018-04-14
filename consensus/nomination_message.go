@@ -2,7 +2,7 @@ package consensus
 
 import (
 	"strings"
-	
+
 	"github.com/lacker/coinkit/util"
 )
 
@@ -24,7 +24,7 @@ type NominationMessage struct {
 }
 
 func (m *NominationMessage) MessageType() string {
-	return "N"
+	return "Nomination"
 }
 
 func (m *NominationMessage) Slot() int {

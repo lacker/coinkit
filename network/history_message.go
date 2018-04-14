@@ -22,7 +22,7 @@ func (m *HistoryMessage) Slot() int {
 }
 
 func (m *HistoryMessage) MessageType() string {
-	return "H"
+	return "History"
 }
 
 func (m *HistoryMessage) String() string {

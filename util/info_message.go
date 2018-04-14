@@ -23,7 +23,7 @@ func (m *InfoMessage) Slot() int {
 }
 
 func (m *InfoMessage) MessageType() string {
-	return "I"
+	return "Info"
 }
 
 func (m *InfoMessage) String() string {

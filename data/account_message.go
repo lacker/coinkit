@@ -26,7 +26,7 @@ func (m *AccountMessage) Slot() int {
 }
 
 func (m *AccountMessage) MessageType() string {
-	return "A"
+	return "Account"
 }
 
 func (m *AccountMessage) String() string {

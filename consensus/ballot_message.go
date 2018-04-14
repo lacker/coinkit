@@ -2,8 +2,8 @@ package consensus
 
 import (
 	"fmt"
-	"strings"
 	"sort"
+	"strings"
 
 	"github.com/lacker/coinkit/util"
 )
@@ -13,7 +13,7 @@ type BallotMessage interface {
 	QuorumSlice() QuorumSlice
 	Phase() Phase
 	MessageType() string
-	Slot() int	
+	Slot() int
 
 	// AcceptAsPrepared tells whether this message implies that the sender
 	// accepts this ballot as prepared
@@ -166,7 +166,7 @@ func (m *PrepareMessage) Phase() Phase {
 }
 
 func (m *PrepareMessage) MessageType() string {
-	return "P"
+	return "Prepare"
 }
 
 func (m *PrepareMessage) AcceptAsPrepared(n int, x SlotValue) bool {
@@ -273,7 +273,7 @@ func (m *ConfirmMessage) Phase() Phase {
 }
 
 func (m *ConfirmMessage) MessageType() string {
-	return "C"
+	return "Confirm"
 }
 
 func (m *ConfirmMessage) AcceptAsPrepared(n int, x SlotValue) bool {
@@ -347,7 +347,7 @@ func (m *ExternalizeMessage) Phase() Phase {
 }
 
 func (m *ExternalizeMessage) MessageType() string {
-	return "E"
+	return "Externalize"
 }
 
 func (m *ExternalizeMessage) AcceptAsPrepared(n int, x SlotValue) bool {

@@ -28,6 +28,9 @@ var MessageTypeMap map[string]reflect.Type = make(map[string]reflect.Type)
 
 func RegisterMessageType(m Message) {
 	name := m.MessageType()
+	if len(name) < 2 {
+		Logger.Fatalf("message type must be at least 2 letters: %s", name)
+	}
 	_, ok := MessageTypeMap[name]
 	if ok {
 		Logger.Fatalf("message type registered multiple times: %s", name)
