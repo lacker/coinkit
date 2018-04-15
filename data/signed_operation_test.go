@@ -39,3 +39,22 @@ func TestSignedOperationJson(t *testing.T) {
 		t.Fatalf("so2.Operation is %+v", so2.Operation)
 	}
 }
+
+func TestSignedOperationDecodingAlsoVerifiesSignature(t *testing.T) {
+	kp := util.NewKeyPairFromSecretPhrase("borp")
+	op := &TestingOperation{
+		Number: 10,
+		Signer: kp.PublicKey().String(),
+	}
+	so := NewSignedOperation(op, kp)
+	so.Signature = "BadSignature"
+	bytes, err := json.Marshal(so)
+	if err != nil {
+		t.Fatal(err)
+	}
+	so2 := &SignedOperation{}
+	err = json.Unmarshal(bytes, so2)
+	if err == nil {
+		t.Fatal("expected error in decoding")
+	}
+}
