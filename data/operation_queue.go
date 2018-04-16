@@ -88,7 +88,10 @@ func (q *OperationQueue) Logf(format string, a ...interface{}) {
 // operation is added after it is.
 // Returns whether any changes were made.
 func (q *OperationQueue) Add(op *SignedOperation) bool {
-	if !q.Validate(op) || q.Contains(op) {
+	if !q.Validate(op) {
+		return false
+	}
+	if q.Contains(op) {
 		return false
 	}
 
@@ -211,7 +214,19 @@ func (q *OperationQueue) Size() int {
 }
 
 func (q *OperationQueue) Validate(op *SignedOperation) bool {
-	return op != nil && op.Verify() && q.accounts.Validate(op.Operation)
+	if op == nil {
+		return false
+	}
+	if op.Operation == nil {
+		return false
+	}
+	if !op.Operation.Verify() {
+		return false
+	}
+	if !q.accounts.Validate(op.Operation) {
+		return false
+	}
+	return true
 }
 
 // Revalidate checks all pending operations to see if they are still valid

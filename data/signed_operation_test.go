@@ -58,3 +58,22 @@ func TestSignedOperationDecodingAlsoVerifiesSignature(t *testing.T) {
 		t.Fatal("expected error in decoding")
 	}
 }
+
+func TestSignedOperationDecodingAlsoVerifiesOperation(t *testing.T) {
+	kp := util.NewKeyPairFromSecretPhrase("bop")
+	op := &TestingOperation{
+		Number:  11,
+		Signer:  kp.PublicKey().String(),
+		Invalid: true,
+	}
+	so := NewSignedOperation(op, kp)
+	bytes, err := json.Marshal(so)
+	if err != nil {
+		t.Fatal(err)
+	}
+	so2 := &SignedOperation{}
+	err = json.Unmarshal(bytes, so2)
+	if err == nil {
+		t.Fatal("expected error in decoding")
+	}
+}

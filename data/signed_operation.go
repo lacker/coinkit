@@ -65,6 +65,9 @@ func (s *SignedOperation) UnmarshalJSON(data []byte) error {
 	if op == nil {
 		return fmt.Errorf("decoding a nil operation is not valid")
 	}
+	if !op.Verify() {
+		return fmt.Errorf("the decoded operation was invalid")
+	}
 
 	pk, err := util.ReadPublicKey(op.GetSigner())
 	if err != nil {
@@ -82,30 +85,7 @@ func (s *SignedOperation) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-// TODO: can we get rid of this because verification happens on decode now
-func (s *SignedOperation) Verify() bool {
-	if s.Operation == nil || reflect.ValueOf(s.Operation).IsNil() {
-		return false
-	}
-	pk, err := util.ReadPublicKey(s.Operation.GetSigner())
-	if err != nil {
-		return false
-	}
-	bytes, err := json.Marshal(s.Operation)
-	if err != nil {
-		return false
-	}
-	if !util.VerifySignature(pk, s.Type+string(bytes), s.Signature) {
-		return false
-	}
-	if !s.Operation.Verify() {
-		return false
-	}
-
-	return true
-}
-
-// HighestPriorityFirst is a comparator in the emirpasic/gods comparator style.
+// HighestFeeFirst is a comparator in the emirpasic/gods comparator style.
 // Negative return indicates a < b
 // Positive return indicates a > b
 // Comparison indicates overall "priority" putting the highest priority first.

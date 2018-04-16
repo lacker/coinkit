@@ -11,8 +11,12 @@ func TestFullQueue(t *testing.T) {
 	q := NewOperationQueue(kp.PublicKey())
 	for i := 1; i <= QueueLimit+10; i++ {
 		op := makeTestSendOperation(i)
-		t := op.Operation.(*SendOperation)
-		q.accounts.SetBalance(t.Signer, 10*t.Amount)
+		send := op.Operation.(*SendOperation)
+		q.accounts.SetBalance(send.Signer, 10*send.Amount)
+		if !op.Verify() {
+			t.Fatalf("bad op: %+v", op)
+		}
+
 		q.Add(op)
 	}
 	if q.Size() != QueueLimit {
@@ -41,6 +45,9 @@ func TestOperationMessage(t *testing.T) {
 	op := makeTestSendOperation(0)
 	tr := op.Operation.(*SendOperation)
 	q.accounts.SetBalance(tr.Signer, 10*tr.Amount)
+	if !op.Verify() {
+		t.Fatal("bad op")
+	}
 	q.Add(op)
 	if q.OperationMessage() == nil {
 		t.Fatal("there should be an operation message after we add one operation")

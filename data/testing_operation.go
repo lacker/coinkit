@@ -3,8 +3,9 @@ package data
 import ()
 
 type TestingOperation struct {
-	Number int
-	Signer string
+	Number  int
+	Signer  string
+	Invalid bool
 }
 
 func (op *TestingOperation) OperationType() string {
@@ -20,7 +21,7 @@ func (op *TestingOperation) GetSigner() string {
 }
 
 func (op *TestingOperation) Verify() bool {
-	return true
+	return !op.Invalid
 }
 
 func (op *TestingOperation) GetFee() uint64 {
