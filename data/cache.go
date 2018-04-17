@@ -2,32 +2,34 @@ package data
 
 import ()
 
-// Used to map a public key to its Account
-type AccountMap struct {
+// The Cache stores a subset of the information that is in the database. Typically
+// this is the subset needed to validate some of the pending operations, so that
+// we can revalidate quickly.
+type Cache struct {
 	// Storing real account data
 	data map[string]*Account
 
 	// We use the fallback when we don't have data on an account
 	// Can be nil
-	fallback *AccountMap
+	fallback *Cache
 }
 
-func NewAccountMap() *AccountMap {
-	return &AccountMap{
+func NewCache() *Cache {
+	return &Cache{
 		data: make(map[string]*Account),
 	}
 }
 
-// Returns a copy of this accountmap that does copy-on-write, so changes
+// Returns a copy of this cache that does copy-on-write, so changes
 // made won't be visible in the original
-func (m *AccountMap) CowCopy() *AccountMap {
-	return &AccountMap{
+func (m *Cache) CowCopy() *Cache {
+	return &Cache{
 		data:     make(map[string]*Account),
 		fallback: m,
 	}
 }
 
-func (m *AccountMap) MaxBalance() uint64 {
+func (m *Cache) MaxBalance() uint64 {
 	answer := uint64(0)
 	for _, account := range m.data {
 		if account.Balance > answer {
@@ -44,7 +46,7 @@ func (m *AccountMap) MaxBalance() uint64 {
 }
 
 // Checks that the data in the account map is what we expect
-func (m *AccountMap) CheckEqual(key string, account *Account) bool {
+func (m *Cache) CheckEqual(key string, account *Account) bool {
 	a := m.Get(key)
 	if a == nil && account == nil {
 		return true
@@ -55,7 +57,7 @@ func (m *AccountMap) CheckEqual(key string, account *Account) bool {
 	return a.Sequence == account.Sequence && a.Balance == account.Balance
 }
 
-func (m *AccountMap) Get(key string) *Account {
+func (m *Cache) Get(key string) *Account {
 	answer := m.data[key]
 	if answer == nil && m.fallback != nil {
 		return m.fallback.Get(key)
@@ -63,15 +65,15 @@ func (m *AccountMap) Get(key string) *Account {
 	return answer
 }
 
-func (m *AccountMap) Set(key string, account *Account) {
+func (m *Cache) Set(key string, account *Account) {
 	m.data[key] = account
 }
 
 // Validate returns whether this operation is valid
-func (m *AccountMap) Validate(op Operation) bool {
+func (m *Cache) Validate(op Operation) bool {
 	t, ok := op.(*SendOperation)
 	if !ok {
-		panic("AccountMap cannot validate non-SendOperation operations")
+		panic("Cache cannot validate non-SendOperation operations")
 	}
 	account := m.Get(t.Signer)
 	if account == nil {
@@ -88,7 +90,7 @@ func (m *AccountMap) Validate(op Operation) bool {
 	return true
 }
 
-func (m *AccountMap) SetBalance(owner string, amount uint64) {
+func (m *Cache) SetBalance(owner string, amount uint64) {
 	oldAccount := m.Get(owner)
 	sequence := uint32(0)
 	if oldAccount != nil {
@@ -98,10 +100,10 @@ func (m *AccountMap) SetBalance(owner string, amount uint64) {
 }
 
 // Process returns false if the operation cannot be processed
-func (m *AccountMap) Process(op Operation) bool {
+func (m *Cache) Process(op Operation) bool {
 	t, ok := op.(*SendOperation)
 	if !ok {
-		panic("AccountMap cannot process non-SendOperation operations")
+		panic("Cache cannot process non-SendOperation operations")
 	}
 	if !m.Validate(t) {
 		return false
@@ -127,7 +129,7 @@ func (m *AccountMap) Process(op Operation) bool {
 // ProcessChunk returns false if the whole chunk cannot be processed.
 // In this situation, the account map may be left with only some of
 // the operations in the chunk processed and would in practice have to be discarded.
-func (m *AccountMap) ProcessChunk(chunk *LedgerChunk) bool {
+func (m *Cache) ProcessChunk(chunk *LedgerChunk) bool {
 	if chunk == nil {
 		return false
 	}
@@ -151,7 +153,7 @@ func (m *AccountMap) ProcessChunk(chunk *LedgerChunk) bool {
 }
 
 // ValidateChunk returns true iff ProcessChunk could succeed.
-func (m *AccountMap) ValidateChunk(chunk *LedgerChunk) bool {
+func (m *Cache) ValidateChunk(chunk *LedgerChunk) bool {
 	copy := m.CowCopy()
 	return copy.ProcessChunk(chunk)
 }

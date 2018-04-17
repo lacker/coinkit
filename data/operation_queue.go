@@ -30,8 +30,8 @@ type OperationQueue struct {
 
 	// accounts is used to validate operations
 	// For now this is the actual authentic store of account data
-	// TODO: get this into a real database
-	accounts *AccountMap
+	// TODO: rename to cache
+	accounts *Cache
 
 	// The key of the last chunk to get finalized
 	last consensus.SlotValue
@@ -49,7 +49,7 @@ func NewOperationQueue(publicKey util.PublicKey) *OperationQueue {
 		set:       treeset.NewWith(HighestFeeFirst),
 		chunks:    make(map[consensus.SlotValue]*LedgerChunk),
 		oldChunks: make(map[int]*LedgerChunk),
-		accounts:  NewAccountMap(),
+		accounts:  NewCache(),
 		last:      consensus.SlotValue(""),
 		slot:      1,
 		finalized: 0,
