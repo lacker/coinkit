@@ -9,9 +9,12 @@ type Cache struct {
 	// Storing real account data
 	data map[string]*Account
 
-	// We use the fallback when we don't have data on an account
-	// Can be nil
-	fallback *Cache
+	// When we are doing a read operation and we don't have data, we can use the
+	// readOnly cache. This is useful so that we can make copy-on-write versions of
+	// this data, so that we can test destructive sequences of operations without
+	// modifying the original.
+	// readOnly can be nil.
+	readOnly *Cache
 }
 
 func NewCache() *Cache {
@@ -25,7 +28,7 @@ func NewCache() *Cache {
 func (m *Cache) CowCopy() *Cache {
 	return &Cache{
 		data:     make(map[string]*Account),
-		fallback: m,
+		readOnly: m,
 	}
 }
 
@@ -36,8 +39,8 @@ func (m *Cache) MaxBalance() uint64 {
 			answer = account.Balance
 		}
 	}
-	if m.fallback != nil {
-		b := m.fallback.MaxBalance()
+	if m.readOnly != nil {
+		b := m.readOnly.MaxBalance()
 		if b > answer {
 			answer = b
 		}
@@ -59,8 +62,8 @@ func (m *Cache) CheckEqual(key string, account *Account) bool {
 
 func (m *Cache) Get(key string) *Account {
 	answer := m.data[key]
-	if answer == nil && m.fallback != nil {
-		return m.fallback.Get(key)
+	if answer == nil && m.readOnly != nil {
+		return m.readOnly.Get(key)
 	}
 	return answer
 }

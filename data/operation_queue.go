@@ -28,10 +28,9 @@ type OperationQueue struct {
 	// They are indexed by slot
 	oldChunks map[int]*LedgerChunk
 
-	// accounts is used to validate operations
+	// cache is used to validate operations
 	// For now this is the actual authentic store of account data
-	// TODO: rename to cache
-	accounts *Cache
+	cache *Cache
 
 	// The key of the last chunk to get finalized
 	last consensus.SlotValue
@@ -49,7 +48,7 @@ func NewOperationQueue(publicKey util.PublicKey) *OperationQueue {
 		set:       treeset.NewWith(HighestFeeFirst),
 		chunks:    make(map[consensus.SlotValue]*LedgerChunk),
 		oldChunks: make(map[int]*LedgerChunk),
-		accounts:  NewCache(),
+		cache:     NewCache(),
 		last:      consensus.SlotValue(""),
 		slot:      1,
 		finalized: 0,
@@ -136,12 +135,12 @@ func (q *OperationQueue) OperationMessage() *OperationMessage {
 
 // MaxBalance is used for testing
 func (q *OperationQueue) MaxBalance() uint64 {
-	return q.accounts.MaxBalance()
+	return q.cache.MaxBalance()
 }
 
 // SetBalance is used for testing
 func (q *OperationQueue) SetBalance(owner string, balance uint64) {
-	q.accounts.SetBalance(owner, balance)
+	q.cache.SetBalance(owner, balance)
 }
 
 func (q *OperationQueue) OldChunk(slot int) *LedgerChunk {
@@ -173,7 +172,7 @@ func (q *OperationQueue) HandleInfoMessage(m *util.InfoMessage) *AccountMessage 
 		I:     q.slot,
 		State: make(map[string]*Account),
 	}
-	output.State[m.Account] = q.accounts.Get(m.Account)
+	output.State[m.Account] = q.cache.Get(m.Account)
 	return output
 }
 
@@ -195,7 +194,7 @@ func (q *OperationQueue) HandleOperationMessage(m *OperationMessage) bool {
 			if _, ok := q.chunks[key]; ok {
 				continue
 			}
-			if !q.accounts.ValidateChunk(chunk) {
+			if !q.cache.ValidateChunk(chunk) {
 				continue
 			}
 			if chunk.Hash() != key {
@@ -223,7 +222,7 @@ func (q *OperationQueue) Validate(op *SignedOperation) bool {
 	if !op.Operation.Verify() {
 		return false
 	}
-	if !q.accounts.Validate(op.Operation) {
+	if !q.cache.Validate(op.Operation) {
 		return false
 	}
 	return true
@@ -242,13 +241,13 @@ func (q *OperationQueue) Revalidate() {
 // The list should already be sorted and deduped and the signed operations
 // should be verified.
 // Returns "", nil if there were no valid operations.
-// This adds a cache entry to q.chunks
+// This adds a chunk to q.chunks
 func (q *OperationQueue) NewChunk(
 	ops []*SignedOperation) (consensus.SlotValue, *LedgerChunk) {
 
 	var last *SignedOperation
 	validOps := []*SignedOperation{}
-	validator := q.accounts.CowCopy()
+	validator := q.cache.CowCopy()
 	state := make(map[string]*Account)
 	for _, op := range ops {
 		if last != nil && HighestFeeFirst(last, op) >= 0 {
@@ -323,11 +322,11 @@ func (q *OperationQueue) Finalize(v consensus.SlotValue) {
 		panic("We are finalizing a chunk but we don't know its data.")
 	}
 
-	if !q.accounts.ValidateChunk(chunk) {
+	if !q.cache.ValidateChunk(chunk) {
 		panic("We could not validate a finalized chunk.")
 	}
 
-	if !q.accounts.ProcessChunk(chunk) {
+	if !q.cache.ProcessChunk(chunk) {
 		panic("We could not process a finalized chunk.")
 	}
 

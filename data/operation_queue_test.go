@@ -12,7 +12,7 @@ func TestFullQueue(t *testing.T) {
 	for i := 1; i <= QueueLimit+10; i++ {
 		op := makeTestSendOperation(i)
 		send := op.Operation.(*SendOperation)
-		q.accounts.SetBalance(send.Signer, 10*send.Amount)
+		q.cache.SetBalance(send.Signer, 10*send.Amount)
 		if !op.Verify() {
 			t.Fatalf("bad op: %+v", op)
 		}
@@ -44,7 +44,7 @@ func TestOperationMessage(t *testing.T) {
 	}
 	op := makeTestSendOperation(0)
 	tr := op.Operation.(*SendOperation)
-	q.accounts.SetBalance(tr.Signer, 10*tr.Amount)
+	q.cache.SetBalance(tr.Signer, 10*tr.Amount)
 	if !op.Verify() {
 		t.Fatal("bad op")
 	}
