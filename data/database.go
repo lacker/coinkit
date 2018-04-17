@@ -58,6 +58,14 @@ CREATE TABLE IF NOT EXISTS blocks (
 
 CREATE UNIQUE INDEX IF NOT EXISTS block_slot_idx ON blocks (slot);
 
+CREATE TABLE IF NOT EXISTS accounts (
+    owner text,
+    sequence integer CHECK (sequence >= 0),
+    balance bigint CHECK (balance >= 0)
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS account_owner_idx ON accounts (owner);
+
 CREATE TABLE IF NOT EXISTS documents (
     id bigint,
     data jsonb NOT NULL
@@ -102,6 +110,18 @@ func (db *Database) TotalSizeInfo() string {
 	}
 	return answer
 }
+
+func DropTestData(i int) {
+	db := NewTestDatabase(i)
+	util.Logger.Printf("clearing test database %s", db.name)
+	db.postgres.MustExec("DROP TABLE IF EXISTS blocks")
+	db.postgres.MustExec("DROP TABLE IF EXISTS accounts")
+	db.postgres.MustExec("DROP TABLE IF EXISTS documents")
+}
+
+//////////////
+// Blocks
+//////////////
 
 const blockInsert = `
 INSERT INTO blocks (slot, chunk, c, h)
@@ -174,6 +194,30 @@ func (db *Database) ForBlocks(f func(b *Block)) int {
 	return slot
 }
 
+//////////////
+// Accounts
+//////////////
+
+const accountUpsert = `
+INSERT INTO accounts (owner, sequence, balance)
+VALUES (:owner, :sequence, :balance)
+ON CONFLICT (owner) DO UPDATE
+  SET sequence = EXCLUDED.sequence,
+      balance = EXCLUDED.balance;
+`
+
+func (db *Database) UpsertAccount(a *Account) error {
+	_, err := db.postgres.NamedExec(accountUpsert, a)
+	if err != nil {
+		panic(err)
+	}
+	return nil
+}
+
+//////////////
+// Documents
+//////////////
+
 const documentInsert = `
 INSERT INTO documents (id, data)
 VALUES (:id, :data)
@@ -213,11 +257,4 @@ func (db *Database) GetDocuments(match map[string]interface{}, limit int) []*Doc
 		answer = append(answer, d)
 	}
 	return answer
-}
-
-func DropTestData(i int) {
-	db := NewTestDatabase(i)
-	util.Logger.Printf("clearing test database %s", db.name)
-	db.postgres.MustExec("DROP TABLE IF EXISTS blocks")
-	db.postgres.MustExec("DROP TABLE IF EXISTS documents")
 }

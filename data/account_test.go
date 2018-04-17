@@ -1,6 +1,7 @@
 package data
 
 import (
+	"bytes"
 	"testing"
 )
 
@@ -29,5 +30,13 @@ func TestSendOperationProcessing(t *testing.T) {
 	}
 	if m.Validate(payBob) {
 		t.Fatalf("validation should reject replay attacks")
+	}
+}
+
+func TestAccountHashing(t *testing.T) {
+	a1 := &Account{Sequence: 1, Balance: 2}
+	a2 := &Account{Sequence: 1, Balance: 20}
+	if bytes.Equal(a1.Bytes(), a2.Bytes()) {
+		t.Fatal("bytes should not be two-to-one")
 	}
 }
