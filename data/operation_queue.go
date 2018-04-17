@@ -172,7 +172,7 @@ func (q *OperationQueue) HandleInfoMessage(m *util.InfoMessage) *AccountMessage 
 		I:     q.slot,
 		State: make(map[string]*Account),
 	}
-	output.State[m.Account] = q.cache.Get(m.Account)
+	output.State[m.Account] = q.cache.GetAccount(m.Account)
 	return output
 }
 
@@ -257,10 +257,10 @@ func (q *OperationQueue) NewChunk(
 		if validator.Process(op.Operation) {
 			validOps = append(validOps, op)
 		}
-		state[op.GetSigner()] = validator.Get(op.GetSigner())
+		state[op.GetSigner()] = validator.GetAccount(op.GetSigner())
 
 		if t, ok := op.Operation.(*SendOperation); ok {
-			state[t.To] = validator.Get(t.To)
+			state[t.To] = validator.GetAccount(t.To)
 		}
 
 		if len(validOps) == MaxChunkSize {

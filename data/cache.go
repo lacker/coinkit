@@ -50,7 +50,7 @@ func (m *Cache) MaxBalance() uint64 {
 
 // Checks that the data in the account map is what we expect
 func (m *Cache) CheckEqual(key string, account *Account) bool {
-	a := m.Get(key)
+	a := m.GetAccount(key)
 	if a == nil && account == nil {
 		return true
 	}
@@ -60,16 +60,18 @@ func (m *Cache) CheckEqual(key string, account *Account) bool {
 	return a.Sequence == account.Sequence && a.Balance == account.Balance
 }
 
-func (m *Cache) Get(key string) *Account {
-	answer := m.data[key]
+// TODO: check the returned account has the right owner
+func (m *Cache) GetAccount(owner string) *Account {
+	answer := m.data[owner]
 	if answer == nil && m.readOnly != nil {
-		return m.readOnly.Get(key)
+		return m.readOnly.GetAccount(owner)
 	}
 	return answer
 }
 
-func (m *Cache) Set(key string, account *Account) {
-	m.data[key] = account
+// TODO: owner should not be required
+func (m *Cache) UpsertAccount(owner string, account *Account) {
+	m.data[owner] = account
 }
 
 // Validate returns whether this operation is valid
@@ -78,7 +80,7 @@ func (m *Cache) Validate(op Operation) bool {
 	if !ok {
 		panic("Cache cannot validate non-SendOperation operations")
 	}
-	account := m.Get(t.Signer)
+	account := m.GetAccount(t.Signer)
 	if account == nil {
 		return false
 	}
@@ -94,12 +96,12 @@ func (m *Cache) Validate(op Operation) bool {
 }
 
 func (m *Cache) SetBalance(owner string, amount uint64) {
-	oldAccount := m.Get(owner)
+	oldAccount := m.GetAccount(owner)
 	sequence := uint32(0)
 	if oldAccount != nil {
 		sequence = oldAccount.Sequence
 	}
-	m.Set(owner, &Account{Sequence: sequence, Balance: amount})
+	m.UpsertAccount(owner, &Account{Sequence: sequence, Balance: amount})
 }
 
 // Process returns false if the operation cannot be processed
@@ -111,8 +113,8 @@ func (m *Cache) Process(op Operation) bool {
 	if !m.Validate(t) {
 		return false
 	}
-	source := m.Get(t.Signer)
-	target := m.Get(t.To)
+	source := m.GetAccount(t.Signer)
+	target := m.GetAccount(t.To)
 	if target == nil {
 		target = &Account{}
 	}
@@ -124,8 +126,8 @@ func (m *Cache) Process(op Operation) bool {
 		Sequence: target.Sequence,
 		Balance:  target.Balance + t.Amount,
 	}
-	m.Set(t.Signer, newSource)
-	m.Set(t.To, newTarget)
+	m.UpsertAccount(t.Signer, newSource)
+	m.UpsertAccount(t.To, newTarget)
 	return true
 }
 
