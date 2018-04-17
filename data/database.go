@@ -214,6 +214,37 @@ func (db *Database) UpsertAccount(a *Account) error {
 	return nil
 }
 
+// ForAccounts calls f on each account in the db, in no particular order.
+// It returns the number of accounts.
+func (db *Database) ForAccounts(f func(a *Account)) int {
+	rows, err := db.postgres.Queryx("SELECT * FROM accounts")
+	if err != nil {
+		panic(err)
+	}
+	count := 0
+	for rows.Next() {
+		a := &Account{}
+		err := rows.StructScan(a)
+		if err != nil {
+			panic(err)
+		}
+		count += 1
+		f(a)
+	}
+	return count
+}
+
+// MaxBalance is slow, so we just use it for testing
+func (db *Database) MaxBalance() uint64 {
+	max := uint64(0)
+	db.ForAccounts(func(a *Account) {
+		if a.Balance > max {
+			max = a.Balance
+		}
+	})
+	return max
+}
+
 //////////////
 // Documents
 //////////////
