@@ -196,6 +196,31 @@ func BenchmarkTwoConstraints(b *testing.B) {
 	}
 }
 
+func TestMaxBalance(t *testing.T) {
+	DropTestData(0)
+	db := NewTestDatabase(0)
+	mb := db.MaxBalance()
+	if mb != 0 {
+		t.Fatalf("got max balance %d but expected 0", mb)
+	}
+	a := &Account{
+		Owner:    "alex",
+		Sequence: 1,
+		Amount:   10,
+	}
+	b := &Account{
+		Owner:    "bob",
+		Sequence: 2,
+		Amount:   5,
+	}
+	db.UpsertBlock(a)
+	db.UpsertBlock(b)
+	mb = db.MaxBalance()
+	if mb != 10 {
+		t.Fatalf("got max balance %d", mb)
+	}
+}
+
 // Clean up both before and after running tests
 func TestMain(m *testing.M) {
 	DropTestData(0)
