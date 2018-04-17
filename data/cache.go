@@ -1,6 +1,8 @@
 package data
 
-import ()
+import (
+	"log"
+)
 
 // The Cache stores a subset of the information that is in the database. Typically
 // this is the subset needed to validate some of the pending operations, so that
@@ -69,9 +71,14 @@ func (m *Cache) GetAccount(owner string) *Account {
 	return answer
 }
 
-// TODO: owner should not be required
-func (m *Cache) UpsertAccount(owner string, account *Account) {
-	m.data[owner] = account
+func (m *Cache) UpsertAccount(account *Account) {
+	if account == nil {
+		log.Fatal("cannot upsert nil account")
+	}
+	if account.Owner == "" {
+		log.Fatal("cannot upsert with no owner")
+	}
+	m.data[account.Owner] = account
 }
 
 // Validate returns whether this operation is valid
@@ -101,7 +108,11 @@ func (m *Cache) SetBalance(owner string, amount uint64) {
 	if oldAccount != nil {
 		sequence = oldAccount.Sequence
 	}
-	m.UpsertAccount(owner, &Account{Sequence: sequence, Balance: amount})
+	m.UpsertAccount(&Account{
+		Owner:    owner,
+		Sequence: sequence,
+		Balance:  amount,
+	})
 }
 
 // Process returns false if the operation cannot be processed
@@ -119,15 +130,17 @@ func (m *Cache) Process(op Operation) bool {
 		target = &Account{}
 	}
 	newSource := &Account{
+		Owner:    t.Signer,
 		Sequence: t.Sequence,
 		Balance:  source.Balance - t.Amount - t.Fee,
 	}
 	newTarget := &Account{
+		Owner:    t.To,
 		Sequence: target.Sequence,
 		Balance:  target.Balance + t.Amount,
 	}
-	m.UpsertAccount(t.Signer, newSource)
-	m.UpsertAccount(t.To, newTarget)
+	m.UpsertAccount(newSource)
+	m.UpsertAccount(newTarget)
 	return true
 }
 
