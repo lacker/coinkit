@@ -62,11 +62,13 @@ func (m *Cache) CheckEqual(key string, account *Account) bool {
 	return a.Sequence == account.Sequence && a.Balance == account.Balance
 }
 
-// TODO: check the returned account has the right owner
 func (m *Cache) GetAccount(owner string) *Account {
 	answer := m.data[owner]
 	if answer == nil && m.readOnly != nil {
-		return m.readOnly.GetAccount(owner)
+		answer = m.readOnly.GetAccount(owner)
+	}
+	if answer != nil && answer.Owner != owner {
+		log.Fatalf("tried to get account with owner %s but got %+v", owner, answer)
 	}
 	return answer
 }
