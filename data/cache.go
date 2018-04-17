@@ -8,7 +8,9 @@ import (
 // this is the subset needed to validate some of the pending operations, so that
 // we can revalidate quickly.
 type Cache struct {
-	// Storing real account data
+	// Storing real account data.
+	// The key of the map is the owner of that account.
+	// nil means there is currently no account for that owner
 	data map[string]*Account
 
 	// When we are doing a read operation and we don't have data, we can use the
@@ -16,7 +18,14 @@ type Cache struct {
 	// this data, so that we can test destructive sequences of operations without
 	// modifying the original.
 	// readOnly can be nil.
+	// readOnly and database should not both be non-nil.
 	readOnly *Cache
+
+	// When database is non-nil, writes to the cache get written through to the
+	// database, and read operations look at the database when data does not
+	// have the relevant data.
+	// readOnly and database should not both be non-nil.
+	database *Database
 }
 
 func NewCache() *Cache {
@@ -25,13 +34,18 @@ func NewCache() *Cache {
 	}
 }
 
+func NewDatabaseCache(database *Database) *Cache {
+	c := NewCache()
+	c.database = database
+	return c
+}
+
 // Returns a copy of this cache that does copy-on-write, so changes
 // made won't be visible in the original
 func (m *Cache) CowCopy() *Cache {
-	return &Cache{
-		data:     make(map[string]*Account),
-		readOnly: m,
-	}
+	c := NewCache()
+	c.readOnly = m
+	return c
 }
 
 func (m *Cache) MaxBalance() uint64 {
