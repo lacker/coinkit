@@ -49,6 +49,9 @@ func (m *Cache) CowCopy() *Cache {
 }
 
 func (m *Cache) MaxBalance() uint64 {
+	if m.database != nil {
+		return m.database.MaxBalance()
+	}
 	answer := uint64(0)
 	for _, account := range m.data {
 		if account.Balance > answer {
@@ -64,7 +67,7 @@ func (m *Cache) MaxBalance() uint64 {
 	return answer
 }
 
-// Checks that the data in the account map is what we expect
+// Checks that the data for an account is what we expect
 func (m *Cache) CheckEqual(key string, account *Account) bool {
 	a := m.GetAccount(key)
 	if a == nil && account == nil {
@@ -78,10 +81,18 @@ func (m *Cache) CheckEqual(key string, account *Account) bool {
 
 func (m *Cache) GetAccount(owner string) *Account {
 	answer := m.data[owner]
-	if answer == nil && m.readOnly != nil {
-		answer = m.readOnly.GetAccount(owner)
+	if answer == nil {
+		if m.readOnly != nil {
+			answer = m.readOnly.GetAccount(owner)
+		} else if m.database != nil {
+			answer = m.database.GetAccount(owner)
+			m.data[owner] = answer
+		}
+		if answer == nil {
+			return answer
+		}
 	}
-	if answer != nil && answer.Owner != owner {
+	if answer.Owner != owner {
 		log.Fatalf("tried to get account with owner %s but got %+v", owner, answer)
 	}
 	return answer
@@ -95,6 +106,9 @@ func (m *Cache) UpsertAccount(account *Account) {
 		log.Fatal("cannot upsert with no owner")
 	}
 	m.data[account.Owner] = account
+	if m.database != nil {
+		m.database.UpsertAccount(account)
+	}
 }
 
 // Validate returns whether this operation is valid
@@ -161,7 +175,7 @@ func (m *Cache) Process(op Operation) bool {
 }
 
 // ProcessChunk returns false if the whole chunk cannot be processed.
-// In this situation, the account map may be left with only some of
+// In this situation, the cache may be left with only some of
 // the operations in the chunk processed and would in practice have to be discarded.
 func (m *Cache) ProcessChunk(chunk *LedgerChunk) bool {
 	if chunk == nil {
@@ -173,12 +187,18 @@ func (m *Cache) ProcessChunk(chunk *LedgerChunk) bool {
 
 	for _, op := range chunk.SendOperations() {
 		if op == nil || !op.Verify() || !m.Process(op) {
+			if m.database != nil {
+				panic("we half-processed a chunk on the database")
+			}
 			return false
 		}
 	}
 
 	for owner, account := range chunk.State {
 		if !m.CheckEqual(owner, account) {
+			if m.database != nil {
+				panic("we processed a chunk, but then integrity checks failed")
+			}
 			return false
 		}
 	}

@@ -206,15 +206,15 @@ func TestMaxBalance(t *testing.T) {
 	a := &Account{
 		Owner:    "alex",
 		Sequence: 1,
-		Amount:   10,
+		Balance:  10,
 	}
 	b := &Account{
 		Owner:    "bob",
 		Sequence: 2,
-		Amount:   5,
+		Balance:  5,
 	}
-	db.UpsertBlock(a)
-	db.UpsertBlock(b)
+	db.UpsertAccount(a)
+	db.UpsertAccount(b)
 	mb = db.MaxBalance()
 	if mb != 10 {
 		t.Fatalf("got max balance %d", mb)

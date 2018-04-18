@@ -214,6 +214,19 @@ func (db *Database) UpsertAccount(a *Account) error {
 	return nil
 }
 
+// GetAccount returns nil if there is no account for the given owner.
+func (db *Database) GetAccount(owner string) *Account {
+	answer := &Account{}
+	err := db.postgres.Get(answer, "SELECT * FROM accounts WHERE owner=$1", owner)
+	if err == sql.ErrNoRows {
+		return nil
+	}
+	if err != nil {
+		panic(err)
+	}
+	return answer
+}
+
 // ForAccounts calls f on each account in the db, in no particular order.
 // It returns the number of accounts.
 func (db *Database) ForAccounts(f func(a *Account)) int {
