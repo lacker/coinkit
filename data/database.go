@@ -18,6 +18,8 @@ import (
 type Database struct {
 	name     string
 	postgres *sqlx.DB
+	reads    int
+	writes   int
 }
 
 func NewDatabase(config *Config) *Database {
@@ -136,6 +138,7 @@ func isUniquenessError(e error) bool {
 // It panics if there is a fundamental database problem.
 func (db *Database) InsertBlock(b *Block) error {
 	_, err := db.postgres.NamedExec(blockInsert, b)
+	db.writes++
 	if err != nil {
 		if isUniquenessError(err) {
 			return err
@@ -149,6 +152,7 @@ func (db *Database) InsertBlock(b *Block) error {
 func (db *Database) GetBlock(slot int) *Block {
 	answer := &Block{}
 	err := db.postgres.Get(answer, "SELECT * FROM blocks WHERE slot=$1", slot)
+	db.reads++
 	if err == sql.ErrNoRows {
 		return nil
 	}
@@ -162,6 +166,7 @@ func (db *Database) GetBlock(slot int) *Block {
 func (db *Database) LastBlock() *Block {
 	answer := &Block{}
 	err := db.postgres.Get(answer, "SELECT * FROM blocks ORDER BY slot DESC LIMIT 1")
+	db.reads++
 	if err == sql.ErrNoRows {
 		return nil
 	}
@@ -176,6 +181,7 @@ func (db *Database) LastBlock() *Block {
 func (db *Database) ForBlocks(f func(b *Block)) int {
 	slot := 0
 	rows, err := db.postgres.Queryx("SELECT * FROM blocks ORDER BY slot")
+	db.reads++
 	if err != nil {
 		panic(err)
 	}
@@ -208,6 +214,7 @@ ON CONFLICT (owner) DO UPDATE
 
 func (db *Database) UpsertAccount(a *Account) error {
 	_, err := db.postgres.NamedExec(accountUpsert, a)
+	db.writes++
 	if err != nil {
 		panic(err)
 	}
@@ -218,6 +225,7 @@ func (db *Database) UpsertAccount(a *Account) error {
 func (db *Database) GetAccount(owner string) *Account {
 	answer := &Account{}
 	err := db.postgres.Get(answer, "SELECT * FROM accounts WHERE owner=$1", owner)
+	db.reads++
 	if err == sql.ErrNoRows {
 		return nil
 	}
@@ -231,6 +239,7 @@ func (db *Database) GetAccount(owner string) *Account {
 // It returns the number of accounts.
 func (db *Database) ForAccounts(f func(a *Account)) int {
 	rows, err := db.postgres.Queryx("SELECT * FROM accounts")
+	db.reads++
 	if err != nil {
 		panic(err)
 	}
@@ -272,6 +281,7 @@ VALUES (:id, :data)
 // It panics if there is a fundamental database problem.
 func (db *Database) InsertDocument(d *Document) error {
 	_, err := db.postgres.NamedExec(documentInsert, d)
+	db.writes++
 	if err != nil {
 		if isUniquenessError(err) {
 			return err
@@ -288,6 +298,7 @@ func (db *Database) GetDocuments(match map[string]interface{}, limit int) []*Doc
 	}
 	rows, err := db.postgres.Queryx(
 		"SELECT * FROM documents WHERE data @> $1 LIMIT $2", string(bytes), limit)
+	db.reads++
 	if err != nil {
 		panic(err)
 	}
