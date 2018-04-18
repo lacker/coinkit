@@ -35,6 +35,13 @@ func NewDatabase(config *Config) *Database {
 	}
 	postgres := sqlx.MustConnect("postgres", info)
 
+	if config.testOnly {
+		util.Logger.Printf("clearing test-only database %s", config.Database)
+		postgres.MustExec("DROP TABLE IF EXISTS blocks")
+		postgres.MustExec("DROP TABLE IF EXISTS accounts")
+		postgres.MustExec("DROP TABLE IF EXISTS documents")
+	}
+
 	db := &Database{
 		postgres: postgres,
 		name:     config.Database,
@@ -44,6 +51,7 @@ func NewDatabase(config *Config) *Database {
 }
 
 // Creates a new database handle designed to be used for unit tests.
+// Whenever this is created, any existing data in the database is deleted.
 func NewTestDatabase(i int) *Database {
 	return NewDatabase(NewTestConfig(i))
 }
@@ -109,14 +117,6 @@ func (db *Database) TotalSizeInfo() string {
 		return err.Error()
 	}
 	return answer
-}
-
-func DropTestData(i int) {
-	db := NewTestDatabase(i)
-	util.Logger.Printf("clearing test database %s", db.name)
-	db.postgres.MustExec("DROP TABLE IF EXISTS blocks")
-	db.postgres.MustExec("DROP TABLE IF EXISTS accounts")
-	db.postgres.MustExec("DROP TABLE IF EXISTS documents")
 }
 
 //////////////

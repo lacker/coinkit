@@ -2,7 +2,6 @@ package data
 
 import (
 	"log"
-	"os"
 	"testing"
 )
 
@@ -49,7 +48,6 @@ func TestCantInsertTwice(t *testing.T) {
 }
 
 func TestLastBlock(t *testing.T) {
-	DropTestData(0)
 	db := NewTestDatabase(0)
 	b := db.LastBlock()
 	if b != nil {
@@ -75,7 +73,6 @@ func TestLastBlock(t *testing.T) {
 }
 
 func TestForBlocks(t *testing.T) {
-	DropTestData(0)
 	db := NewTestDatabase(0)
 	for i := 1; i <= 5; i++ {
 		b := &Block{
@@ -98,7 +95,6 @@ func TestForBlocks(t *testing.T) {
 }
 
 func TestTotalSizeInfo(t *testing.T) {
-	DropTestData(0)
 	db := NewTestDatabase(0)
 	b := &Block{
 		Slot:  1,
@@ -113,7 +109,6 @@ func TestTotalSizeInfo(t *testing.T) {
 }
 
 func TestGetDocuments(t *testing.T) {
-	DropTestData(0)
 	db := NewTestDatabase(0)
 	for a := 1; a <= 2; a++ {
 		for b := 1; b <= 2; b++ {
@@ -134,7 +129,6 @@ func TestGetDocuments(t *testing.T) {
 }
 
 func TestGetDocumentsNoResults(t *testing.T) {
-	DropTestData(0)
 	db := NewTestDatabase(0)
 	docs := db.GetDocuments(map[string]interface{}{"blorp": "hi"}, 3)
 	if len(docs) != 0 {
@@ -145,7 +139,6 @@ func TestGetDocumentsNoResults(t *testing.T) {
 const benchmarkMax = 400
 
 func databaseForBenchmarking() *Database {
-	DropTestData(0)
 	db := NewTestDatabase(0)
 	log.Printf("populating db for benchmarking")
 	items := 0
@@ -197,7 +190,6 @@ func BenchmarkTwoConstraints(b *testing.B) {
 }
 
 func TestMaxBalance(t *testing.T) {
-	DropTestData(0)
 	db := NewTestDatabase(0)
 	mb := db.MaxBalance()
 	if mb != 0 {
@@ -219,12 +211,4 @@ func TestMaxBalance(t *testing.T) {
 	if mb != 10 {
 		t.Fatalf("got max balance %d", mb)
 	}
-}
-
-// Clean up both before and after running tests
-func TestMain(m *testing.M) {
-	DropTestData(0)
-	answer := m.Run()
-	DropTestData(0)
-	os.Exit(answer)
 }

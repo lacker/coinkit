@@ -101,7 +101,6 @@ func TestNodeRestarting(t *testing.T) {
 	qs, names := consensus.MakeTestQuorumSlice(4)
 	nodes := []*Node{}
 	for i, name := range names {
-		data.DropTestData(i)
 		db := data.NewTestDatabase(i)
 		node := NewNodeWithMint(name, qs, db, mint.PublicKey(), 1000)
 		node.queue.SetBalance(mint.PublicKey().String(), 1000)
@@ -121,7 +120,7 @@ func TestNodeRestarting(t *testing.T) {
 	}
 
 	// Knock out and replace node 1
-	nodes[1] = NewNodeWithMint(names[1], qs, data.NewTestDatabase(1), mint.PublicKey(), 1000)
+	nodes[1] = NewNodeWithMint(names[1], qs, nodes[1].database, mint.PublicKey(), 1000)
 
 	// Send another 10 to Bob
 	m = newSendMessage(mint, bob, 2, 10)

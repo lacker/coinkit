@@ -31,3 +31,7 @@ func TestSendOperationProcessing(t *testing.T) {
 		t.Fatalf("validation should reject replay attacks")
 	}
 }
+
+func TestReadThrough(t *testing.T) {
+	// TODO: implement
+}

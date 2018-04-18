@@ -22,6 +22,9 @@ type Config struct {
 
 	// The database password
 	Password string
+
+	// Test-only databases are cleared on startup
+	testOnly bool
 }
 
 func NewTestConfig(i int) *Config {
@@ -30,6 +33,7 @@ func NewTestConfig(i int) *Config {
 		User:     "$USER",
 		Host:     "127.0.0.1",
 		Port:     5432,
+		testOnly: true,
 	}
 }
 
