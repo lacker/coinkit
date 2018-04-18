@@ -55,3 +55,19 @@ func TestReadThrough(t *testing.T) {
 		t.Fatalf("bad a4: %+v", a4)
 	}
 }
+
+func TestWriteThrough(t *testing.T) {
+	db := NewTestDatabase(0)
+	c1 := NewDatabaseCache(db)
+	a1 := &Account{
+		Owner:    "bob",
+		Sequence: 8,
+		Balance:  200,
+	}
+	c1.UpsertAccount(a1)
+	c2 := NewDatabaseCache(db)
+	a2 := c2.GetAccount("bob")
+	if a2 == nil || a2.Balance != 200 {
+		t.Fatalf("writethrough fail: %+v", a2)
+	}
+}
