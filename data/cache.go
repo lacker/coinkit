@@ -7,6 +7,9 @@ import (
 // The Cache stores a subset of the information that is in the database. Typically
 // this is the subset needed to validate some of the pending operations, so that
 // we can revalidate quickly.
+// Cache is not multithreaded.
+// If there are multiple Cache objects for a single Database, data can get stale, so
+// don't do that.
 type Cache struct {
 	// Storing real account data.
 	// The key of the map is the owner of that account.
@@ -80,19 +83,21 @@ func (m *Cache) CheckEqual(key string, account *Account) bool {
 }
 
 func (m *Cache) GetAccount(owner string) *Account {
-	answer := m.data[owner]
-	if answer == nil {
-		if m.readOnly != nil {
-			answer = m.readOnly.GetAccount(owner)
-		} else if m.database != nil {
-			answer = m.database.GetAccount(owner)
-			m.data[owner] = answer
-		}
-		if answer == nil {
-			return answer
-		}
+	answer, ok := m.data[owner]
+	if ok {
+		return answer
 	}
-	if answer.Owner != owner {
+
+	if m.readOnly != nil {
+		// When there is no direct database, we don't need to cache reads.
+		answer = m.readOnly.GetAccount(owner)
+	} else if m.database != nil {
+		// When there is a database, we should cache reads to reduce database access.
+		answer = m.database.GetAccount(owner)
+		m.data[owner] = answer
+	}
+
+	if answer != nil && answer.Owner != owner {
 		log.Fatalf("tried to get account with owner %s but got %+v", owner, answer)
 	}
 	return answer
