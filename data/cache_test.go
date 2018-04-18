@@ -54,6 +54,17 @@ func TestReadThrough(t *testing.T) {
 	if a4 == nil || a4.Balance != 100 {
 		t.Fatalf("bad a4: %+v", a4)
 	}
+
+	if c2.GetAccount("nonexistent") != nil {
+		t.Fatalf("nonexistent existed")
+	}
+	prereads := db.reads
+	if c2.GetAccount("nonexistent") != nil {
+		t.Fatalf("nonexistent existed")
+	}
+	if prereads != db.reads {
+		t.Fatalf("double nil read should not require a db hit")
+	}
 }
 
 func TestWriteThrough(t *testing.T) {
