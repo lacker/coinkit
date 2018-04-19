@@ -2,6 +2,7 @@ package data
 
 import (
 	"log"
+	"sort"
 )
 
 // The Cache stores a subset of the information that is in the database. Typically
@@ -215,4 +216,43 @@ func (c *Cache) ProcessChunk(chunk *LedgerChunk) bool {
 func (c *Cache) ValidateChunk(chunk *LedgerChunk) bool {
 	copy := c.CowCopy()
 	return copy.ProcessChunk(chunk)
+}
+
+type CacheAccountIterator struct {
+	nextIndex int
+	accounts  []*Account
+}
+
+func (iter *CacheAccountIterator) Next() *Account {
+	if iter.nextIndex >= len(iter.accounts) {
+		return nil
+	}
+	answer := iter.accounts[iter.nextIndex]
+	iter.nextIndex++
+	return answer
+}
+
+func (c *Cache) IterAccounts() AccountIterator {
+	if c.database != nil {
+		return c.database.IterAccounts()
+	}
+	if c.readOnly != nil {
+		panic("IterAccounts for cow copies not implemented")
+	}
+
+	// Make sure to go through owners in sorted order
+	owners := []string{}
+	for owner, _ := range c.data {
+		owners = append(owners, owner)
+	}
+	sort.Strings(owners)
+
+	iter := &CacheAccountIterator{
+		nextIndex: 0,
+		accounts:  []*Account{},
+	}
+	for _, owner := range owners {
+		iter.accounts = append(iter.accounts, c.GetAccount(owner))
+	}
+	return iter
 }
