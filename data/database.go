@@ -253,10 +253,10 @@ func (iter *DatabaseAccountIterator) Next() *Account {
 
 func (db *Database) IterAccounts() AccountIterator {
 	rows, err := db.postgres.Queryx("SELECT * FROM accounts ORDER BY owner")
+	db.reads++
 	if err != nil {
 		panic(err)
 	}
-	db.reads++
 	return &DatabaseAccountIterator{
 		rows: rows,
 	}
@@ -266,22 +266,16 @@ func (db *Database) IterAccounts() AccountIterator {
 // It returns the number of accounts.
 // TODO: implement via IterAccounts
 func (db *Database) ForAccounts(f func(a *Account)) int {
-	rows, err := db.postgres.Queryx("SELECT * FROM accounts")
-	db.reads++
-	if err != nil {
-		panic(err)
-	}
 	count := 0
-	for rows.Next() {
-		a := &Account{}
-		err := rows.StructScan(a)
-		if err != nil {
-			panic(err)
+	iter := db.IterAccounts()
+	for {
+		a := iter.Next()
+		if a == nil {
+			return count
 		}
 		count += 1
 		f(a)
 	}
-	return count
 }
 
 // MaxBalance is slow, so we just use it for testing
