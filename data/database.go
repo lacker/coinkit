@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os/user"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/jmoiron/sqlx"
@@ -15,11 +16,17 @@ import (
 )
 
 // A Database encapsulates a connection to a Postgres database.
+// It is threadsafe.
 type Database struct {
 	name     string
 	postgres *sqlx.DB
 	reads    int
 	writes   int
+
+	// The mutex guards the transaction in progress.
+	// All writes happen via this transaction.
+	mutex sync.Mutex
+	tx    *sqlx.Tx
 }
 
 func NewDatabase(config *Config) *Database {
@@ -107,6 +114,34 @@ func (db *Database) initialize() {
 		}
 		time.Sleep(time.Millisecond * time.Duration(200*errors))
 	}
+}
+
+// namedExec is a helper function to execute a write within the pending transaction.
+func (db *Database) namedExec(query string, arg interface{}) {
+	db.mutex.Lock()
+	defer db.mutex.Unlock()
+
+	if db.tx == nil {
+		db.tx = db.postgres.MustBegin()
+	}
+	_, err := db.tx.NamedExec(query, arg)
+	if err != nil {
+		panic(err)
+	}
+}
+
+func (db *Database) commit() {
+	db.mutex.Lock()
+	defer db.mutex.Unlock()
+
+	if db.tx == nil {
+		return
+	}
+	err := db.tx.Commit()
+	if err != nil {
+		panic(err)
+	}
+	db.tx = nil
 }
 
 func (db *Database) TotalSizeInfo() string {
