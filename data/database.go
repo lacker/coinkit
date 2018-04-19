@@ -235,8 +235,36 @@ func (db *Database) GetAccount(owner string) *Account {
 	return answer
 }
 
+type DatabaseAccountIterator struct {
+	rows *sqlx.Rows
+}
+
+func (iter *DatabaseAccountIterator) Next() *Account {
+	if !iter.rows.Next() {
+		return nil
+	}
+	a := &Account{}
+	err := iter.rows.StructScan(a)
+	if err != nil {
+		panic(err)
+	}
+	return a
+}
+
+func (db *Database) IterAccounts() AccountIterator {
+	rows, err := db.postgres.Queryx("SELECT * FROM accounts ORDER BY owner")
+	if err != nil {
+		panic(err)
+	}
+	db.reads++
+	return &DatabaseAccountIterator{
+		rows: rows,
+	}
+}
+
 // ForAccounts calls f on each account in the db, in no particular order.
 // It returns the number of accounts.
+// TODO: implement via IterAccounts
 func (db *Database) ForAccounts(f func(a *Account)) int {
 	rows, err := db.postgres.Queryx("SELECT * FROM accounts")
 	db.reads++
