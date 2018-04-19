@@ -264,7 +264,6 @@ func (db *Database) IterAccounts() AccountIterator {
 
 // ForAccounts calls f on each account in the db, in no particular order.
 // It returns the number of accounts.
-// TODO: implement via IterAccounts
 func (db *Database) ForAccounts(f func(a *Account)) int {
 	count := 0
 	iter := db.IterAccounts()
