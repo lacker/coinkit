@@ -212,3 +212,31 @@ func TestMaxBalance(t *testing.T) {
 		t.Fatalf("got max balance %d", mb)
 	}
 }
+
+func TestAccounts(t *testing.T) {
+	db := NewTestDatabase(0)
+	if db.GetAccount("bob") != nil {
+		t.Fatalf("db should be empty")
+	}
+	nothing := func(a *Account) {}
+	if db.ForAccounts(nothing) != 0 {
+		t.Fatalf("ForAccounts on empty db should be 0")
+	}
+	a := &Account{
+		Owner:    "bob",
+		Sequence: 3,
+		Balance:  4,
+	}
+	db.UpsertAccount(a)
+	if db.GetAccount("bob") == nil {
+		t.Fatalf("bob should exist now")
+	}
+	if db.ForAccounts(nothing) != 1 {
+		t.Fatalf("there should be 1 thing in the db now")
+	}
+	a.Owner = "bob2"
+	db.UpsertAccount(a)
+	if db.ForAccounts(nothing) != 2 {
+		t.Fatalf("there should be 2 things in the db now")
+	}
+}
