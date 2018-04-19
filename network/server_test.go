@@ -29,8 +29,9 @@ func (m *FakeMessage) String() string {
 func makeServers() []*Server {
 	config, kps := NewUnitTestNetwork()
 	answer := []*Server{}
-	for _, kp := range kps {
-		server := NewServer(kp, config, nil)
+	for i, kp := range kps {
+		db := data.NewTestDatabase(i)
+		server := NewServer(kp, config, db)
 
 		// In theory rebroadcasts should not be necessary unless we have node failures
 		// or lossy communication channels.

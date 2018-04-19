@@ -77,6 +77,12 @@ func (node *Node) Handle(sender string, message util.Message) (util.Message, boo
 		return nil, false
 
 	case *util.InfoMessage:
+		if node.database == nil {
+			util.Logger.Fatal("InfoMessages require a database to fulfill")
+		}
+
+		// TODO: actually fulfill the InfoMessage from the database, instead of
+		// doing this stuff below
 		if m.Account != "" {
 			answer := node.queue.HandleInfoMessage(m)
 			return answer, answer != nil
