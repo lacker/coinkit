@@ -140,6 +140,7 @@ func (node *Node) handleChainMessage(sender string, message util.Message) (util.
 			if err != nil {
 				panic(err)
 			}
+			node.database.Commit()
 		}
 	}
 

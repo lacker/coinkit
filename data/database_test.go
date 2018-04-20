@@ -15,6 +15,7 @@ func TestInsertAndGet(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	db.Commit()
 	b2 := db.GetBlock(3)
 	if b2.C != block.C {
 		t.Fatal("block changed: %+v -> %+v", block, b2)
@@ -45,6 +46,7 @@ func TestCantInsertTwice(t *testing.T) {
 	if err == nil {
 		t.Fatal("a block should not save twice")
 	}
+	// TODO: what happens to the borked transaction here?
 }
 
 func TestLastBlock(t *testing.T) {
@@ -66,6 +68,7 @@ func TestLastBlock(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	db.Commit()
 	b2 := db.LastBlock()
 	if b2.Slot != b.Slot {
 		t.Fatal("b2: %+v", b2)
@@ -84,6 +87,7 @@ func TestForBlocks(t *testing.T) {
 			t.Fatal("block could not save")
 		}
 	}
+	db.Commit()
 	count := db.ForBlocks(func(b *Block) {
 		if b.C != 7 {
 			t.Fatal("expected C = 7")
@@ -91,19 +95,6 @@ func TestForBlocks(t *testing.T) {
 	})
 	if count != 5 {
 		t.Fatal("expected count = 5")
-	}
-}
-
-func TestTotalSizeInfo(t *testing.T) {
-	db := NewTestDatabase(0)
-	b := &Block{
-		Slot:  1,
-		Chunk: NewEmptyChunk(),
-		C:     8,
-	}
-	err := db.InsertBlock(b)
-	if err != nil {
-		t.Fatalf("could not save. got error: %s", err)
 	}
 	log.Print(db.TotalSizeInfo())
 }

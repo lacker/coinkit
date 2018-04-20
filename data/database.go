@@ -117,7 +117,7 @@ func (db *Database) initialize() {
 }
 
 // namedExec is a helper function to execute a write within the pending transaction.
-func (db *Database) namedExec(query string, arg interface{}) {
+func (db *Database) namedExec(query string, arg interface{}) error {
 	db.mutex.Lock()
 	defer db.mutex.Unlock()
 
@@ -125,12 +125,11 @@ func (db *Database) namedExec(query string, arg interface{}) {
 		db.tx = db.postgres.MustBegin()
 	}
 	_, err := db.tx.NamedExec(query, arg)
-	if err != nil {
-		panic(err)
-	}
+	return err
 }
 
-func (db *Database) commit() {
+// Commit commits the pending transaction. If there is any error, it panics.
+func (db *Database) Commit() {
 	db.mutex.Lock()
 	defer db.mutex.Unlock()
 
@@ -171,9 +170,10 @@ func isUniquenessError(e error) bool {
 
 // InsertBlock returns an error if it failed because this block is already saved.
 // It panics if there is a fundamental database problem.
+// It returns an error if this block is not unique.
+// TODO: is the transaction just borked then?
 func (db *Database) InsertBlock(b *Block) error {
-	_, err := db.postgres.NamedExec(blockInsert, b)
-	db.writes++
+	err := db.namedExec(blockInsert, b)
 	if err != nil {
 		if isUniquenessError(err) {
 			return err
