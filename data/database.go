@@ -227,7 +227,7 @@ func (db *Database) ForBlocks(f func(b *Block)) int {
 			panic(err)
 		}
 		if b.Slot != slot+1 {
-			util.Logger.Fatal("missing block with slot %d", slot+1)
+			util.Logger.Fatalf("missing block with slot %d", slot+1)
 		}
 		slot += 1
 		f(b)

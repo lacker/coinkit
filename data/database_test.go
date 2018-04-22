@@ -18,7 +18,7 @@ func TestInsertAndGet(t *testing.T) {
 	db.Commit()
 	b2 := db.GetBlock(3)
 	if b2.C != block.C {
-		t.Fatal("block changed: %+v -> %+v", block, b2)
+		t.Fatalf("block changed: %+v -> %+v", block, b2)
 	}
 }
 
@@ -78,7 +78,7 @@ func TestLastBlock(t *testing.T) {
 	db.Commit()
 	b3 := db.LastBlock()
 	if b3.Slot != b.Slot {
-		t.Fatal("b3: %+v", b3)
+		t.Fatalf("b3: %+v", b3)
 	}
 }
 

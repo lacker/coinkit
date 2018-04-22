@@ -74,7 +74,7 @@ func (p Phase) String() string {
 	case Externalize:
 		return "Externalize"
 	default:
-		panic(fmt.Sprintf("unknown phase: %+v", p))
+		panic(fmt.Sprintf("unknown phase: %d", p))
 	}
 }
 

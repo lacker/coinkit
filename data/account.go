@@ -47,7 +47,7 @@ func (a *Account) CheckEqual(other *Account) error {
 			a.Owner, a.Sequence, other.Sequence)
 	}
 	if a.Balance != other.Balance {
-		return fmt.Errorf("data mismatch for owner %s: balance % != balance %d",
+		return fmt.Errorf("data mismatch for owner %s: balance %d != balance %d",
 			a.Owner, a.Balance, other.Balance)
 	}
 	return nil
