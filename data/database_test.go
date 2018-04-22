@@ -53,7 +53,7 @@ func TestLastBlock(t *testing.T) {
 	db := NewTestDatabase(0)
 	b := db.LastBlock()
 	if b != nil {
-		t.Fatal("expected last block nil but got %+v", b)
+		t.Fatalf("expected last block nil but got %+v", b)
 	}
 	b = &Block{
 		Slot:  5,
@@ -63,15 +63,22 @@ func TestLastBlock(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+
+	// Before commit, the insert should not be visible
+	b2 := db.LastBlock()
+	if b2 != nil {
+		t.Fatalf("expected b2 nil but got: %+v", b2)
+	}
+
 	b.Slot = 6
 	err = db.InsertBlock(b)
 	if err != nil {
 		t.Fatal(err)
 	}
 	db.Commit()
-	b2 := db.LastBlock()
-	if b2.Slot != b.Slot {
-		t.Fatal("b2: %+v", b2)
+	b3 := db.LastBlock()
+	if b3.Slot != b.Slot {
+		t.Fatal("b3: %+v", b3)
 	}
 }
 
