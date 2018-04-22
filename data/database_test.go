@@ -46,7 +46,19 @@ func TestCantInsertTwice(t *testing.T) {
 	if err == nil {
 		t.Fatal("a block should not save twice")
 	}
-	// TODO: what happens to the borked transaction here?
+
+	if db.LastBlock() != nil {
+		t.Fatal("insert should not have worked without commit")
+	}
+	db.Rollback()
+	err = db.InsertBlock(block)
+	if err != nil {
+		t.Fatal(err)
+	}
+	db.Commit()
+	if db.LastBlock() == nil {
+		t.Fatal("insert should work after rollback")
+	}
 }
 
 func TestLastBlock(t *testing.T) {

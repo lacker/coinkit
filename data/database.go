@@ -143,6 +143,20 @@ func (db *Database) Commit() {
 	db.tx = nil
 }
 
+func (db *Database) Rollback() {
+	db.mutex.Lock()
+	defer db.mutex.Unlock()
+
+	if db.tx == nil {
+		return
+	}
+	err := db.tx.Rollback()
+	if err != nil {
+		panic(err)
+	}
+	db.tx = nil
+}
+
 func (db *Database) TotalSizeInfo() string {
 	var answer string
 	err := db.postgres.Get(
@@ -171,7 +185,7 @@ func isUniquenessError(e error) bool {
 // InsertBlock returns an error if it failed because this block is already saved.
 // It panics if there is a fundamental database problem.
 // It returns an error if this block is not unique.
-// TODO: is the transaction just borked then?
+// If this fails, the pending transaction will be unusable.
 func (db *Database) InsertBlock(b *Block) error {
 	err := db.namedExec(blockInsert, b)
 	if err != nil {
