@@ -133,6 +133,11 @@ func TestGetDocuments(t *testing.T) {
 		}
 	}
 	docs := db.GetDocuments(map[string]interface{}{"a": 2, "b": 1}, 2)
+	if len(docs) != 0 {
+		t.Fatal("expected no docs visible before commit")
+	}
+	db.Commit()
+	docs = db.GetDocuments(map[string]interface{}{"a": 2, "b": 1}, 2)
 	if len(docs) != 1 {
 		t.Fatalf("expected one doc but got: %+v", docs)
 	}

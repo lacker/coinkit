@@ -185,7 +185,7 @@ func isUniquenessError(e error) bool {
 // InsertBlock returns an error if it failed because this block is already saved.
 // It panics if there is a fundamental database problem.
 // It returns an error if this block is not unique.
-// If this fails, the pending transaction will be unusable.
+// If this returns an error, the pending transaction will be unusable.
 func (db *Database) InsertBlock(b *Block) error {
 	err := db.namedExec(blockInsert, b)
 	if err != nil {
@@ -349,9 +349,9 @@ VALUES (:id, :data)
 // InsertDocument returns an error if it failed because there is already a document with
 // this id.
 // It panics if there is a fundamental database problem.
+// If this returns an error, the pending transaction will be unusable.
 func (db *Database) InsertDocument(d *Document) error {
-	_, err := db.postgres.NamedExec(documentInsert, d)
-	db.writes++
+	err := db.namedExec(documentInsert, d)
 	if err != nil {
 		if isUniquenessError(err) {
 			return err
