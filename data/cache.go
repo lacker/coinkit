@@ -104,6 +104,8 @@ func (c *Cache) GetAccount(owner string) *Account {
 	return answer
 }
 
+// Cache.UpsertAccount finalizes immediately. It calls Commit on the
+// underlying db if necessary.
 func (c *Cache) UpsertAccount(account *Account) {
 	if account == nil {
 		log.Fatal("cannot upsert nil account")
@@ -114,6 +116,7 @@ func (c *Cache) UpsertAccount(account *Account) {
 	c.data[account.Owner] = account
 	if c.database != nil {
 		c.database.UpsertAccount(account)
+		c.database.Commit()
 	}
 }
 

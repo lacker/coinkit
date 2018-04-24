@@ -210,6 +210,7 @@ func TestMaxBalance(t *testing.T) {
 	if mb != 0 {
 		t.Fatalf("got max balance %d but expected 0", mb)
 	}
+
 	a := &Account{
 		Owner:    "alex",
 		Sequence: 1,
@@ -222,6 +223,12 @@ func TestMaxBalance(t *testing.T) {
 	}
 	db.UpsertAccount(a)
 	db.UpsertAccount(b)
+	mb = db.MaxBalance()
+	if mb != 0 {
+		t.Fatalf("got max balance %d before commit, but expected 0", mb)
+	}
+
+	db.Commit()
 	mb = db.MaxBalance()
 	if mb != 10 {
 		t.Fatalf("got max balance %d", mb)
@@ -243,6 +250,7 @@ func TestAccounts(t *testing.T) {
 		Balance:  4,
 	}
 	db.UpsertAccount(a)
+	db.Commit()
 	if db.GetAccount("bob") == nil {
 		t.Fatalf("bob should exist now")
 	}
@@ -251,6 +259,7 @@ func TestAccounts(t *testing.T) {
 	}
 	a.Owner = "bob2"
 	db.UpsertAccount(a)
+	db.Commit()
 	if db.ForAccounts(nothing) != 2 {
 		t.Fatalf("there should be 2 things in the db now")
 	}

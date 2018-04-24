@@ -261,9 +261,9 @@ ON CONFLICT (owner) DO UPDATE
       balance = EXCLUDED.balance;
 `
 
+// Database.UpsertAccount will not finalize until Commit is called.
 func (db *Database) UpsertAccount(a *Account) error {
-	_, err := db.postgres.NamedExec(accountUpsert, a)
-	db.writes++
+	err := db.namedExec(accountUpsert, a)
 	if err != nil {
 		panic(err)
 	}

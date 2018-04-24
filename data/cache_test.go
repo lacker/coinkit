@@ -46,6 +46,7 @@ func TestReadThrough(t *testing.T) {
 		Balance:  100,
 	}
 	db.UpsertAccount(a2)
+	db.Commit()
 	a3 := c1.GetAccount("bob")
 	if a3 != nil {
 		t.Fatalf("expected c1 to not do read-through when cache is warm")
