@@ -3,6 +3,8 @@ package data
 import (
 	"log"
 	"testing"
+
+	"github.com/lacker/coinkit/util"
 )
 
 func TestInsertAndGet(t *testing.T) {
@@ -257,5 +259,12 @@ func TestAccounts(t *testing.T) {
 	db.Commit()
 	if db.ForAccounts(nothing) != 2 {
 		t.Fatalf("there should be 2 things in the db now")
+	}
+	m := &util.InfoMessage{
+		Account: "bob",
+	}
+	am := db.HandleInfoMessage(m)
+	if am == nil || am.I != 1 || am.State["bob"].Balance != 4 {
+		t.Fatalf("got unexpected account message: %+v", am)
 	}
 }

@@ -200,7 +200,33 @@ func (db *Database) HandleInfoMessage(m *util.InfoMessage) *AccountMessage {
 	if m == nil || m.Account == "" {
 		return nil
 	}
-	panic("TODO: implement")
+	// Check slot before and after querying. If a new block has been
+	// mined during our query,
+	// reissue it.
+	// TODO: figure out if this is a good idea. If there are enough
+	// new blocks written, this will cause a large amount of read
+	// traffic. We might instead be able to use some transactiony
+	// thing.
+	retries := 0
+	initialSlot := db.CurrentSlot()
+	for {
+		account := db.GetAccount(m.Account)
+		slot := db.CurrentSlot()
+		if slot != initialSlot {
+			initialSlot = slot
+			retries++
+			if retries >= 10 {
+				util.Logger.Printf("HandleInfoMessage is getting overloaded")
+			}
+			continue
+		}
+		output := &AccountMessage{
+			I:     slot,
+			State: map[string]*Account{m.Account: account},
+		}
+		return output
+	}
+	panic("control should not reach here")
 }
 
 //////////////
