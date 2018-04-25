@@ -24,11 +24,11 @@ func WaitToClear(c Connection, user string, sequence uint32) *data.Account {
 	for {
 		SendAnonymousMessage(c, &util.InfoMessage{Account: user})
 		m := (<-c.Receive()).Message()
-		accountMessage, ok := m.(*data.AccountMessage)
+		dataMessage, ok := m.(*data.DataMessage)
 		if !ok {
 			continue
 		}
-		account := accountMessage.State[user]
+		account := dataMessage.Accounts[user]
 		if account == nil {
 			continue
 		}
@@ -45,11 +45,11 @@ func GetAccount(c Connection, user string) *data.Account {
 	for {
 		SendAnonymousMessage(c, &util.InfoMessage{Account: user})
 		m := (<-c.Receive()).Message()
-		accountMessage, ok := m.(*data.AccountMessage)
+		dataMessage, ok := m.(*data.DataMessage)
 		if !ok {
-			util.Logger.Fatalf("expected an account message but got: %+v", m)
+			util.Logger.Fatalf("expected a data message but got: %+v", m)
 		}
-		return accountMessage.State[user]
+		return dataMessage.Accounts[user]
 	}
 }
 

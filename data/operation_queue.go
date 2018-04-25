@@ -164,15 +164,16 @@ func (q *OperationQueue) OldChunkMessage(slot int) *OperationMessage {
 	}
 }
 
-func (q *OperationQueue) HandleInfoMessage(m *util.InfoMessage) *AccountMessage {
+func (q *OperationQueue) HandleInfoMessage(m *util.InfoMessage) *DataMessage {
 	if m == nil || m.Account == "" {
 		return nil
 	}
-	output := &AccountMessage{
-		I:     q.slot,
-		State: make(map[string]*Account),
+	// TODO: for logical correctness change slot to slot - 1. but make sure tests pass
+	output := &DataMessage{
+		I:        q.slot,
+		Accounts: make(map[string]*Account),
 	}
-	output.State[m.Account] = q.cache.GetAccount(m.Account)
+	output.Accounts[m.Account] = q.cache.GetAccount(m.Account)
 	return output
 }
 
