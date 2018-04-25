@@ -168,9 +168,8 @@ func (q *OperationQueue) HandleInfoMessage(m *util.InfoMessage) *DataMessage {
 	if m == nil || m.Account == "" {
 		return nil
 	}
-	// TODO: for logical correctness change slot to slot - 1. but make sure tests pass
 	output := &DataMessage{
-		I:        q.slot,
+		I:        q.slot - 1,
 		Accounts: make(map[string]*Account),
 	}
 	output.Accounts[m.Account] = q.cache.GetAccount(m.Account)

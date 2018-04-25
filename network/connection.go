@@ -36,7 +36,8 @@ func WaitToClear(c Connection, user string, sequence uint32) *data.Account {
 			return account
 		}
 
-		SendAnonymousMessage(c, &util.InfoMessage{Block: m.Slot()})
+		// The operation didn't clear. Wait for the next block to finalize
+		SendAnonymousMessage(c, &util.InfoMessage{Block: m.Slot() + 1})
 		<-c.Receive()
 	}
 }
