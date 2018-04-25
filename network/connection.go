@@ -1,6 +1,8 @@
 package network
 
 import (
+	"time"
+
 	"github.com/lacker/coinkit/data"
 	"github.com/lacker/coinkit/util"
 )
@@ -36,9 +38,7 @@ func WaitToClear(c Connection, user string, sequence uint32) *data.Account {
 			return account
 		}
 
-		// The operation didn't clear. Wait for the next block to finalize
-		SendAnonymousMessage(c, &util.InfoMessage{Block: m.Slot() + 1})
-		<-c.Receive()
+		time.Sleep(time.Millisecond * 100)
 	}
 }
 
