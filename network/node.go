@@ -73,21 +73,18 @@ func (node *Node) Handle(sender string, message util.Message) (util.Message, boo
 		node.Handle(sender, m.E)
 		return nil, false
 
-	case *data.AccountMessage:
-		return nil, false
-
 	case *util.InfoMessage:
 		if node.database == nil {
 			util.Logger.Fatal("InfoMessages require a database to fulfill")
 		}
 
-		// TODO: actually fulfill the InfoMessage from the database, instead of
-		// doing this stuff below
+		// TODO: fulfill all InfoMessages from the database, instead of
+		// doing this stuff below. Then Node could just not handle InfoMessages
 		if m.Account != "" {
 			answer := node.queue.HandleInfoMessage(m)
 			return answer, answer != nil
 		}
-		if m.I != 0 {
+		if m.Block != 0 {
 			answer, ok := node.chain.Handle(sender, m)
 			return answer, ok
 		}
@@ -113,7 +110,7 @@ func (node *Node) Handle(sender string, message util.Message) (util.Message, boo
 		return answer, ok
 
 	default:
-		util.Logger.Printf("unrecognized message: %+v", m)
+		util.Logger.Printf("Node received unexpected message: %+v", m)
 		return nil, false
 	}
 }

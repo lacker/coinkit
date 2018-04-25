@@ -136,6 +136,7 @@ func (s *Server) handleConnection(connection net.Conn) {
 // down or we are overloaded, (nil, false) is returned.
 // (nil, true) means we processed the message and there is a nil response.
 func (s *Server) handleMessage(sm *util.SignedMessage) (*util.SignedMessage, bool) {
+	// TODO: stop this delaying for info messages. instead let db be async about it
 	if _, ok := sm.Message().(*util.InfoMessage); ok {
 		return s.retryHandleMessage(sm)
 	}
