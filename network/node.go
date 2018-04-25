@@ -82,12 +82,12 @@ func (node *Node) Handle(sender string, message util.Message) (util.Message, boo
 		// doing this stuff below. Then Node could just not handle InfoMessages
 		if m.Account != "" {
 			answer := node.queue.HandleInfoMessage(m)
+			if answer == nil {
+				util.Logger.Fatal("answer was nil")
+			}
 			return answer, answer != nil
 		}
-		if m.Block != 0 {
-			answer, ok := node.chain.Handle(sender, m)
-			return answer, ok
-		}
+
 		return nil, false
 
 	case *data.OperationMessage:
