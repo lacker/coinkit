@@ -263,8 +263,8 @@ func TestAccounts(t *testing.T) {
 	m := &util.InfoMessage{
 		Account: "bob",
 	}
-	am := db.HandleInfoMessage(m)
-	if am == nil || am.I != 1 || am.State["bob"].Balance != 4 {
-		t.Fatalf("got unexpected account message: %+v", am)
+	dm := db.HandleInfoMessage(m)
+	if dm == nil || dm.I != 0 || dm.Accounts["bob"].Balance != 4 {
+		t.Fatalf("got unexpected data message: %+v", dm)
 	}
 }

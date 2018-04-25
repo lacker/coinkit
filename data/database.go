@@ -33,7 +33,7 @@ type Database struct {
 	tx *sqlx.Tx
 
 	// To be threadsafe, don't access these directly. Use CurrentSlot() instead.
-	// currentSlot is the slot we are working on.
+	// currentSlot is the last slot that has been finalized to the database.
 	currentSlot int
 }
 
@@ -104,9 +104,9 @@ CREATE INDEX IF NOT EXISTS document_data_idx ON documents USING gin (data jsonb_
 func (db *Database) updateCurrentSlot() {
 	b := db.LastBlock()
 	if b == nil {
-		db.currentSlot = 1
+		db.currentSlot = 0
 	} else {
-		db.currentSlot = b.Slot + 1
+		db.currentSlot = b.Slot
 	}
 }
 
@@ -196,7 +196,7 @@ func (db *Database) TotalSizeInfo() string {
 	return answer
 }
 
-func (db *Database) HandleInfoMessage(m *util.InfoMessage) *AccountMessage {
+func (db *Database) HandleInfoMessage(m *util.InfoMessage) *DataMessage {
 	if m == nil || m.Account == "" {
 		return nil
 	}
@@ -220,9 +220,9 @@ func (db *Database) HandleInfoMessage(m *util.InfoMessage) *AccountMessage {
 			}
 			continue
 		}
-		output := &AccountMessage{
-			I:     slot,
-			State: map[string]*Account{m.Account: account},
+		output := &DataMessage{
+			I:        slot,
+			Accounts: map[string]*Account{m.Account: account},
 		}
 		return output
 	}
@@ -251,8 +251,8 @@ func (db *Database) InsertBlock(b *Block) error {
 		util.Logger.Fatal("cannot insert nil block")
 	}
 	cur := db.CurrentSlot()
-	if b.Slot != cur {
-		util.Logger.Fatalf("inserting block at slot %d but current is %d", b.Slot, cur)
+	if b.Slot != cur+1 {
+		util.Logger.Fatalf("inserting block at slot %d but db has slot %d", b.Slot, cur)
 	}
 	err := db.namedExec(blockInsert, b)
 	if err != nil {

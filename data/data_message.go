@@ -30,7 +30,7 @@ func (m *DataMessage) MessageType() string {
 }
 
 func (m *DataMessage) String() string {
-	parts := []string{"data", fmt.Sprintf("slot=%d", m.Slot)}
+	parts := []string{"data", fmt.Sprintf("slot=%d", m.Slot())}
 	for owner, account := range m.Accounts {
 		parts = append(parts, fmt.Sprintf("a:%s=%s",
 			util.Shorten(owner), StringifyAccount(account)))
