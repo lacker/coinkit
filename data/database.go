@@ -20,13 +20,21 @@ import (
 type Database struct {
 	name     string
 	postgres *sqlx.DB
-	reads    int
-	writes   int
 
-	// The mutex guards the transaction in progress.
+	// reads generally cannot be used in a threadsafe way. Just use it for testing
+	reads int
+
+	// The mutex guards the transaction in progress and the member
+	// variables below this line.
 	// All writes happen via this transaction.
 	mutex sync.Mutex
-	tx    *sqlx.Tx
+
+	// tx is nil when there is no transaction in progress
+	tx *sqlx.Tx
+
+	// To be threadsafe, don't access these directly. Use CurrentSlot() instead.
+	// currentSlot is the slot we are working on.
+	currentSlot int
 }
 
 func NewDatabase(config *Config) *Database {
@@ -92,6 +100,16 @@ CREATE UNIQUE INDEX IF NOT EXISTS document_id_idx ON documents (id);
 CREATE INDEX IF NOT EXISTS document_data_idx ON documents USING gin (data jsonb_path_ops);
 `
 
+// Not threadsafe, caller should hold mutex or be in init
+func (db *Database) updateCurrentSlot() {
+	b := db.LastBlock()
+	if b == nil {
+		db.currentSlot = 1
+	} else {
+		db.currentSlot = b.Slot + 1
+	}
+}
+
 // initialize makes sure the schemas are set up right and panics if not
 func (db *Database) initialize() {
 	util.Logger.Printf("initializing database %s", db.name)
@@ -105,6 +123,7 @@ func (db *Database) initialize() {
 			if errors > 0 {
 				util.Logger.Printf("db init retry successful")
 			}
+			db.updateCurrentSlot()
 			return
 		}
 		util.Logger.Printf("db init error: %s", err)
@@ -114,6 +133,7 @@ func (db *Database) initialize() {
 		}
 		time.Sleep(time.Millisecond * time.Duration(200*errors))
 	}
+	panic("control should not reach here")
 }
 
 // namedExec is a helper function to execute a write within the pending transaction.
@@ -126,6 +146,12 @@ func (db *Database) namedExec(query string, arg interface{}) error {
 	}
 	_, err := db.tx.NamedExec(query, arg)
 	return err
+}
+
+func (db *Database) CurrentSlot() int {
+	db.mutex.Lock()
+	defer db.mutex.Unlock()
+	return db.currentSlot
 }
 
 // Commit commits the pending transaction. If there is any error, it panics.
@@ -141,6 +167,7 @@ func (db *Database) Commit() {
 		panic(err)
 	}
 	db.tx = nil
+	db.updateCurrentSlot()
 }
 
 func (db *Database) Rollback() {
@@ -169,6 +196,13 @@ func (db *Database) TotalSizeInfo() string {
 	return answer
 }
 
+func (db *Database) HandleInfoMessage(m *util.InfoMessage) *AccountMessage {
+	if m == nil || m.Account == "" {
+		return nil
+	}
+	panic("TODO: implement")
+}
+
 //////////////
 // Blocks
 //////////////
@@ -187,6 +221,13 @@ func isUniquenessError(e error) bool {
 // It returns an error if this block is not unique.
 // If this returns an error, the pending transaction will be unusable.
 func (db *Database) InsertBlock(b *Block) error {
+	if b == nil {
+		util.Logger.Fatal("cannot insert nil block")
+	}
+	cur := db.CurrentSlot()
+	if b.Slot != cur {
+		util.Logger.Fatalf("inserting block at slot %d but current is %d", b.Slot, cur)
+	}
 	err := db.namedExec(blockInsert, b)
 	if err != nil {
 		if isUniquenessError(err) {

@@ -8,7 +8,7 @@ import (
 func TestInsertAndGet(t *testing.T) {
 	db := NewTestDatabase(0)
 	block := &Block{
-		Slot:  3,
+		Slot:  1,
 		Chunk: NewEmptyChunk(),
 	}
 	err := db.InsertBlock(block)
@@ -16,24 +16,19 @@ func TestInsertAndGet(t *testing.T) {
 		t.Fatal(err)
 	}
 	db.Commit()
-	b2 := db.GetBlock(3)
+	if db.GetBlock(4) != nil {
+		t.Fatal("block should be nonexistent")
+	}
+	b2 := db.GetBlock(1)
 	if b2.C != block.C {
 		t.Fatalf("block changed: %+v -> %+v", block, b2)
-	}
-}
-
-func TestGetNonexistentBlock(t *testing.T) {
-	db := NewTestDatabase(0)
-	b := db.GetBlock(4)
-	if b != nil {
-		t.Fatal("block should be nonexistent")
 	}
 }
 
 func TestCantInsertTwice(t *testing.T) {
 	db := NewTestDatabase(0)
 	block := &Block{
-		Slot:  4,
+		Slot:  1,
 		Chunk: NewEmptyChunk(),
 		C:     1,
 		H:     2,
@@ -68,7 +63,7 @@ func TestLastBlock(t *testing.T) {
 		t.Fatalf("expected last block nil but got %+v", b)
 	}
 	b = &Block{
-		Slot:  5,
+		Slot:  1,
 		Chunk: NewEmptyChunk(),
 	}
 	err := db.InsertBlock(b)
@@ -81,8 +76,8 @@ func TestLastBlock(t *testing.T) {
 	if b2 != nil {
 		t.Fatalf("expected b2 nil but got: %+v", b2)
 	}
-
-	b.Slot = 6
+	db.Commit()
+	b.Slot = 2
 	err = db.InsertBlock(b)
 	if err != nil {
 		t.Fatal(err)
@@ -105,8 +100,8 @@ func TestForBlocks(t *testing.T) {
 		if db.InsertBlock(b) != nil {
 			t.Fatal("block could not save")
 		}
+		db.Commit()
 	}
-	db.Commit()
 	count := db.ForBlocks(func(b *Block) {
 		if b.C != 7 {
 			t.Fatal("expected C = 7")
