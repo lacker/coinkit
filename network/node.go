@@ -18,6 +18,9 @@ type Node struct {
 	slot      int
 }
 
+// Creates a node for a blockchain that starts out with the provided accounts airdropped.
+// TODO
+
 // Creates a node for a blockchain that starts with one mint account having a balance.
 func NewNodeWithMint(publicKey util.PublicKey, qs consensus.QuorumSlice,
 	db *data.Database, mint util.PublicKey, balance uint64) *Node {
@@ -48,7 +51,8 @@ func NewNodeWithMint(publicKey util.PublicKey, qs consensus.QuorumSlice,
 	return node
 }
 
-func NewNode(
+// Creates a new node where nobody has any money
+func NewEmptyNode(
 	publicKey util.PublicKey, qs consensus.QuorumSlice, db *data.Database) *Node {
 	var invalid util.PublicKey
 	return NewNodeWithMint(publicKey, qs, db, invalid, 0)
