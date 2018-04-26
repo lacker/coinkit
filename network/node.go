@@ -18,16 +18,18 @@ type Node struct {
 	slot      int
 }
 
-// Creates a node for a blockchain that starts out with the provided accounts airdropped.
-// TODO
+func NewNode(
+	publicKey util.PublicKey, qs consensus.QuorumSlice, db *data.Database) *Node {
+	return NewNodeWithAccounts(publicKey, qs, db, data.Airdrop)
+}
 
-// Creates a node for a blockchain that starts with one mint account having a balance.
-func NewNodeWithMint(publicKey util.PublicKey, qs consensus.QuorumSlice,
-	db *data.Database, mint util.PublicKey, balance uint64) *Node {
+// Creates a node for a blockchain that starts out with the provided accounts airdropped.
+func NewNodeWithAccounts(publicKey util.PublicKey, qs consensus.QuorumSlice,
+	db *data.Database, accounts []*data.Account) *Node {
 
 	queue := data.NewOperationQueue(publicKey)
-	if balance != 0 {
-		queue.SetBalance(mint.String(), balance)
+	for _, account := range accounts {
+		queue.SetBalance(account.Owner, account.Balance)
 	}
 
 	node := &Node{
@@ -51,11 +53,21 @@ func NewNodeWithMint(publicKey util.PublicKey, qs consensus.QuorumSlice,
 	return node
 }
 
+// Creates a node for a blockchain that starts with one mint account having a balance.
+func NewNodeWithMint(publicKey util.PublicKey, qs consensus.QuorumSlice,
+	db *data.Database, mint util.PublicKey, balance uint64) *Node {
+
+	account := &data.Account{
+		Owner:   mint.String(),
+		Balance: balance,
+	}
+	return NewNodeWithAccounts(publicKey, qs, db, []*data.Account{account})
+}
+
 // Creates a new node where nobody has any money
 func NewEmptyNode(
 	publicKey util.PublicKey, qs consensus.QuorumSlice, db *data.Database) *Node {
-	var invalid util.PublicKey
-	return NewNodeWithMint(publicKey, qs, db, invalid, 0)
+	return NewNodeWithAccounts(publicKey, qs, db, []*data.Account{})
 }
 
 // Slot() returns the slot this node is currently working on
