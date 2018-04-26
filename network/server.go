@@ -149,6 +149,19 @@ func (s *Server) handleConnection(connection net.Conn) {
 // If handling cannot be completed, like if the server shuts down, it
 // returns (nil, false).
 func (s *Server) handleMessage(sm *util.SignedMessage) (*util.SignedMessage, bool) {
+	/* TODO: uncomment this once the mint bugs are fixed
+	// InfoMessages can be handled by the database
+	im, ok := sm.Message().(*util.InfoMessage)
+	if ok {
+		if s.db == nil {
+			util.Logger.Fatal("you must attach a database to handle InfoMessages")
+		}
+		dm := s.db.HandleInfoMessage(im)
+		util.Logger.Printf("got data: %+v", dm)
+		return util.NewSignedMessage(dm, s.keyPair), true
+	}
+	*/
+
 	response := make(chan *util.SignedMessage)
 	request := &Request{
 		Message:  sm,
