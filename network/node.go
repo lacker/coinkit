@@ -47,8 +47,20 @@ func NewNodeWithAccounts(publicKey util.PublicKey, qs consensus.QuorumSlice,
 			node.chain.AlreadyExternalized(m)
 			node.queue.FinalizeChunk(b.Chunk)
 		})
-		util.Logger.Printf("loaded %d old blocks from the database", loaded)
-		node.slot = loaded + 1
+		if loaded > 0 {
+			util.Logger.Printf("loaded %d old blocks from the database", loaded)
+			node.slot = loaded + 1
+		} else {
+			// This is initial startup.
+			// We need to make sure the database reflects the airdrop.
+			for _, account := range accounts {
+				err := db.UpsertAccount(account)
+				if err != nil {
+					util.Logger.Fatalf("failure on account initialization: %s", err)
+				}
+			}
+			db.Commit()
+		}
 	}
 
 	return node
