@@ -103,7 +103,6 @@ func TestNodeRestarting(t *testing.T) {
 	for i, name := range names {
 		db := data.NewTestDatabase(i)
 		node := NewNodeWithMint(name, qs, db, mint.PublicKey(), 1000)
-		node.queue.SetBalance(mint.PublicKey().String(), 1000)
 		nodes = append(nodes, node)
 	}
 
