@@ -85,7 +85,7 @@ func (node *Node) Handle(sender string, message util.Message) (util.Message, boo
 			if answer == nil {
 				util.Logger.Fatal("answer was nil")
 			}
-			return answer, answer != nil
+			return answer, true
 		}
 
 		return nil, false

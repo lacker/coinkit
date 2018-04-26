@@ -16,16 +16,29 @@ type Server struct {
 	port    int
 	keyPair *util.KeyPair
 	peers   []*RedialConnection
-	node    *Node
+
+	// The node is capable of handling some sorts of incoming messages
+	// serially.
+	// Generally this is the messages that are trying to do a write to
+	// the blockchain.
+	node *Node
+
+	// The database is capable of handling some sorts of incoming
+	// messages in parallel.
+	// Generally this is the messages that are trying to read some
+	// data from this server without modifying it.
+	db *data.Database
 
 	// Whenever there is a new batch of outgoing messages, it is sent to the
 	// outgoing channel
 	outgoing chan []*util.SignedMessage
 
-	// Messages we are going to handle that do not require a response
+	// inbox contains messages that are going to be handled serially
+	// by the node, and do not require a response.
 	inbox chan *util.SignedMessage
 
-	// Requests we are going to handle that do require a response
+	// requests contains messages that are going to be handled
+	// serially by the node, and *do* require a response.
 	requests chan *Request
 
 	listener net.Listener
@@ -40,8 +53,6 @@ type Server struct {
 
 	// A counter of how many messages we have broadcasted
 	broadcasted int
-
-	db *data.Database
 
 	start time.Time
 
@@ -128,23 +139,16 @@ func (s *Server) handleConnection(connection net.Conn) {
 	}
 }
 
-// handleMessage will try many times for an InfoMessage, but only once for other
-// messages.
-// handleMessage is safe to be called from multiple threads, because it dispatches
-// messages to the processing goroutine for processing.
-// If we did not process the message, like if the server is shutting
-// down or we are overloaded, (nil, false) is returned.
-// (nil, true) means we processed the message and there is a nil response.
+// handleMessage may be called from multiple threads and is used to
+// respond to a message from a sender who wants a response.
+// Generally this is a client sender who is not necessarily part of
+// the consensus logic.
+// handleMessage is safe to be called from multiple threads. It routes
+// messages that must be handled by the node through the request queue.
+// When handling is complete, it returns (response, true).
+// If handling cannot be completed, like if the server shuts down, it
+// returns (nil, false).
 func (s *Server) handleMessage(sm *util.SignedMessage) (*util.SignedMessage, bool) {
-	// TODO: stop this delaying for info messages. instead let db be async about it
-	if _, ok := sm.Message().(*util.InfoMessage); ok {
-		return s.retryHandleMessage(sm)
-	}
-	return s.handleMessageOnce(sm)
-}
-
-// handleMessageOnce is like handleMessage but explicitly only tries once.
-func (s *Server) handleMessageOnce(sm *util.SignedMessage) (*util.SignedMessage, bool) {
 	response := make(chan *util.SignedMessage)
 	request := &Request{
 		Message:  sm,
@@ -166,12 +170,14 @@ func (s *Server) handleMessageOnce(sm *util.SignedMessage) (*util.SignedMessage,
 	}
 }
 
-// retryHandleMessage is like handleMessageOnce, but it expects a non-nil response.
+// retryHandleMessage is like handleMessage, but it expects a non-nil response.
 // If the response is nil, it waits for another block to be finalized and tries again
 // when it is.
+// TODO: this is unused, but I theorize we will want something like this for efficiently
+// awaiting the next block, so let's remove or alter this when we want that.
 func (s *Server) retryHandleMessage(sm *util.SignedMessage) (*util.SignedMessage, bool) {
 	for {
-		m, ok := s.handleMessageOnce(sm)
+		m, ok := s.handleMessage(sm)
 		if !ok {
 			return nil, false
 		}
