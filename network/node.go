@@ -18,6 +18,7 @@ type Node struct {
 	slot      int
 }
 
+// NewNode uses the standard account initialization settings from data.Airdrop
 func NewNode(
 	publicKey util.PublicKey, qs consensus.QuorumSlice, db *data.Database) *Node {
 	return NewNodeWithAccounts(publicKey, qs, db, data.Airdrop)

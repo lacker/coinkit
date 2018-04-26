@@ -67,11 +67,7 @@ func NewServer(keyPair *util.KeyPair, config *Config, db *data.Database) *Server
 		peers = append(peers, NewRedialConnection(address, inbox))
 	}
 	qs := config.QuorumSlice()
-
-	// At the start, all money is in the "mint" account
-	mint := util.NewKeyPairFromSecretPhrase("mint")
-	node := NewNodeWithMint(keyPair.PublicKey(), qs, db,
-		mint.PublicKey(), data.TotalMoney)
+	node := NewNode(keyPair.PublicKey(), qs, db)
 
 	return &Server{
 		port:                config.GetPort(keyPair.PublicKey().String(), 9000),
