@@ -42,13 +42,13 @@ type OperationQueue struct {
 	finalized int
 }
 
-func NewOperationQueue(publicKey util.PublicKey) *OperationQueue {
+func NewOperationQueue(publicKey util.PublicKey, cache *Cache) *OperationQueue {
 	return &OperationQueue{
 		publicKey: publicKey,
 		set:       treeset.NewWith(HighestFeeFirst),
 		chunks:    make(map[consensus.SlotValue]*LedgerChunk),
 		oldChunks: make(map[int]*LedgerChunk),
-		cache:     NewCache(),
+		cache:     cache,
 		last:      consensus.SlotValue(""),
 		slot:      1,
 		finalized: 0,
