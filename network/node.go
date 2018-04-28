@@ -28,8 +28,13 @@ func NewNode(
 func NewNodeWithAccounts(publicKey util.PublicKey, qs consensus.QuorumSlice,
 	db *data.Database, accounts []*data.Account) *Node {
 
-	// TODO: make this cache use the db
-	queue := data.NewOperationQueue(publicKey, data.NewCache())
+	var cache *data.Cache
+	if db == nil {
+		cache = data.NewCache()
+	} else {
+		cache := NewDatabaseCache(db)
+	}
+	queue := data.NewOperationQueue(publicKey, cache)
 	for _, account := range accounts {
 		queue.SetBalance(account.Owner, account.Balance)
 	}
