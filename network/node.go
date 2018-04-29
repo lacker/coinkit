@@ -32,7 +32,7 @@ func NewNodeWithAccounts(publicKey util.PublicKey, qs consensus.QuorumSlice,
 	if db == nil {
 		cache = data.NewCache()
 	} else {
-		cache := NewDatabaseCache(db)
+		cache = data.NewDatabaseCache(db)
 	}
 	queue := data.NewOperationQueue(publicKey, cache)
 	for _, account := range accounts {
