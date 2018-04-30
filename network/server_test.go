@@ -86,7 +86,7 @@ func TestSendMoney(t *testing.T) {
 	conn := NewRedialConnection(servers[0].LocalhostAddress(), nil)
 	sendMoney(conn, mint, bob, 100)
 	elapsed := time.Now().Sub(start).Seconds()
-	if elapsed > 3.0 {
+	if elapsed > 10.0 {
 		t.Fatalf("sending money is too slow: %.2f seconds", elapsed)
 	}
 	go stopServers(servers)

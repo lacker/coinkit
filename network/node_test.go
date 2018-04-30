@@ -2,6 +2,7 @@ package network
 
 import (
 	"fmt"
+	"log"
 	"math/rand"
 	"testing"
 
@@ -102,7 +103,7 @@ func TestNodeRestarting(t *testing.T) {
 	nodes := []*Node{}
 	for i, name := range names {
 		db := data.NewTestDatabase(i)
-		node := NewNodeWithMint(name, qs, db, mint.PublicKey(), 1000)
+		node := NewNode(name, qs, db)
 		nodes = append(nodes, node)
 	}
 
@@ -119,7 +120,9 @@ func TestNodeRestarting(t *testing.T) {
 	}
 
 	// Knock out and replace node 1
-	nodes[1] = NewNodeWithMint(names[1], qs, nodes[1].database, mint.PublicKey(), 1000)
+	log.Printf("about to replace node 1")
+	nodes[1] = NewNode(names[1], qs, nodes[1].database)
+	log.Printf("replaced node 1")
 
 	// Send another 10 to Bob
 	m = newSendMessage(mint, bob, 2, 10)
@@ -135,7 +138,7 @@ func TestNodeRestarting(t *testing.T) {
 		sendNodeToNodeMessages(nodes[2], nodes[1], t)
 	}
 
-	if nodes[1].queue.MaxBalance() != 980 {
+	if nodes[1].queue.MaxBalance() != data.TotalMoney-20 {
 		t.Fatalf("recovery failed")
 	}
 }
