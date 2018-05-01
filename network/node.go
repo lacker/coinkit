@@ -21,11 +21,11 @@ type Node struct {
 // NewNode uses the standard account initialization settings from data.Airdrop
 func NewNode(
 	publicKey util.PublicKey, qs consensus.QuorumSlice, db *data.Database) *Node {
-	return NewNodeWithAccounts(publicKey, qs, db, data.Airdrop)
+	return newNodeWithAccounts(publicKey, qs, db, data.Airdrop)
 }
 
 // Creates a node for a blockchain that starts out with the provided accounts airdropped.
-func NewNodeWithAccounts(publicKey util.PublicKey, qs consensus.QuorumSlice,
+func newNodeWithAccounts(publicKey util.PublicKey, qs consensus.QuorumSlice,
 	db *data.Database, accounts []*data.Account) *Node {
 
 	// TODO: make this cache use the db
@@ -70,7 +70,7 @@ func NewNodeWithAccounts(publicKey util.PublicKey, qs consensus.QuorumSlice,
 
 // Creates a new memory-only node where nobody has any money
 func newTestingNode(publicKey util.PublicKey, qs consensus.QuorumSlice) *Node {
-	return NewNodeWithAccounts(publicKey, qs, nil, []*data.Account{})
+	return newNodeWithAccounts(publicKey, qs, nil, []*data.Account{})
 }
 
 // Slot() returns the slot this node is currently working on
