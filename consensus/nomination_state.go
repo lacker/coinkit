@@ -228,7 +228,7 @@ func (s *NominationState) Handle(node string, m *NominationMessage) {
 		return
 	}
 	// Update our most-recent-message
-	s.Logf("got message from %s: %s", util.Shorten(node), m)
+	// s.Logf("got message from %s: %s", util.Shorten(node), m)
 	s.N[node] = m
 
 	for i := oldLenNom; i < len(m.Nom); i++ {

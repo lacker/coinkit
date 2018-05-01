@@ -614,7 +614,7 @@ func (s *BallotState) Handle(node string, message BallotMessage) {
 		s.CheckIfStale()
 		return
 	}
-	s.Logf("got message from %s: %s", util.Shorten(node), message)
+	// s.Logf("got message from %s: %s", util.Shorten(node), message)
 	s.stale[node] = 0
 	s.M[node] = message
 
