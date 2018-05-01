@@ -24,8 +24,13 @@ func SendAnonymousMessage(c Connection, message *util.InfoMessage) {
 // WaitToClear waits for the operation with this account + sequence number to clear.
 func WaitToClear(c Connection, user string, sequence uint32) *data.Account {
 	for {
+		start := time.Now()
 		SendAnonymousMessage(c, &util.InfoMessage{Account: user})
 		m := (<-c.Receive()).Message()
+		elapsed := time.Now().Sub(start).Seconds()
+		if elapsed > 1.0 {
+			util.Logger.Printf("warning: server took %.2fs to get account info", elapsed)
+		}
 		dataMessage, ok := m.(*data.DataMessage)
 		if !ok {
 			continue

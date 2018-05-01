@@ -145,7 +145,7 @@ func (s *Server) handleConnection(connection net.Conn) {
 // If handling cannot be completed, like if the server shuts down, it
 // returns (nil, false).
 func (s *Server) handleMessage(sm *util.SignedMessage) (*util.SignedMessage, bool) {
-	/* TODO: uncomment this once the mint bugs are fixed
+	/* TODO: uncomment this once the db contains accurate data
 	// InfoMessages can be handled by the database
 	im, ok := sm.Message().(*util.InfoMessage)
 	if ok {
