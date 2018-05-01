@@ -68,10 +68,9 @@ func NewNodeWithAccounts(publicKey util.PublicKey, qs consensus.QuorumSlice,
 	return node
 }
 
-// Creates a new node where nobody has any money
-func NewEmptyNode(
-	publicKey util.PublicKey, qs consensus.QuorumSlice, db *data.Database) *Node {
-	return NewNodeWithAccounts(publicKey, qs, db, []*data.Account{})
+// Creates a new memory-only node where nobody has any money
+func newTestingNode(publicKey util.PublicKey, qs consensus.QuorumSlice) *Node {
+	return NewNodeWithAccounts(publicKey, qs, nil, []*data.Account{})
 }
 
 // Slot() returns the slot this node is currently working on
