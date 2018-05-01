@@ -95,17 +95,6 @@ func (c *Chain) GetLast() *ExternalizeMessage {
 	return c.history[c.Slot()-1]
 }
 
-// AlreadyExternalized handles the case where the slot we are working on is
-// already externalized. The caller must know this.
-// TODO: stop using this to catch up
-func (c *Chain) AlreadyExternalized(m *ExternalizeMessage) {
-	if m.I != c.Slot() {
-		panic("slot mismatch")
-	}
-	c.history[m.I] = m
-	c.current = NewBlock(c.publicKey, c.D, m.I+1, c.values)
-}
-
 // Creates a new chain given the last block
 func NewChain(publicKey util.PublicKey, qs QuorumSlice, vs ValueStore,
 	lastExternal *ExternalizeMessage) *Chain {
