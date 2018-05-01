@@ -35,23 +35,23 @@ func newNodeWithAccounts(publicKey util.PublicKey, qs consensus.QuorumSlice,
 		queue.SetBalance(account.Owner, account.Balance)
 	}
 
-	// TODO: use NewChain here if we have more recent data
-	chain := consensus.NewEmptyChain(publicKey, qs, queue)
-
 	node := &Node{
 		publicKey: publicKey,
 		queue:     queue,
 		database:  db,
-		chain:     chain,
 		slot:      1,
 	}
 
 	if db != nil {
+		var block *data.Block
 		loaded := db.ForBlocks(func(b *data.Block) {
-			m := b.ExternalizeMessage(qs)
-			node.chain.AlreadyExternalized(m)
 			node.queue.FinalizeChunk(b.Chunk)
+			block = b
 		})
+		if block != nil {
+			node.chain = consensus.NewChain(
+				publicKey, qs, queue, block.ExternalizeMessage(qs))
+		}
 		if loaded > 0 {
 			util.Logger.Printf("loaded %d old blocks from the database", loaded)
 			node.slot = loaded + 1
@@ -66,6 +66,10 @@ func newNodeWithAccounts(publicKey util.PublicKey, qs consensus.QuorumSlice,
 			}
 			db.Commit()
 		}
+	}
+
+	if node.chain == nil {
+		node.chain = consensus.NewEmptyChain(publicKey, qs, queue)
 	}
 
 	return node

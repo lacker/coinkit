@@ -139,7 +139,7 @@ func TestNodeRestarting(t *testing.T) {
 	}
 
 	if nodes[1].queue.MaxBalance() != data.TotalMoney-20 {
-		t.Fatalf("recovery failed")
+		t.Fatalf("looks like node 1 never recovered after its restart")
 	}
 }
 

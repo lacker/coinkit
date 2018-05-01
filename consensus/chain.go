@@ -106,6 +106,7 @@ func (c *Chain) AlreadyExternalized(m *ExternalizeMessage) {
 	c.current = NewBlock(c.publicKey, c.D, m.I+1, c.values)
 }
 
+// Creates a new chain given the last block
 func NewChain(publicKey util.PublicKey, qs QuorumSlice, vs ValueStore,
 	lastExternal *ExternalizeMessage) *Chain {
 	return &Chain{
