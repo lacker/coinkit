@@ -97,6 +97,7 @@ func (c *Chain) GetLast() *ExternalizeMessage {
 
 // AlreadyExternalized handles the case where the slot we are working on is
 // already externalized. The caller must know this.
+// TODO: stop using this to catch up
 func (c *Chain) AlreadyExternalized(m *ExternalizeMessage) {
 	if m.I != c.Slot() {
 		panic("slot mismatch")
