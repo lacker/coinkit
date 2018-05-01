@@ -105,6 +105,17 @@ func (c *Chain) AlreadyExternalized(m *ExternalizeMessage) {
 	c.current = NewBlock(c.publicKey, c.D, m.I+1, c.values)
 }
 
+func NewChain(publicKey util.PublicKey, qs QuorumSlice, vs ValueStore,
+	lastExternal *ExternalizeMessage) *Chain {
+	return &Chain{
+		current:   NewBlock(publicKey, qs, lastExternal.I+1, vs),
+		history:   map[int]*ExternalizeMessage{lastExternal.I: lastExternal},
+		D:         qs,
+		values:    vs,
+		publicKey: publicKey,
+	}
+}
+
 func NewEmptyChain(publicKey util.PublicKey, qs QuorumSlice, vs ValueStore) *Chain {
 	return &Chain{
 		current:   NewBlock(publicKey, qs, 1, vs),
