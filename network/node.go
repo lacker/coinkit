@@ -68,17 +68,6 @@ func NewNodeWithAccounts(publicKey util.PublicKey, qs consensus.QuorumSlice,
 	return node
 }
 
-// Creates a node for a blockchain that starts with one mint account having a balance.
-func NewNodeWithMint(publicKey util.PublicKey, qs consensus.QuorumSlice,
-	db *data.Database, mint util.PublicKey, balance uint64) *Node {
-
-	account := &data.Account{
-		Owner:   mint.String(),
-		Balance: balance,
-	}
-	return NewNodeWithAccounts(publicKey, qs, db, []*data.Account{account})
-}
-
 // Creates a new node where nobody has any money
 func NewEmptyNode(
 	publicKey util.PublicKey, qs consensus.QuorumSlice, db *data.Database) *Node {
