@@ -35,11 +35,14 @@ func newNodeWithAccounts(publicKey util.PublicKey, qs consensus.QuorumSlice,
 		queue.SetBalance(account.Owner, account.Balance)
 	}
 
+	// TODO: use NewChain here if we have more recent data
+	chain := consensus.NewEmptyChain(publicKey, qs, queue)
+
 	node := &Node{
 		publicKey: publicKey,
 		queue:     queue,
 		database:  db,
-		chain:     consensus.NewEmptyChain(publicKey, qs, queue),
+		chain:     chain,
 		slot:      1,
 	}
 
