@@ -236,6 +236,24 @@ func (db *Database) HandleInfoMessage(m *util.InfoMessage) *DataMessage {
 	panic("control should not reach here")
 }
 
+// CheckAccountsMatchBlocks replays the blockchain from the beginning
+// and returns an error if the resulting information does not match
+// the information held in the accounts.
+// TODO: use this on startup
+func (db *Database) CheckAccountsMatchBlocks() error {
+	cache := NewCache()
+	var err error
+	db.ForBlocks(func(b *Block) {
+		if err == nil {
+			err = cache.ProcessChunk(b.Chunk)
+		}
+	})
+	if err != nil {
+		return err
+	}
+	return cache.CheckAgainstDatabase(db)
+}
+
 //////////////
 // Blocks
 //////////////
