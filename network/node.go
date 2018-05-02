@@ -83,24 +83,6 @@ func (node *Node) Handle(sender string, message util.Message) (util.Message, boo
 		node.Handle(sender, m.E)
 		return nil, false
 
-	case *util.InfoMessage:
-		if node.database == nil {
-			util.Logger.Fatal("InfoMessages require a database to fulfill")
-		}
-
-		// TODO: fulfill all InfoMessages from the database, instead of
-		// doing this stuff below. Then Node could just not handle InfoMessages
-		if m.Account != "" {
-			answer := node.queue.HandleInfoMessage(m)
-			if answer == nil {
-				util.Logger.Fatal("answer was nil")
-			}
-			util.Logger.Printf("DEPRECATED got data: %+v", answer)
-			return answer, true
-		}
-
-		return nil, false
-
 	case *data.OperationMessage:
 		if node.queue.HandleOperationMessage(m) {
 			node.chain.ValueStoreUpdated()
