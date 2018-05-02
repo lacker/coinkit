@@ -146,6 +146,16 @@ func TestNodeRestarting(t *testing.T) {
 	if nodes[1].queue.MaxBalance() != data.TotalMoney-20 {
 		t.Fatalf("looks like node 1 never recovered after its restart")
 	}
+
+	// Try messing with node 2's database
+	account := nodes[2].database.GetAccount(mint.PublicKey().String())
+	account.Balance = 1234
+	nodes[2].database.UpsertAccount(account)
+	nodes[2].database.Commit()
+	node := NewNode(names[2], qs, nodes[2].database)
+	if node != nil {
+		t.Fatalf("NewNode should fail on a tampered database")
+	}
 }
 
 func nodeFuzzTest(seed int64, t *testing.T) {
