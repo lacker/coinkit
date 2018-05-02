@@ -340,11 +340,6 @@ func (q *OperationQueue) Finalize(v consensus.SlotValue) {
 		util.Logger.Fatalf("Failure while processing a finalized chunk: %s", err)
 	}
 
-	q.Logf("XXX finalized chunk: %+v", chunk)
-	if q.cache.database == nil {
-		q.Logf("XXX no db for finalizing into")
-	}
-
 	q.oldChunks[q.slot] = chunk
 	q.finalized += len(chunk.Operations)
 	q.last = v

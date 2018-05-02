@@ -91,12 +91,11 @@ func (node *Node) Handle(sender string, message util.Message) (util.Message, boo
 		// TODO: fulfill all InfoMessages from the database, instead of
 		// doing this stuff below. Then Node could just not handle InfoMessages
 		if m.Account != "" {
-			util.Logger.Fatal("XXX deprecated")
 			answer := node.queue.HandleInfoMessage(m)
 			if answer == nil {
 				util.Logger.Fatal("answer was nil")
 			}
-			util.Logger.Printf("XXX got data: %+v", answer)
+			util.Logger.Printf("DEPRECATED got data: %+v", answer)
 			return answer, true
 		}
 

@@ -25,7 +25,6 @@ func SendAnonymousMessage(c Connection, message *util.InfoMessage) {
 func WaitToClear(c Connection, user string, sequence uint32) *data.Account {
 	for {
 		start := time.Now()
-		util.Logger.Printf("XXX checking account info at %s", start)
 		SendAnonymousMessage(c, &util.InfoMessage{Account: user})
 		m := (<-c.Receive()).Message()
 		elapsed := time.Now().Sub(start).Seconds()
@@ -40,7 +39,6 @@ func WaitToClear(c Connection, user string, sequence uint32) *data.Account {
 			}
 		}
 
-		util.Logger.Printf("XXX sleeping for a bit at %s", time.Now())
 		time.Sleep(time.Millisecond * 100)
 	}
 }

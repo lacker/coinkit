@@ -166,7 +166,6 @@ func (db *Database) Commit() {
 	db.mutex.Lock()
 	defer db.mutex.Unlock()
 
-	util.Logger.Printf("XXX committing")
 	if db.tx == nil {
 		return
 	}
@@ -338,7 +337,6 @@ ON CONFLICT (owner) DO UPDATE
 
 // Database.UpsertAccount will not finalize until Commit is called.
 func (db *Database) UpsertAccount(a *Account) error {
-	util.Logger.Printf("XXX upserting account in the db: %+v", a)
 	err := db.namedExec(accountUpsert, a)
 	if err != nil {
 		panic(err)

@@ -145,17 +145,13 @@ func (s *Server) handleConnection(connection net.Conn) {
 // If handling cannot be completed, like if the server shuts down, it
 // returns (nil, false).
 func (s *Server) handleMessage(sm *util.SignedMessage) (*util.SignedMessage, bool) {
-	s.Logf("XXX handling message: %+v", sm.Message())
-
 	// InfoMessages can be handled by the database
 	im, ok := sm.Message().(*util.InfoMessage)
 	if ok {
 		if s.db == nil {
 			util.Logger.Fatal("you must attach a database to handle InfoMessages")
 		}
-		s.Logf("XXX handling info message...")
 		dm := s.db.HandleInfoMessage(im)
-		s.Logf("XXX got data: %+v", dm)
 		return util.NewSignedMessage(dm, s.keyPair), true
 	}
 
@@ -270,20 +266,30 @@ func (s *Server) processMessagesForever() {
 		select {
 
 		case request := <-s.requests:
+			if s.shutdown {
+				return
+			}
 			if request.Message != nil {
 				response := s.unsafeProcessMessage(request.Message)
 				if request.Response != nil {
 					request.Response <- response
 				}
+			} else {
+				s.Logf("nil message in request queue")
 			}
 
 		case message := <-s.inbox:
+			if s.shutdown {
+				return
+			}
 			if message != nil {
 				s.unsafeProcessMessage(message)
+			} else {
+				s.Logf("nil message in inbox queue")
 			}
 
 		case <-s.quit:
-			break
+			return
 		}
 	}
 }
@@ -353,9 +359,13 @@ func (s *Server) broadcastIntermittently() {
 		select {
 
 		case <-s.quit:
-			break
+			return
 
 		case messages := <-s.outgoing:
+			if s.shutdown {
+				return
+			}
+
 			// See if there are even newer messages
 			newerMessages, ok := s.getOutgoing()
 			if ok {
@@ -369,6 +379,10 @@ func (s *Server) broadcastIntermittently() {
 			s.broadcast(changedMessages)
 
 		case <-timer.C:
+			if s.shutdown {
+				return
+			}
+
 			// It's time for a rebroadcast. Send out duplicate messages.
 			// This is a backstop against miscellaneous problems. If the
 			// network is functioning perfectly, this isn't necessary.
