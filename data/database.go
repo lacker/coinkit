@@ -242,6 +242,9 @@ func (db *Database) HandleInfoMessage(m *util.InfoMessage) *DataMessage {
 // TODO: use this on startup
 func (db *Database) CheckAccountsMatchBlocks() error {
 	cache := NewCache()
+	for _, account := range Airdrop {
+		cache.UpsertAccount(account)
+	}
 	var err error
 	db.ForBlocks(func(b *Block) {
 		if err == nil {

@@ -21,7 +21,18 @@ type Node struct {
 // NewNode uses the standard account initialization settings from data.Airdrop
 func NewNode(
 	publicKey util.PublicKey, qs consensus.QuorumSlice, db *data.Database) *Node {
-	return newNodeWithAccounts(publicKey, qs, db, data.Airdrop)
+	node := newNodeWithAccounts(publicKey, qs, db, data.Airdrop)
+
+	// We check on startup that our block history matches our current account data
+	if db != nil {
+		err := db.CheckAccountsMatchBlocks()
+		if err != nil {
+			util.Logger.Printf("check failed: accounts do not match blocks")
+			return nil
+		}
+	}
+
+	return node
 }
 
 // Creates a node for a blockchain that starts out with the provided accounts airdropped.
