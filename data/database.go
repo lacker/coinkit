@@ -54,9 +54,9 @@ func NewDatabase(config *Config) *Database {
 
 	if config.testOnly {
 		util.Logger.Printf("clearing test-only database %s", config.Database)
-		postgres.MustExec("DROP TABLE IF EXISTS blocks")
-		postgres.MustExec("DROP TABLE IF EXISTS accounts")
-		postgres.MustExec("DROP TABLE IF EXISTS documents")
+		postgres.Exec("DELETE FROM blocks")
+		postgres.Exec("DELETE FROM accounts")
+		postgres.Exec("DELETE FROM documents")
 	}
 
 	db := &Database{
@@ -154,11 +154,19 @@ func (db *Database) CurrentSlot() int {
 	return db.currentSlot
 }
 
+func (db *Database) TransactionInProgress() bool {
+	db.mutex.Lock()
+	defer db.mutex.Unlock()
+
+	return db.tx != nil
+}
+
 // Commit commits the pending transaction. If there is any error, it panics.
 func (db *Database) Commit() {
 	db.mutex.Lock()
 	defer db.mutex.Unlock()
 
+	util.Logger.Printf("XXX committing")
 	if db.tx == nil {
 		return
 	}
@@ -330,6 +338,7 @@ ON CONFLICT (owner) DO UPDATE
 
 // Database.UpsertAccount will not finalize until Commit is called.
 func (db *Database) UpsertAccount(a *Account) error {
+	util.Logger.Printf("XXX upserting account in the db: %+v", a)
 	err := db.namedExec(accountUpsert, a)
 	if err != nil {
 		panic(err)

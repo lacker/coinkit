@@ -8,7 +8,7 @@ import (
 
 func TestFullQueue(t *testing.T) {
 	kp := util.NewKeyPair()
-	q := NewOperationQueue(kp.PublicKey(), NewCache())
+	q := NewOperationQueue(kp.PublicKey(), nil)
 	for i := 1; i <= QueueLimit+10; i++ {
 		op := makeTestSendOperation(i)
 		send := op.Operation.(*SendOperation)
@@ -38,7 +38,7 @@ func TestFullQueue(t *testing.T) {
 
 func TestOperationMessage(t *testing.T) {
 	kp := util.NewKeyPair()
-	q := NewOperationQueue(kp.PublicKey(), NewCache())
+	q := NewOperationQueue(kp.PublicKey(), nil)
 	if q.OperationMessage() != nil {
 		t.Fatal("there should be no operation message with an empty queue")
 	}

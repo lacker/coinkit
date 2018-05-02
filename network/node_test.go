@@ -119,6 +119,11 @@ func TestNodeRestarting(t *testing.T) {
 		sendNodeToNodeMessages(nodes[2], nodes[1], t)
 	}
 
+	err := nodes[0].queue.CheckConsistency()
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	// Knock out and replace node 1
 	log.Printf("about to replace node 1")
 	nodes[1] = NewNode(names[1], qs, nodes[1].database)

@@ -53,6 +53,12 @@ go test ./...
 go install ./...
 ```
 
+If you have older databases set up, the tests might fail with some weird database errors. If this happens run:
+
+```
+clear-test.sh
+```
+
 ## How to run it
 
 Commands are from the `~/go/src/github.com/lacker/coinkit` directory.
@@ -67,6 +73,12 @@ To stop the local cluster:
 
 ```
 ./stop-local.sh
+```
+
+To clear the local databases:
+
+```
+./clear-local.sh
 ```
 
 You can check the current account balance with:
@@ -97,15 +109,11 @@ To check the servers' health, go to `http://127.0.01:8000/healthz` in your brows
 
 ## Benchmarking
 
+TODO: make sure these benchmarks are fast enough to run on typical machines.
+
 ```
 # Testing a 4-server network with one client
-go test ./network -run=zzz -bench=BenchmarkSendMoney1$ -benchtime=20s
-
-# With 10 clients
-go test ./network -run=zzz -bench=BenchmarkSendMoney10$ -benchtime=20s
-
-# With 30 clients
-go test ./network -run=zzz -bench=BenchmarkSendMoney30$ -benchtime=20s
+go test ./network -run=zzz -bench=BenchmarkSendMoney1$ -benchtime=10s
 ```
 
 ## Code organization

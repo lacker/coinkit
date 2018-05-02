@@ -1,6 +1,7 @@
 package data
 
 import (
+	"fmt"
 	"log"
 	"sort"
 )
@@ -81,6 +82,23 @@ func (c *Cache) CheckEqual(key string, account *Account) bool {
 		return false
 	}
 	return a.Sequence == account.Sequence && a.Balance == account.Balance
+}
+
+func (c *Cache) CheckConsistency() error {
+	if c.database == nil {
+		return nil
+	}
+	if c.database.TransactionInProgress() {
+		return fmt.Errorf("there is an uncommitted transaction")
+	}
+	for owner, dataAccount := range c.data {
+		dbAccount := c.database.GetAccount(owner)
+		err := dataAccount.CheckEqual(dbAccount)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func (c *Cache) GetAccount(owner string) *Account {
@@ -183,40 +201,40 @@ func (c *Cache) Process(op Operation) bool {
 	return true
 }
 
-// ProcessChunk returns false if the whole chunk cannot be processed.
+// ProcessChunk returns an error if the whole chunk cannot be processed.
 // In this situation, the cache may be left with only some of
 // the operations in the chunk processed and would in practice have to be discarded.
-func (c *Cache) ProcessChunk(chunk *LedgerChunk) bool {
+func (c *Cache) ProcessChunk(chunk *LedgerChunk) error {
 	if chunk == nil {
-		return false
+		return fmt.Errorf("cannot process nil chunk")
 	}
 	if len(chunk.Operations) > MaxChunkSize {
-		return false
+		return fmt.Errorf("%d ops in a chunk is too many", len(chunk.Operations))
 	}
 
 	for _, op := range chunk.SendOperations() {
-		if op == nil || !op.Verify() || !c.Process(op) {
-			if c.database != nil {
-				panic("we half-processed a chunk on the database")
-			}
-			return false
+		if op == nil {
+			return fmt.Errorf("chunk has a nil op")
+		}
+		if !op.Verify() {
+			return fmt.Errorf("op failed verify: %+v", op)
+		}
+		if !c.Process(op) {
+			return fmt.Errorf("op failed to process: %+v", op)
 		}
 	}
 
 	for owner, account := range chunk.State {
 		if !c.CheckEqual(owner, account) {
-			if c.database != nil {
-				panic("we processed a chunk, but then integrity checks failed")
-			}
-			return false
+			return fmt.Errorf("integrity checks failed after chunk processing")
 		}
 	}
 
-	return true
+	return nil
 }
 
-// ValidateChunk returns true iff ProcessChunk could succeed.
-func (c *Cache) ValidateChunk(chunk *LedgerChunk) bool {
+// ValidateChunk returns an error iff ProcessChunk would fail.
+func (c *Cache) ValidateChunk(chunk *LedgerChunk) error {
 	copy := c.CowCopy()
 	return copy.ProcessChunk(chunk)
 }

@@ -36,7 +36,7 @@ func (a *Account) CheckEqual(other *Account) error {
 	if a == nil && other == nil {
 		return nil
 	}
-	if a != nil || other != nil {
+	if a == nil || other == nil {
 		return fmt.Errorf("a != other. a is %+v, other is %+v", a, other)
 	}
 	if a.Owner != other.Owner {

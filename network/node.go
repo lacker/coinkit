@@ -28,51 +28,35 @@ func NewNode(
 func newNodeWithAccounts(publicKey util.PublicKey, qs consensus.QuorumSlice,
 	db *data.Database, accounts []*data.Account) *Node {
 
-	// TODO: make this cache use the db
-	queue := data.NewOperationQueue(publicKey, data.NewCache())
+	queue := data.NewOperationQueue(publicKey, db)
+	var chain *consensus.Chain
 
-	for _, account := range accounts {
-		queue.SetBalance(account.Owner, account.Balance)
+	// Figure out the current slot
+	slot := 1
+	if db != nil {
+		last := db.LastBlock()
+		if last != nil {
+			slot = last.Slot + 1
+			chain = consensus.NewChain(
+				publicKey, qs, queue, last.ExternalizeMessage(qs))
+		}
 	}
 
-	node := &Node{
+	if chain == nil {
+		// This is initial startup, so do the airdrop.
+		chain = consensus.NewEmptyChain(publicKey, qs, queue)
+		for _, account := range accounts {
+			queue.SetBalance(account.Owner, account.Balance)
+		}
+	}
+
+	return &Node{
 		publicKey: publicKey,
 		queue:     queue,
 		database:  db,
-		slot:      1,
+		chain:     chain,
+		slot:      slot,
 	}
-
-	if db != nil {
-		var block *data.Block
-		loaded := db.ForBlocks(func(b *data.Block) {
-			node.queue.FinalizeChunk(b.Chunk)
-			block = b
-		})
-		if block != nil {
-			node.chain = consensus.NewChain(
-				publicKey, qs, queue, block.ExternalizeMessage(qs))
-		}
-		if loaded > 0 {
-			util.Logger.Printf("loaded %d old blocks from the database", loaded)
-			node.slot = loaded + 1
-		} else {
-			// This is initial startup.
-			// We need to make sure the database reflects the airdrop.
-			for _, account := range accounts {
-				err := db.UpsertAccount(account)
-				if err != nil {
-					util.Logger.Fatalf("failure on account initialization: %s", err)
-				}
-			}
-			db.Commit()
-		}
-	}
-
-	if node.chain == nil {
-		node.chain = consensus.NewEmptyChain(publicKey, qs, queue)
-	}
-
-	return node
 }
 
 // Creates a new memory-only node where nobody has any money
@@ -107,11 +91,12 @@ func (node *Node) Handle(sender string, message util.Message) (util.Message, boo
 		// TODO: fulfill all InfoMessages from the database, instead of
 		// doing this stuff below. Then Node could just not handle InfoMessages
 		if m.Account != "" {
+			util.Logger.Fatal("XXX deprecated")
 			answer := node.queue.HandleInfoMessage(m)
 			if answer == nil {
 				util.Logger.Fatal("answer was nil")
 			}
-			util.Logger.Printf("got data: %+v", answer)
+			util.Logger.Printf("XXX got data: %+v", answer)
 			return answer, true
 		}
 

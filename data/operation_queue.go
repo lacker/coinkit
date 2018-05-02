@@ -42,17 +42,23 @@ type OperationQueue struct {
 	finalized int
 }
 
-func NewOperationQueue(publicKey util.PublicKey, cache *Cache) *OperationQueue {
-	return &OperationQueue{
+func NewOperationQueue(publicKey util.PublicKey, db *Database) *OperationQueue {
+	q := &OperationQueue{
 		publicKey: publicKey,
 		set:       treeset.NewWith(HighestFeeFirst),
 		chunks:    make(map[consensus.SlotValue]*LedgerChunk),
 		oldChunks: make(map[int]*LedgerChunk),
-		cache:     cache,
 		last:      consensus.SlotValue(""),
 		slot:      1,
 		finalized: 0,
 	}
+
+	if db == nil {
+		q.cache = NewCache()
+	} else {
+		q.cache = NewDatabaseCache(db)
+	}
+	return q
 }
 
 // Returns the top n items in the queue
@@ -164,6 +170,10 @@ func (q *OperationQueue) OldChunkMessage(slot int) *OperationMessage {
 	}
 }
 
+func (q *OperationQueue) CheckConsistency() error {
+	return q.cache.CheckConsistency()
+}
+
 func (q *OperationQueue) HandleInfoMessage(m *util.InfoMessage) *DataMessage {
 	if m == nil || m.Account == "" {
 		return nil
@@ -194,7 +204,7 @@ func (q *OperationQueue) HandleOperationMessage(m *OperationMessage) bool {
 			if _, ok := q.chunks[key]; ok {
 				continue
 			}
-			if !q.cache.ValidateChunk(chunk) {
+			if q.cache.ValidateChunk(chunk) != nil {
 				continue
 			}
 			if chunk.Hash() != key {
@@ -322,12 +332,17 @@ func (q *OperationQueue) Finalize(v consensus.SlotValue) {
 		panic("We are finalizing a chunk but we don't know its data.")
 	}
 
-	if !q.cache.ValidateChunk(chunk) {
-		panic("We could not validate a finalized chunk.")
+	if err := q.cache.ValidateChunk(chunk); err != nil {
+		util.Logger.Fatalf("We could not validate a finalized chunk: %s", err)
 	}
 
-	if !q.cache.ProcessChunk(chunk) {
-		panic("We could not process a finalized chunk.")
+	if err := q.cache.ProcessChunk(chunk); err != nil {
+		util.Logger.Fatalf("Failure while processing a finalized chunk: %s", err)
+	}
+
+	q.Logf("XXX finalized chunk: %+v", chunk)
+	if q.cache.database == nil {
+		q.Logf("XXX no db for finalizing into")
 	}
 
 	q.oldChunks[q.slot] = chunk
