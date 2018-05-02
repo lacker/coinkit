@@ -84,21 +84,29 @@ func (c *Cache) CheckEqual(key string, account *Account) bool {
 	return a.Sequence == account.Sequence && a.Balance == account.Balance
 }
 
-func (c *Cache) CheckConsistency() error {
-	if c.database == nil {
-		return nil
-	}
-	if c.database.TransactionInProgress() {
+// CheckAgainstDatabase returns an error if any of the data in the
+// memory part of the cache does not match against the database.
+func (c *Cache) CheckAgainstDatabase(db *Database) error {
+	if db.TransactionInProgress() {
 		return fmt.Errorf("there is an uncommitted transaction")
 	}
 	for owner, dataAccount := range c.data {
-		dbAccount := c.database.GetAccount(owner)
+		dbAccount := db.GetAccount(owner)
 		err := dataAccount.CheckEqual(dbAccount)
 		if err != nil {
 			return err
 		}
 	}
 	return nil
+}
+
+// CheckConsistency returns an error if there is any mismatch between
+// this cache and its own database.
+func (c *Cache) CheckConsistency() error {
+	if c.database == nil {
+		return nil
+	}
+	return c.CheckAgainstDatabase(c.database)
 }
 
 func (c *Cache) GetAccount(owner string) *Account {
