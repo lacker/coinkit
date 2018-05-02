@@ -239,7 +239,6 @@ func (db *Database) HandleInfoMessage(m *util.InfoMessage) *DataMessage {
 // CheckAccountsMatchBlocks replays the blockchain from the beginning
 // and returns an error if the resulting information does not match
 // the information held in the accounts.
-// TODO: use this on startup
 func (db *Database) CheckAccountsMatchBlocks() error {
 	cache := NewCache()
 	for _, account := range Airdrop {
