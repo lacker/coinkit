@@ -68,6 +68,9 @@ func main() {
 	net := network.NewConfigFromSerialized(bytes)
 
 	s := network.NewServer(kp, net, db)
+	if s == nil {
+		util.Fatalf("failed to start the server")
+	}
 	if httpPort != 0 {
 		s.ServeHttpInBackground(httpPort)
 	}

@@ -69,6 +69,10 @@ func NewServer(keyPair *util.KeyPair, config *Config, db *data.Database) *Server
 	qs := config.QuorumSlice()
 	node := NewNode(keyPair.PublicKey(), qs, db)
 
+	if node == nil {
+		return nil
+	}
+
 	return &Server{
 		port:                config.GetPort(keyPair.PublicKey().String(), 9000),
 		keyPair:             keyPair,

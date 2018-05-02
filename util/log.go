@@ -22,3 +22,11 @@ func Shorten(name string) string {
 func Logf(tag string, publicKey string, format string, a ...interface{}) {
 	Logger.Printf(tag+" "+Shorten(publicKey)+" "+format, a...)
 }
+
+func Printf(format string, a ...interface{}) {
+	Logger.Printf(format, a...)
+}
+
+func Fatalf(format string, a ...interface{}) {
+	Logger.Fatalf(format, a...)
+}
