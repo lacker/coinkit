@@ -208,8 +208,7 @@ func (db *Database) HandleInfoMessage(m *util.InfoMessage) *DataMessage {
 		return nil
 	}
 	// Check slot before and after querying. If a new block has been
-	// mined during our query,
-	// reissue it.
+	// mined during our query, reissue the query.
 	// TODO: figure out if this is a good idea. If there are enough
 	// new blocks written, this will cause a large amount of read
 	// traffic. We might instead be able to use some transactiony

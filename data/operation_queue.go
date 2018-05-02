@@ -320,12 +320,6 @@ func (q *OperationQueue) CanFinalize(v consensus.SlotValue) bool {
 	return ok
 }
 
-func (q *OperationQueue) FinalizeChunk(chunk *LedgerChunk) {
-	v := chunk.Hash()
-	q.chunks[v] = chunk
-	q.Finalize(v)
-}
-
 func (q *OperationQueue) Finalize(v consensus.SlotValue) {
 	chunk, ok := q.chunks[v]
 	if !ok {
