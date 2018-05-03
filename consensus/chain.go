@@ -55,11 +55,12 @@ func (c *Chain) Handle(sender string, message util.Message) (util.Message, bool)
 
 	if slot == c.current.slot {
 		c.current.Handle(sender, message)
-		if c.current.Done() && c.values.CanFinalize(c.current.external.X) {
+		ext := c.current.external
+		if c.current.Done() && c.values.CanFinalize(ext.X) {
 			// This block is done, let's move on to the next one
 			c.Logf("advancing to slot %d", slot+1)
-			c.values.Finalize(c.current.external.X)
-			c.history[slot] = c.current.external
+			c.values.Finalize(ext.X, ext.Cn, ext.Hn)
+			c.history[slot] = ext
 			c.current = NewBlock(c.publicKey, c.D, slot+1, c.values)
 		}
 		return nil, false

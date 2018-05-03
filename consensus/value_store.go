@@ -43,7 +43,7 @@ type ValueStore interface {
 	CanFinalize(v SlotValue) bool
 
 	// Called when a value is finalized
-	Finalize(v SlotValue)
+	Finalize(v SlotValue, c int, h int)
 
 	// The last finalized slot value
 	Last() SlotValue
@@ -90,7 +90,7 @@ func (t *TestValueStore) CanFinalize(v SlotValue) bool {
 	return true
 }
 
-func (t *TestValueStore) Finalize(v SlotValue) {
+func (t *TestValueStore) Finalize(v SlotValue, c int, h int) {
 	t.last = v
 }
 
