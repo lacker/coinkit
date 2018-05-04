@@ -45,8 +45,9 @@ func NewDatabase(config *Config) *Database {
 		panic(err)
 	}
 	username := strings.Replace(config.User, "$USER", user.Username, 1)
-	info := fmt.Sprintf("host=%s port=%d user=%s dbname=%s sslmode=disable",
-		config.Host, config.Port, username, config.Database)
+	info := fmt.Sprintf(
+		"host=%s port=%d user=%s dbname=%s sslmode=disable statement_timeout=%d",
+		config.Host, config.Port, username, config.Database, 5000)
 	util.Logger.Printf("connecting to postgres with %s", info)
 	if len(config.Password) > 0 {
 		util.Logger.Printf("(password hidden)")
