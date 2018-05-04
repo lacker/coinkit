@@ -63,6 +63,9 @@ func newNodeWithAccounts(publicKey util.PublicKey, qs consensus.QuorumSlice,
 		for _, account := range accounts {
 			queue.SetBalance(account.Owner, account.Balance)
 		}
+		if db != nil {
+			db.Commit()
+		}
 	}
 
 	return &Node{

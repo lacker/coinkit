@@ -77,6 +77,7 @@ func TestWriteThrough(t *testing.T) {
 		Balance:  200,
 	}
 	c1.UpsertAccount(a1)
+	db.Commit()
 	c2 := NewDatabaseCache(db)
 	a2 := c2.GetAccount("bob")
 	if a2 == nil || a2.Balance != 200 {

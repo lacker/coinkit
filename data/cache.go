@@ -132,8 +132,8 @@ func (c *Cache) GetAccount(owner string) *Account {
 	return answer
 }
 
-// Cache.UpsertAccount finalizes immediately. It calls Commit on the
-// underlying db if necessary.
+// UpsertAccount writes through to the underlying database, but it leaves it as
+// a pending transaction. The caller must call db.Commit() themselves.
 func (c *Cache) UpsertAccount(account *Account) {
 	if account == nil {
 		log.Fatal("cannot upsert nil account")
@@ -144,7 +144,6 @@ func (c *Cache) UpsertAccount(account *Account) {
 	c.data[account.Owner] = account
 	if c.database != nil {
 		c.database.UpsertAccount(account)
-		c.database.Commit()
 	}
 }
 
@@ -227,7 +226,6 @@ func (c *Cache) FinalizeBlock(block *Block) {
 	}
 
 	if c.database != nil {
-		// util.Logger.Printf("inserting block: %+v", block)
 		err := c.database.InsertBlock(block)
 		if err != nil {
 			panic(err)
@@ -239,8 +237,8 @@ func (c *Cache) FinalizeBlock(block *Block) {
 // ProcessChunk returns an error if the whole chunk cannot be processed.
 // In this situation, the cache may be left with only some of
 // the operations in the chunk processed and would in practice have to be discarded.
-// TODO: describe transaction situation
-// TODO: hide from external callers
+// If this cache has a database, it is left with a transaction in progress; the
+// caller of ProcessChunk must call db.Commit() themselves.
 func (c *Cache) ProcessChunk(chunk *LedgerChunk) error {
 	if chunk == nil {
 		return fmt.Errorf("cannot process nil chunk")
