@@ -259,7 +259,7 @@ func (c *Cache) ProcessChunk(chunk *LedgerChunk) error {
 		}
 	}
 
-	for owner, account := range chunk.State {
+	for owner, account := range chunk.Accounts {
 		if !c.CheckEqual(owner, account) {
 			return fmt.Errorf("integrity checks failed after chunk processing")
 		}

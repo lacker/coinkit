@@ -15,7 +15,7 @@ func TestLedgerChunkHashing(t *testing.T) {
 
 	chunk1 := &LedgerChunk{
 		Operations: []*SignedOperation{t1, t2},
-		State: map[string]*Account{
+		Accounts: map[string]*Account{
 			"a1": a1,
 			"a2": a2,
 		},
@@ -23,7 +23,7 @@ func TestLedgerChunkHashing(t *testing.T) {
 
 	chunk1copy := &LedgerChunk{
 		Operations: []*SignedOperation{t1copy, t2},
-		State: map[string]*Account{
+		Accounts: map[string]*Account{
 			"a1": a1copy,
 			"a2": a2,
 		},
@@ -31,7 +31,7 @@ func TestLedgerChunkHashing(t *testing.T) {
 
 	chunk2 := &LedgerChunk{
 		Operations: []*SignedOperation{t1, t3},
-		State: map[string]*Account{
+		Accounts: map[string]*Account{
 			"a1": a1,
 			"a2": a2,
 		},
@@ -39,7 +39,7 @@ func TestLedgerChunkHashing(t *testing.T) {
 
 	chunk3 := &LedgerChunk{
 		Operations: []*SignedOperation{t1, t2},
-		State: map[string]*Account{
+		Accounts: map[string]*Account{
 			"a1": a2,
 			"a2": a1,
 		},
@@ -47,7 +47,7 @@ func TestLedgerChunkHashing(t *testing.T) {
 
 	chunk4 := &LedgerChunk{
 		Operations: []*SignedOperation{t1},
-		State: map[string]*Account{
+		Accounts: map[string]*Account{
 			"a1": a1,
 			"a2": a2,
 		},

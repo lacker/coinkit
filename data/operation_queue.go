@@ -286,7 +286,7 @@ func (q *OperationQueue) NewChunk(
 	}
 	chunk := &LedgerChunk{
 		Operations: ops,
-		State:      state,
+		Accounts:   state,
 	}
 	key := chunk.Hash()
 	if _, ok := q.chunks[key]; !ok {

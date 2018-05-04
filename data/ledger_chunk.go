@@ -21,13 +21,13 @@ type LedgerChunk struct {
 	// The state of accounts after these operations have been processed.
 	// This only includes account information for the accounts that are
 	// mentioned in the operations.
-	State map[string]*Account
+	Accounts map[string]*Account
 }
 
 func NewEmptyChunk() *LedgerChunk {
 	return &LedgerChunk{
 		Operations: []*SignedOperation{},
-		State:      make(map[string]*Account),
+		Accounts:   make(map[string]*Account),
 	}
 }
 
@@ -37,13 +37,13 @@ func (c *LedgerChunk) Hash() consensus.SlotValue {
 		h.Write([]byte(op.Signature))
 	}
 	keys := []string{}
-	for key, _ := range c.State {
+	for key, _ := range c.Accounts {
 		keys = append(keys, key)
 	}
 	sort.Strings(keys)
 	for _, key := range keys {
 		h.Write([]byte(key))
-		account := c.State[key]
+		account := c.Accounts[key]
 		h.Write(account.Bytes())
 	}
 	return consensus.SlotValue(base64.RawStdEncoding.EncodeToString(h.Sum(nil)))
