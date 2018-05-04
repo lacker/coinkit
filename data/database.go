@@ -37,6 +37,8 @@ type Database struct {
 	currentSlot int
 }
 
+var allDatabases = []*Database{}
+
 func NewDatabase(config *Config) *Database {
 	user, err := user.Current()
 	if err != nil {
@@ -64,6 +66,7 @@ func NewDatabase(config *Config) *Database {
 		name:     config.Database,
 	}
 	db.initialize()
+	allDatabases = append(allDatabases, db)
 	return db
 }
 
@@ -189,6 +192,18 @@ func (db *Database) Rollback() {
 		panic(err)
 	}
 	db.tx = nil
+}
+
+// Can be used for testing so that we can find who left open a transaction.
+// If you suspect a test of leaving an uncommitted transaction, call this at the
+// end of it.
+func CheckAllDatabasesCommitted() {
+	for _, db := range allDatabases {
+		if db.TransactionInProgress() {
+			util.Logger.Fatalf("a transaction was left open in db %s", db.name)
+		}
+	}
+	allDatabases = []*Database{}
 }
 
 func (db *Database) TotalSizeInfo() string {
