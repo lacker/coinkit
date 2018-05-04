@@ -119,6 +119,10 @@ func TestNodeRestarting(t *testing.T) {
 		sendNodeToNodeMessages(nodes[2], nodes[1], t)
 	}
 
+	if nodes[0].database.Commits() != 2 {
+		t.Fatalf("two commits should have happened, one for airdrop, one for the send")
+	}
+
 	err := nodes[0].queue.CheckConsistency()
 	if err != nil {
 		t.Fatal(err)

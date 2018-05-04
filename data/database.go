@@ -161,6 +161,12 @@ func (db *Database) CurrentSlot() int {
 	return db.currentSlot
 }
 
+func (db *Database) Commits() int {
+	db.mutex.Lock()
+	defer db.mutex.Unlock()
+	return db.commits
+}
+
 func (db *Database) TransactionInProgress() bool {
 	db.mutex.Lock()
 	defer db.mutex.Unlock()
