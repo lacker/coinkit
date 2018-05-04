@@ -35,6 +35,9 @@ type Database struct {
 	// To be threadsafe, don't access these directly. Use CurrentSlot() instead.
 	// currentSlot is the last slot that has been finalized to the database.
 	currentSlot int
+
+	// How many commits have happened in the lifetime of this db handle
+	commits int
 }
 
 var allDatabases = []*Database{}
@@ -178,6 +181,7 @@ func (db *Database) Commit() {
 		panic(err)
 	}
 	db.tx = nil
+	db.commits++
 	db.updateCurrentSlot()
 }
 
