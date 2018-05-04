@@ -133,26 +133,6 @@ func (node *Node) handleChainMessage(sender string, message util.Message) (util.
 	if node.chain.Slot() > node.Slot() {
 		// We have advanced.
 		node.slot += 1
-
-		/*
-			// TODO: save the old block at the same time we save account modifications
-			if node.database != nil {
-				// Let's save the old block.
-				last := node.chain.GetLast()
-				chunk := node.queue.OldChunk(last.I)
-				block := &data.Block{
-					Slot:  last.I,
-					C:     last.Cn,
-					H:     last.Hn,
-					Chunk: chunk,
-				}
-				err := node.database.InsertBlock(block)
-				if err != nil {
-					panic(err)
-				}
-				node.database.Commit()
-			}
-		*/
 	}
 
 	if !hasResponse {
