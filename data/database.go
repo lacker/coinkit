@@ -1,6 +1,7 @@
 package data
 
 import (
+	"context"
 	"database/sql"
 	"encoding/json"
 	"fmt"
@@ -233,32 +234,46 @@ func (db *Database) HandleInfoMessage(m *util.InfoMessage) *DataMessage {
 	if m == nil || m.Account == "" {
 		return nil
 	}
-	// Check slot before and after querying. If a new block has been
-	// mined during our query, reissue the query.
-	// TODO: figure out if this is a good idea. If there are enough
-	// new blocks written, this will cause a large amount of read
-	// traffic. We might instead be able to use some transactiony
-	// thing.
-	retries := 0
-	initialSlot := db.CurrentSlot()
-	for {
-		account := db.GetAccount(m.Account)
-		slot := db.CurrentSlot()
-		if slot != initialSlot {
-			initialSlot = slot
-			retries++
-			if retries >= 10 {
-				util.Logger.Printf("HandleInfoMessage is getting overloaded")
-			}
-			continue
-		}
-		output := &DataMessage{
-			I:        slot,
-			Accounts: map[string]*Account{m.Account: account},
-		}
-		return output
+
+	// Use a transaction to simultaneously fetch the last block mined and
+	// the data we need to respond to the message.
+	// We need "repeatable read" isolation level so that those queries reflect
+	// the same snapshot of the db. See:
+	// https://www.postgresql.org/docs/9.1/static/transaction-iso.html
+	tx := db.postgres.MustBeginTx(context.Background(), &sql.TxOptions{
+		Isolation: sql.LevelRepeatableRead,
+		ReadOnly:  true,
+	})
+
+	account := &Account{}
+	err := tx.Get(account, "SELECT * FROM accounts WHERE owner=$1", m.Account)
+	if err == sql.ErrNoRows {
+		account = nil
+	} else if err != nil {
+		panic(err)
 	}
-	panic("control should not reach here")
+
+	block := &Block{}
+	var slot int
+	err = tx.Get(block, "SELECT * FROM blocks ORDER BY slot DESC LIMIT 1")
+	if err == sql.ErrNoRows {
+		slot = 0
+	} else if err != nil {
+		panic(err)
+	} else {
+		slot = block.Slot
+	}
+
+	err = tx.Commit()
+	if err != nil {
+		panic(err)
+	}
+
+	db.reads++
+	return &DataMessage{
+		I:        slot,
+		Accounts: map[string]*Account{m.Account: account},
+	}
 }
 
 // CheckAccountsMatchBlocks replays the blockchain from the beginning
