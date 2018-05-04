@@ -231,10 +231,18 @@ func (db *Database) TotalSizeInfo() string {
 }
 
 func (db *Database) HandleInfoMessage(m *util.InfoMessage) *DataMessage {
-	if m == nil || m.Account == "" {
+	if m == nil {
 		return nil
 	}
 
+	if m.Account != "" {
+		return db.AccountDataMessage(m.Account)
+	}
+
+	return nil
+}
+
+func (db *Database) AccountDataMessage(owner string) *DataMessage {
 	// Use a transaction to simultaneously fetch the last block mined and
 	// the data we need to respond to the message.
 	// We need "repeatable read" isolation level so that those queries reflect
@@ -246,7 +254,7 @@ func (db *Database) HandleInfoMessage(m *util.InfoMessage) *DataMessage {
 	})
 
 	account := &Account{}
-	err := tx.Get(account, "SELECT * FROM accounts WHERE owner=$1", m.Account)
+	err := tx.Get(account, "SELECT * FROM accounts WHERE owner=$1", owner)
 	if err == sql.ErrNoRows {
 		account = nil
 	} else if err != nil {
@@ -272,7 +280,7 @@ func (db *Database) HandleInfoMessage(m *util.InfoMessage) *DataMessage {
 	db.reads++
 	return &DataMessage{
 		I:        slot,
-		Accounts: map[string]*Account{m.Account: account},
+		Accounts: map[string]*Account{owner: account},
 	}
 }
 

@@ -44,15 +44,6 @@ func (c *Chain) Handle(sender string, message util.Message) (util.Message, bool)
 		util.Logger.Fatalf("slot should not be zero in %s", message)
 	}
 
-	// Handle info messages
-	if _, ok := message.(*util.InfoMessage); ok {
-		external := c.history[slot]
-		if external != nil {
-			return external, true
-		}
-		return nil, false
-	}
-
 	if slot == c.current.slot {
 		c.current.Handle(sender, message)
 		ext := c.current.external
