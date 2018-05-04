@@ -39,22 +39,26 @@ func NewNode(
 func newNodeWithAccounts(publicKey util.PublicKey, qs consensus.QuorumSlice,
 	db *data.Database, accounts []*data.Account) *Node {
 
-	queue := data.NewOperationQueue(publicKey, db)
+	var slot int
+	var queue *data.OperationQueue
 	var chain *consensus.Chain
 
 	// Figure out the current slot
-	slot := 1
 	if db != nil {
 		last := db.LastBlock()
 		if last != nil {
+			// We are resuming where we left off, based on the database
 			slot = last.Slot + 1
+			queue = data.NewOperationQueue(publicKey, db, slot)
 			chain = consensus.NewChain(
 				publicKey, qs, queue, last.ExternalizeMessage(qs))
 		}
 	}
 
 	if chain == nil {
-		// This is initial startup, so do the airdrop.
+		// This is initial startup, so do the airdrop
+		slot = 1
+		queue = data.NewOperationQueue(publicKey, db, slot)
 		chain = consensus.NewEmptyChain(publicKey, qs, queue)
 		for _, account := range accounts {
 			queue.SetBalance(account.Owner, account.Balance)
@@ -127,22 +131,25 @@ func (node *Node) handleChainMessage(sender string, message util.Message) (util.
 		// We have advanced.
 		node.slot += 1
 
-		if node.database != nil {
-			// Let's save the old block.
-			last := node.chain.GetLast()
-			chunk := node.queue.OldChunk(last.I)
-			block := &data.Block{
-				Slot:  last.I,
-				C:     last.Cn,
-				H:     last.Hn,
-				Chunk: chunk,
+		/*
+			// TODO: save the old block at the same time we save account modifications
+			if node.database != nil {
+				// Let's save the old block.
+				last := node.chain.GetLast()
+				chunk := node.queue.OldChunk(last.I)
+				block := &data.Block{
+					Slot:  last.I,
+					C:     last.Cn,
+					H:     last.Hn,
+					Chunk: chunk,
+				}
+				err := node.database.InsertBlock(block)
+				if err != nil {
+					panic(err)
+				}
+				node.database.Commit()
 			}
-			err := node.database.InsertBlock(block)
-			if err != nil {
-				panic(err)
-			}
-			node.database.Commit()
-		}
+		*/
 	}
 
 	if !hasResponse {

@@ -42,21 +42,25 @@ type OperationQueue struct {
 	finalized int
 }
 
-func NewOperationQueue(publicKey util.PublicKey, db *Database) *OperationQueue {
+func NewOperationQueue(publicKey util.PublicKey, db *Database, slot int) *OperationQueue {
 	q := &OperationQueue{
 		publicKey: publicKey,
 		set:       treeset.NewWith(HighestFeeFirst),
 		chunks:    make(map[consensus.SlotValue]*LedgerChunk),
 		oldChunks: make(map[int]*LedgerChunk),
 		last:      consensus.SlotValue(""),
-		slot:      1,
 		finalized: 0,
+		slot:      slot,
 	}
 
 	if db == nil {
+		if slot != 1 {
+			util.Logger.Fatalf("if there is no db we must start at slot 1")
+		}
 		q.cache = NewCache()
 	} else {
 		q.cache = NewDatabaseCache(db)
+
 	}
 	return q
 }
@@ -326,13 +330,13 @@ func (q *OperationQueue) Finalize(v consensus.SlotValue, c int, h int) {
 		panic("We are finalizing a chunk but we don't know its data.")
 	}
 
-	if err := q.cache.ValidateChunk(chunk); err != nil {
-		util.Logger.Fatalf("We could not validate a finalized chunk: %s", err)
+	block := &Block{
+		Slot:  q.slot,
+		C:     c,
+		H:     h,
+		Chunk: chunk,
 	}
-
-	if err := q.cache.ProcessChunk(chunk); err != nil {
-		util.Logger.Fatalf("Failure while processing a finalized chunk: %s", err)
-	}
+	q.cache.FinalizeBlock(block)
 
 	q.oldChunks[q.slot] = chunk
 	q.finalized += len(chunk.Operations)
@@ -344,6 +348,10 @@ func (q *OperationQueue) Finalize(v consensus.SlotValue, c int, h int) {
 
 func (q *OperationQueue) Last() consensus.SlotValue {
 	return q.last
+}
+
+func (q *OperationQueue) Slot() int {
+	return q.slot
 }
 
 // SuggestValue returns a chunk that is keyed by its hash

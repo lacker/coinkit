@@ -125,9 +125,12 @@ func TestNodeRestarting(t *testing.T) {
 	}
 
 	// Knock out and replace node 1
-	log.Printf("about to replace node 1")
+	log.Printf("replacing node 1 (%s)", util.Shorten(names[1].String()))
 	nodes[1] = NewNode(names[1], qs, nodes[1].database)
-	log.Printf("replaced node 1")
+	if nodes[1].Slot() != nodes[1].queue.Slot() {
+		t.Fatalf("the new node has a slot mismatch: node slot %d, queue slot %d",
+			nodes[1].Slot(), nodes[1].queue.Slot())
+	}
 
 	// Send another 10 to Bob
 	m = newSendMessage(mint, bob, 2, 10)

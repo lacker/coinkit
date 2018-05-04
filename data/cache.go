@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"log"
 	"sort"
+
+	"github.com/lacker/coinkit/util"
 )
 
 // The Cache stores a subset of the information that is in the database. Typically
@@ -209,9 +211,36 @@ func (c *Cache) Process(op Operation) bool {
 	return true
 }
 
+// FinalizeBlock should be called whenever a new block is mined.
+// This updates account data as well as block data.
+// The modification of database state happens in a single transaction so that
+// other code using the database will see consistent state.
+// TODO: make that statement about transactions true
+func (c *Cache) FinalizeBlock(block *Block) {
+	// util.Logger.Printf("finalizing block: %+v", block)
+	if err := c.ValidateChunk(block.Chunk); err != nil {
+		util.Logger.Fatalf("We could not validate a finalized chunk: %s", err)
+	}
+
+	if err := c.ProcessChunk(block.Chunk); err != nil {
+		util.Logger.Fatalf("Failure while processing a finalized chunk: %s", err)
+	}
+
+	if c.database != nil {
+		// util.Logger.Printf("inserting block: %+v", block)
+		err := c.database.InsertBlock(block)
+		if err != nil {
+			panic(err)
+		}
+		c.database.Commit()
+	}
+}
+
 // ProcessChunk returns an error if the whole chunk cannot be processed.
 // In this situation, the cache may be left with only some of
 // the operations in the chunk processed and would in practice have to be discarded.
+// TODO: describe transaction situation
+// TODO: hide from external callers
 func (c *Cache) ProcessChunk(chunk *LedgerChunk) error {
 	if chunk == nil {
 		return fmt.Errorf("cannot process nil chunk")
