@@ -11,7 +11,7 @@ import (
 
 // An OperationMessage has a list of operations. Each of the operations
 // is separately signed by the sender, so that an OperationMessage can be
-// used not just to inform the network you would like to issue an opertion,
+// used not just to inform the network you would like to issue an operation,
 // but also for nodes to share a set of known pending operations.
 
 type OperationMessage struct {
