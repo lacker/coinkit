@@ -10,6 +10,7 @@ import (
 // A DataMessage is used to respond when a client requests data.
 type DataMessage struct {
 	// I is the last finalized slot occurring in the data snapshot used for this data.
+	// If I is zero, it just means we are not reporting which slot this reflects.
 	I int
 
 	// The contents of an account, keyed by owner.

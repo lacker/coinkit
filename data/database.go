@@ -230,7 +230,7 @@ func (db *Database) TotalSizeInfo() string {
 	return answer
 }
 
-func (db *Database) HandleInfoMessage(m *util.InfoMessage) *DataMessage {
+func (db *Database) HandleQueryMessage(m *QueryMessage) *DataMessage {
 	if m == nil {
 		return nil
 	}

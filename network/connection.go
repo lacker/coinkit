@@ -15,7 +15,7 @@ type Connection interface {
 }
 
 // SendAnonymousMessage uses a new random key to send a single message.
-func SendAnonymousMessage(c Connection, message *util.InfoMessage) {
+func SendAnonymousMessage(c Connection, message *data.QueryMessage) {
 	kp := util.NewKeyPair()
 	sm := util.NewSignedMessage(message, kp)
 	c.Send(sm)
@@ -25,7 +25,7 @@ func SendAnonymousMessage(c Connection, message *util.InfoMessage) {
 func WaitToClear(c Connection, user string, sequence uint32) *data.Account {
 	for {
 		start := time.Now()
-		SendAnonymousMessage(c, &util.InfoMessage{Account: user})
+		SendAnonymousMessage(c, &data.QueryMessage{Account: user})
 		m := (<-c.Receive()).Message()
 		elapsed := time.Now().Sub(start).Seconds()
 		if elapsed > 1.0 {
@@ -45,7 +45,7 @@ func WaitToClear(c Connection, user string, sequence uint32) *data.Account {
 
 func GetAccount(c Connection, user string) *data.Account {
 	for {
-		SendAnonymousMessage(c, &util.InfoMessage{Account: user})
+		SendAnonymousMessage(c, &data.QueryMessage{Account: user})
 		m := (<-c.Receive()).Message()
 		dataMessage, ok := m.(*data.DataMessage)
 		if !ok {

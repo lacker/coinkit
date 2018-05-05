@@ -178,7 +178,7 @@ func (q *OperationQueue) CheckConsistency() error {
 	return q.cache.CheckConsistency()
 }
 
-func (q *OperationQueue) HandleInfoMessage(m *util.InfoMessage) *DataMessage {
+func (q *OperationQueue) HandleQueryMessage(m *QueryMessage) *DataMessage {
 	if m == nil || m.Account == "" {
 		return nil
 	}
