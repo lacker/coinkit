@@ -239,6 +239,10 @@ func (db *Database) HandleQueryMessage(m *QueryMessage) *DataMessage {
 		return db.AccountDataMessage(m.Account)
 	}
 
+	if m.Block != 0 {
+		return db.BlockDataMessage(m.Block)
+	}
+
 	return nil
 }
 
@@ -281,6 +285,13 @@ func (db *Database) AccountDataMessage(owner string) *DataMessage {
 	return &DataMessage{
 		I:        slot,
 		Accounts: map[string]*Account{owner: account},
+	}
+}
+
+func (db *Database) BlockDataMessage(slot int) *DataMessage {
+	block := db.GetBlock(slot)
+	return &DataMessage{
+		Blocks: map[int]*Block{slot: block},
 	}
 }
 
