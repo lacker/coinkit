@@ -87,6 +87,19 @@ func TestLastBlock(t *testing.T) {
 	if b3.Slot != b.Slot {
 		t.Fatalf("b3: %+v", b3)
 	}
+
+	// We should also be able to retrieve it with a query message
+	qm := &QueryMessage{
+		Block: b.Slot,
+	}
+	dm := db.HandleQueryMessage(qm)
+	if dm == nil {
+		t.Fatalf("got nil data message")
+	}
+	b4 := dm.Blocks[b.Slot]
+	if b4 == nil || b4.Slot != b.Slot {
+		t.Fatalf("got bad data message: %+v", dm)
+	}
 }
 
 func TestForBlocks(t *testing.T) {
