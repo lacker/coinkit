@@ -96,6 +96,57 @@ func TestNodeCatchup(t *testing.T) {
 	}
 }
 
+/*
+func TestNodeCatchupFromDatabase(t *testing.T) {
+	mint := util.NewKeyPairFromSecretPhrase("mint")
+	bob := util.NewKeyPairFromSecretPhrase("bob")
+	qs, names := consensus.MakeTestQuorumSlice(4)
+	nodes := []*Node{}
+	for i, name := range names {
+		db := data.NewTestDatabase(i)
+		node := NewNode(name, qs, db)
+		nodes = append(nodes, node)
+	}
+
+	// Run a few rounds with the first three nodes
+	for round := 1; round <= 3; round++ {
+		m := newSendMessage(mint, bob, round, 10)
+		nodes[0].Handle(mint.PublicKey().String(), m)
+		for i := 0; i < 10; i++ {
+			sendNodeToNodeMessages(nodes[0], nodes[1], t)
+			sendNodeToNodeMessages(nodes[0], nodes[2], t)
+			sendNodeToNodeMessages(nodes[1], nodes[2], t)
+			sendNodeToNodeMessages(nodes[1], nodes[0], t)
+			sendNodeToNodeMessages(nodes[2], nodes[0], t)
+			sendNodeToNodeMessages(nodes[2], nodes[1], t)
+		}
+		for i := 0; i <= 2; i++ {
+			if nodes[i].Slot() != round+1 {
+				t.Fatalf("nodes[%d] did not finish round %d", i, round)
+			}
+		}
+	}
+
+	// Knock out and restart the first three nodes to force a db recovery
+	for i := 0; i <= 2; i++ {
+		nodes[i] = NewNode(names[i], qs, nodes[i].database)
+	}
+
+	// The last node should be able to catch up
+	for i := 0; i < 10; i++ {
+		sendNodeToNodeMessages(nodes[0], nodes[3], t)
+		sendNodeToNodeMessages(nodes[3], nodes[0], t)
+		sendNodeToNodeMessages(nodes[1], nodes[3], t)
+		sendNodeToNodeMessages(nodes[3], nodes[2], t)
+		sendNodeToNodeMessages(nodes[2], nodes[3], t)
+		sendNodeToNodeMessages(nodes[3], nodes[2], t)
+	}
+	if nodes[3].Slot() != 4 {
+		t.Fatalf("catchup failed")
+	}
+}
+*/
+
 func TestNodeRestarting(t *testing.T) {
 	mint := util.NewKeyPairFromSecretPhrase("mint")
 	bob := util.NewKeyPairFromSecretPhrase("bob")
