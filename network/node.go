@@ -51,7 +51,7 @@ func newNodeWithAccounts(publicKey util.PublicKey, qs consensus.QuorumSlice,
 			slot = last.Slot + 1
 			queue = data.NewOperationQueue(publicKey, db, slot)
 			chain = consensus.NewChain(
-				publicKey, qs, queue, last.ExternalizeMessage(qs))
+				publicKey, qs, queue, last.ExternalizeMessage())
 		}
 	}
 

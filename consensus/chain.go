@@ -50,7 +50,7 @@ func (c *Chain) Handle(sender string, message util.Message) (util.Message, bool)
 		if c.current.Done() && c.values.CanFinalize(ext.X) {
 			// This block is done, let's move on to the next one
 			c.Logf("advancing to slot %d", slot+1)
-			c.values.Finalize(ext.X, ext.Cn, ext.Hn)
+			c.values.Finalize(ext.X, ext.Cn, ext.Hn, ext.D)
 			c.history[slot] = ext
 			c.current = NewBlock(c.publicKey, c.D, slot+1, c.values)
 		}

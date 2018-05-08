@@ -324,7 +324,9 @@ func (q *OperationQueue) CanFinalize(v consensus.SlotValue) bool {
 	return ok
 }
 
-func (q *OperationQueue) Finalize(v consensus.SlotValue, c int, h int) {
+func (q *OperationQueue) Finalize(
+	v consensus.SlotValue, c int, h int, qs consensus.QuorumSlice) {
+
 	chunk, ok := q.chunks[v]
 	if !ok {
 		panic("We are finalizing a chunk but we don't know its data.")
@@ -332,9 +334,10 @@ func (q *OperationQueue) Finalize(v consensus.SlotValue, c int, h int) {
 
 	block := &Block{
 		Slot:  q.slot,
+		Chunk: chunk,
 		C:     c,
 		H:     h,
-		Chunk: chunk,
+		D:     qs,
 	}
 	q.cache.FinalizeBlock(block)
 

@@ -214,9 +214,7 @@ func (c *Cache) Process(op Operation) bool {
 // This updates account data as well as block data.
 // The modification of database state happens in a single transaction so that
 // other code using the database will see consistent state.
-// TODO: make that statement about transactions true
 func (c *Cache) FinalizeBlock(block *Block) {
-	// util.Logger.Printf("finalizing block: %+v", block)
 	if err := c.ValidateChunk(block.Chunk); err != nil {
 		util.Logger.Fatalf("We could not validate a finalized chunk: %s", err)
 	}

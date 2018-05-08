@@ -17,15 +17,18 @@ type Block struct {
 	// The ballot numbers this node confirmed.
 	C int
 	H int
+
+	// The quorum slice used to confirm this block
+	D consensus.QuorumSlice
 }
 
-func (b *Block) ExternalizeMessage(d consensus.QuorumSlice) *consensus.ExternalizeMessage {
+func (b *Block) ExternalizeMessage() *consensus.ExternalizeMessage {
 	return &consensus.ExternalizeMessage{
 		I:  b.Slot,
 		X:  b.Chunk.Hash(),
 		Cn: b.C,
 		Hn: b.H,
-		D:  d,
+		D:  b.D,
 	}
 }
 
