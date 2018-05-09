@@ -5,7 +5,6 @@ import (
 	"testing"
 
 	"github.com/lacker/coinkit/consensus"
-	"github.com/lacker/coinkit/util"
 )
 
 func TestInsertAndGet(t *testing.T) {

@@ -99,7 +99,6 @@ func TestNodeCatchup(t *testing.T) {
 	}
 }
 
-/*
 func TestNodeCatchupFromDatabase(t *testing.T) {
 	mint := util.NewKeyPairFromSecretPhrase("mint")
 	bob := util.NewKeyPairFromSecretPhrase("bob")
@@ -156,7 +155,6 @@ func TestNodeCatchupFromDatabase(t *testing.T) {
 		t.Fatalf("catchup failed")
 	}
 }
-*/
 
 func TestNodeRestarting(t *testing.T) {
 	mint := util.NewKeyPairFromSecretPhrase("mint")
