@@ -22,6 +22,8 @@ type Block struct {
 	D consensus.QuorumSlice
 }
 
+// ExternalizeMessage() constructs a message with the metadata for how we came to
+// consensus on this block
 func (b *Block) ExternalizeMessage() *consensus.ExternalizeMessage {
 	return &consensus.ExternalizeMessage{
 		I:  b.Slot,
@@ -30,6 +32,11 @@ func (b *Block) ExternalizeMessage() *consensus.ExternalizeMessage {
 		Hn: b.H,
 		D:  b.D,
 	}
+}
+
+// OperationMessage() constructs a message with the chunk contents
+func (b *Block) OperationMessage() *OperationMessage {
+	return NewOperationMessageWithChunk(b.Chunk)
 }
 
 func (b *Block) String() string {

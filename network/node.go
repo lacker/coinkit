@@ -101,6 +101,19 @@ func (node *Node) Handle(sender string, message util.Message) (util.Message, boo
 		node.Handle(sender, m.E)
 		return nil, false
 
+	case *data.DataMessage:
+		// We can only use a data message if it has a block for our slot
+		if m.Blocks == nil {
+			return nil, false
+		}
+		block := m.Blocks[node.slot]
+		if block == nil {
+			return nil, false
+		}
+		node.Handle(sender, block.OperationMessage())
+		node.Handle(sender, block.ExternalizeMessage())
+		return nil, false
+
 	case *data.OperationMessage:
 		if node.queue.HandleOperationMessage(m) {
 			node.chain.ValueStoreUpdated()

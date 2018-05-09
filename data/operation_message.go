@@ -52,6 +52,16 @@ func NewOperationMessage(ops ...*SignedOperation) *OperationMessage {
 	}
 }
 
+func NewOperationMessageWithChunk(chunk *LedgerChunk) *OperationMessage {
+	if chunk == nil {
+		util.Logger.Fatal("cannot make operation message with nil chunk")
+	}
+	return &OperationMessage{
+		Operations: []*SignedOperation{},
+		Chunks:     map[consensus.SlotValue]*LedgerChunk{chunk.Hash(): chunk},
+	}
+}
+
 func init() {
 	util.RegisterMessageType(&OperationMessage{})
 }
