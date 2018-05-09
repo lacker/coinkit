@@ -157,13 +157,9 @@ func (node *Node) handleChainMessage(sender string, message util.Message) (util.
 		return response, true
 	}
 
-	// Augment externalize messages into history messages
-	om := node.queue.OldChunkMessage(externalize.I)
-	return &HistoryMessage{
-		O: om,
-		E: externalize,
-		I: externalize.I,
-	}, true
+	// Instead of externalize messages, send the entire block with a data message
+	dm := node.queue.OldBlockMessage(externalize.I)
+	return dm, true
 }
 
 func (node *Node) OutgoingMessages() []util.Message {

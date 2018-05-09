@@ -24,9 +24,10 @@ type OperationQueue struct {
 	// They are indexed by their hash
 	chunks map[consensus.SlotValue]*LedgerChunk
 
-	// Ledger chunks that already got finalized
+	// Blocks that already got finalized
 	// They are indexed by slot
-	oldChunks map[int]*LedgerChunk
+	// TODO: remove this, just use the db.
+	oldBlocks map[int]*Block
 
 	// cache is used to validate operations
 	// For now this is the actual authentic store of account data
@@ -47,7 +48,7 @@ func NewOperationQueue(publicKey util.PublicKey, db *Database, slot int) *Operat
 		publicKey: publicKey,
 		set:       treeset.NewWith(HighestFeeFirst),
 		chunks:    make(map[consensus.SlotValue]*LedgerChunk),
-		oldChunks: make(map[int]*LedgerChunk),
+		oldBlocks: make(map[int]*Block),
 		last:      consensus.SlotValue(""),
 		finalized: 0,
 		slot:      slot,
@@ -153,24 +154,21 @@ func (q *OperationQueue) SetBalance(owner string, balance uint64) {
 	q.cache.SetBalance(owner, balance)
 }
 
-func (q *OperationQueue) OldChunk(slot int) *LedgerChunk {
-	chunk, ok := q.oldChunks[slot]
+func (q *OperationQueue) OldBlock(slot int) *Block {
+	block, ok := q.oldBlocks[slot]
 	if !ok {
 		return nil
 	}
-	return chunk
+	return block
 }
 
-func (q *OperationQueue) OldChunkMessage(slot int) *OperationMessage {
-	chunk := q.OldChunk(slot)
-	if chunk == nil {
+func (q *OperationQueue) OldBlockMessage(slot int) *DataMessage {
+	block := q.OldBlock(slot)
+	if block == nil {
 		return nil
 	}
-	chunks := make(map[consensus.SlotValue]*LedgerChunk)
-	chunks[chunk.Hash()] = chunk
-	return &OperationMessage{
-		Operations: []*SignedOperation{},
-		Chunks:     chunks,
+	return &DataMessage{
+		Blocks: map[int]*Block{slot: block},
 	}
 }
 
@@ -341,7 +339,7 @@ func (q *OperationQueue) Finalize(
 	}
 	q.cache.FinalizeBlock(block)
 
-	q.oldChunks[q.slot] = chunk
+	q.oldBlocks[q.slot] = block
 	q.finalized += len(chunk.Operations)
 	q.last = v
 	q.chunks = make(map[consensus.SlotValue]*LedgerChunk)
