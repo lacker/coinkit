@@ -18,7 +18,10 @@ type Cache struct {
 	// Storing real account data.
 	// The key of the map is the owner of that account.
 	// nil means there is currently no account for that owner
-	data map[string]*Account
+	accounts map[string]*Account
+
+	// Storing past blocks.
+	blocks map[int]*Block
 
 	// When we are doing a read operation and we don't have data, we can use the
 	// readOnly cache. This is useful so that we can make copy-on-write versions of
@@ -37,7 +40,8 @@ type Cache struct {
 
 func NewCache() *Cache {
 	return &Cache{
-		data: make(map[string]*Account),
+		accounts: make(map[string]*Account),
+		blocks:   make(map[int]*Block),
 	}
 }
 
@@ -60,7 +64,7 @@ func (c *Cache) MaxBalance() uint64 {
 		return c.database.MaxBalance()
 	}
 	answer := uint64(0)
-	for _, account := range c.data {
+	for _, account := range c.accounts {
 		if account.Balance > answer {
 			answer = account.Balance
 		}
@@ -92,7 +96,7 @@ func (c *Cache) CheckAgainstDatabase(db *Database) error {
 	if db.TransactionInProgress() {
 		return fmt.Errorf("there is an uncommitted transaction")
 	}
-	for owner, dataAccount := range c.data {
+	for owner, dataAccount := range c.accounts {
 		dbAccount := db.GetAccount(owner)
 		err := dataAccount.CheckEqual(dbAccount)
 		if err != nil {
@@ -112,7 +116,7 @@ func (c *Cache) CheckConsistency() error {
 }
 
 func (c *Cache) GetAccount(owner string) *Account {
-	answer, ok := c.data[owner]
+	answer, ok := c.accounts[owner]
 	if ok {
 		return answer
 	}
@@ -123,7 +127,7 @@ func (c *Cache) GetAccount(owner string) *Account {
 	} else if c.database != nil {
 		// When there is a database, we should cache reads to reduce database access.
 		answer = c.database.GetAccount(owner)
-		c.data[owner] = answer
+		c.accounts[owner] = answer
 	}
 
 	if answer != nil && answer.Owner != owner {
@@ -141,7 +145,7 @@ func (c *Cache) UpsertAccount(account *Account) {
 	if account.Owner == "" {
 		log.Fatal("cannot upsert with no owner")
 	}
-	c.data[account.Owner] = account
+	c.accounts[account.Owner] = account
 	if c.database != nil {
 		c.database.UpsertAccount(account)
 	}
@@ -296,7 +300,7 @@ func (c *Cache) IterAccounts() AccountIterator {
 
 	// Make sure to go through owners in sorted order
 	owners := []string{}
-	for owner, _ := range c.data {
+	for owner, _ := range c.accounts {
 		owners = append(owners, owner)
 	}
 	sort.Strings(owners)
@@ -309,4 +313,28 @@ func (c *Cache) IterAccounts() AccountIterator {
 		iter.accounts = append(iter.accounts, c.GetAccount(owner))
 	}
 	return iter
+}
+
+// GetBlock returns nil if there is no block for the provided slot.
+func (c *Cache) GetBlock(slot int) *Block {
+	block, ok := c.blocks[slot]
+	if ok {
+		return block
+	}
+	if c.database != nil {
+		return c.database.GetBlock(slot)
+	}
+	return nil
+}
+
+// InsertBlock writes through to the db, if there is one.
+// Panics on db failure
+func (c *Cache) InsertBlock(b *Block) {
+	c.blocks[b.Slot] = b
+	if c.database != nil {
+		err := c.database.InsertBlock(b)
+		if err != nil {
+			panic(err)
+		}
+	}
 }
