@@ -96,11 +96,6 @@ func (node *Node) Handle(sender string, message util.Message) (util.Message, boo
 	}
 	switch m := message.(type) {
 
-	case *HistoryMessage:
-		node.Handle(sender, m.O)
-		node.Handle(sender, m.E)
-		return nil, false
-
 	case *data.DataMessage:
 		// We can only use a data message if it has a block for our slot
 		if m.Blocks == nil {
