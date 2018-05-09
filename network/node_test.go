@@ -12,10 +12,13 @@ import (
 )
 
 func sendNodeToNodeMessages(source *Node, target *Node, t *testing.T) {
+	util.Infof("sending %s -> %s", source.publicKey.ShortName(),
+		target.publicKey.ShortName())
 	messages := source.OutgoingMessages()
 	for _, message := range messages {
 		m := util.EncodeThenDecodeMessage(message)
 		response, ok := target.Handle(source.publicKey.String(), m)
+		util.Infof("message: %+v, response: %+v", message, response)
 		if ok {
 			x, ok := source.Handle(target.publicKey.String(), response)
 			if ok {
@@ -129,8 +132,16 @@ func TestNodeCatchupFromDatabase(t *testing.T) {
 
 	// Knock out and restart the first three nodes to force a db recovery
 	for i := 0; i <= 2; i++ {
+		util.Logger.Printf("restarting node %d", i)
 		nodes[i] = NewNode(names[i], qs, nodes[i].database)
 	}
+
+	// This should be enough to catch up one block
+	util.Verbose = true
+	sendNodeToNodeMessages(nodes[3], nodes[0], t)
+	sendNodeToNodeMessages(nodes[3], nodes[1], t)
+	sendNodeToNodeMessages(nodes[3], nodes[2], t)
+	util.Verbose = false
 
 	// The last node should be able to catch up
 	for i := 0; i < 10; i++ {

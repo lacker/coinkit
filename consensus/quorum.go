@@ -1,6 +1,9 @@
 package consensus
 
 import (
+	"database/sql/driver"
+	"encoding/json"
+	"errors"
 	"fmt"
 
 	"github.com/lacker/coinkit/util"
@@ -18,8 +21,8 @@ type QuorumSlice struct {
 	Threshold int
 }
 
-func MakeQuorumSlice(members []string, threshold int) QuorumSlice {
-	return QuorumSlice{
+func NewQuorumSlice(members []string, threshold int) *QuorumSlice {
+	return &QuorumSlice{
 		Members:   members,
 		Threshold: threshold,
 	}
@@ -52,7 +55,7 @@ func (qs *QuorumSlice) SatisfiedWith(nodes []string) bool {
 // Makes data for a test quorum slice that requires a consensus of more
 // than two thirds of the given size.
 // Also returns a list of public keys of the quorum members.
-func MakeTestQuorumSlice(size int) (QuorumSlice, []util.PublicKey) {
+func MakeTestQuorumSlice(size int) (*QuorumSlice, []util.PublicKey) {
 	threshold := 2*size/3 + 1
 	pks := []util.PublicKey{}
 	names := []string{}
@@ -61,7 +64,7 @@ func MakeTestQuorumSlice(size int) (QuorumSlice, []util.PublicKey) {
 		pks = append(pks, pk)
 		names = append(names, pk.String())
 	}
-	qs := MakeQuorumSlice(names, threshold)
+	qs := NewQuorumSlice(names, threshold)
 	return qs, pks
 }
 
@@ -78,6 +81,7 @@ func MeetsQuorum(f QuorumFinder, nodes []string) bool {
 	filtered := []string{}
 	for _, node := range nodes {
 		qs, ok := f.QuorumSlice(node)
+		util.Infof("node %s has qs %+v", node, qs)
 		if ok && qs.SatisfiedWith(nodes) {
 			filtered = append(filtered, node)
 			if node == f.PublicKey().String() {
@@ -92,4 +96,21 @@ func MeetsQuorum(f QuorumFinder, nodes []string) bool {
 		return true
 	}
 	return MeetsQuorum(f, filtered)
+}
+
+func (qs *QuorumSlice) Value() (driver.Value, error) {
+	bytes, err := json.Marshal(qs)
+	return driver.Value(bytes), err
+}
+
+func (qs *QuorumSlice) Scan(src interface{}) error {
+	bytes, ok := src.([]byte)
+	if !ok {
+		return errors.New("expected []byte")
+	}
+	err := json.Unmarshal(bytes, qs)
+	if err != nil {
+		return err
+	}
+	return nil
 }

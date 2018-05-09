@@ -86,7 +86,8 @@ CREATE TABLE IF NOT EXISTS blocks (
     slot integer,
     chunk json NOT NULL,
     c integer,
-    h integer
+    h integer,
+    d json NOT NULL
 );
 
 CREATE UNIQUE INDEX IF NOT EXISTS block_slot_idx ON blocks (slot);
@@ -320,8 +321,8 @@ func (db *Database) CheckAccountsMatchBlocks() error {
 //////////////
 
 const blockInsert = `
-INSERT INTO blocks (slot, chunk, c, h)
-VALUES (:slot, :chunk, :c, :h)
+INSERT INTO blocks (slot, chunk, c, h, d)
+VALUES (:slot, :chunk, :c, :h, :d)
 `
 
 func isUniquenessError(e error) bool {

@@ -3,13 +3,20 @@ package data
 import (
 	"log"
 	"testing"
+
+	"github.com/lacker/coinkit/consensus"
+	"github.com/lacker/coinkit/util"
 )
 
 func TestInsertAndGet(t *testing.T) {
 	db := NewTestDatabase(0)
+	qs, _ := consensus.MakeTestQuorumSlice(4)
 	block := &Block{
 		Slot:  1,
 		Chunk: NewEmptyChunk(),
+		C:     7,
+		H:     8,
+		D:     qs,
 	}
 	err := db.InsertBlock(block)
 	if err != nil {
@@ -22,6 +29,12 @@ func TestInsertAndGet(t *testing.T) {
 	b2 := db.GetBlock(1)
 	if b2.C != block.C {
 		t.Fatalf("block changed: %+v -> %+v", block, b2)
+	}
+	if b2.Chunk == nil {
+		t.Fatalf("block chunk was nil on retrieval")
+	}
+	if b2.D == nil {
+		t.Fatalf("block quorum slice was nil on retrieval")
 	}
 }
 

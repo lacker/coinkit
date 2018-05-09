@@ -18,7 +18,7 @@ type Chain struct {
 	history map[int]*ExternalizeMessage
 
 	// The quorum logic we use for future blocks
-	D QuorumSlice
+	D *QuorumSlice
 
 	// Who we are
 	publicKey util.PublicKey
@@ -88,7 +88,7 @@ func (c *Chain) GetLast() *ExternalizeMessage {
 }
 
 // Creates a new chain given the last block
-func NewChain(publicKey util.PublicKey, qs QuorumSlice, vs ValueStore,
+func NewChain(publicKey util.PublicKey, qs *QuorumSlice, vs ValueStore,
 	lastExternal *ExternalizeMessage) *Chain {
 	return &Chain{
 		current:   NewBlock(publicKey, qs, lastExternal.I+1, vs),
@@ -99,7 +99,7 @@ func NewChain(publicKey util.PublicKey, qs QuorumSlice, vs ValueStore,
 	}
 }
 
-func NewEmptyChain(publicKey util.PublicKey, qs QuorumSlice, vs ValueStore) *Chain {
+func NewEmptyChain(publicKey util.PublicKey, qs *QuorumSlice, vs ValueStore) *Chain {
 	return &Chain{
 		current:   NewBlock(publicKey, qs, 1, vs),
 		history:   make(map[int]*ExternalizeMessage),

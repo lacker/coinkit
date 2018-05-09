@@ -61,13 +61,13 @@ type BallotState struct {
 	publicKey util.PublicKey
 
 	// Who we listen to for quorum
-	D QuorumSlice
+	D *QuorumSlice
 
 	// The nomination state
 	nState *NominationState
 }
 
-func NewBallotState(publicKey util.PublicKey, qs QuorumSlice, nState *NominationState) *BallotState {
+func NewBallotState(publicKey util.PublicKey, qs *QuorumSlice, nState *NominationState) *BallotState {
 	return &BallotState{
 		phase:     Prepare,
 		M:         make(map[string]BallotMessage),
@@ -109,14 +109,14 @@ func (s *BallotState) PublicKey() util.PublicKey {
 
 func (s *BallotState) QuorumSlice(node string) (*QuorumSlice, bool) {
 	if node == s.publicKey.String() {
-		return &s.D, true
+		return s.D, true
 	}
 	m, ok := s.M[node]
 	if !ok {
 		return nil, false
 	}
 	qs := m.QuorumSlice()
-	return &qs, true
+	return qs, true
 }
 
 // MaybeAcceptAsPrepared returns true if the ballot state changes.
@@ -393,7 +393,9 @@ func (s *BallotState) MaybeConfirmAsCommitted(n int, x SlotValue) bool {
 		}
 	}
 
+	util.Infof("XXX checking if we have quorum for CAC")
 	if !MeetsQuorum(s, accepted) {
+		util.Infof("XXX no quorum for CAC. accepted: %+v", accepted)
 		return false
 	}
 
@@ -680,7 +682,7 @@ func (s *BallotState) AssertValid() {
 	}
 }
 
-func (s *BallotState) Message(slot int, qs QuorumSlice) BallotMessage {
+func (s *BallotState) Message(slot int, qs *QuorumSlice) BallotMessage {
 	if !s.HasMessage() {
 		panic("coding error")
 	}

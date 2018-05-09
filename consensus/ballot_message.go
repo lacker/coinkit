@@ -10,7 +10,7 @@ import (
 
 // See page 23 of the protocol paper for a description of balloting.
 type BallotMessage interface {
-	QuorumSlice() QuorumSlice
+	QuorumSlice() *QuorumSlice
 	Phase() Phase
 	MessageType() string
 	Slot() int
@@ -137,7 +137,7 @@ type PrepareMessage struct {
 	Cn int
 	Hn int
 
-	D QuorumSlice
+	D *QuorumSlice
 }
 
 func (m *PrepareMessage) String() string {
@@ -157,7 +157,7 @@ func (m *PrepareMessage) String() string {
 	return strings.Join(parts, " ")
 }
 
-func (m *PrepareMessage) QuorumSlice() QuorumSlice {
+func (m *PrepareMessage) QuorumSlice() *QuorumSlice {
 	return m.D
 }
 
@@ -256,7 +256,7 @@ type ConfirmMessage struct {
 	Cn int
 	Hn int
 
-	D QuorumSlice
+	D *QuorumSlice
 }
 
 func (m *ConfirmMessage) String() string {
@@ -264,7 +264,7 @@ func (m *ConfirmMessage) String() string {
 		m.I, util.Shorten(string(m.X)), m.Pn, m.Cn, m.Hn)
 }
 
-func (m *ConfirmMessage) QuorumSlice() QuorumSlice {
+func (m *ConfirmMessage) QuorumSlice() *QuorumSlice {
 	return m.D
 }
 
@@ -330,7 +330,7 @@ type ExternalizeMessage struct {
 	Cn int
 	Hn int
 
-	D QuorumSlice
+	D *QuorumSlice
 }
 
 func (m *ExternalizeMessage) String() string {
@@ -338,7 +338,7 @@ func (m *ExternalizeMessage) String() string {
 		m.I, util.Shorten(string(m.X)), m.Cn, m.Hn)
 }
 
-func (m *ExternalizeMessage) QuorumSlice() QuorumSlice {
+func (m *ExternalizeMessage) QuorumSlice() *QuorumSlice {
 	return m.D
 }
 

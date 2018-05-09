@@ -24,13 +24,9 @@ type OperationQueue struct {
 	// They are indexed by their hash
 	chunks map[consensus.SlotValue]*LedgerChunk
 
-	// Blocks that already got finalized
-	// They are indexed by slot
-	// TODO: remove this, just use the db.
-	oldBlocks map[int]*Block
-
-	// cache is used to validate operations
-	// For now this is the actual authentic store of account data
+	// cache is a wrapper around the database that we use to store new
+	// finalized data, to validate possible operations, and to respond
+	// to some messages.
 	cache *Cache
 
 	// The key of the last chunk to get finalized
@@ -48,7 +44,6 @@ func NewOperationQueue(publicKey util.PublicKey, db *Database, slot int) *Operat
 		publicKey: publicKey,
 		set:       treeset.NewWith(HighestFeeFirst),
 		chunks:    make(map[consensus.SlotValue]*LedgerChunk),
-		oldBlocks: make(map[int]*Block),
 		last:      consensus.SlotValue(""),
 		finalized: 0,
 		slot:      slot,
@@ -154,18 +149,13 @@ func (q *OperationQueue) SetBalance(owner string, balance uint64) {
 	q.cache.SetBalance(owner, balance)
 }
 
-func (q *OperationQueue) OldBlock(slot int) *Block {
-	block, ok := q.oldBlocks[slot]
-	if !ok {
-		return nil
-	}
-	return block
-}
-
 func (q *OperationQueue) OldBlockMessage(slot int) *DataMessage {
-	block := q.OldBlock(slot)
+	block := q.cache.GetBlock(slot)
 	if block == nil {
 		return nil
+	}
+	if block.D == nil {
+		util.Logger.Fatalf("old block has nil quorum slice")
 	}
 	return &DataMessage{
 		Blocks: map[int]*Block{slot: block},
@@ -323,7 +313,7 @@ func (q *OperationQueue) CanFinalize(v consensus.SlotValue) bool {
 }
 
 func (q *OperationQueue) Finalize(
-	v consensus.SlotValue, c int, h int, qs consensus.QuorumSlice) {
+	v consensus.SlotValue, c int, h int, qs *consensus.QuorumSlice) {
 
 	chunk, ok := q.chunks[v]
 	if !ok {
@@ -339,7 +329,6 @@ func (q *OperationQueue) Finalize(
 	}
 	q.cache.FinalizeBlock(block)
 
-	q.oldBlocks[q.slot] = block
 	q.finalized += len(chunk.Operations)
 	q.last = v
 	q.chunks = make(map[consensus.SlotValue]*LedgerChunk)

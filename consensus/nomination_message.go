@@ -20,7 +20,7 @@ type NominationMessage struct {
 	// The values we have accepted as nominated
 	Acc []SlotValue
 
-	D QuorumSlice
+	D *QuorumSlice
 }
 
 func (m *NominationMessage) MessageType() string {

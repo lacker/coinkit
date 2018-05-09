@@ -219,6 +219,10 @@ func (c *Cache) Process(op Operation) bool {
 // The modification of database state happens in a single transaction so that
 // other code using the database will see consistent state.
 func (c *Cache) FinalizeBlock(block *Block) {
+	if block.D.Threshold == 0 {
+		util.Logger.Fatalf("cannot finalize with bad quorum slice: %+v", block.D)
+	}
+
 	if err := c.ValidateChunk(block.Chunk); err != nil {
 		util.Logger.Fatalf("We could not validate a finalized chunk: %s", err)
 	}
@@ -324,7 +328,11 @@ func (c *Cache) GetBlock(slot int) *Block {
 		return block
 	}
 	if c.database != nil {
-		return c.database.GetBlock(slot)
+		b := c.database.GetBlock(slot)
+		if b.D == nil {
+			util.Logger.Fatalf("database block for slot %d has nil quorum slice", slot)
+		}
+		return b
 	}
 	return nil
 }

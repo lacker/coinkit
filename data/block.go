@@ -19,7 +19,7 @@ type Block struct {
 	H int
 
 	// The quorum slice used to confirm this block
-	D consensus.QuorumSlice
+	D *consensus.QuorumSlice
 }
 
 // ExternalizeMessage() constructs a message with the metadata for how we came to

@@ -26,14 +26,14 @@ type Block struct {
 	values ValueStore
 
 	// Who we care about
-	D QuorumSlice
+	D *QuorumSlice
 
 	// Who we are
 	publicKey util.PublicKey
 }
 
 func NewBlock(
-	publicKey util.PublicKey, qs QuorumSlice, slot int, vs ValueStore) *Block {
+	publicKey util.PublicKey, qs *QuorumSlice, slot int, vs ValueStore) *Block {
 	nState := NewNominationState(publicKey, qs, vs)
 	nState.MaybeNominateNewValue()
 	block := &Block{

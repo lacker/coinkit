@@ -14,7 +14,7 @@ func TestSolipsistQuorum(t *testing.T) {
 	vs := NewTestValueStore(1)
 	kp := util.NewKeyPairFromSecretPhrase("foo")
 	s := NewBlock(kp.PublicKey(),
-		MakeQuorumSlice([]string{kp.PublicKey().String()}, 1), 1, vs)
+		NewQuorumSlice([]string{kp.PublicKey().String()}, 1), 1, vs)
 	if !MeetsQuorum(s.nState, []string{kp.PublicKey().String()}) {
 		t.Fatal("known public key should meet the quorum")
 	}
@@ -34,7 +34,7 @@ func TestConsensus(t *testing.T) {
 		cpk.String(),
 		dpk.String(),
 	}
-	qs := MakeQuorumSlice(members, 3)
+	qs := NewQuorumSlice(members, 3)
 	vs := NewTestValueStore(0)
 	amy := NewBlock(apk, qs, 1, vs)
 	bob := NewBlock(bpk, qs, 1, vs)
@@ -130,7 +130,7 @@ func TestProtectionAgainstBigRangeDDoS(t *testing.T) {
 		dpk.String(),
 	}
 
-	qs := MakeQuorumSlice(members, 3)
+	qs := NewQuorumSlice(members, 3)
 	vs := NewTestValueStore(0)
 
 	blocks := []*Block{

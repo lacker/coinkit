@@ -56,12 +56,12 @@ func (c *Config) PeerAddresses(keyPair *util.KeyPair) []*Address {
 	return answer
 }
 
-func (c *Config) QuorumSlice() consensus.QuorumSlice {
+func (c *Config) QuorumSlice() *consensus.QuorumSlice {
 	members := []string{}
 	for key, _ := range c.Servers {
 		members = append(members, key)
 	}
-	return consensus.MakeQuorumSlice(members, c.Threshold)
+	return consensus.NewQuorumSlice(members, c.Threshold)
 }
 
 func (c *Config) GetPort(publicKey string, defaultPort int) int {

@@ -15,6 +15,7 @@ import (
 const MaxChunkSize = 100
 
 // A LedgerChunk is the information in one block of the blockchain.
+// LedgerChunk is sql-json-serializable.
 type LedgerChunk struct {
 	Operations []*SignedOperation
 

@@ -24,7 +24,7 @@ type NominationState struct {
 	publicKey util.PublicKey
 
 	// Who we listen to for quorum
-	D QuorumSlice
+	D *QuorumSlice
 
 	// The number of messages this state has processed
 	received int
@@ -39,7 +39,7 @@ type NominationState struct {
 }
 
 func NewNominationState(
-	publicKey util.PublicKey, qs QuorumSlice, vs ValueStore) *NominationState {
+	publicKey util.PublicKey, qs *QuorumSlice, vs ValueStore) *NominationState {
 
 	return &NominationState{
 		X:         make([]SlotValue, 0),
@@ -127,13 +127,13 @@ func (s *NominationState) PredictValue() SlotValue {
 
 func (s *NominationState) QuorumSlice(node string) (*QuorumSlice, bool) {
 	if node == s.publicKey.String() {
-		return &s.D, true
+		return s.D, true
 	}
 	m, ok := s.N[node]
 	if !ok {
 		return nil, false
 	}
-	return &m.D, true
+	return m.D, true
 }
 
 func (s *NominationState) PublicKey() util.PublicKey {
@@ -255,7 +255,7 @@ func (s *NominationState) Handle(node string, m *NominationMessage) {
 	}
 }
 
-func (s *NominationState) Message(slot int, qs QuorumSlice) *NominationMessage {
+func (s *NominationState) Message(slot int, qs *QuorumSlice) *NominationMessage {
 	return &NominationMessage{
 		I:   slot,
 		Nom: s.X,

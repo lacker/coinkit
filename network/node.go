@@ -20,7 +20,7 @@ type Node struct {
 
 // NewNode uses the standard account initialization settings from data.Airdrop
 func NewNode(
-	publicKey util.PublicKey, qs consensus.QuorumSlice, db *data.Database) *Node {
+	publicKey util.PublicKey, qs *consensus.QuorumSlice, db *data.Database) *Node {
 	node := newNodeWithAccounts(publicKey, qs, db, data.Airdrop)
 
 	// We check on startup that our block history matches our current account data
@@ -36,7 +36,7 @@ func NewNode(
 }
 
 // Creates a node for a blockchain that starts out with the provided accounts airdropped.
-func newNodeWithAccounts(publicKey util.PublicKey, qs consensus.QuorumSlice,
+func newNodeWithAccounts(publicKey util.PublicKey, qs *consensus.QuorumSlice,
 	db *data.Database, accounts []*data.Account) *Node {
 
 	var slot int
@@ -78,7 +78,7 @@ func newNodeWithAccounts(publicKey util.PublicKey, qs consensus.QuorumSlice,
 }
 
 // Creates a new memory-only node where nobody has any money
-func newTestingNode(publicKey util.PublicKey, qs consensus.QuorumSlice) *Node {
+func newTestingNode(publicKey util.PublicKey, qs *consensus.QuorumSlice) *Node {
 	return newNodeWithAccounts(publicKey, qs, nil, []*data.Account{})
 }
 
@@ -136,6 +136,12 @@ func (node *Node) Handle(sender string, message util.Message) (util.Message, boo
 
 // A helper to handle the messages
 func (node *Node) handleChainMessage(sender string, message util.Message) (util.Message, bool) {
+	if message.Slot() < node.slot {
+		// If the sender is behind, we can send back a data message with the block
+		// they are missing
+		return node.queue.OldBlockMessage(message.Slot()), true
+	}
+
 	response, hasResponse := node.chain.Handle(sender, message)
 
 	if node.chain.Slot() > node.Slot() {
@@ -153,8 +159,7 @@ func (node *Node) handleChainMessage(sender string, message util.Message) (util.
 	}
 
 	// Instead of externalize messages, send the entire block with a data message
-	dm := node.queue.OldBlockMessage(externalize.I)
-	return dm, true
+	return node.queue.OldBlockMessage(externalize.I), true
 }
 
 func (node *Node) OutgoingMessages() []util.Message {
@@ -177,4 +182,8 @@ func (node *Node) Stats() {
 func (node *Node) Log() {
 	node.chain.Log()
 	node.queue.Log()
+}
+
+func (node *Node) Logf(format string, a ...interface{}) {
+	util.Logf("NO", node.publicKey.ShortName(), format, a...)
 }

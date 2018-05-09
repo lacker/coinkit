@@ -8,7 +8,8 @@ import (
 // This is the one default global logger.
 var Logger = log.New(os.Stderr, "", log.LstdFlags)
 
-var LogType = "default"
+// Just useful for debugging
+var Verbose = false
 
 func Shorten(name string) string {
 	length := len(name)
@@ -16,6 +17,13 @@ func Shorten(name string) string {
 		length = 6
 	}
 	return name[:length]
+}
+
+// Only logged if verbose is true
+func Infof(format string, a ...interface{}) {
+	if Verbose {
+		Logger.Printf(format, a...)
+	}
 }
 
 // Send logging through here so that it's easier to manage
