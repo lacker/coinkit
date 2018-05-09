@@ -10,12 +10,12 @@ type Document struct {
 	// For consistency, all fields on a document are stored within the
 	// Data column.
 	// Naming convention is namedLikeThis.
-	// Some fields are required on every object:
+	// Some fields are required on every object in the database:
 	// id: a unique integer
 	// TODO: collection, owner, createdAt, updatedAt
 	Data types.JSONText
 
-	// Every document has a unique id. It is stored twice in the
+	// Every document has a unique id, starting at 1. It is stored twice in the
 	// database to enforce uniqueness.
 	Id uint64
 }

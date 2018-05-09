@@ -6,6 +6,7 @@ import (
 	"github.com/lacker/coinkit/util"
 )
 
+// SendOperation is used to send money from one account to another.
 type SendOperation struct {
 	// Who is sending this money
 	Signer string
@@ -24,29 +25,29 @@ type SendOperation struct {
 	Fee uint64
 }
 
-func (t *SendOperation) String() string {
+func (op *SendOperation) String() string {
 	return fmt.Sprintf("send %d from %s -> %s, seq %d fee %d",
-		t.Amount, util.Shorten(t.Signer), util.Shorten(t.To), t.Sequence, t.Fee)
+		op.Amount, util.Shorten(op.Signer), util.Shorten(op.To), op.Sequence, op.Fee)
 }
 
-func (t *SendOperation) OperationType() string {
+func (op *SendOperation) OperationType() string {
 	return "Send"
 }
 
-func (t *SendOperation) GetSigner() string {
-	return t.Signer
+func (op *SendOperation) GetSigner() string {
+	return op.Signer
 }
 
-func (t *SendOperation) GetFee() uint64 {
-	return t.Fee
+func (op *SendOperation) GetFee() uint64 {
+	return op.Fee
 }
 
-func (t *SendOperation) GetSequence() uint32 {
-	return t.Sequence
+func (op *SendOperation) GetSequence() uint32 {
+	return op.Sequence
 }
 
-func (t *SendOperation) Verify() bool {
-	if _, err := util.ReadPublicKey(t.To); err != nil {
+func (op *SendOperation) Verify() bool {
+	if _, err := util.ReadPublicKey(op.To); err != nil {
 		return false
 	}
 	return true
