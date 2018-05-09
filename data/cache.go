@@ -227,6 +227,8 @@ func (c *Cache) FinalizeBlock(block *Block) {
 		util.Logger.Fatalf("Failure while processing a finalized chunk: %s", err)
 	}
 
+	c.blocks[block.Slot] = block
+
 	if c.database != nil {
 		err := c.database.InsertBlock(block)
 		if err != nil {
@@ -325,16 +327,4 @@ func (c *Cache) GetBlock(slot int) *Block {
 		return c.database.GetBlock(slot)
 	}
 	return nil
-}
-
-// InsertBlock writes through to the db, if there is one.
-// Panics on db failure
-func (c *Cache) InsertBlock(b *Block) {
-	c.blocks[b.Slot] = b
-	if c.database != nil {
-		err := c.database.InsertBlock(b)
-		if err != nil {
-			panic(err)
-		}
-	}
 }
