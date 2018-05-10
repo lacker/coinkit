@@ -30,12 +30,17 @@ func (ob *JSONObject) decode() error {
 	return json.Unmarshal(ob.bytes, &ob.content)
 }
 
-func NewJSONObject() *JSONObject {
+func NewJSONObject(content map[string]interface{}) *JSONObject {
 	answer := &JSONObject{
-		content: make(map[string]interface{}),
+		content: content,
 	}
 	answer.encode()
 	return answer
+}
+
+func NewEmptyJSONObject() *JSONObject {
+	content := make(map[string]interface{})
+	return NewJSONObject(content)
 }
 
 func (ob *JSONObject) Value() (driver.Value, error) {
