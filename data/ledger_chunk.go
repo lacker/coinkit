@@ -64,11 +64,7 @@ func (c *LedgerChunk) Scan(src interface{}) error {
 	if !ok {
 		return errors.New("expected []byte")
 	}
-	err := json.Unmarshal(bytes, c)
-	if err != nil {
-		return err
-	}
-	return nil
+	return json.Unmarshal(bytes, c)
 }
 
 // Returns only the operations that are send operations

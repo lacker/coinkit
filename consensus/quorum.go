@@ -108,9 +108,5 @@ func (qs *QuorumSlice) Scan(src interface{}) error {
 	if !ok {
 		return errors.New("expected []byte")
 	}
-	err := json.Unmarshal(bytes, qs)
-	if err != nil {
-		return err
-	}
-	return nil
+	return json.Unmarshal(bytes, qs)
 }
