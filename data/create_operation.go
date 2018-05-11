@@ -3,8 +3,6 @@ package data
 import (
 	"fmt"
 
-	"github.com/jmoiron/sqlx/types"
-
 	"github.com/lacker/coinkit/util"
 )
 
@@ -17,7 +15,7 @@ type CreateOperation struct {
 	Sequence uint32
 
 	// The data to be created in the new document
-	Data types.JSONText
+	Data *JSONObject
 
 	// How much the creator is willing to pay to get this document registered
 	Fee uint64

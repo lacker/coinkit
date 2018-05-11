@@ -104,11 +104,7 @@ func (kp *KeyPair) Serialize() []byte {
 		Public:  kp.publicKey.String(),
 		Private: base64.RawStdEncoding.EncodeToString(kp.privateKey),
 	}
-	bytes, err := json.MarshalIndent(s, "", "  ")
-	if err != nil {
-		panic(err)
-	}
-	return append(bytes, '\n')
+	return PrettyJSON(s)
 }
 
 // Interprets the message as utf8, then returns the signature as base64.

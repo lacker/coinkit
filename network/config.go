@@ -39,11 +39,7 @@ func NewConfigFromSerialized(serialized []byte) *Config {
 }
 
 func (c *Config) Serialize() []byte {
-	bytes, err := json.MarshalIndent(c, "", "  ")
-	if err != nil {
-		panic(err)
-	}
-	return append(bytes, '\n')
+	return util.PrettyJSON(c)
 }
 
 func (c *Config) PeerAddresses(keyPair *util.KeyPair) []*Address {

@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+
+	"github.com/lacker/coinkit/util"
 )
 
 // Information we need for database access
@@ -65,9 +67,5 @@ func NewConfigFromSerialized(serialized []byte) *Config {
 }
 
 func (c *Config) Serialize() []byte {
-	bytes, err := json.MarshalIndent(c, "", "  ")
-	if err != nil {
-		panic(err)
-	}
-	return append(bytes, '\n')
+	return util.PrettyJSON(c)
 }

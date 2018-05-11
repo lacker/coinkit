@@ -4,6 +4,8 @@ import (
 	"database/sql/driver"
 	"encoding/json"
 	"errors"
+
+	"github.com/lacker/coinkit/util"
 )
 
 // JSONObject is a modifiable set of key-value mappings.
@@ -54,4 +56,8 @@ func (ob *JSONObject) Scan(src interface{}) error {
 	}
 	ob.bytes = bytes
 	return json.Unmarshal(ob.bytes, &ob.content)
+}
+
+func (ob *JSONObject) String() string {
+	return string(util.PrettyJSON(ob))
 }

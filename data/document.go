@@ -1,7 +1,7 @@
 package data
 
 import (
-	"encoding/json"
+	"github.com/lacker/coinkit/util"
 )
 
 type Document struct {
@@ -19,11 +19,7 @@ type Document struct {
 }
 
 func (d *Document) String() string {
-	bytes, err := json.MarshalIndent(d, "", "  ")
-	if err != nil {
-		panic(err)
-	}
-	return string(append(bytes, '\n'))
+	return string(util.PrettyJSON(d))
 }
 
 func NewDocument(id uint64, data map[string]interface{}) *Document {

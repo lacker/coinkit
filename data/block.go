@@ -1,9 +1,8 @@
 package data
 
 import (
-	"encoding/json"
-
 	"github.com/lacker/coinkit/consensus"
+	"github.com/lacker/coinkit/util"
 )
 
 // data.Block represents how the value for a single block gets stored to the database.
@@ -40,9 +39,5 @@ func (b *Block) OperationMessage() *OperationMessage {
 }
 
 func (b *Block) String() string {
-	bytes, err := json.MarshalIndent(b, "", "  ")
-	if err != nil {
-		panic(err)
-	}
-	return string(append(bytes, '\n'))
+	return string(util.PrettyJSON(b))
 }
