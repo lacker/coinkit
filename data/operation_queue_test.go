@@ -2,13 +2,10 @@ package data
 
 import (
 	"testing"
-
-	"github.com/lacker/coinkit/util"
 )
 
 func TestFullQueue(t *testing.T) {
-	kp := util.NewKeyPair()
-	q := NewOperationQueue(kp.PublicKey(), nil, 1)
+	q := NewTestingOperationQueue()
 	for i := 1; i <= QueueLimit+10; i++ {
 		op := makeTestSendOperation(i)
 		send := op.Operation.(*SendOperation)
@@ -37,8 +34,7 @@ func TestFullQueue(t *testing.T) {
 }
 
 func TestSendOperation(t *testing.T) {
-	kp := util.NewKeyPair()
-	q := NewOperationQueue(kp.PublicKey(), nil, 1)
+	q := NewTestingOperationQueue()
 	if q.OperationMessage() != nil {
 		t.Fatal("there should be no operation message with an empty queue")
 	}
@@ -55,8 +51,7 @@ func TestSendOperation(t *testing.T) {
 }
 
 func TestCreateOperation(t *testing.T) {
-	kp := util.NewKeyPair()
-	q := NewOperationQueue(kp.PublicKey(), nil, 1)
+	q := NewTestingOperationQueue()
 	op := makeTestCreateOperation(1)
 	if !op.Verify() {
 		t.Fatal("bad op")

@@ -29,6 +29,9 @@ type LedgerChunk struct {
 }
 
 func (c *LedgerChunk) Hash() consensus.SlotValue {
+	if c == nil {
+		return consensus.SlotValue("")
+	}
 	h := sha512.New512_256()
 	for _, op := range c.Operations {
 		h.Write([]byte(op.Signature))

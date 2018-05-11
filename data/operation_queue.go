@@ -29,8 +29,12 @@ type OperationQueue struct {
 	// to some messages.
 	cache *Cache
 
-	// The key of the last chunk to get finalized
-	last consensus.SlotValue
+	// The hash of the last chunk to get finalized
+	lastHash consensus.SlotValue
+
+	// The last chunk to get finalized. This is nil iff we are
+	// working on slot 1.
+	lastChunk *LedgerChunk
 
 	// The current slot we are working on
 	slot int
@@ -39,14 +43,20 @@ type OperationQueue struct {
 	finalized int
 }
 
-func NewOperationQueue(publicKey util.PublicKey, db *Database, slot int) *OperationQueue {
+func NewOperationQueue(publicKey util.PublicKey, db *Database,
+	lastChunk *LedgerChunk, slot int) *OperationQueue {
 	q := &OperationQueue{
 		publicKey: publicKey,
 		set:       treeset.NewWith(HighestFeeFirst),
 		chunks:    make(map[consensus.SlotValue]*LedgerChunk),
-		last:      consensus.SlotValue(""),
-		finalized: 0,
+		lastHash:  lastChunk.Hash(),
+		lastChunk: lastChunk,
 		slot:      slot,
+		finalized: 0,
+	}
+
+	if lastChunk == nil && slot != 1 {
+		util.Logger.Fatalf("the queue needs a valid last chunk after slot 1")
 	}
 
 	if db == nil {
@@ -59,6 +69,19 @@ func NewOperationQueue(publicKey util.PublicKey, db *Database, slot int) *Operat
 
 	}
 	return q
+}
+
+// An operation queue with no database attached and no history
+func NewTestingOperationQueue() *OperationQueue {
+	kp := util.NewKeyPair()
+	return NewOperationQueue(kp.PublicKey(), nil, nil, 1)
+}
+
+func (q *OperationQueue) NextDocumentId() uint64 {
+	if q.lastChunk == nil {
+		return 1
+	}
+	return q.lastChunk.NextDocumentId
 }
 
 // Returns the top n items in the queue
@@ -330,14 +353,14 @@ func (q *OperationQueue) Finalize(
 	q.cache.FinalizeBlock(block)
 
 	q.finalized += len(chunk.Operations)
-	q.last = v
+	q.lastHash = v
 	q.chunks = make(map[consensus.SlotValue]*LedgerChunk)
 	q.slot += 1
 	q.Revalidate()
 }
 
 func (q *OperationQueue) Last() consensus.SlotValue {
-	return q.last
+	return q.lastHash
 }
 
 func (q *OperationQueue) Slot() int {

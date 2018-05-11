@@ -49,7 +49,7 @@ func newNodeWithAccounts(publicKey util.PublicKey, qs *consensus.QuorumSlice,
 		if last != nil {
 			// We are resuming where we left off, based on the database
 			slot = last.Slot + 1
-			queue = data.NewOperationQueue(publicKey, db, slot)
+			queue = data.NewOperationQueue(publicKey, db, last.Chunk, slot)
 			chain = consensus.NewChain(
 				publicKey, qs, queue, last.ExternalizeMessage())
 		}
@@ -58,7 +58,7 @@ func newNodeWithAccounts(publicKey util.PublicKey, qs *consensus.QuorumSlice,
 	if chain == nil {
 		// This is initial startup, so do the airdrop
 		slot = 1
-		queue = data.NewOperationQueue(publicKey, db, slot)
+		queue = data.NewOperationQueue(publicKey, db, nil, slot)
 		chain = consensus.NewEmptyChain(publicKey, qs, queue)
 		for _, account := range accounts {
 			queue.SetBalance(account.Owner, account.Balance)
