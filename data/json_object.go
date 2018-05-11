@@ -70,6 +70,15 @@ func (ob *JSONObject) Scan(src interface{}) error {
 	return ob.UnmarshalJSON(bytes)
 }
 
+func (ob *JSONObject) Copy() *JSONObject {
+	answer := NewEmptyJSONObject()
+	err := answer.UnmarshalJSON(ob.bytes)
+	if err != nil {
+		panic(err)
+	}
+	return answer
+}
+
 func (ob *JSONObject) Set(key string, value interface{}) {
 	ob.content[key] = value
 	ob.encode()
