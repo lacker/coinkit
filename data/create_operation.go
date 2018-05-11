@@ -22,7 +22,7 @@ type CreateOperation struct {
 }
 
 func (op *CreateOperation) String() string {
-	return fmt.Sprintf("create by %s: %s", util.Shorten(op.Signer), op.Data)
+	return fmt.Sprintf("create owner=%s, data=%s", util.Shorten(op.Signer), op.Data)
 }
 
 func (op *CreateOperation) OperationType() string {

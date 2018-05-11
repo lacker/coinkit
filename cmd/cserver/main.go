@@ -73,6 +73,7 @@ func main() {
 	}
 	if httpPort != 0 {
 		s.ServeHttpInBackground(httpPort)
+		util.Printf("serving status information on port %d", httpPort)
 	}
 	s.ServeForever()
 }

@@ -9,9 +9,10 @@ import (
 )
 
 // JSONObject is a modifiable set of key-value mappings.
-// It is designed to be more convenient than representing JSON as either a
-// map[string]interface{} or the raw bytes.
+// It is designed to be a convenient albeit possibly less efficient
+// way of representing a JSON object of unknown format.
 // After calling any exposed method, bytes and content should be equivalent.
+// JSONObject works with both go's built-in JSON encoding and SQL encoding.
 type JSONObject struct {
 	bytes   []byte
 	content map[string]interface{}
@@ -26,11 +27,6 @@ func (ob *JSONObject) encode() {
 	ob.bytes = bytes
 }
 
-func (ob *JSONObject) setBytes(bytes []byte) error {
-	ob.bytes = bytes
-	return json.Unmarshal(ob.bytes, &ob.content)
-}
-
 func NewJSONObject(content map[string]interface{}) *JSONObject {
 	answer := &JSONObject{
 		content: content,
@@ -41,7 +37,7 @@ func NewJSONObject(content map[string]interface{}) *JSONObject {
 
 func ReadJSONObject(bytes []byte) (*JSONObject, error) {
 	ob := &JSONObject{}
-	err := ob.setBytes(bytes)
+	err := ob.UnmarshalJSON(bytes)
 	if err == nil {
 		return ob, nil
 	}
@@ -53,6 +49,15 @@ func NewEmptyJSONObject() *JSONObject {
 	return NewJSONObject(content)
 }
 
+func (ob *JSONObject) MarshalJSON() ([]byte, error) {
+	return ob.bytes, nil
+}
+
+func (ob *JSONObject) UnmarshalJSON(bytes []byte) error {
+	ob.bytes = bytes
+	return json.Unmarshal(ob.bytes, &ob.content)
+}
+
 func (ob *JSONObject) Value() (driver.Value, error) {
 	return driver.Value(ob.bytes), nil
 }
@@ -62,7 +67,7 @@ func (ob *JSONObject) Scan(src interface{}) error {
 	if !ok {
 		return errors.New("expected []byte")
 	}
-	return ob.setBytes(bytes)
+	return ob.UnmarshalJSON(bytes)
 }
 
 func (ob *JSONObject) Set(key string, value interface{}) {
@@ -76,10 +81,14 @@ func (ob *JSONObject) Get(key string) (interface{}, bool) {
 	return value, ok
 }
 
-// Returns (0, false) if the key does not exist, or is not an int
+// Returns (0, false) if the key does not exist, or is not int-y
 func (ob *JSONObject) GetInt(key string) (int, bool) {
 	value, ok := ob.Get(key)
 	if ok {
+		floatValue, ok := value.(float64)
+		if ok {
+			return int(floatValue), true
+		}
 		intValue, ok := value.(int)
 		if ok {
 			return intValue, true
@@ -88,6 +97,14 @@ func (ob *JSONObject) GetInt(key string) (int, bool) {
 	return 0, false
 }
 
+func (ob *JSONObject) DefaultInt(key string, def int) int {
+	answer, ok := ob.GetInt(key)
+	if ok {
+		return answer
+	}
+	return def
+}
+
 func (ob *JSONObject) String() string {
-	return string(util.PrettyJSON(ob))
+	return string(util.PrettyJSON(ob.content))
 }

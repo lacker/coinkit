@@ -52,7 +52,7 @@ func NewDatabase(config *Config) *Database {
 	info := fmt.Sprintf(
 		"host=%s port=%d user=%s dbname=%s sslmode=disable statement_timeout=%d",
 		config.Host, config.Port, username, config.Database, 5000)
-	util.Logger.Printf("connecting to postgres with %s", info)
+	// util.Logger.Printf("connecting to postgres with %s", info)
 	if len(config.Password) > 0 {
 		util.Logger.Printf("(password hidden)")
 		info = fmt.Sprintf("%s password=%s", info, config.Password)
@@ -60,7 +60,7 @@ func NewDatabase(config *Config) *Database {
 	postgres := sqlx.MustConnect("postgres", info)
 
 	if config.testOnly {
-		util.Logger.Printf("clearing test-only database %s", config.Database)
+		// util.Logger.Printf("clearing test-only database %s", config.Database)
 		postgres.Exec("DELETE FROM blocks")
 		postgres.Exec("DELETE FROM accounts")
 		postgres.Exec("DELETE FROM documents")
@@ -121,7 +121,7 @@ func (db *Database) updateCurrentSlot() {
 
 // initialize makes sure the schemas are set up right and panics if not
 func (db *Database) initialize() {
-	util.Logger.Printf("initializing database %s", db.name)
+	// util.Logger.Printf("initializing database %s", db.name)
 
 	// There are some strange errors on initialization that I don't understand.
 	// Just sleep a bit and retry.
