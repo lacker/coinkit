@@ -194,33 +194,42 @@ func (c *Cache) SetBalance(owner string, amount uint64) {
 	})
 }
 
-// Process returns false if the operation cannot be processed
-func (c *Cache) Process(op Operation) bool {
-	t, ok := op.(*SendOperation)
-	if !ok {
-		panic("Cache cannot process non-SendOperation operations")
-	}
-	if !c.Validate(t) {
-		return false
-	}
-	source := c.GetAccount(t.Signer)
-	target := c.GetAccount(t.To)
+// ProcessSendOperation returns false if the operation cannot be processed
+func (c *Cache) ProcessSendOperation(op *SendOperation) bool {
+	source := c.GetAccount(op.Signer)
+	target := c.GetAccount(op.To)
 	if target == nil {
 		target = &Account{}
 	}
 	newSource := &Account{
-		Owner:    t.Signer,
-		Sequence: t.Sequence,
-		Balance:  source.Balance - t.Amount - t.Fee,
+		Owner:    op.Signer,
+		Sequence: op.Sequence,
+		Balance:  source.Balance - op.Amount - op.Fee,
 	}
 	newTarget := &Account{
-		Owner:    t.To,
+		Owner:    op.To,
 		Sequence: target.Sequence,
-		Balance:  target.Balance + t.Amount,
+		Balance:  target.Balance + op.Amount,
 	}
 	c.UpsertAccount(newSource)
 	c.UpsertAccount(newTarget)
 	return true
+}
+
+// Process returns false if the operation cannot be processed
+func (c *Cache) Process(operation Operation) bool {
+	if !c.Validate(operation) {
+		return false
+	}
+
+	switch op := operation.(type) {
+	case *SendOperation:
+		return c.ProcessSendOperation(op)
+	default:
+		util.Fatalf("Cache cannot process this type of operation: %+v", operation)
+		return false
+	}
+	panic("control should not get here")
 }
 
 // FinalizeBlock should be called whenever a new block is mined.
