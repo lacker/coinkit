@@ -23,13 +23,9 @@ type LedgerChunk struct {
 	// This only includes account information for the accounts that are
 	// mentioned in the operations.
 	Accounts map[string]*Account
-}
 
-func NewEmptyChunk() *LedgerChunk {
-	return &LedgerChunk{
-		Operations: []*SignedOperation{},
-		Accounts:   make(map[string]*Account),
-	}
+	// The id for the next document to be created, after this chunk
+	NextDocumentId uint64
 }
 
 func (c *LedgerChunk) Hash() consensus.SlotValue {

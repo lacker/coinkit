@@ -12,7 +12,7 @@ func TestInsertAndGet(t *testing.T) {
 	qs, _ := consensus.MakeTestQuorumSlice(4)
 	block := &Block{
 		Slot:  1,
-		Chunk: NewEmptyChunk(),
+		Chunk: &LedgerChunk{},
 		C:     7,
 		H:     8,
 		D:     qs,
@@ -41,7 +41,7 @@ func TestCantInsertTwice(t *testing.T) {
 	db := NewTestDatabase(0)
 	block := &Block{
 		Slot:  1,
-		Chunk: NewEmptyChunk(),
+		Chunk: &LedgerChunk{},
 		C:     1,
 		H:     2,
 	}
@@ -76,7 +76,7 @@ func TestLastBlock(t *testing.T) {
 	}
 	b = &Block{
 		Slot:  1,
-		Chunk: NewEmptyChunk(),
+		Chunk: &LedgerChunk{},
 	}
 	err := db.InsertBlock(b)
 	if err != nil {
@@ -119,7 +119,7 @@ func TestForBlocks(t *testing.T) {
 	for i := 1; i <= 5; i++ {
 		b := &Block{
 			Slot:  i,
-			Chunk: NewEmptyChunk(),
+			Chunk: &LedgerChunk{},
 			C:     7,
 		}
 		if db.InsertBlock(b) != nil {
