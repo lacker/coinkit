@@ -3,6 +3,7 @@ package data
 import (
 	"fmt"
 	"log"
+	"reflect"
 	"sort"
 
 	"github.com/lacker/coinkit/util"
@@ -177,6 +178,7 @@ func (c *Cache) Validate(operation Operation) bool {
 		// TODO: better logic here
 		return true
 	default:
+		util.Printf("operation: %+v has type %s", operation, reflect.TypeOf(operation))
 		panic("operation type cannot be validated")
 	}
 }
@@ -225,8 +227,11 @@ func (c *Cache) Process(operation Operation) bool {
 	switch op := operation.(type) {
 	case *SendOperation:
 		return c.ProcessSendOperation(op)
+	case *CreateOperation:
+		// TODO: actually create the document
+		return true
 	default:
-		util.Fatalf("Cache cannot process this type of operation: %+v", operation)
+		util.Fatalf("unhanded type in cache.Process: %s", reflect.TypeOf(operation))
 		return false
 	}
 	panic("control should not get here")
@@ -273,14 +278,14 @@ func (c *Cache) ProcessChunk(chunk *LedgerChunk) error {
 		return fmt.Errorf("%d ops in a chunk is too many", len(chunk.Operations))
 	}
 
-	for _, op := range chunk.SendOperations() {
+	for _, op := range chunk.Operations {
 		if op == nil {
 			return fmt.Errorf("chunk has a nil op")
 		}
 		if !op.Verify() {
 			return fmt.Errorf("op failed verify: %+v", op)
 		}
-		if !c.Process(op) {
+		if !c.Process(op.Operation) {
 			return fmt.Errorf("op failed to process: %+v", op)
 		}
 	}
@@ -289,6 +294,10 @@ func (c *Cache) ProcessChunk(chunk *LedgerChunk) error {
 		if !c.CheckEqual(owner, account) {
 			return fmt.Errorf("integrity checks failed after chunk processing")
 		}
+	}
+
+	if c.NextDocumentId != chunk.NextDocumentId {
+		return fmt.Errorf("bad NextDocumentId")
 	}
 
 	return nil
