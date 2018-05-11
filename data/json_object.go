@@ -26,9 +26,8 @@ func (ob *JSONObject) encode() {
 	ob.bytes = bytes
 }
 
-// Sets content based on bytes.
-// Returns an error if the bytes are bad json
-func (ob *JSONObject) decode() error {
+func (ob *JSONObject) setBytes(bytes []byte) error {
+	ob.bytes = bytes
 	return json.Unmarshal(ob.bytes, &ob.content)
 }
 
@@ -38,6 +37,15 @@ func NewJSONObject(content map[string]interface{}) *JSONObject {
 	}
 	answer.encode()
 	return answer
+}
+
+func ReadJSONObject(bytes []byte) (*JSONObject, error) {
+	ob := &JSONObject{}
+	err := ob.setBytes(bytes)
+	if err == nil {
+		return ob, nil
+	}
+	return nil, err
 }
 
 func NewEmptyJSONObject() *JSONObject {
@@ -54,8 +62,30 @@ func (ob *JSONObject) Scan(src interface{}) error {
 	if !ok {
 		return errors.New("expected []byte")
 	}
-	ob.bytes = bytes
-	return json.Unmarshal(ob.bytes, &ob.content)
+	return ob.setBytes(bytes)
+}
+
+func (ob *JSONObject) Set(key string, value interface{}) {
+	ob.content[key] = value
+	ob.encode()
+}
+
+// Returns (nil, false) if the key does not exist
+func (ob *JSONObject) Get(key string) (interface{}, bool) {
+	value, ok := ob.content[key]
+	return value, ok
+}
+
+// Returns (0, false) if the key does not exist, or is not an int
+func (ob *JSONObject) GetInt(key string) (int, bool) {
+	value, ok := ob.Get(key)
+	if ok {
+		intValue, ok := value.(int)
+		if ok {
+			return intValue, true
+		}
+	}
+	return 0, false
 }
 
 func (ob *JSONObject) String() string {

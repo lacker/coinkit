@@ -45,6 +45,19 @@ func (op *CreateOperation) Verify() bool {
 	return true
 }
 
+func makeTestCreateOperation(n int) *SignedOperation {
+	mint := util.NewKeyPairFromSecretPhrase("mint")
+	data := NewEmptyJSONObject()
+	data.Set("foo", n)
+	op := &CreateOperation{
+		Signer:   mint.PublicKey().String(),
+		Sequence: uint32(n),
+		Data:     data,
+		Fee:      0,
+	}
+	return NewSignedOperation(op, mint)
+}
+
 func init() {
 	RegisterOperationType(&CreateOperation{})
 }

@@ -100,7 +100,7 @@ func (q *OperationQueue) Add(op *SignedOperation) bool {
 		return false
 	}
 
-	q.Logf("saw a new operation: %s", op.Operation)
+	// q.Logf("saw a new operation: %s", op.Operation)
 	q.set.Add(op)
 
 	if q.set.Size() > QueueLimit {

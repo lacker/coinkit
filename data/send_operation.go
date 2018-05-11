@@ -56,14 +56,14 @@ func (op *SendOperation) Verify() bool {
 func makeTestSendOperation(n int) *SignedOperation {
 	kp := util.NewKeyPairFromSecretPhrase(fmt.Sprintf("blorp %d", n))
 	dest := util.NewKeyPairFromSecretPhrase("destination")
-	t := &SendOperation{
+	op := &SendOperation{
 		Signer:   kp.PublicKey().String(),
 		Sequence: 1,
 		To:       dest.PublicKey().String(),
 		Amount:   uint64(n),
 		Fee:      uint64(n),
 	}
-	return NewSignedOperation(t, kp)
+	return NewSignedOperation(op, kp)
 }
 
 func init() {

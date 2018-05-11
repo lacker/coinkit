@@ -274,8 +274,9 @@ func TestAccounts(t *testing.T) {
 	if db.GetAccount("bob") == nil {
 		t.Fatalf("bob should exist now")
 	}
-	if db.ForAccounts(nothing) != 1 {
-		t.Fatalf("there should be 1 thing in the db now")
+	numAccounts := db.ForAccounts(nothing)
+	if numAccounts != 1 {
+		t.Fatalf("there should be 1 thing in the db now, but there was %d", numAccounts)
 	}
 	a.Owner = "bob2"
 	db.UpsertAccount(a)
