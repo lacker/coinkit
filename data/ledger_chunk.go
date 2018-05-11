@@ -65,16 +65,3 @@ func (c *LedgerChunk) Scan(src interface{}) error {
 	}
 	return json.Unmarshal(bytes, c)
 }
-
-// Returns only the operations that are send operations
-// TODO: get rid of this
-func (c *LedgerChunk) SendOperations() []*SendOperation {
-	answer := []*SendOperation{}
-	for _, op := range c.Operations {
-		t, ok := op.Operation.(*SendOperation)
-		if ok {
-			answer = append(answer, t)
-		}
-	}
-	return answer
-}
