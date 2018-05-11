@@ -65,8 +65,11 @@ func NewOperationQueue(publicKey util.PublicKey, db *Database,
 		}
 		q.cache = NewCache()
 	} else {
-		q.cache = NewDatabaseCache(db)
-
+		nextDocumentId := uint64(1)
+		if lastChunk != nil {
+			nextDocumentId = lastChunk.NextDocumentId
+		}
+		q.cache = NewDatabaseCache(db, nextDocumentId)
 	}
 	return q
 }
@@ -75,13 +78,6 @@ func NewOperationQueue(publicKey util.PublicKey, db *Database,
 func NewTestingOperationQueue() *OperationQueue {
 	kp := util.NewKeyPair()
 	return NewOperationQueue(kp.PublicKey(), nil, nil, 1)
-}
-
-func (q *OperationQueue) NextDocumentId() uint64 {
-	if q.lastChunk == nil {
-		return 1
-	}
-	return q.lastChunk.NextDocumentId
 }
 
 // Returns the top n items in the queue
@@ -296,8 +292,9 @@ func (q *OperationQueue) NewChunk(
 		return consensus.SlotValue(""), nil
 	}
 	chunk := &LedgerChunk{
-		Operations: ops,
-		Accounts:   state,
+		Operations:     ops,
+		Accounts:       state,
+		NextDocumentId: validator.NextDocumentId,
 	}
 	key := chunk.Hash()
 	if _, ok := q.chunks[key]; !ok {

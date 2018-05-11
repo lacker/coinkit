@@ -36,26 +36,32 @@ type Cache struct {
 	// have the relevant data.
 	// readOnly and database should not both be non-nil.
 	database *Database
+
+	NextDocumentId uint64
 }
 
 func NewCache() *Cache {
 	return &Cache{
-		accounts: make(map[string]*Account),
-		blocks:   make(map[int]*Block),
+		accounts:       make(map[string]*Account),
+		blocks:         make(map[int]*Block),
+		NextDocumentId: uint64(1),
 	}
 }
 
-func NewDatabaseCache(database *Database) *Cache {
+func NewDatabaseCache(database *Database, nextDocumentId uint64) *Cache {
 	c := NewCache()
 	c.database = database
+	c.NextDocumentId = nextDocumentId
 	return c
 }
 
-// Returns a copy of this cache that does copy-on-write, so changes
-// made won't be visible in the original
+// Returns a copy of this cache that writes changes into the copy, so changes
+// made won't be visible in the original, but lets reads fall through to the
+// original.
 func (cache *Cache) CowCopy() *Cache {
 	c := NewCache()
 	c.readOnly = cache
+	c.NextDocumentId = cache.NextDocumentId
 	return c
 }
 

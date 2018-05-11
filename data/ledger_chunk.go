@@ -17,8 +17,6 @@ const MaxChunkSize = 100
 // A LedgerChunk is the information in one block of the blockchain.
 // LedgerChunk is sql-json-serializable.
 type LedgerChunk struct {
-	Operations []*SignedOperation
-
 	// The state of accounts after these operations have been processed.
 	// This only includes account information for the accounts that are
 	// mentioned in the operations.
@@ -26,6 +24,8 @@ type LedgerChunk struct {
 
 	// The id for the next document to be created, after this chunk
 	NextDocumentId uint64
+
+	Operations []*SignedOperation
 }
 
 func (c *LedgerChunk) Hash() consensus.SlotValue {
