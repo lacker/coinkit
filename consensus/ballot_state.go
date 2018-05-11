@@ -393,9 +393,7 @@ func (s *BallotState) MaybeConfirmAsCommitted(n int, x SlotValue) bool {
 		}
 	}
 
-	util.Infof("XXX checking if we have quorum for CAC")
 	if !MeetsQuorum(s, accepted) {
-		util.Infof("XXX no quorum for CAC. accepted: %+v", accepted)
 		return false
 	}
 

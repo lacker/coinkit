@@ -36,7 +36,7 @@ func TestFullQueue(t *testing.T) {
 	}
 }
 
-func TestOperationMessage(t *testing.T) {
+func TestSendOperation(t *testing.T) {
 	kp := util.NewKeyPair()
 	q := NewOperationQueue(kp.PublicKey(), nil, 1)
 	if q.OperationMessage() != nil {
@@ -50,6 +50,24 @@ func TestOperationMessage(t *testing.T) {
 	}
 	q.Add(op)
 	if q.OperationMessage() == nil {
-		t.Fatal("there should be an operation message after we add one operation")
+		t.Fatal("there should be an operation message after we add a send operation")
+	}
+}
+
+func TestCreateOperation(t *testing.T) {
+	kp := util.NewKeyPair()
+	q := NewOperationQueue(kp.PublicKey(), nil, 1)
+	op := makeTestCreateOperation(1)
+	if !op.Verify() {
+		t.Fatal("bad op")
+	}
+	q.Add(op)
+	if q.OperationMessage() != nil {
+		t.Fatal("the op should be invalid because of insufficient balance")
+	}
+	q.cache.SetBalance(op.GetSigner(), TotalMoney)
+	q.Add(op)
+	if q.OperationMessage() == nil {
+		t.Fatal("there should be an op message with a create operation")
 	}
 }

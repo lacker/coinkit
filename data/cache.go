@@ -8,12 +8,12 @@ import (
 	"github.com/lacker/coinkit/util"
 )
 
-// The Cache stores a subset of the information that is in the database. Typically
+// The Cache stores a subset of the information that is in the database. Generally
 // this is the subset needed to validate some of the pending operations, so that
 // we can revalidate quickly.
 // Cache is not multithreaded.
-// If there are multiple Cache objects for a single Database, data can get stale, so
-// don't do that.
+// If there are multiple Cache objects in use with the same cache.database
+// set, data can get stale, so don't do that.
 type Cache struct {
 	// Storing real account data.
 	// The key of the map is the owner of that account.
@@ -152,24 +152,27 @@ func (c *Cache) UpsertAccount(account *Account) {
 }
 
 // Validate returns whether this operation is valid
-func (c *Cache) Validate(op Operation) bool {
-	t, ok := op.(*SendOperation)
-	if !ok {
-		panic("Cache cannot validate non-SendOperation operations")
-	}
-	account := c.GetAccount(t.Signer)
+func (c *Cache) Validate(operation Operation) bool {
+	account := c.GetAccount(operation.GetSigner())
 	if account == nil {
 		return false
 	}
-	if account.Sequence+1 != t.Sequence {
+	if account.Sequence+1 != operation.GetSequence() {
 		return false
 	}
-	cost := t.Amount + t.Fee
-	if cost > account.Balance {
+	if account.Balance < operation.GetFee() {
 		return false
 	}
 
-	return true
+	switch op := operation.(type) {
+	case *SendOperation:
+		return account.ValidateSendOperation(op)
+	case *CreateOperation:
+		// TODO: better logic here
+		return true
+	default:
+		panic("operation type cannot be validated")
+	}
 }
 
 func (c *Cache) SetBalance(owner string, amount uint64) {

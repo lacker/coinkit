@@ -6,11 +6,12 @@ import (
 	"github.com/lacker/coinkit/util"
 )
 
-// Accounts are stored in units of nanocoins.
-const OneMillion = 1000 * 1000
-const NumCoins = 21 * OneMillion
-const OneBillion = 1000 * OneMillion
-const TotalMoney = NumCoins * OneBillion
+// Each unit of money pays for the storage of one byte.
+// The total amount of money is thus (roughly) equivalent to the total
+// amount of document bytes that a node has to be storing.
+// The equivalence is only rough because there is some other data
+// besides the direct document storage that takes up space.
+const TotalMoney = 1e9
 
 type Account struct {
 	Owner string
@@ -22,6 +23,10 @@ type Account struct {
 
 	// The current balance of this account.
 	Balance uint64
+
+	// How much data this account is currently storing.
+	// Storage can never exceed balance.
+	Storage uint64
 }
 
 // For debugging
@@ -55,4 +60,9 @@ func (a *Account) CheckEqual(other *Account) error {
 
 func (a *Account) Bytes() []byte {
 	return []byte(fmt.Sprintf("%s:%d:%d", a.Owner, a.Sequence, a.Balance))
+}
+
+func (a *Account) ValidateSendOperation(op *SendOperation) bool {
+	cost := op.Amount + op.Fee
+	return cost <= a.Balance
 }

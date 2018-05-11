@@ -8,9 +8,11 @@ type Document struct {
 	// For consistency, all fields on a document are stored within the
 	// Data column.
 	// Naming convention is namedLikeThis.
-	// Some fields are required on every object in the database:
+	// Some fields are required on every object in the database, and
+	// automatically added on object creation:
 	// id: a unique integer
-	// TODO: collection, owner, createdAt, updatedAt
+	// owner: the public key of the account that owns this document
+	// TODO: consider collection, createdAt, updatedAt
 	Data *JSONObject
 
 	// Every document has a unique id, starting at 1. It is stored twice in the
