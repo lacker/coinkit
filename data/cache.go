@@ -175,7 +175,7 @@ func (c *Cache) Validate(operation Operation) bool {
 	case *SendOperation:
 		return account.ValidateSendOperation(op)
 	case *CreateOperation:
-		// TODO: better logic here
+		// TODO: check if this account has enough space to store this document
 		return true
 	default:
 		util.Printf("operation: %+v has type %s", operation, reflect.TypeOf(operation))
@@ -228,7 +228,11 @@ func (c *Cache) Process(operation Operation) bool {
 	case *SendOperation:
 		return c.ProcessSendOperation(op)
 	case *CreateOperation:
-		// TODO: actually create the document
+		doc := op.Document(c.NextDocumentId)
+		if c.database != nil {
+			c.database.InsertDocument(doc)
+		}
+		c.NextDocumentId++
 		return true
 	default:
 		util.Fatalf("unhanded type in cache.Process: %s", reflect.TypeOf(operation))

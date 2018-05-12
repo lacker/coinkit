@@ -58,6 +58,15 @@ func makeTestCreateOperation(n int) *SignedOperation {
 	return NewSignedOperation(op, mint)
 }
 
+func (op *CreateOperation) Document(id uint64) *Document {
+	data := op.Data.Copy()
+	data.Set("id", id)
+	return &Document{
+		Data: data,
+		Id:   id,
+	}
+}
+
 func init() {
 	RegisterOperationType(&CreateOperation{})
 }
