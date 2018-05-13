@@ -55,6 +55,19 @@ func newSendMessage(from *util.KeyPair, to *util.KeyPair, seq int, amount int) u
 	return data.NewOperationMessage(op)
 }
 
+func sendMessages(nodes []*Node, t *testing.T) {
+	for n := 0; n < 10; n++ {
+		for i := 0; i < len(nodes); i++ {
+			for j := 0; j < len(nodes); j++ {
+				if i == j {
+					continue
+				}
+				sendNodeToNodeMessages(nodes[i], nodes[j], t)
+			}
+		}
+	}
+}
+
 func TestNodeCatchup(t *testing.T) {
 	kp := util.NewKeyPairFromSecretPhrase("client")
 	kp2 := util.NewKeyPairFromSecretPhrase("bob")
