@@ -79,18 +79,11 @@ func TestNodeCatchup(t *testing.T) {
 		nodes = append(nodes, node)
 	}
 
-	// Run a few rounds with the first three nodes
+	// Run a few rounds without the last node
 	for round := 1; round <= 3; round++ {
 		m := newSendMessage(kp, kp2, round, 1)
 		nodes[0].Handle(kp.PublicKey().String(), m)
-		for i := 0; i < 10; i++ {
-			sendNodeToNodeMessages(nodes[0], nodes[1], t)
-			sendNodeToNodeMessages(nodes[0], nodes[2], t)
-			sendNodeToNodeMessages(nodes[1], nodes[2], t)
-			sendNodeToNodeMessages(nodes[1], nodes[0], t)
-			sendNodeToNodeMessages(nodes[2], nodes[0], t)
-			sendNodeToNodeMessages(nodes[2], nodes[1], t)
-		}
+		sendMessages(nodes[0:len(nodes)-1], t)
 		for i := 0; i <= 2; i++ {
 			if nodes[i].Slot() != round+1 {
 				t.Fatalf("nodes[%d] did not finish round %d", i, round)
@@ -99,14 +92,7 @@ func TestNodeCatchup(t *testing.T) {
 	}
 
 	// The last node should be able to catch up
-	for i := 0; i < 10; i++ {
-		sendNodeToNodeMessages(nodes[0], nodes[3], t)
-		sendNodeToNodeMessages(nodes[3], nodes[0], t)
-		sendNodeToNodeMessages(nodes[1], nodes[3], t)
-		sendNodeToNodeMessages(nodes[3], nodes[2], t)
-		sendNodeToNodeMessages(nodes[2], nodes[3], t)
-		sendNodeToNodeMessages(nodes[3], nodes[2], t)
-	}
+	sendMessages(nodes, t)
 	if nodes[3].Slot() != 4 {
 		t.Fatalf("catchup failed")
 	}
@@ -123,18 +109,11 @@ func TestNodeCatchupFromDatabase(t *testing.T) {
 		nodes = append(nodes, node)
 	}
 
-	// Run a few rounds with the first three nodes
+	// Run a few rounds without the last node
 	for round := 1; round <= 3; round++ {
 		m := newSendMessage(mint, bob, round, 10)
 		nodes[0].Handle(mint.PublicKey().String(), m)
-		for i := 0; i < 10; i++ {
-			sendNodeToNodeMessages(nodes[0], nodes[1], t)
-			sendNodeToNodeMessages(nodes[0], nodes[2], t)
-			sendNodeToNodeMessages(nodes[1], nodes[2], t)
-			sendNodeToNodeMessages(nodes[1], nodes[0], t)
-			sendNodeToNodeMessages(nodes[2], nodes[0], t)
-			sendNodeToNodeMessages(nodes[2], nodes[1], t)
-		}
+		sendMessages(nodes[0:len(nodes)-1], t)
 		for i := 0; i <= 2; i++ {
 			if nodes[i].Slot() != round+1 {
 				t.Fatalf("nodes[%d] did not finish round %d", i, round)
@@ -156,14 +135,7 @@ func TestNodeCatchupFromDatabase(t *testing.T) {
 	util.Verbose = false
 
 	// The last node should be able to catch up
-	for i := 0; i < 10; i++ {
-		sendNodeToNodeMessages(nodes[0], nodes[3], t)
-		sendNodeToNodeMessages(nodes[3], nodes[0], t)
-		sendNodeToNodeMessages(nodes[1], nodes[3], t)
-		sendNodeToNodeMessages(nodes[3], nodes[2], t)
-		sendNodeToNodeMessages(nodes[2], nodes[3], t)
-		sendNodeToNodeMessages(nodes[3], nodes[2], t)
-	}
+	sendMessages(nodes, t)
 	if nodes[3].Slot() != 4 {
 		t.Fatalf("catchup failed")
 	}
@@ -181,16 +153,10 @@ func TestNodeRestarting(t *testing.T) {
 	}
 
 	// Send 10 to Bob
+	// Don't use the last node, pretend it is out of the network
 	m := newSendMessage(mint, bob, 1, 10)
 	nodes[0].Handle(mint.PublicKey().String(), m)
-	for i := 0; i < 10; i++ {
-		sendNodeToNodeMessages(nodes[0], nodes[1], t)
-		sendNodeToNodeMessages(nodes[0], nodes[2], t)
-		sendNodeToNodeMessages(nodes[1], nodes[2], t)
-		sendNodeToNodeMessages(nodes[1], nodes[0], t)
-		sendNodeToNodeMessages(nodes[2], nodes[0], t)
-		sendNodeToNodeMessages(nodes[2], nodes[1], t)
-	}
+	sendMessages(nodes[0:len(nodes)-1], t)
 
 	if nodes[0].database.Commits() != 2 {
 		t.Fatalf("two commits should have happened, one for airdrop, one for the send")
@@ -201,7 +167,8 @@ func TestNodeRestarting(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	// Knock out and replace node 1
+	// Knock out and replace node 1.
+	// So node 3 is totally out, node 1 had to restart from the database.
 	log.Printf("replacing node 1 (%s)", util.Shorten(names[1].String()))
 	nodes[1] = NewNode(names[1], qs, nodes[1].database)
 	if nodes[1].Slot() != nodes[1].queue.Slot() {
@@ -213,15 +180,8 @@ func TestNodeRestarting(t *testing.T) {
 	m = newSendMessage(mint, bob, 2, 10)
 	nodes[0].Handle(mint.PublicKey().String(), m)
 
-	// Even without node 3 the network should continue
-	for i := 0; i < 10; i++ {
-		sendNodeToNodeMessages(nodes[0], nodes[1], t)
-		sendNodeToNodeMessages(nodes[0], nodes[2], t)
-		sendNodeToNodeMessages(nodes[1], nodes[2], t)
-		sendNodeToNodeMessages(nodes[1], nodes[0], t)
-		sendNodeToNodeMessages(nodes[2], nodes[0], t)
-		sendNodeToNodeMessages(nodes[2], nodes[1], t)
-	}
+	// Even without the last node, the network should continue
+	sendMessages(nodes[0:len(nodes)-1], t)
 
 	if nodes[1].queue.MaxBalance() != data.TotalMoney-20 {
 		t.Fatalf("looks like node 1 never recovered after its restart")
