@@ -45,7 +45,7 @@ func (op *CreateOperation) Verify() bool {
 	return true
 }
 
-func makeTestCreateOperation(n int) *SignedOperation {
+func MakeTestCreateOperation(n int) *SignedOperation {
 	mint := util.NewKeyPairFromSecretPhrase("mint")
 	data := NewEmptyJSONObject()
 	data.Set("foo", n)

@@ -6,7 +6,7 @@ import (
 )
 
 func TestCreateOperationSerialization(t *testing.T) {
-	op1 := makeTestCreateOperation(1).Operation.(*CreateOperation)
+	op1 := MakeTestCreateOperation(1).Operation.(*CreateOperation)
 	bytes, err := json.Marshal(op1)
 	if err != nil {
 		panic(err)

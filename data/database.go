@@ -515,6 +515,23 @@ func (db *Database) InsertDocument(d *Document) error {
 	return nil
 }
 
+func (db *Database) GetDocument(id uint64) *Document {
+	rows, err := db.postgres.Queryx(
+		"SELECT * FROM documents WHERE id = $1 LIMIT 1", id)
+	if err != nil {
+		panic(err)
+	}
+	for rows.Next() {
+		d := &Document{}
+		err := rows.StructScan(d)
+		if err != nil {
+			panic(err)
+		}
+		return d
+	}
+	return nil
+}
+
 func (db *Database) GetDocuments(match map[string]interface{}, limit int) []*Document {
 	bytes, err := json.Marshal(match)
 	if err != nil {

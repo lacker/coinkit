@@ -198,6 +198,28 @@ func TestNodeRestarting(t *testing.T) {
 	}
 }
 
+func TestCreatingDocuments(t *testing.T) {
+	qs, names := consensus.MakeTestQuorumSlice(4)
+	nodes := []*Node{}
+	for i, name := range names {
+		db := data.NewTestDatabase(i)
+		node := NewNode(name, qs, db)
+		nodes = append(nodes, node)
+	}
+
+	// Create a document
+	op := data.MakeTestCreateOperation(1)
+	m := data.NewOperationMessage(op)
+	nodes[0].Handle(op.GetSigner(), m)
+
+	sendMessages(nodes, t)
+
+	doc := nodes[0].database.GetDocument(1)
+	if doc == nil {
+		t.Fatalf("the document should have been created")
+	}
+}
+
 func nodeFuzzTest(seed int64, t *testing.T) {
 	initialMoney := uint64(4)
 
