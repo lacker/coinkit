@@ -41,6 +41,7 @@ func (op *CreateOperation) GetSequence() uint32 {
 	return op.Sequence
 }
 
+// TODO: should this do something?
 func (op *CreateOperation) Verify() bool {
 	return true
 }
