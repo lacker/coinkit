@@ -532,6 +532,8 @@ func (db *Database) GetDocument(id uint64) *Document {
 	return nil
 }
 
+// TODO: implement func (db *Database) UpdateDocument(id uint64, data *JSONObject)
+
 func (db *Database) GetDocuments(match map[string]interface{}, limit int) []*Document {
 	bytes, err := json.Marshal(match)
 	if err != nil {

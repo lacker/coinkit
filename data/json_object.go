@@ -49,6 +49,18 @@ func NewEmptyJSONObject() *JSONObject {
 	return NewJSONObject(content)
 }
 
+// UpdateWith uses any data in `other` to replace fields that are found in `ob`.
+// When `other` contains a null value, that field in `ob` is removed.
+func (ob *JSONObject) UpdateWith(other *JSONObject) {
+	for key, value := range other.content {
+		if value == nil {
+			ob.Delete(key)
+		} else {
+			ob.Set(key, value)
+		}
+	}
+}
+
 func (ob *JSONObject) MarshalJSON() ([]byte, error) {
 	return ob.bytes, nil
 }
@@ -88,6 +100,11 @@ func (ob *JSONObject) Set(key string, value interface{}) {
 func (ob *JSONObject) Get(key string) (interface{}, bool) {
 	value, ok := ob.content[key]
 	return value, ok
+}
+
+func (ob *JSONObject) Delete(key string) {
+	delete(ob.content, key)
+	ob.encode()
 }
 
 // Returns (0, false) if the key does not exist, or is not int-y
