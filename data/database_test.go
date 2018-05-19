@@ -171,6 +171,25 @@ func TestGetDocumentsNoResults(t *testing.T) {
 	}
 }
 
+func TestSetDocument(t *testing.T) {
+	db := NewTestDatabase(0)
+	d := NewDocument(uint64(3), map[string]interface{}{
+		"number": 3,
+	})
+	err := db.InsertDocument(d)
+	if err != nil {
+		t.Fatal(err)
+	}
+	db.Commit()
+	d.Data.Set("number", 4)
+	db.SetDocument(d)
+	db.Commit()
+	docs := db.GetDocuments(map[string]interface{}{"number": 4}, 2)
+	if len(docs) != 1 {
+		t.Fatalf("could not find newly-set document")
+	}
+}
+
 const benchmarkMax = 400
 
 func databaseForBenchmarking() *Database {
