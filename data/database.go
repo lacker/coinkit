@@ -502,6 +502,7 @@ VALUES (:id, :data)
 
 // InsertDocument returns an error if it failed because there is already a document with
 // this id.
+// It uses the transaction.
 // It panics if there is a fundamental database problem.
 // If this returns an error, the pending transaction will be unusable.
 func (db *Database) InsertDocument(d *Document) error {
@@ -532,7 +533,26 @@ func (db *Database) GetDocument(id uint64) *Document {
 	return nil
 }
 
+const documentUpdate = `
+UPDATE documents
+SET data = :data
+WHERE id = :id
+`
+
+// SetDocument changes the contents of the document to be precisely the provided data.
+// It uses the transaction.
+// This panics if there is a fundamental database error.
+// If this returns an error, the pending transaction will be unusable.
+func (db *Database) SetDocument(doc *Document) error {
+	err := db.namedExec(documentUpdate, doc)
+	if err != nil {
+		panic(err)
+	}
+	return nil
+}
+
 // TODO: implement func (db *Database) UpdateDocument(id uint64, data *JSONObject)
+// It needs to do a read within the transaction
 
 func (db *Database) GetDocuments(match map[string]interface{}, limit int) []*Document {
 	bytes, err := json.Marshal(match)
