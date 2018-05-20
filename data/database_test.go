@@ -190,6 +190,16 @@ func TestSetDocument(t *testing.T) {
 	}
 }
 
+// TODO: this just does nothing. should it do something?
+func TestSetNonexistentDocument(t *testing.T) {
+	db := NewTestDatabase(0)
+	doc := NewDocument(uint64(4), map[string]interface{}{
+		"number": 4,
+	})
+	db.SetDocument(doc)
+	db.Commit()
+}
+
 const benchmarkMax = 400
 
 func databaseForBenchmarking() *Database {
