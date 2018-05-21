@@ -145,8 +145,8 @@ func (db *Database) initialize() {
 	panic("control should not reach here")
 }
 
-// namedExec is a helper function to execute a write within the pending transaction.
-func (db *Database) namedExec(query string, arg interface{}) error {
+// namedExecTx is a helper function to execute a write within the pending transaction.
+func (db *Database) namedExecTx(query string, arg interface{}) error {
 	db.mutex.Lock()
 	defer db.mutex.Unlock()
 
@@ -155,6 +155,17 @@ func (db *Database) namedExec(query string, arg interface{}) error {
 	}
 	_, err := db.tx.NamedExec(query, arg)
 	return err
+}
+
+// get is a helper function to execute a Get within the pending transaction.
+func (db *Database) getTx(dest interface{}, query string, args ...interface{}) error {
+	db.mutex.Lock()
+	defer db.mutex.Unlock()
+
+	if db.tx == nil {
+		db.tx = db.postgres.MustBegin()
+	}
+	return db.tx.Get(dest, query, args...)
 }
 
 func (db *Database) CurrentSlot() int {
@@ -341,7 +352,7 @@ func (db *Database) InsertBlock(b *Block) error {
 	if b.Slot != cur+1 {
 		util.Logger.Fatalf("inserting block at slot %d but db has slot %d", b.Slot, cur)
 	}
-	err := db.namedExec(blockInsert, b)
+	err := db.namedExecTx(blockInsert, b)
 	if err != nil {
 		if isUniquenessError(err) {
 			return err
@@ -417,7 +428,7 @@ ON CONFLICT (owner) DO UPDATE
 
 // Database.UpsertAccount will not finalize until Commit is called.
 func (db *Database) UpsertAccount(a *Account) error {
-	err := db.namedExec(accountUpsert, a)
+	err := db.namedExecTx(accountUpsert, a)
 	if err != nil {
 		panic(err)
 	}
@@ -506,7 +517,7 @@ VALUES (:id, :data)
 // It panics if there is a fundamental database problem.
 // If this returns an error, the pending transaction will be unusable.
 func (db *Database) InsertDocument(d *Document) error {
-	err := db.namedExec(documentInsert, d)
+	err := db.namedExecTx(documentInsert, d)
 	if err != nil {
 		if isUniquenessError(err) {
 			return err
@@ -543,8 +554,9 @@ WHERE id = :id
 // It uses the transaction.
 // This panics if there is a fundamental database error.
 // If this returns an error, the pending transaction will be unusable.
+// If there is no such document, no change is made.
 func (db *Database) SetDocument(doc *Document) error {
-	err := db.namedExec(documentUpdate, doc)
+	err := db.namedExecTx(documentUpdate, doc)
 	if err != nil {
 		panic(err)
 	}
