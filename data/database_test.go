@@ -190,7 +190,6 @@ func TestSetDocument(t *testing.T) {
 	}
 }
 
-// TODO: this just does nothing. should it do something?
 func TestSetNonexistentDocument(t *testing.T) {
 	db := NewTestDatabase(0)
 	doc := NewDocument(uint64(4), map[string]interface{}{
@@ -198,6 +197,10 @@ func TestSetNonexistentDocument(t *testing.T) {
 	})
 	db.SetDocument(doc)
 	db.Commit()
+	docs := db.GetDocuments(map[string]interface{}{"number": 4}, 2)
+	if len(docs) != 0 {
+		t.Fatalf("setting a nonexistent doc should be a no-op")
+	}
 }
 
 const benchmarkMax = 400
