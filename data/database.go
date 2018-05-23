@@ -563,8 +563,12 @@ func (db *Database) SetDocument(doc *Document) error {
 	return nil
 }
 
-// TODO: implement func (db *Database) UpdateDocument(id uint64, data *JSONObject)
-// It needs to do a read within the transaction
+func (db *Database) UpdateDocument(id uint64, data *JSONObject) {
+	// It needs to do a read within the transaction
+	doc := &Document
+	db.GetTx(doc, "SELECT * FROM documents WHERE id = $1 LIMIT 1", id)
+	panic("TODO: implement more")
+}
 
 func (db *Database) GetDocuments(match map[string]interface{}, limit int) []*Document {
 	bytes, err := json.Marshal(match)
