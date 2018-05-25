@@ -171,7 +171,7 @@ func TestGetDocumentsNoResults(t *testing.T) {
 	}
 }
 
-func TestSetDocument(t *testing.T) {
+func TestSetAndUpdateDocument(t *testing.T) {
 	db := NewTestDatabase(0)
 	d := NewDocument(uint64(3), map[string]interface{}{
 		"number": 3,
@@ -188,6 +188,13 @@ func TestSetDocument(t *testing.T) {
 	if len(docs) != 1 {
 		t.Fatalf("could not find newly-set document")
 	}
+
+	data := NewEmptyJSONObject()
+	data.Set("number", 4)
+	db.UpdateDocument(uint64(3), data)
+	db.Commit()
+
+	// TODO: check it changed
 }
 
 func TestSetNonexistentDocument(t *testing.T) {
