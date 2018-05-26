@@ -194,7 +194,11 @@ func TestSetAndUpdateDocument(t *testing.T) {
 	db.UpdateDocument(uint64(3), data)
 	db.Commit()
 
-	// TODO: check it changed
+	// Check it updated
+	docs = db.GetDocuments(map[string]interface{}{"number": 3}, 2)
+	if len(docs) != 1 {
+		t.Fatalf("unexpectedly found %d docs", len(docs))
+	}
 }
 
 func TestSetNonexistentDocument(t *testing.T) {
