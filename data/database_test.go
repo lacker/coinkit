@@ -190,12 +190,12 @@ func TestSetAndUpdateDocument(t *testing.T) {
 	}
 
 	data := NewEmptyJSONObject()
-	data.Set("number", 4)
+	data.Set("number", 5)
 	db.UpdateDocument(uint64(3), data)
 	db.Commit()
 
 	// Check it updated
-	docs = db.GetDocuments(map[string]interface{}{"number": 3}, 2)
+	docs = db.GetDocuments(map[string]interface{}{"number": 5}, 2)
 	if len(docs) != 1 {
 		t.Fatalf("unexpectedly found %d docs", len(docs))
 	}
