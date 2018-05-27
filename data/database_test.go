@@ -199,6 +199,12 @@ func TestSetAndUpdateDocument(t *testing.T) {
 	if len(docs) != 1 {
 		t.Fatalf("unexpectedly found %d docs", len(docs))
 	}
+
+	// Try to update a nonexistent document
+	err = db.UpdateDocument(uint64(4), data)
+	if err == nil {
+		t.Fatalf("UpdateDocument should error on nonexistent document")
+	}
 }
 
 func TestSetNonexistentDocument(t *testing.T) {

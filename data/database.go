@@ -564,16 +564,18 @@ func (db *Database) SetDocument(doc *Document) error {
 }
 
 // UpdateDocument updates the contents of the document, using the transaction.
-// TODO: figure out precisely when it panics, explains
-func (db *Database) UpdateDocument(id uint64, data *JSONObject) {
+// Errors when there is no such document.
+// If this returns an error, the pending transaction will be unusable.
+func (db *Database) UpdateDocument(id uint64, data *JSONObject) error {
 	// It needs to do a read within the transaction
 	doc := &Document{}
 	err := db.getTx(doc, "SELECT * FROM documents WHERE id = $1 LIMIT 1", id)
 	if err != nil {
-		panic(err)
+		return err
 	}
 	doc.Data.UpdateWith(data)
 	db.SetDocument(doc)
+	return nil
 }
 
 func (db *Database) GetDocuments(match map[string]interface{}, limit int) []*Document {
