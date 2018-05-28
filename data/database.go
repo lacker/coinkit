@@ -146,15 +146,15 @@ func (db *Database) initialize() {
 }
 
 // namedExecTx is a helper function to execute a write within the pending transaction.
-func (db *Database) namedExecTx(query string, arg interface{}) error {
+func (db *Database) namedExecTx(query string, arg interface{}) (sql.Result, error) {
 	db.mutex.Lock()
 	defer db.mutex.Unlock()
 
 	if db.tx == nil {
 		db.tx = db.postgres.MustBegin()
 	}
-	_, err := db.tx.NamedExec(query, arg)
-	return err
+	res, err := db.tx.NamedExec(query, arg)
+	return res, err
 }
 
 // get is a helper function to execute a Get within the pending transaction.
@@ -352,7 +352,7 @@ func (db *Database) InsertBlock(b *Block) error {
 	if b.Slot != cur+1 {
 		util.Logger.Fatalf("inserting block at slot %d but db has slot %d", b.Slot, cur)
 	}
-	err := db.namedExecTx(blockInsert, b)
+	_, err := db.namedExecTx(blockInsert, b)
 	if err != nil {
 		if isUniquenessError(err) {
 			return err
@@ -428,7 +428,7 @@ ON CONFLICT (owner) DO UPDATE
 
 // Database.UpsertAccount will not finalize until Commit is called.
 func (db *Database) UpsertAccount(a *Account) error {
-	err := db.namedExecTx(accountUpsert, a)
+	_, err := db.namedExecTx(accountUpsert, a)
 	if err != nil {
 		panic(err)
 	}
@@ -517,7 +517,7 @@ VALUES (:id, :data)
 // It panics if there is a fundamental database problem.
 // If this returns an error, the pending transaction will be unusable.
 func (db *Database) InsertDocument(d *Document) error {
-	err := db.namedExecTx(documentInsert, d)
+	_, err := db.namedExecTx(documentInsert, d)
 	if err != nil {
 		if isUniquenessError(err) {
 			return err
@@ -553,12 +553,20 @@ WHERE id = :id
 // SetDocument changes the contents of the document to be precisely the provided data.
 // It uses the transaction.
 // This panics if there is a fundamental database error.
-// If this returns an error, the pending transaction will be unusable.
+// This returns an error if there is no such document, and the pending
+// transaction will still be usable.
 // If there is no such document, no change is made.
 func (db *Database) SetDocument(doc *Document) error {
-	err := db.namedExecTx(documentUpdate, doc)
+	res, err := db.namedExecTx(documentUpdate, doc)
 	if err != nil {
 		panic(err)
+	}
+	count, err := res.RowsAffected()
+	if err != nil {
+		panic(err)
+	}
+	if count != 1 {
+		return fmt.Errorf("expected 1 row affected, got %d", count)
 	}
 	return nil
 }
