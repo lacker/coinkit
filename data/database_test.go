@@ -212,7 +212,10 @@ func TestSetNonexistentDocument(t *testing.T) {
 	doc := NewDocument(uint64(4), map[string]interface{}{
 		"number": 4,
 	})
-	db.SetDocument(doc)
+	err := db.SetDocument(doc)
+	if err == nil {
+		t.Fatalf("setting a nonexistent doc should error")
+	}
 	db.Commit()
 	docs := db.GetDocuments(map[string]interface{}{"number": 4}, 2)
 	if len(docs) != 0 {
