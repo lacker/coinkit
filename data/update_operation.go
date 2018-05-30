@@ -14,11 +14,14 @@ type UpdateOperation struct {
 	// The sequence number for this operation
 	Sequence uint32
 
-	// The data to update the document with.
-	Data *JSONObject
-
 	// How much the updater is willing to pay to send this operation through
 	Fee uint64
+
+	// The id of the document to update
+	Id uint64
+
+	// The data to update the document with.
+	Data *JSONObject
 }
 
 func (op *UpdateOperation) String() string {
@@ -47,7 +50,7 @@ func (op *UpdateOperation) Verify() bool {
 }
 
 // Works with MakeTestCreateOperation to change the value
-func MakeTestUpdateOperation(n int, sequence int) *SignedOperation {
+func MakeTestUpdateOperation(id uint64, sequence int) *SignedOperation {
 	mint := util.NewKeyPairFromSecretPhrase("mint")
 	data := NewEmptyJSONObject()
 	data.Set("foo", sequence)
@@ -55,6 +58,7 @@ func MakeTestUpdateOperation(n int, sequence int) *SignedOperation {
 		Signer:   mint.PublicKey().String(),
 		Sequence: uint32(sequence),
 		Data:     data,
+		Id:       id,
 		Fee:      0,
 	}
 	return NewSignedOperation(op, mint)

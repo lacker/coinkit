@@ -198,7 +198,7 @@ func TestNodeRestarting(t *testing.T) {
 	}
 }
 
-func TestCreatingDocuments(t *testing.T) {
+func TestDocumentOperations(t *testing.T) {
 	qs, names := consensus.MakeTestQuorumSlice(4)
 	nodes := []*Node{}
 	for i, name := range names {

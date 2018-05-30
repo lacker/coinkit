@@ -14,11 +14,11 @@ type CreateOperation struct {
 	// The sequence number for this operation
 	Sequence uint32
 
-	// The data to be created in the new document
-	Data *JSONObject
-
 	// How much the creator is willing to pay to get this document registered
 	Fee uint64
+
+	// The data to be created in the new document
+	Data *JSONObject
 }
 
 func (op *CreateOperation) String() string {
