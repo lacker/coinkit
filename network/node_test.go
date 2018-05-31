@@ -218,6 +218,15 @@ func TestDocumentOperations(t *testing.T) {
 	if doc == nil {
 		t.Fatalf("the document should have been created")
 	}
+
+	op = data.MakeTestUpdateOperation(1, 2)
+	m = data.NewOperationMessage(op)
+	nodes[0].Handle(op.GetSigner(), m)
+
+	sendMessages(nodes, t)
+
+	doc = nodes[0].database.GetDocument(1)
+	// TODO: check that foo: 2 is in the doc
 }
 
 func nodeFuzzTest(seed int64, t *testing.T) {
