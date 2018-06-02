@@ -226,11 +226,13 @@ func TestDocumentOperations(t *testing.T) {
 	sendMessages(nodes, t)
 
 	doc = nodes[0].database.GetDocument(1)
-	_, ok := doc.Data.GetInt("foo")
+	foo, ok := doc.Data.GetInt("foo")
 	if !ok {
 		t.Fatalf("foo was not in doc after update")
 	}
-	// TODO: check that foo is 2
+	if foo != 2 {
+		t.Fatalf("expected foo to be updated to 2")
+	}
 }
 
 func nodeFuzzTest(seed int64, t *testing.T) {
