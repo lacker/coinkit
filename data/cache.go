@@ -177,6 +177,9 @@ func (c *Cache) Validate(operation Operation) bool {
 	case *CreateOperation:
 		// TODO: check if this account has enough space to store this document
 		return true
+	case *UpdateOperation:
+		// TODO: check that the document exists already
+		return true
 	default:
 		util.Printf("operation: %+v has type %s", operation, reflect.TypeOf(operation))
 		panic("operation type cannot be validated")
