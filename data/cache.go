@@ -237,6 +237,14 @@ func (c *Cache) Process(operation Operation) bool {
 		}
 		c.NextDocumentId++
 		return true
+	case *UpdateOperation:
+		if c.database != nil {
+			err := c.database.UpdateDocument(op.Id, op.Data)
+			if err != nil {
+				panic(err)
+			}
+		}
+		return true
 	default:
 		util.Fatalf("unhanded type in cache.Process: %s", reflect.TypeOf(operation))
 		return false
