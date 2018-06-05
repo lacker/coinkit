@@ -220,6 +220,9 @@ func TestDocumentOperations(t *testing.T) {
 	}
 
 	op = data.MakeTestUpdateOperation(1, 2)
+	if !nodes[0].queue.Validate(op) {
+		t.Fatalf("the update op does not validate")
+	}
 	m = data.NewOperationMessage(op)
 	nodes[0].Handle(op.GetSigner(), m)
 
