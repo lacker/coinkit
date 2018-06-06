@@ -165,6 +165,7 @@ func (c *Cache) Validate(operation Operation) bool {
 		return false
 	}
 	if account.Sequence+1 != operation.GetSequence() {
+		log.Printf("XXX bad seq")
 		return false
 	}
 	if account.Balance < operation.GetFee() {

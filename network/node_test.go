@@ -219,6 +219,10 @@ func TestDocumentOperations(t *testing.T) {
 		t.Fatalf("the document should have been created")
 	}
 
+	if nodes[0].Slot() != 2 {
+		t.Fatalf("after one create, slot should be 2 but is %d", nodes[0].Slot())
+	}
+
 	op = data.MakeTestUpdateOperation(1, 2)
 	if !nodes[0].queue.Validate(op) {
 		t.Fatalf("the update op does not validate")
