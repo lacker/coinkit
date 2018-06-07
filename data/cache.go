@@ -222,6 +222,17 @@ func (c *Cache) ProcessSendOperation(op *SendOperation) bool {
 	return true
 }
 
+// Increments the sequence number for the provided op.
+// The op should already have been validated.
+func (c *Cache) IncrementSequence(op Operation) {
+	account := c.GetAccount(op.GetSigner())
+	if account.Sequence+1 != op.GetSequence() {
+		panic("sequence numbers were not validated")
+	}
+	account.Sequence = op.GetSequence()
+	c.UpsertAccount(account)
+}
+
 // Process returns false if the operation cannot be processed
 func (c *Cache) Process(operation Operation) bool {
 	if !c.Validate(operation) {
@@ -232,6 +243,7 @@ func (c *Cache) Process(operation Operation) bool {
 	case *SendOperation:
 		return c.ProcessSendOperation(op)
 	case *CreateOperation:
+		c.IncrementSequence(op)
 		doc := op.Document(c.NextDocumentId)
 		if c.database != nil {
 			c.database.InsertDocument(doc)
@@ -239,6 +251,7 @@ func (c *Cache) Process(operation Operation) bool {
 		c.NextDocumentId++
 		return true
 	case *UpdateOperation:
+		c.IncrementSequence(op)
 		if c.database != nil {
 			err := c.database.UpdateDocument(op.Id, op.Data)
 			if err != nil {
