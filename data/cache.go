@@ -122,6 +122,8 @@ func (c *Cache) CheckConsistency() error {
 	return c.CheckAgainstDatabase(c.database)
 }
 
+// Do not modify the Account returned from GetAccount, because it might belong to
+// the readonly cache.
 func (c *Cache) GetAccount(owner string) *Account {
 	answer, ok := c.accounts[owner]
 	if ok {
@@ -165,7 +167,6 @@ func (c *Cache) Validate(operation Operation) bool {
 		return false
 	}
 	if account.Sequence+1 != operation.GetSequence() {
-		log.Printf("XXX bad seq")
 		return false
 	}
 	if account.Balance < operation.GetFee() {
@@ -214,7 +215,7 @@ func (c *Cache) ProcessSendOperation(op *SendOperation) bool {
 	}
 	newTarget := &Account{
 		Owner:    op.To,
-		Sequence: target.Sequence,
+		Sequence: target.Sequence, // TODO: remove this line?
 		Balance:  target.Balance + op.Amount,
 	}
 	c.UpsertAccount(newSource)
@@ -229,8 +230,11 @@ func (c *Cache) IncrementSequence(op Operation) {
 	if account.Sequence+1 != op.GetSequence() {
 		panic("sequence numbers were not validated")
 	}
-	account.Sequence = op.GetSequence()
-	c.UpsertAccount(account)
+	newAccount := &Account{
+		Owner:    op.GetSigner(),
+		Sequence: op.GetSequence(),
+	}
+	c.UpsertAccount(newAccount)
 }
 
 // Process returns false if the operation cannot be processed
