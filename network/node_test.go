@@ -240,6 +240,10 @@ func TestDocumentOperations(t *testing.T) {
 	if foo != 2 {
 		t.Fatalf("expected foo to be updated to 2")
 	}
+
+	if nodes[0].Slot() != 3 {
+		t.Fatalf("after create + update, slot should be 3 but is %d", nodes[0].Slot())
+	}
 }
 
 func nodeFuzzTest(seed int64, t *testing.T) {
