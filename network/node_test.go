@@ -244,6 +244,12 @@ func TestDocumentOperations(t *testing.T) {
 	if nodes[0].Slot() != 3 {
 		t.Fatalf("after create + update, slot should be 3 but is %d", nodes[0].Slot())
 	}
+
+	// Try to update a nonexistent document
+	op = data.MakeTestUpdateOperation(1000, 1)
+	if nodes[0].queue.Validate(op) {
+		t.Fatalf("updating a nonexistent document should not validate")
+	}
 }
 
 func nodeFuzzTest(seed int64, t *testing.T) {
