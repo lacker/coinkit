@@ -250,6 +250,14 @@ func TestDocumentOperations(t *testing.T) {
 	if nodes[0].queue.Validate(op) {
 		t.Fatalf("updating a nonexistent document should not validate")
 	}
+	m = data.NewOperationMessage(op)
+	nodes[0].Handle(op.GetSigner(), m)
+
+	sendMessages(nodes, t)
+
+	if nodes[0].Slot() != 3 {
+		t.Fatalf("the slot should not have advanced with an invalid op")
+	}
 }
 
 func nodeFuzzTest(seed int64, t *testing.T) {
