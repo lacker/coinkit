@@ -25,7 +25,7 @@ type UpdateOperation struct {
 }
 
 func (op *UpdateOperation) String() string {
-	return fmt.Sprintf("update owner=%s, data=%s", util.Shorten(op.Signer), op.Data)
+	return fmt.Sprintf("update owner=%s, id=%d, data=%s", util.Shorten(op.Signer), op.Id, op.Data)
 }
 
 func (op *UpdateOperation) OperationType() string {

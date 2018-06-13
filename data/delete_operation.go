@@ -1,6 +1,10 @@
 package data
 
-import ()
+import (
+	"fmt"
+
+	"github.com/lacker/coinkit/util"
+)
 
 type DeleteOperation struct {
 	// Who is deleting the document. Must be the owner
@@ -14,4 +18,33 @@ type DeleteOperation struct {
 
 	// The id of the document to update
 	Id uint64
+}
+
+func (op *DeleteOperation) String() string {
+	return fmt.Sprintf("delete owner=%s, id=%d", util.Shorten(op.Signer), op.Id)
+}
+
+func (op *DeleteOperation) OperationType() string {
+	return "Delete"
+}
+
+func (op *DeleteOperation) GetSigner() string {
+	return op.Signer
+}
+
+func (op *DeleteOperation) GetFee() uint64 {
+	return op.Fee
+}
+
+func (op *DeleteOperation) GetSequence() uint32 {
+	return op.Sequence
+}
+
+// TODO: should this do something?
+func (op *DeleteOperation) Verify() bool {
+	return true
+}
+
+func init() {
+	RegisterOperationType(&DeleteOperation{})
 }
