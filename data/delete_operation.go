@@ -45,6 +45,17 @@ func (op *DeleteOperation) Verify() bool {
 	return true
 }
 
+func MakeTestDeleteOperation(id uint64, sequence int) *SignedOperation {
+	mint := util.NewKeyPairFromSecretPhrase("mint")
+	op := &DeleteOperation{
+		Signer:   mint.PublicKey().String(),
+		Sequence: uint32(sequence),
+		Id:       id,
+		Fee:      0,
+	}
+	return NewSignedOperation(op, mint)
+}
+
 func init() {
 	RegisterOperationType(&DeleteOperation{})
 }
