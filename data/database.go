@@ -550,6 +550,11 @@ SET data = :data
 WHERE id = :id
 `
 
+const documentDelete = `
+DELETE FROM documents
+WHERE id = :id
+`
+
 // SetDocument changes the contents of the document to be precisely the provided data.
 // It uses the transaction.
 // This panics if there is a fundamental database error.
@@ -583,6 +588,24 @@ func (db *Database) UpdateDocument(id uint64, data *JSONObject) error {
 	}
 	doc.Data.UpdateWith(data)
 	db.SetDocument(doc)
+	return nil
+}
+
+// DeleteDocument deletes the document, using the transaction.
+// It errors when there is no such document.
+// If this returns an error, the pending transaction will be unusable.
+func (db *Database) DeleteDocument(id uint64) error {
+	res, err := db.namedExecTx(documentDelete, id)
+	if err != nil {
+		panic(err)
+	}
+	count, err := res.RowsAffected()
+	if err != nil {
+		panic(err)
+	}
+	if count != 1 {
+		return fmt.Errorf("expected 1 row deleted, got %d", count)
+	}
 	return nil
 }
 
