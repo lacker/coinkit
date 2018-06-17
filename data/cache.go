@@ -266,6 +266,14 @@ func (c *Cache) Process(operation Operation) bool {
 			}
 		}
 		return true
+	case *DeleteOperation:
+		c.IncrementSequence(op)
+		if c.database != nil {
+			err := c.database.DeleteDocument(op.Id)
+			if err != nil {
+				panic(err)
+			}
+		}
 	default:
 		util.Fatalf("unhanded type in cache.Process: %s", reflect.TypeOf(operation))
 		return false
