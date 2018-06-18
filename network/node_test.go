@@ -258,6 +258,13 @@ func TestDocumentOperations(t *testing.T) {
 	if nodes[0].Slot() != 3 {
 		t.Fatalf("the slot should not have advanced with an invalid op")
 	}
+
+	// Delete our document
+	op = data.MakeTestDeleteOperation(1, 3)
+	if !nodes[0].queue.Validate(op) {
+		t.Fatalf("the delete op should validate")
+	}
+	// TODO: actually delete it
 }
 
 func nodeFuzzTest(seed int64, t *testing.T) {
