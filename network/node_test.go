@@ -270,7 +270,10 @@ func TestDocumentOperations(t *testing.T) {
 	if !nodes[0].queue.Validate(op) {
 		t.Fatalf("the delete op should validate")
 	}
-	// TODO: actually delete it
+
+	sendMessages(nodes, t)
+
+	// TODO: Check that our document is deleted
 }
 
 func nodeFuzzTest(seed int64, t *testing.T) {
