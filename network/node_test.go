@@ -273,7 +273,11 @@ func TestDocumentOperations(t *testing.T) {
 
 	sendMessages(nodes, t)
 
-	// TODO: Check that our document is deleted
+	// Check that our document is deleted
+	doc := nodes[0].database.GetDocument(1)
+	if doc != nil {
+		t.Fatalf("the document should have gotten deleted")
+	}
 }
 
 func nodeFuzzTest(seed int64, t *testing.T) {
