@@ -24,6 +24,11 @@ type Cache struct {
 	// Storing past blocks.
 	blocks map[int]*Block
 
+	// documents stores a subset of the documents in the database.
+	// The key of the map is the document id.
+	// nil means there is currently no such document.
+	documents map[uint64]*Document
+
 	// When we are doing a read operation and we don't have data, we can use the
 	// readOnly cache. This is useful so that we can make copy-on-write versions of
 	// this data, so that we can test destructive sequences of operations without
