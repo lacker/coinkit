@@ -50,6 +50,7 @@ func NewCache() *Cache {
 	return &Cache{
 		accounts:       make(map[string]*Account),
 		blocks:         make(map[int]*Block),
+		documents:      make(map[uint64]*Document),
 		NextDocumentId: uint64(1),
 	}
 }
