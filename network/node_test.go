@@ -274,7 +274,7 @@ func TestDocumentOperations(t *testing.T) {
 	sendMessages(nodes, t)
 
 	// Check that our document is deleted
-	doc := nodes[0].database.GetDocument(1)
+	doc = nodes[0].database.GetDocument(1)
 	if doc != nil {
 		t.Fatalf("the document should have gotten deleted")
 	}
