@@ -151,6 +151,27 @@ func (c *Cache) GetAccount(owner string) *Account {
 	return answer
 }
 
+// Do not modify the Document returned from GetDocument, because it might belong to
+// the readonly cache.
+func (c *Cache) GetDocument(id uint64) *Document {
+	doc, ok := c.documents[id]
+	if ok {
+		return doc
+	}
+
+	if c.readOnly != nil {
+		return c.readOnly.GetDocument(id)
+	}
+	if c.database != nil {
+		// When there is a database, cache reads.
+		doc = c.database.GetDocument(id)
+		c.documents[id] = doc
+		return doc
+	}
+
+	return nil
+}
+
 // UpsertAccount writes through to the underlying database, but it leaves it as
 // a pending transaction. The caller must call db.Commit() themselves.
 func (c *Cache) UpsertAccount(account *Account) {
