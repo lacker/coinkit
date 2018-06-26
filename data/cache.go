@@ -172,8 +172,20 @@ func (c *Cache) GetDocument(id uint64) *Document {
 	return nil
 }
 
-// UpsertAccount writes through to the underlying database, but it leaves it as
-// a pending transaction. The caller must call db.Commit() themselves.
+// DeleteDocument writes through to the underlying database (if there is one),
+// but it leaves it as a pending transaction. The caller must call db.Commit() themselves.
+func (c *Cache) DeleteDocument(id uint64) {
+	c.documents[id] = nil
+	if c.database != nil {
+		err := c.database.DeleteDocument(id)
+		if err != nil {
+			panic(err)
+		}
+	}
+}
+
+// UpsertAccount writes through to the underlying database (if there is one),
+// but it leaves it as a pending transaction. The caller must call db.Commit() themselves.
 func (c *Cache) UpsertAccount(account *Account) {
 	if account == nil {
 		log.Fatal("cannot upsert nil account")
