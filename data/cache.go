@@ -153,6 +153,7 @@ func (c *Cache) GetAccount(owner string) *Account {
 
 // Do not modify the Document returned from GetDocument, because it might belong to
 // the readonly cache.
+// Returns nil if there is no such document.
 func (c *Cache) GetDocument(id uint64) *Document {
 	doc, ok := c.documents[id]
 	if ok {
@@ -222,8 +223,8 @@ func (c *Cache) Validate(operation Operation) bool {
 		// TODO: check that the document exists already
 		return true
 	case *DeleteOperation:
-		// TODO: check that the document exists
-		return true
+		doc := c.GetDocument(op.Id)
+		return doc != nil
 	default:
 		util.Printf("operation: %+v has type %s", operation, reflect.TypeOf(operation))
 		panic("operation type cannot be validated")
