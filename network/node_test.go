@@ -270,6 +270,8 @@ func TestDocumentOperations(t *testing.T) {
 	if !nodes[0].queue.Validate(op) {
 		t.Fatalf("the delete op should validate")
 	}
+	m = data.NewOperationMessage(op)
+	nodes[0].Handle(op.GetSigner(), m)
 
 	sendMessages(nodes, t)
 
