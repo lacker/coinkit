@@ -171,7 +171,7 @@ func TestGetDocumentsNoResults(t *testing.T) {
 	}
 }
 
-func TestSetAndUpdateDocument(t *testing.T) {
+func TestDocumentOperations(t *testing.T) {
 	db := NewTestDatabase(0)
 	d := NewDocument(uint64(3), map[string]interface{}{
 		"number": 3,
@@ -200,10 +200,30 @@ func TestSetAndUpdateDocument(t *testing.T) {
 		t.Fatalf("unexpectedly found %d docs", len(docs))
 	}
 
+	// Double-check
+	doc := db.GetDocument(3)
+	number, _ := doc.Data.GetInt("number")
+	if number != 5 {
+		t.Fatalf("expected number to be 5 but it was %d", number)
+	}
+
 	// Try to update a nonexistent document
 	err = db.UpdateDocument(uint64(4), data)
 	if err == nil {
 		t.Fatalf("UpdateDocument should error on nonexistent document")
+	}
+
+	// Delete the document
+	err = db.DeleteDocument(3)
+	if err != nil {
+		panic(err)
+	}
+	db.Commit()
+
+	// Check it deleted
+	doc = db.GetDocument(3)
+	if doc != nil {
+		t.Fatalf("the delete operation did not delete the document")
 	}
 }
 

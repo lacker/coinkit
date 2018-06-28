@@ -287,8 +287,10 @@ func (c *Cache) Process(operation Operation) bool {
 	}
 
 	switch op := operation.(type) {
+
 	case *SendOperation:
 		return c.ProcessSendOperation(op)
+
 	case *CreateOperation:
 		c.IncrementSequence(op)
 		doc := op.Document(c.NextDocumentId)
@@ -297,6 +299,7 @@ func (c *Cache) Process(operation Operation) bool {
 		}
 		c.NextDocumentId++
 		return true
+
 	case *UpdateOperation:
 		c.IncrementSequence(op)
 		if c.database != nil {
@@ -306,19 +309,21 @@ func (c *Cache) Process(operation Operation) bool {
 			}
 		}
 		return true
+
 	case *DeleteOperation:
-		c.IncrementSequence(op)
-		if c.database != nil {
-			err := c.database.DeleteDocument(op.Id)
-			if err != nil {
-				panic(err)
-			}
+		doc := c.GetDocument(op.Id)
+		if doc == nil {
+			return false
 		}
+		c.IncrementSequence(op)
+		c.DeleteDocument(op.Id)
+		return true
+
 	default:
 		util.Fatalf("unhanded type in cache.Process: %s", reflect.TypeOf(operation))
 		return false
 	}
-	panic("control should not get here")
+	panic("you forgot to add a return statement in the cache.Process switch")
 }
 
 // FinalizeBlock should be called whenever a new block is mined.
