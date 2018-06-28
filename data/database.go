@@ -157,6 +157,18 @@ func (db *Database) namedExecTx(query string, arg interface{}) (sql.Result, erro
 	return res, err
 }
 
+// execTx is a helper function to execute a write within the pending transaction.
+func (db *Database) execTx(query string, args ...interface{}) (sql.Result, error) {
+	db.mutex.Lock()
+	defer db.mutex.Unlock()
+
+	if db.tx == nil {
+		db.tx = db.postgres.MustBegin()
+	}
+	res, err := db.tx.Exec(query, args...)
+	return res, err
+}
+
 // get is a helper function to execute a Get within the pending transaction.
 func (db *Database) getTx(dest interface{}, query string, args ...interface{}) error {
 	db.mutex.Lock()
@@ -552,7 +564,7 @@ WHERE id = :id
 
 const documentDelete = `
 DELETE FROM documents
-WHERE id = :id
+WHERE id = $1
 `
 
 // SetDocument changes the contents of the document to be precisely the provided data.
@@ -595,7 +607,7 @@ func (db *Database) UpdateDocument(id uint64, data *JSONObject) error {
 // It errors when there is no such document.
 // If this returns an error, the pending transaction will be unusable.
 func (db *Database) DeleteDocument(id uint64) error {
-	res, err := db.namedExecTx(documentDelete, id)
+	res, err := db.execTx(documentDelete, id)
 	if err != nil {
 		panic(err)
 	}
