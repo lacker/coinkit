@@ -96,6 +96,7 @@ func TestValidation(t *testing.T) {
 	if c.Validate(MakeTestUpdateOperation(1, 10).Operation) {
 		t.Fatalf("sequence number of 10 should be bad")
 	}
+
 	if !c.Process(MakeTestUpdateOperation(1, 2).Operation) {
 		t.Fatalf("update should work")
 	}

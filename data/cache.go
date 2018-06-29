@@ -173,6 +173,18 @@ func (c *Cache) GetDocument(id uint64) *Document {
 	return nil
 }
 
+// InsertDocument writes through to the underlying database (if there is one),
+// but it leaves it as a pending transaction. The caller must call db.Commit() themselves.
+func (c *Cache) InsertDocument(doc *Document) {
+	c.documents[doc.Id] = doc
+	if c.database != nil {
+		err := c.database.InsertDocument(doc)
+		if err != nil {
+			panic(err)
+		}
+	}
+}
+
 // DeleteDocument writes through to the underlying database (if there is one),
 // but it leaves it as a pending transaction. The caller must call db.Commit() themselves.
 func (c *Cache) DeleteDocument(id uint64) {
@@ -200,6 +212,10 @@ func (c *Cache) UpsertAccount(account *Account) {
 	}
 }
 
+func (c *Cache) DocExists(id uint64) bool {
+	return c.GetDocument(id) != nil
+}
+
 // Validate returns whether this operation is valid
 func (c *Cache) Validate(operation Operation) bool {
 	account := c.GetAccount(operation.GetSigner())
@@ -214,17 +230,19 @@ func (c *Cache) Validate(operation Operation) bool {
 	}
 
 	switch op := operation.(type) {
+
 	case *SendOperation:
 		return account.ValidateSendOperation(op)
+
 	case *CreateOperation:
-		// TODO: check if this account has enough space to store this document
 		return true
+
 	case *UpdateOperation:
-		// TODO: check that the document exists already
-		return true
+		return c.DocExists(op.Id)
+
 	case *DeleteOperation:
-		doc := c.GetDocument(op.Id)
-		return doc != nil
+		return c.DocExists(op.Id)
+
 	default:
 		util.Printf("operation: %+v has type %s", operation, reflect.TypeOf(operation))
 		panic("operation type cannot be validated")
@@ -294,9 +312,7 @@ func (c *Cache) Process(operation Operation) bool {
 	case *CreateOperation:
 		c.IncrementSequence(op)
 		doc := op.Document(c.NextDocumentId)
-		if c.database != nil {
-			c.database.InsertDocument(doc)
-		}
+		c.InsertDocument(doc)
 		c.NextDocumentId++
 		return true
 
