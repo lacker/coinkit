@@ -79,6 +79,7 @@ func TestValidation(t *testing.T) {
 	}
 	c.UpsertAccount(account)
 
+	// First create a document
 	op := MakeTestCreateOperation(2).Operation
 	if c.Validate(op) {
 		t.Fatalf("should get rejected for bad sequence")
@@ -89,9 +90,10 @@ func TestValidation(t *testing.T) {
 		t.Fatalf("should be a valid create, id = 1 seq = 1")
 	}
 
+	// Update our document
 	badId := uint64(100)
 	if c.Validate(MakeTestUpdateOperation(badId, 2).Operation) {
-		t.Fatalf("badId should be bad")
+		t.Fatalf("badId for update should be bad")
 	}
 	if c.Validate(MakeTestUpdateOperation(1, 10).Operation) {
 		t.Fatalf("sequence number of 10 should be bad")
@@ -99,6 +101,11 @@ func TestValidation(t *testing.T) {
 
 	if !c.Process(MakeTestUpdateOperation(1, 2).Operation) {
 		t.Fatalf("update should work")
+	}
+
+	// Delete our document
+	if c.Validate(MakeTestDeleteOperation(badId, 3).Operation) {
+		t.Fatalf("badId for delete should be bad")
 	}
 }
 
