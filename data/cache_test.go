@@ -2,6 +2,8 @@ package data
 
 import (
 	"testing"
+
+	"github.com/lacker/coinkit/util"
 )
 
 func TestSendOperationProcessing(t *testing.T) {
@@ -69,12 +71,33 @@ func TestReadThrough(t *testing.T) {
 }
 
 func TestValidation(t *testing.T) {
-	db := NewTestDatabase(0)
-	c := NewDatabaseCache(db, 1)
+	c := NewCache()
+	mint := util.NewKeyPairFromSecretPhrase("mint")
+	account := &Account{
+		Owner:   mint.PublicKey().String(),
+		Balance: 1000000,
+	}
+	c.UpsertAccount(account)
 
-	op := MakeTestCreateOperation(2)
+	op := MakeTestCreateOperation(2).Operation
 	if c.Validate(op) {
 		t.Fatalf("should get rejected for bad sequence")
+	}
+
+	op = MakeTestCreateOperation(1).Operation
+	if !c.Process(op) {
+		t.Fatalf("should be a valid create, id = 1 seq = 1")
+	}
+
+	badId := uint64(100)
+	if c.Validate(MakeTestUpdateOperation(badId, 2).Operation) {
+		t.Fatalf("badId should be bad")
+	}
+	if c.Validate(MakeTestUpdateOperation(1, 10).Operation) {
+		t.Fatalf("sequence number of 10 should be bad")
+	}
+	if !c.Process(MakeTestUpdateOperation(1, 2).Operation) {
+		t.Fatalf("update should work")
 	}
 }
 
