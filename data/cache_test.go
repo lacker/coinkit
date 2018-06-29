@@ -68,6 +68,16 @@ func TestReadThrough(t *testing.T) {
 	}
 }
 
+func TestValidation(t *testing.T) {
+	db := NewTestDatabase(0)
+	c := NewDatabaseCache(db, 1)
+
+	op := MakeTestCreateOperation(2)
+	if c.Validate(op) {
+		t.Fatalf("should get rejected for bad sequence")
+	}
+}
+
 func TestWriteThrough(t *testing.T) {
 	db := NewTestDatabase(0)
 	c1 := NewDatabaseCache(db, 1)
