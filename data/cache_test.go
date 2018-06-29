@@ -84,7 +84,6 @@ func TestValidation(t *testing.T) {
 	if c.Validate(op) {
 		t.Fatalf("should get rejected for bad sequence")
 	}
-
 	op = MakeTestCreateOperation(1).Operation
 	if !c.Process(op) {
 		t.Fatalf("should be a valid create, id = 1 seq = 1")
@@ -96,9 +95,8 @@ func TestValidation(t *testing.T) {
 		t.Fatalf("badId for update should be bad")
 	}
 	if c.Validate(MakeTestUpdateOperation(1, 10).Operation) {
-		t.Fatalf("sequence number of 10 should be bad")
+		t.Fatalf("sequence number of 10 should be bad for update")
 	}
-
 	if !c.Process(MakeTestUpdateOperation(1, 2).Operation) {
 		t.Fatalf("update should work")
 	}
@@ -106,6 +104,9 @@ func TestValidation(t *testing.T) {
 	// Delete our document
 	if c.Validate(MakeTestDeleteOperation(badId, 3).Operation) {
 		t.Fatalf("badId for delete should be bad")
+	}
+	if c.Validate(MakeTestDeleteOperation(1, 10).Operation) {
+		t.Fatalf("sequence number of 10 should be bad for delete")
 	}
 }
 
