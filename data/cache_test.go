@@ -108,6 +108,11 @@ func TestValidation(t *testing.T) {
 	if c.Validate(MakeTestDeleteOperation(1, 10).Operation) {
 		t.Fatalf("sequence number of 10 should be bad for delete")
 	}
+	if !c.Process(MakeTestDeleteOperation(1, 3).Operation) {
+		t.Fatalf("delete should work")
+	}
+
+	// TODO: commit and test things are as they should be
 }
 
 func TestWriteThrough(t *testing.T) {
