@@ -89,6 +89,13 @@ func TestValidation(t *testing.T) {
 		t.Fatalf("should be a valid create, id = 1 seq = 1")
 	}
 
+	// Check our doc is there
+	doc := c.GetDocument(1)
+	foo, ok := doc.Data.GetInt("foo")
+	if !ok || foo != 1 {
+		t.Fatalf("expected doc.Data.foo to be 1")
+	}
+
 	// Update our document
 	badId := uint64(100)
 	if c.Validate(MakeTestUpdateOperation(badId, 2).Operation) {
@@ -101,6 +108,13 @@ func TestValidation(t *testing.T) {
 		t.Fatalf("update should work")
 	}
 
+	// Check our doc is updated
+	doc = c.GetDocument(1)
+	foo, ok = doc.Data.GetInt("foo")
+	if !ok || foo != 2 {
+		t.Fatalf("expected doc.Data.foo to be 2")
+	}
+
 	// Delete our document
 	if c.Validate(MakeTestDeleteOperation(badId, 3).Operation) {
 		t.Fatalf("badId for delete should be bad")
@@ -111,6 +125,8 @@ func TestValidation(t *testing.T) {
 	if !c.Process(MakeTestDeleteOperation(1, 3).Operation) {
 		t.Fatalf("delete should work")
 	}
+
+	// TODO: check its deleted
 }
 
 func TestWriteThrough(t *testing.T) {
