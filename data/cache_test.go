@@ -126,7 +126,11 @@ func TestValidation(t *testing.T) {
 		t.Fatalf("delete should work")
 	}
 
-	// TODO: check its deleted
+	// Check our doc is deleted
+	doc = c.GetDocument(1)
+	if doc != nil {
+		t.Fatalf("doc should have been deleted")
+	}
 }
 
 func TestWriteThrough(t *testing.T) {
