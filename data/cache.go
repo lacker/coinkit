@@ -297,7 +297,7 @@ func (c *Cache) ProcessSendOperation(op *SendOperation) bool {
 	}
 	newTarget := &Account{
 		Owner:    op.To,
-		Sequence: target.Sequence, // TODO: remove this line?
+		Sequence: target.Sequence,
 		Balance:  target.Balance + op.Amount,
 	}
 	c.UpsertAccount(newSource)
