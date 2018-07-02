@@ -188,7 +188,16 @@ func (c *Cache) InsertDocument(doc *Document) {
 // UpdateDocument writes through to the underlying database (if there is one),
 // but it leaves it as a pending transaction. The caller must call db.Commit() themselves.
 func (c *Cache) UpdateDocument(id uint64, data *JSONObject) {
-	c.documents[id].Data = data
+	doc := c.GetDocument(id)
+	if doc == nil {
+		panic("no doc found for update")
+	}
+	newDoc := &Document{
+		Id:   id,
+		Data: data,
+	}
+	c.documents[id] = newDoc
+
 	if c.database != nil {
 		err := c.database.UpdateDocument(id, data)
 		if err != nil {
