@@ -185,6 +185,18 @@ func (c *Cache) InsertDocument(doc *Document) {
 	}
 }
 
+// UpdateDocument writes through to the underlying database (if there is one),
+// but it leaves it as a pending transaction. The caller must call db.Commit() themselves.
+func (c *Cache) UpdateDocument(id uint64, data *JSONObject) {
+	c.documents[id].Data = data
+	if c.database != nil {
+		err := c.database.UpdateDocument(id, data)
+		if err != nil {
+			panic(err)
+		}
+	}
+}
+
 // DeleteDocument writes through to the underlying database (if there is one),
 // but it leaves it as a pending transaction. The caller must call db.Commit() themselves.
 func (c *Cache) DeleteDocument(id uint64) {
@@ -318,12 +330,7 @@ func (c *Cache) Process(operation Operation) bool {
 
 	case *UpdateOperation:
 		c.IncrementSequence(op)
-		if c.database != nil {
-			err := c.database.UpdateDocument(op.Id, op.Data)
-			if err != nil {
-				panic(err)
-			}
-		}
+		c.UpdateDocument(op.Id, op.Data)
 		return true
 
 	case *DeleteOperation:
