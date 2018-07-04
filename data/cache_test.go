@@ -126,7 +126,10 @@ func TestValidation(t *testing.T) {
 		t.Fatalf("delete should work")
 	}
 	if c.Validate(MakeTestDeleteOperation(1, 4).Operation) {
-		t.Fatalf("a second delete should not work")
+		t.Fatalf("delete-after-delete should not work")
+	}
+	if c.Validate(MakeTestUpdateOperation(1, 4).Operation) {
+		t.Fatalf("update-after-delete should not work")
 	}
 
 	// Check our doc is deleted
