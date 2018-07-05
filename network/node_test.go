@@ -245,6 +245,19 @@ func TestDocumentOperations(t *testing.T) {
 		t.Fatalf("after create + update, slot should be 3 but is %d", nodes[0].Slot())
 	}
 
+	// Make sure the wrong user can't delete our document
+	wrong := util.NewKeyPairFromSecretPhrase("wrong")
+	dop := &DeleteOperation{
+		Signer:   wrong.PublicKey().String(),
+		Sequence: 3,
+		Id:       1,
+		Fee:      0,
+	}
+	sop := NewSignedOperation(dop, wrong)
+	if nodes[0].queue.Validate(op) {
+		t.Fatalf("deletes should only be runnable by the owner")
+	}
+
 	// Try to update a nonexistent document
 	op = data.MakeTestUpdateOperation(1000, 1)
 	if nodes[0].queue.Validate(op) {
