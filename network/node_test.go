@@ -247,14 +247,14 @@ func TestDocumentOperations(t *testing.T) {
 
 	// Make sure the wrong user can't delete our document
 	wrong := util.NewKeyPairFromSecretPhrase("wrong")
-	dop := &DeleteOperation{
+	dop := &data.DeleteOperation{
 		Signer:   wrong.PublicKey().String(),
 		Sequence: 3,
 		Id:       1,
 		Fee:      0,
 	}
-	sop := NewSignedOperation(dop, wrong)
-	if nodes[0].queue.Validate(op) {
+	sop := data.NewSignedOperation(dop, wrong)
+	if nodes[0].queue.Validate(sop) {
 		t.Fatalf("deletes should only be runnable by the owner")
 	}
 
