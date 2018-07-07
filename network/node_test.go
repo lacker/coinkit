@@ -258,6 +258,19 @@ func TestDocumentOperations(t *testing.T) {
 		t.Fatalf("deletes should only be runnable by the owner")
 	}
 
+	// Make sure the wrong user can't update our document
+	wrong := util.NewKeyPairFromSecretPhrase("wrong")
+	uop := &data.UpdateOperation{
+		Signer:   wrong.PublicKey().String(),
+		Sequence: 3,
+		Id:       1,
+		Fee:      0,
+	}
+	sop = data.NewSignedOperation(uop, wrong)
+	if nodes[0].queue.Validate(sop) {
+		t.Fatalf("updates should only be runnable by the owner")
+	}
+
 	// Try to update a nonexistent document
 	op = data.MakeTestUpdateOperation(1000, 1)
 	if nodes[0].queue.Validate(op) {
