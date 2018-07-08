@@ -259,7 +259,6 @@ func TestDocumentOperations(t *testing.T) {
 	}
 
 	// Make sure the wrong user can't update our document
-	wrong := util.NewKeyPairFromSecretPhrase("wrong")
 	uop := &data.UpdateOperation{
 		Signer:   wrong.PublicKey().String(),
 		Sequence: 3,
