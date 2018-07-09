@@ -198,6 +198,22 @@ func TestNodeRestarting(t *testing.T) {
 	}
 }
 
+func validateOp(nodes []*Node, op *SignedOperation, t *testing.T) bool {
+	hasTrue := false
+	hasFalse := false
+	for _, node := range nodes {
+		if node.queue.Validate(op) {
+			hasTrue = true
+		} else {
+			hasFalse = true
+		}
+	}
+	if hasTrue && hasFalse {
+		t.Fatalf("inconsistent nodes")
+	}
+	return hasTrue
+}
+
 func TestDocumentOperations(t *testing.T) {
 	qs, names := consensus.MakeTestQuorumSlice(4)
 	nodes := []*Node{}
