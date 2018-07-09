@@ -198,7 +198,7 @@ func TestNodeRestarting(t *testing.T) {
 	}
 }
 
-func validateOp(nodes []*Node, op *SignedOperation, t *testing.T) bool {
+func validateOp(nodes []*Node, op *data.SignedOperation, t *testing.T) bool {
 	hasTrue := false
 	hasFalse := false
 	for _, node := range nodes {
