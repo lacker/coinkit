@@ -18,6 +18,9 @@ type QueryMessage struct {
 
 	// When Block is nonzero, this message is requesting data for a mined block.
 	Block int
+
+	// When Documents is nonzero, this message is requesting data for matching documents.
+	Documents *DocumentQuery
 }
 
 func (m *QueryMessage) Slot() int {

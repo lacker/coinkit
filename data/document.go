@@ -4,6 +4,7 @@ import (
 	"github.com/lacker/coinkit/util"
 )
 
+// TODO: reconsider whether ids should be stored twice.
 type Document struct {
 	// For consistency, all fields on a document are stored within the
 	// Data column.
