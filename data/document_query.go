@@ -9,5 +9,6 @@ type DocumentQuery struct {
 	Data *JSONObject
 
 	// The maximum number of objects to be returned.
+	// It's up to individual servers what the maximum supported limit is.
 	Limit int
 }

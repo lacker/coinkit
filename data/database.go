@@ -622,6 +622,13 @@ func (db *Database) DeleteDocument(id uint64) error {
 }
 
 func (db *Database) GetDocuments(match map[string]interface{}, limit int) []*Document {
+	if limit <= 0 {
+		limit = 100
+	}
+	if limit > 500 {
+		limit = 500
+	}
+
 	bytes, err := json.Marshal(match)
 	if err != nil {
 		panic(err)
