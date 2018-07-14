@@ -1,6 +1,8 @@
 package data
 
-import ()
+import (
+	"github.com/lacker/coinkit/util"
+)
 
 // A DocumentQuery expresses a way to select a subset of documents.
 type DocumentQuery struct {
@@ -11,4 +13,8 @@ type DocumentQuery struct {
 	// The maximum number of objects to be returned.
 	// It's up to individual servers what the maximum supported limit is.
 	Limit int
+}
+
+func (q *DocumentQuery) String() string {
+	return string(util.PrettyJSON(q))
 }
