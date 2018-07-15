@@ -16,5 +16,5 @@ type DocumentQuery struct {
 }
 
 func (q *DocumentQuery) String() string {
-	return string(util.PrettyJSON(q))
+	return string(util.ToJSON(q))
 }

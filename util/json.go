@@ -11,3 +11,11 @@ func PrettyJSON(x interface{}) []byte {
 	}
 	return append(bytes, '\n')
 }
+
+func ToJSON(x interface{}) []byte {
+	bytes, err := json.Marshal(x)
+	if err != nil {
+		panic(err)
+	}
+	return bytes
+}

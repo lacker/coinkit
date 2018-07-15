@@ -39,6 +39,9 @@ func (m *QueryMessage) String() string {
 	if m.Block != 0 {
 		parts = append(parts, fmt.Sprintf("block=%d", m.Block))
 	}
+	if m.Documents != nil {
+		parts = append(parts, fmt.Sprintf("docs=%s", m.Documents))
+	}
 	return strings.Join(parts, " ")
 }
 
