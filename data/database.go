@@ -319,6 +319,10 @@ func (db *Database) BlockDataMessage(slot int) *DataMessage {
 	}
 }
 
+func (db *Database) HandleDocumentQuery(q *DocumentQuery) *DataMessage {
+	panic("TODO")
+}
+
 // CheckAccountsMatchBlocks replays the blockchain from the beginning
 // and returns an error if the resulting information does not match
 // the information held in the accounts.

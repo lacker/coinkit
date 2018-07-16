@@ -21,9 +21,8 @@ type DataMessage struct {
 	// Nil values mean that the block is unknown because it has not been finalized yet.
 	Blocks map[int]*Block
 
-	// A set of documents, keyed by document id.
-	// A nil value means there is no such document.
-	Documents map[uint64]*Document
+	// A list of documents.
+	Documents []*Document
 }
 
 func (m *DataMessage) Slot() int {
