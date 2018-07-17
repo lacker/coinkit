@@ -319,8 +319,11 @@ func (db *Database) BlockDataMessage(slot int) *DataMessage {
 	}
 }
 
+// TODO: handle slot intelligently
 func (db *Database) HandleDocumentQuery(q *DocumentQuery) *DataMessage {
-	panic("TODO")
+	message := &DataMessage{}
+	message.Documents = db.GetDocuments(q.Data, q.Limit)
+	return message
 }
 
 // CheckAccountsMatchBlocks replays the blockchain from the beginning
