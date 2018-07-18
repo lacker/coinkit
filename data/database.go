@@ -267,6 +267,10 @@ func (db *Database) HandleQueryMessage(m *QueryMessage) *DataMessage {
 		return db.BlockDataMessage(m.Block)
 	}
 
+	if m.Documents != nil {
+		return db.DocumentDataMessage(m.Documents)
+	}
+
 	return nil
 }
 
@@ -320,9 +324,9 @@ func (db *Database) BlockDataMessage(slot int) *DataMessage {
 }
 
 // TODO: handle slot intelligently
-func (db *Database) HandleDocumentQuery(q *DocumentQuery) *DataMessage {
+func (db *Database) DocumentDataMessage(q *DocumentQuery) *DataMessage {
 	message := &DataMessage{}
-	message.Documents = db.GetDocuments(q.Data, q.Limit)
+	message.Documents = db.GetDocuments(q.Data.content, q.Limit)
 	return message
 }
 
