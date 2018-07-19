@@ -274,9 +274,12 @@ func (db *Database) HandleQueryMessage(m *QueryMessage) *DataMessage {
 	return nil
 }
 
-func (db *Database) AccountDataMessage(owner string) *DataMessage {
-	// Use a transaction to simultaneously fetch the last block mined and
-	// the data we need to respond to the message.
+// readTransaction is a helper to let you use a transaction to fetch data that reflects
+// the state of the blockchain at a known slot.
+// It returns a transaction you can use for reads and the slot that this transaction
+// reflects.
+// Be sure to commit the transaction when you are done with it.
+func (db *Database) readTransaction() (*sqlx.Tx, int) {
 	// We need "repeatable read" isolation level so that those queries reflect
 	// the same snapshot of the db. See:
 	// https://www.postgresql.org/docs/9.1/static/transaction-iso.html
@@ -285,23 +288,29 @@ func (db *Database) AccountDataMessage(owner string) *DataMessage {
 		ReadOnly:  true,
 	})
 
-	account := &Account{}
-	err := tx.Get(account, "SELECT * FROM accounts WHERE owner=$1", owner)
-	if err == sql.ErrNoRows {
-		account = nil
-	} else if err != nil {
-		panic(err)
-	}
-
 	block := &Block{}
 	var slot int
-	err = tx.Get(block, "SELECT * FROM blocks ORDER BY slot DESC LIMIT 1")
+	err := tx.Get(block, "SELECT * FROM blocks ORDER BY slot DESC LIMIT 1")
 	if err == sql.ErrNoRows {
 		slot = 0
 	} else if err != nil {
 		panic(err)
 	} else {
 		slot = block.Slot
+	}
+
+	return tx, slot
+}
+
+func (db *Database) AccountDataMessage(owner string) *DataMessage {
+	tx, slot := db.readTransaction()
+
+	account := &Account{}
+	err := tx.Get(account, "SELECT * FROM accounts WHERE owner=$1", owner)
+	if err == sql.ErrNoRows {
+		account = nil
+	} else if err != nil {
+		panic(err)
 	}
 
 	err = tx.Commit()
