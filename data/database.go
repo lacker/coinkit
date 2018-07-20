@@ -278,7 +278,7 @@ func (db *Database) HandleQueryMessage(m *QueryMessage) *DataMessage {
 // the state of the blockchain at a known slot.
 // It returns a transaction you can use for reads and the slot that this transaction
 // reflects.
-// Be sure to commit the transaction when you are done with it.
+// Be sure to call finishReadTransaction(tx) when you are done with it.
 func (db *Database) readTransaction() (*sqlx.Tx, int) {
 	// We need "repeatable read" isolation level so that those queries reflect
 	// the same snapshot of the db. See:
@@ -302,6 +302,15 @@ func (db *Database) readTransaction() (*sqlx.Tx, int) {
 	return tx, slot
 }
 
+func (db *Database) finishReadTransaction(tx *sqlx.Tx) {
+	err := tx.Rollback()
+	if err != nil {
+		panic(err)
+	}
+
+	db.reads++
+}
+
 func (db *Database) AccountDataMessage(owner string) *DataMessage {
 	tx, slot := db.readTransaction()
 
@@ -313,12 +322,8 @@ func (db *Database) AccountDataMessage(owner string) *DataMessage {
 		panic(err)
 	}
 
-	err = tx.Commit()
-	if err != nil {
-		panic(err)
-	}
+	db.finishReadTransaction(tx)
 
-	db.reads++
 	return &DataMessage{
 		I:        slot,
 		Accounts: map[string]*Account{owner: account},
