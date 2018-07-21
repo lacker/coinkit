@@ -658,9 +658,11 @@ func (db *Database) GetDocuments(match map[string]interface{}, limit int) []*Doc
 	if err != nil {
 		panic(err)
 	}
-	rows, err := db.postgres.Queryx(
+
+	tx, _ := db.readTransaction()
+
+	rows, err := tx.Queryx(
 		"SELECT * FROM documents WHERE data @> $1 LIMIT $2", string(bytes), limit)
-	db.reads++
 	if err != nil {
 		panic(err)
 	}
@@ -673,5 +675,8 @@ func (db *Database) GetDocuments(match map[string]interface{}, limit int) []*Doc
 		}
 		answer = append(answer, d)
 	}
+
+	db.finishReadTransaction(tx)
+
 	return answer
 }
