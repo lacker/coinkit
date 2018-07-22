@@ -646,7 +646,9 @@ func (db *Database) DeleteDocument(id uint64) error {
 	return nil
 }
 
-func (db *Database) GetDocuments(match map[string]interface{}, limit int) []*Document {
+// GetDocuments returns a list of matching documents, along with the slot that this
+// data reflects.
+func (db *Database) GetDocuments(match map[string]interface{}, limit int) ([]*Document, int) {
 	if limit <= 0 {
 		limit = 100
 	}
@@ -659,7 +661,7 @@ func (db *Database) GetDocuments(match map[string]interface{}, limit int) []*Doc
 		panic(err)
 	}
 
-	tx, _ := db.readTransaction()
+	tx, slot := db.readTransaction()
 
 	rows, err := tx.Queryx(
 		"SELECT * FROM documents WHERE data @> $1 LIMIT $2", string(bytes), limit)
@@ -678,5 +680,5 @@ func (db *Database) GetDocuments(match map[string]interface{}, limit int) []*Doc
 
 	db.finishReadTransaction(tx)
 
-	return answer
+	return answer, slot
 }
