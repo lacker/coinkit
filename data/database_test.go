@@ -152,12 +152,12 @@ func TestGetDocuments(t *testing.T) {
 			}
 		}
 	}
-	docs := db.GetDocuments(map[string]interface{}{"a": 2, "b": 1}, 2)
+	docs, _ := db.GetDocuments(map[string]interface{}{"a": 2, "b": 1}, 2)
 	if len(docs) != 0 {
 		t.Fatal("expected no docs visible before commit")
 	}
 	db.Commit()
-	docs = db.GetDocuments(map[string]interface{}{"a": 2, "b": 1}, 2)
+	docs, _ = db.GetDocuments(map[string]interface{}{"a": 2, "b": 1}, 2)
 	if len(docs) != 1 {
 		t.Fatalf("expected one doc but got: %+v", docs)
 	}
@@ -165,7 +165,7 @@ func TestGetDocuments(t *testing.T) {
 
 func TestGetDocumentsNoResults(t *testing.T) {
 	db := NewTestDatabase(0)
-	docs := db.GetDocuments(map[string]interface{}{"blorp": "hi"}, 3)
+	docs, _ := db.GetDocuments(map[string]interface{}{"blorp": "hi"}, 3)
 	if len(docs) != 0 {
 		t.Fatalf("expected zero docs but got: %+v", docs)
 	}
@@ -184,7 +184,7 @@ func TestDocumentOperations(t *testing.T) {
 	d.Data.Set("number", 4)
 	db.SetDocument(d)
 	db.Commit()
-	docs := db.GetDocuments(map[string]interface{}{"number": 4}, 2)
+	docs, _ := db.GetDocuments(map[string]interface{}{"number": 4}, 2)
 	if len(docs) != 1 {
 		t.Fatalf("could not find newly-set document")
 	}
@@ -195,7 +195,7 @@ func TestDocumentOperations(t *testing.T) {
 	db.Commit()
 
 	// Check it updated
-	docs = db.GetDocuments(map[string]interface{}{"number": 5}, 2)
+	docs, _ = db.GetDocuments(map[string]interface{}{"number": 5}, 2)
 	if len(docs) != 1 {
 		t.Fatalf("unexpectedly found %d docs", len(docs))
 	}
@@ -237,7 +237,7 @@ func TestSetNonexistentDocument(t *testing.T) {
 		t.Fatalf("setting a nonexistent doc should error")
 	}
 	db.Commit()
-	docs := db.GetDocuments(map[string]interface{}{"number": 4}, 2)
+	docs, _ := db.GetDocuments(map[string]interface{}{"number": 4}, 2)
 	if len(docs) != 0 {
 		t.Fatalf("setting a nonexistent doc should be a no-op")
 	}
@@ -276,7 +276,7 @@ func BenchmarkOneConstraint(b *testing.B) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		c := i%(benchmarkMax*benchmarkMax) + 1
-		docs := db.GetDocuments(map[string]interface{}{"c": c}, 2)
+		docs, _ := db.GetDocuments(map[string]interface{}{"c": c}, 2)
 		if len(docs) != 1 {
 			log.Fatalf("expected one doc for c = %d but got: %+v", c, docs)
 		}
@@ -289,7 +289,7 @@ func BenchmarkTwoConstraints(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		a := i % benchmarkMax
 		b := ((i - a) / benchmarkMax) % benchmarkMax
-		docs := db.GetDocuments(map[string]interface{}{"a": a, "b": b}, 2)
+		docs, _ := db.GetDocuments(map[string]interface{}{"a": a, "b": b}, 2)
 		if len(docs) != 1 {
 			log.Fatalf("expected one doc but got: %+v", docs)
 		}

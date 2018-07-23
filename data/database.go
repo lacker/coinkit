@@ -339,8 +339,11 @@ func (db *Database) BlockDataMessage(slot int) *DataMessage {
 
 // TODO: include slot in the return message
 func (db *Database) DocumentDataMessage(q *DocumentQuery) *DataMessage {
-	message := &DataMessage{}
-	message.Documents = db.GetDocuments(q.Data.content, q.Limit)
+	docs, slot := db.GetDocuments(q.Data.content, q.Limit)
+	message := &DataMessage{
+		Documents: docs,
+		I:         slot,
+	}
 	return message
 }
 
