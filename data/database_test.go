@@ -152,7 +152,10 @@ func TestGetDocuments(t *testing.T) {
 			}
 		}
 	}
-	docs, _ := db.GetDocuments(map[string]interface{}{"a": 2, "b": 1}, 2)
+	docs, slot := db.GetDocuments(map[string]interface{}{"a": 2, "b": 1}, 2)
+	if slot != 0 {
+		t.Fatalf("wrong slot: %d")
+	}
 	if len(docs) != 0 {
 		t.Fatal("expected no docs visible before commit")
 	}
