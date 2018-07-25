@@ -247,9 +247,13 @@ func TestDocumentOperations(t *testing.T) {
 			Data: d,
 		},
 	}
-	dm, ok := nodes[0].Handle("anon", qm)
+	m, ok := nodes[0].Handle("anon", qm)
 	if !ok {
 		t.Fatalf("expected a response to the query message")
+	}
+	dm, ok := m.(*DataMessage)
+	if !ok {
+		t.Fatalf("expected response to be a DataMessage")
 	}
 	if len(dm.Documents) != 1 {
 		t.Fatalf("expected 1 result but got %d", len(dm.Documents))
