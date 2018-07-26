@@ -239,26 +239,6 @@ func TestDocumentOperations(t *testing.T) {
 		t.Fatalf("after one create, slot should be 2 but is %d", nodes[0].Slot())
 	}
 
-	// Check that our document can be queried for
-	d := data.NewEmptyJSONObject()
-	d.Set("foo", 1)
-	qm := &data.QueryMessage{
-		Documents: &data.DocumentQuery{
-			Data: d,
-		},
-	}
-	response, ok := nodes[0].Handle("anon", qm)
-	if !ok {
-		t.Fatalf("expected a response to the query message")
-	}
-	dm, ok := response.(*data.DataMessage)
-	if !ok {
-		t.Fatalf("expected response to be a DataMessage")
-	}
-	if len(dm.Documents) != 1 {
-		t.Fatalf("expected 1 result but got %d", len(dm.Documents))
-	}
-
 	op = data.MakeTestUpdateOperation(1, 2)
 	if !nodes[0].queue.Validate(op) {
 		t.Fatalf("the update op does not validate")
