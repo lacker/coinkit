@@ -183,3 +183,17 @@ func TestServerOkayWithFakeWellFormattedMessage(t *testing.T) {
 	// better assertion here
 	go s.Stop()
 }
+
+func TestDataOperations(t *testing.T) {
+	servers := makeServers()
+	start := time.Now()
+	mint := util.NewKeyPairFromSecretPhrase("mint")
+
+	// TODO: test some data ops here
+
+	elapsed := time.Now().Sub(start).Seconds()
+	if elapsed > 10.0 {
+		t.Fatalf("data operations are too slow: %.2f seconds", elapsed)
+	}
+	go stopServers(servers)
+}
