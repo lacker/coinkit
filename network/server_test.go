@@ -190,8 +190,8 @@ func TestDataOperations(t *testing.T) {
 	mint := util.NewKeyPairFromSecretPhrase("mint")
 
 	// TODO: Create a document with this op
-	cop := MakeTestCreateOperation(1)
-	_ := data.NewSignedOperation(cop, mint)
+	cop := data.MakeTestCreateOperation(1)
+	_ = data.NewSignedOperation(cop, mint)
 
 	elapsed := time.Now().Sub(start).Seconds()
 	if elapsed > 10.0 {
