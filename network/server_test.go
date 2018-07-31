@@ -188,10 +188,10 @@ func TestDataOperations(t *testing.T) {
 	servers := makeServers()
 	start := time.Now()
 	mint := util.NewKeyPairFromSecretPhrase("mint")
+	conn := NewRedialConnection(servers[0].LocalhostAddress(), nil)
 
 	// TODO: Create a document with this op
-	cop := data.MakeTestCreateOperation(1)
-	_ = data.NewSignedOperation(cop, mint)
+	op := data.MakeTestCreateOperation(1)
 
 	elapsed := time.Now().Sub(start).Seconds()
 	if elapsed > 10.0 {
