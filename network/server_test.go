@@ -202,6 +202,15 @@ func TestDataOperations(t *testing.T) {
 	op := data.MakeTestCreateOperation(1)
 	sendOperation(conn, mint, op)
 
+	// Query for the document
+	qm := &data.QueryMessage{
+		Documents: &data.DocumentQuery{
+			Data: data.NewJSONObject(map[string]interface{}{"foo": 1}),
+		},
+	}
+	sm := util.NewSignedMessage(qm, mint)
+	conn.Send(sm)
+
 	elapsed := time.Now().Sub(start).Seconds()
 	if elapsed > 10.0 {
 		t.Fatalf("data operations are too slow: %.2f seconds", elapsed)
