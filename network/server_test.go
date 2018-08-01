@@ -78,6 +78,14 @@ func sendMoney(conn Connection, from *util.KeyPair, to *util.KeyPair, amount uin
 	WaitToClear(conn, from.PublicKey().String(), seq)
 }
 
+// TODO: make sendMoney use sendOperation
+func sendOperation(conn Connection, from *util.KeyPair, op *data.SignedOperation) {
+	om := data.NewOperationMessage(op)
+	sm := util.NewSignedMessage(om, from)
+	conn.Send(sm)
+	WaitToClear(conn, from.PublicKey().String(), op.GetSequence())
+}
+
 func TestSendMoney(t *testing.T) {
 	servers := makeServers()
 	start := time.Now()
@@ -190,8 +198,9 @@ func TestDataOperations(t *testing.T) {
 	mint := util.NewKeyPairFromSecretPhrase("mint")
 	conn := NewRedialConnection(servers[0].LocalhostAddress(), nil)
 
-	// TODO: Create a document with this op
+	// Create a document
 	op := data.MakeTestCreateOperation(1)
+	sendOperation(conn, mint, op)
 
 	elapsed := time.Now().Sub(start).Seconds()
 	if elapsed > 10.0 {
