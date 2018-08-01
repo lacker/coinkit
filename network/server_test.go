@@ -202,7 +202,7 @@ func TestDataOperations(t *testing.T) {
 	op := data.MakeTestCreateOperation(1)
 	sendOperation(conn, mint, op)
 
-	// Query for the document
+	// Query for the document. TODO: use FindDocuments
 	qm := &data.QueryMessage{
 		Documents: &data.DocumentQuery{
 			Data: data.NewJSONObject(map[string]interface{}{"foo": 1}),

@@ -43,17 +43,14 @@ func WaitToClear(c Connection, user string, sequence uint32) *data.Account {
 	}
 }
 
-// TODO: remove for loop
 func GetAccount(c Connection, user string) *data.Account {
-	for {
-		SendAnonymousMessage(c, &data.QueryMessage{Account: user})
-		m := (<-c.Receive()).Message()
-		dataMessage, ok := m.(*data.DataMessage)
-		if !ok {
-			util.Logger.Fatalf("expected a data message but got: %+v", m)
-		}
-		return dataMessage.Accounts[user]
+	SendAnonymousMessage(c, &data.QueryMessage{Account: user})
+	m := (<-c.Receive()).Message()
+	dataMessage, ok := m.(*data.DataMessage)
+	if !ok {
+		util.Logger.Fatalf("expected a data message but got: %+v", m)
 	}
+	return dataMessage.Accounts[user]
 }
 
 func FindDocuments(c Connection, matching map[string]interface{}) []*data.Document {
