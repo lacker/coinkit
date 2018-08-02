@@ -202,14 +202,11 @@ func TestDataOperations(t *testing.T) {
 	op := data.MakeTestCreateOperation(1)
 	sendOperation(conn, mint, op)
 
-	// Query for the document. TODO: use FindDocuments
-	qm := &data.QueryMessage{
-		Documents: &data.DocumentQuery{
-			Data: data.NewJSONObject(map[string]interface{}{"foo": 1}),
-		},
+	// Query for the document.
+	docs := FindDocuments(conn, map[string]interface{}{"foo": 1})
+	if len(docs) != 1 {
+		t.Fatalf("expected 1 doc but got %d", len(docs))
 	}
-	sm := util.NewSignedMessage(qm, mint)
-	conn.Send(sm)
 
 	elapsed := time.Now().Sub(start).Seconds()
 	if elapsed > 10.0 {
