@@ -207,7 +207,10 @@ func TestDataOperations(t *testing.T) {
 	if len(docs) != 1 {
 		t.Fatalf("expected 1 doc but got %d", len(docs))
 	}
-	foo := docs[0].Data.GetInt("foo")
+	foo, ok := docs[0].Data.GetInt("foo")
+	if !ok {
+		t.Fatalf("doc does not contain foo")
+	}
 	if foo != 1 {
 		t.Fatalf("expected foo = 1 but got %d", foo)
 	}
