@@ -207,6 +207,10 @@ func TestDataOperations(t *testing.T) {
 	if len(docs) != 1 {
 		t.Fatalf("expected 1 doc but got %d", len(docs))
 	}
+	foo := docs[0].Data.GetInt("foo")
+	if foo != 1 {
+		t.Fatalf("expected foo = 1 but got %d", foo)
+	}
 
 	elapsed := time.Now().Sub(start).Seconds()
 	if elapsed > 10.0 {
