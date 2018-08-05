@@ -27,6 +27,10 @@ func (ob *JSONObject) encode() {
 	ob.bytes = bytes
 }
 
+func (ob *JSONObject) NumKeys() int {
+	return len(ob.content)
+}
+
 func NewJSONObject(content map[string]interface{}) *JSONObject {
 	answer := &JSONObject{
 		content: content,
