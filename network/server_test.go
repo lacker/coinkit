@@ -209,7 +209,7 @@ func TestDataOperations(t *testing.T) {
 	}
 	ob := docs[0].Data
 	if ob.NumKeys() != 1 {
-		t.Fatalf("expected only one key")
+		t.Fatalf("expected only one key but got: %s", ob)
 	}
 	foo, ok := ob.GetInt("foo")
 	if !ok {
