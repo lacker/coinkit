@@ -97,7 +97,7 @@ func TestSendMoney(t *testing.T) {
 	if elapsed > 10.0 {
 		t.Fatalf("sending money is too slow: %.2f seconds", elapsed)
 	}
-	go stopServers(servers)
+	stopServers(servers)
 }
 
 func makeConns(servers []*Server, n int) []Connection {
@@ -208,8 +208,9 @@ func TestDataOperations(t *testing.T) {
 		t.Fatalf("expected 1 doc but got %d", len(docs))
 	}
 	ob := docs[0].Data
-	if ob.NumKeys() != 1 {
-		t.Fatalf("expected only one key but got: %s", ob)
+	// TODO: update this test once we don't dupe id into the regular data
+	if ob.NumKeys() != 2 {
+		t.Fatalf("expected two keys but got: %s", ob)
 	}
 	foo, ok := ob.GetInt("foo")
 	if !ok {
@@ -223,5 +224,5 @@ func TestDataOperations(t *testing.T) {
 	if elapsed > 10.0 {
 		t.Fatalf("data operations are too slow: %.2f seconds", elapsed)
 	}
-	go stopServers(servers)
+	stopServers(servers)
 }
