@@ -26,12 +26,19 @@ func (m *FakeMessage) String() string {
 	return "Fake"
 }
 
-func makeServers() []*Server {
+type Fatalfer interface {
+	Fatalf(format string, args ...interface{})
+}
+
+func makeServers(t Fatalfer) []*Server {
 	config, kps := NewUnitTestNetwork()
 	answer := []*Server{}
 	for i, kp := range kps {
 		db := data.NewTestDatabase(i)
 		server := NewServer(kp, config, db)
+		if server == nil {
+			t.Fatalf("failed to construct server")
+		}
 
 		// In theory rebroadcasts should not be necessary unless we have node failures
 		// or lossy communication channels.
@@ -50,9 +57,9 @@ func stopServers(servers []*Server) {
 }
 
 func TestStartStop(t *testing.T) {
-	servers := makeServers()
+	servers := makeServers(t)
 	stopServers(servers)
-	moreServers := makeServers()
+	moreServers := makeServers(t)
 	stopServers(moreServers)
 }
 
@@ -87,7 +94,7 @@ func sendOperation(conn Connection, from *util.KeyPair, op *data.SignedOperation
 }
 
 func TestSendMoney(t *testing.T) {
-	servers := makeServers()
+	servers := makeServers(t)
 	start := time.Now()
 	mint := util.NewKeyPairFromSecretPhrase("mint")
 	bob := util.NewKeyPairFromSecretPhrase("bob")
@@ -123,7 +130,7 @@ func sendMoneyRepeatedly(
 }
 
 func benchmarkSendMoney(numConns int, b *testing.B) {
-	servers := makeServers()
+	servers := makeServers(b)
 	conns := makeConns(servers, numConns)
 
 	// Setup
@@ -193,7 +200,7 @@ func TestServerOkayWithFakeWellFormattedMessage(t *testing.T) {
 }
 
 func TestDataOperations(t *testing.T) {
-	servers := makeServers()
+	servers := makeServers(t)
 	start := time.Now()
 	mint := util.NewKeyPairFromSecretPhrase("mint")
 	conn := NewRedialConnection(servers[0].LocalhostAddress(), nil)

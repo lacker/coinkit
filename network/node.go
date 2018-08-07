@@ -27,7 +27,7 @@ func NewNode(
 	if db != nil {
 		err := db.CheckAccountsMatchBlocks()
 		if err != nil {
-			util.Printf("check failed: accounts do not match blocks")
+			util.Printf("check failed: accounts do not match blocks: %s", err)
 			return nil
 		}
 	}
