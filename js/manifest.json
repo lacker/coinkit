@@ -1,0 +1,18 @@
+{
+    "manifest_version": 2,
+    "name": "cwallet",
+    "description": "An in-browser coinkit wallet.",
+    "version": "1.0",
+    "permissions": [
+        "http://localhost:9000/*",
+        "http://localhost:9001/*",
+        "http://localhost:9002/*",
+        "http://localhost:9003/*"
+    ],
+    "browser_action": {
+        "default_title": "cwallet"
+    },
+    "background": {
+        "scripts": ["build/bundle.js"]
+    }
+}
