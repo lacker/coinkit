@@ -1,9 +1,9 @@
 package network
 
 import (
+	"bufio"
 	"context"
 	"fmt"
-	"io/ioutil"
 	"net"
 	"net/http"
 	"os"
@@ -179,12 +179,6 @@ func (s *Server) handleMessage(sm *util.SignedMessage) (*util.SignedMessage, boo
 		util.Logger.Fatalf("the processing goroutine got overloaded")
 		return nil, false
 	}
-}
-
-// handleJSONMessage is a wrapper for handleMessage that also does JSON decoding and
-// encoding.
-func (s *Server) handleJSONMessage(input []byte) []byte {
-	panic("XXX")
 }
 
 // retryHandleMessage is like handleMessage, but it expects a non-nil response.
@@ -461,14 +455,18 @@ func (s *Server) ServeHttpInBackground(port int) {
 		}
 	})
 
-	// /api is a bridge from the blockchain protocol to json over http
+	// /api is a bridge from the blockchain to http
 	http.HandleFunc("/api", func(w http.ResponseWriter, r *http.Request) {
-		body, err := ioutil.ReadAll(r.Body)
+		reader := bufio.NewReader(r.Body)
+		input, err := util.ReadSignedMessage(reader)
 		if err != nil {
 			return
 		}
-		output := s.handleJSONMessage(body)
-		w.Write(output)
+		output, ok := s.handleMessage(input)
+		if !ok {
+			return
+		}
+		output.Write(w)
 	})
 
 	srv := &http.Server{
