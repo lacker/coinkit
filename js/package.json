@@ -1,23 +1,23 @@
 {
-   "name": "cwallet",
-   "version": "0.1.0",
-   "description": "a coinkit wallet",
-   "main": "src/main.js",
-   "scripts": {
-      "build": "parcel build src/main.js -d build/ -o bundle.js",
-      "watch": "parcel watch src/main.js -d build/ -o bundle.js"
-   },
-   "author": "Kevin Lacker",
-   "dependencies": {
-      "babel-preset-env": "^1.6.1",
-      "babel-preset-react": "^6.24.1",
-      "parcel-bundler": "^1.6.2",
-      "react": "^16.2.0",
-      "react-dom": "^16.2.0"
-   },
-   "repository": {
-      "type": "git",
-      "url": "https://github.com/lacker/coinkit.git"
-   },
-   "license": "UNLICENSED"
+    "name": "cwallet",
+    "version": "0.1.0",
+    "description": "a coinkit wallet",
+    "main": "src/main.js",
+    "scripts": {
+	"build": "parcel build src/main.js -d build/ -o bundle.js",
+	"watch": "parcel watch src/main.js -d build/ -o bundle.js"
+    },
+    "author": "Kevin Lacker",
+    "dependencies": {
+	"babel-preset-env": "^1.6.1",
+	"babel-preset-react": "^6.24.1",
+	"parcel-bundler": "^1.6.2",
+	"react": "^16.2.0",
+	"react-dom": "^16.2.0"
+    },
+    "repository": {
+	"type": "git",
+	"url": "https://github.com/lacker/coinkit.git"
+    },
+    "license": "UNLICENSED"
 }
