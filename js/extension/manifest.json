@@ -13,6 +13,6 @@
         "default_title": "cwallet"
     },
     "background": {
-        "scripts": ["build/bundle.js"]
+        "scripts": ["bundle.js"]
     }
 }

@@ -4,8 +4,8 @@
     "description": "a coinkit wallet",
     "main": "src/main.js",
     "scripts": {
-	"build": "parcel build src/main.js -d build/ -o bundle.js",
-	"watch": "parcel watch src/main.js -d build/ -o bundle.js"
+	"build": "parcel build src/main.js -d extension/ -o bundle.js",
+	"watch": "parcel watch src/main.js -d extension/ -o bundle.js"
     },
     "author": "Kevin Lacker",
     "dependencies": {
