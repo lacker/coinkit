@@ -230,6 +230,16 @@ func (db *Database) Rollback() {
 	db.tx = nil
 }
 
+// Panics if a transaction was left open
+func (db *Database) AssertDone() {
+	db.mutex.Lock()
+	defer db.mutex.Unlock()
+
+	if db.tx != nil {
+		panic("a transaction was left in progress")
+	}
+}
+
 // Can be used for testing so that we can find who left open a transaction.
 // If you suspect a test of leaving an uncommitted transaction, call this at the
 // end of it.

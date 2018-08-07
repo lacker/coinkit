@@ -101,6 +101,11 @@ func (s *Server) setBalance(user string, amount uint64) {
 	s.node.queue.SetBalance(user, amount)
 }
 
+// Panics if anything is left in progress on the server. Only use for testing
+func (s *Server) assertDone() {
+	s.db.AssertDone()
+}
+
 func (s *Server) numPeersConnected() int {
 	answer := 0
 	for _, peer := range s.peers {

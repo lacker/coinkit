@@ -196,7 +196,7 @@ func TestServerOkayWithFakeWellFormattedMessage(t *testing.T) {
 	s.requests <- fakeRequest
 	// This hits the right code path but it feels like we ought to have a
 	// better assertion here
-	go s.Stop()
+	s.Stop()
 }
 
 // TODO: reenable this test when the general db problems clear up
