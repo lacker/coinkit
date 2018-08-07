@@ -3,6 +3,7 @@ package network
 import (
 	"context"
 	"fmt"
+	"io/ioutil"
 	"net"
 	"net/http"
 	"os"
@@ -178,6 +179,12 @@ func (s *Server) handleMessage(sm *util.SignedMessage) (*util.SignedMessage, boo
 		util.Logger.Fatalf("the processing goroutine got overloaded")
 		return nil, false
 	}
+}
+
+// handleJSONMessage is a wrapper for handleMessage that also does JSON decoding and
+// encoding.
+func (s *Server) handleJSONMessage(input []byte) []byte {
+	panic("XXX")
 }
 
 // retryHandleMessage is like handleMessage, but it expects a non-nil response.
@@ -452,6 +459,16 @@ func (s *Server) ServeHttpInBackground(port int) {
 			}
 			fmt.Fprintf(w, "total database size: %s\n", s.db.TotalSizeInfo())
 		}
+	})
+
+	// /api is a bridge from the blockchain protocol to json over http
+	http.HandleFunc("/api", func(w http.ResponseWriter, r *http.Request) {
+		body, err := ioutil.ReadAll(r.Body)
+		if err != nil {
+			return
+		}
+		output := s.handleJSONMessage(body)
+		w.Write(output)
 	})
 
 	srv := &http.Server{
