@@ -69,3 +69,7 @@ func NewConfigFromSerialized(serialized []byte) *Config {
 func (c *Config) Serialize() []byte {
 	return util.PrettyJSON(c)
 }
+
+func (c *Config) String() string {
+	return string(c.Serialize())
+}
