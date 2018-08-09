@@ -10,9 +10,10 @@
         "http://localhost:9003/*"
     ],
     "browser_action": {
-        "default_title": "cwallet"
+        "default_title": "cwallet",
+	"default_popup": "popup.html"
     },
     "background": {
-        "scripts": ["bundle.js"]
+        "scripts": ["background.js"]
     }
 }
