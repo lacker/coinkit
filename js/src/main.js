@@ -1,7 +1,8 @@
 import React from "react";
 import ReactDOM from "react-dom";
 
+import Popup from "./Popup";
+
 window.onload = () => {
-  const element = <h1>hello world</h1>;
-  ReactDOM.render(element, document.getElementById("root"));
+  ReactDOM.render(<Popup />, document.getElementById("root"));
 };
