@@ -4,7 +4,7 @@
 
 2. Build the extension locally
    a. `npm install`
-   b. `npm run build`
+   b. `npm run build`, or `npm run watch` to build continuously
 
 3. Load the extension in Chrome
    a. Navigate to `chrome://extensions`
