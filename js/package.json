@@ -1,23 +1,26 @@
 {
-    "name": "cwallet",
-    "version": "0.1.0",
-    "description": "a coinkit wallet",
-    "main": "src/main.js",
-    "scripts": {
-	"build": "parcel --no-hmr build src/main.js -d extension/ -o bundle.js",
-	"watch": "parcel --no-hmr watch src/main.js -d extension/ -o bundle.js"
-    },
-    "author": "Kevin Lacker",
-    "dependencies": {
-	"babel-preset-env": "^1.6.1",
-	"babel-preset-react": "^6.24.1",
-	"parcel-bundler": "^1.6.2",
-	"react": "^16.2.0",
-	"react-dom": "^16.2.0"
-    },
-    "repository": {
-	"type": "git",
-	"url": "https://github.com/lacker/coinkit.git"
-    },
-    "license": "UNLICENSED"
+  "name": "cwallet",
+  "version": "0.1.0",
+  "description": "a coinkit wallet",
+  "main": "src/main.js",
+  "scripts": {
+    "build": "parcel --no-hmr build src/main.js -d extension/ -o bundle.js",
+    "watch": "parcel --no-hmr watch src/main.js -d extension/ -o bundle.js"
+  },
+  "author": "Kevin Lacker",
+  "dependencies": {
+    "babel-preset-env": "^1.6.1",
+    "babel-preset-react": "^6.24.1",
+    "parcel-bundler": "^1.6.2",
+    "react": "^16.2.0",
+    "react-dom": "^16.2.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lacker/coinkit.git"
+  },
+  "license": "UNLICENSED",
+  "browserslist": [
+    "last 10 chrome versions"
+  ]
 }

@@ -2,24 +2,34 @@
 
 import React, { Component } from "react";
 
+import Client from "./Client";
+
 export default class Popup extends Component {
   constructor(props) {
     super(props);
 
-    this.state = { n: 0 };
+    this.state = { message: "hello world" };
+    this.client = new Client();
 
     this.click = this.click.bind(this);
   }
 
-  click(newN) {
-    this.setState({ n: newN });
+  async click() {
+    let mint =
+      "0x32652ebe42a8d56314b8b11abf51c01916a238920c1f16db597ee87374515f4609d3";
+    let query = {
+      Account: mint
+    };
+    let response = await this.client.query(query);
+
+    this.setState({ message: JSON.stringify(response) });
   }
 
   render(props) {
     return (
       <div>
-        <button onClick={() => this.click(this.state.n + 1)} />
-        <h1>hello world: {this.state.n}</h1>
+        <button onClick={this.click} />
+        <h1>message: {this.state.message}</h1>
       </div>
     );
   }
