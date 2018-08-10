@@ -13,6 +13,8 @@ import (
 	"github.com/lacker/coinkit/util"
 )
 
+var DatabasesInUse *util.SafeSet = util.NewSafeSet()
+
 type Server struct {
 	port    int
 	keyPair *util.KeyPair
@@ -62,6 +64,15 @@ type Server struct {
 }
 
 func NewServer(keyPair *util.KeyPair, config *Config, db *data.Database) *Server {
+	if db != nil {
+		// Make sure this process isn't running multiple servers per database
+		key := db.Config().String()
+		if DatabasesInUse.Contains(key) {
+			util.Logger.Fatalf("multiple servers running for database: %s", key)
+		}
+		DatabasesInUse.Add(key)
+	}
+
 	peers := []*RedialConnection{}
 	inbox := make(chan *util.SignedMessage)
 	for _, address := range config.PeerAddresses(keyPair) {
@@ -509,5 +520,9 @@ func (s *Server) Stop() {
 
 	for _, peer := range s.peers {
 		peer.Close()
+	}
+
+	if s.db != nil {
+		DatabasesInUse.Remove(s.db.Config().String())
 	}
 }

@@ -39,6 +39,8 @@ type Database struct {
 
 	// How many commits have happened in the lifetime of this db handle
 	commits int
+
+	config *Config
 }
 
 var allDatabases = []*Database{}
@@ -69,6 +71,7 @@ func NewDatabase(config *Config) *Database {
 	db := &Database{
 		postgres: postgres,
 		name:     config.Database,
+		config:   config,
 	}
 	db.initialize()
 	allDatabases = append(allDatabases, db)
@@ -79,6 +82,10 @@ func NewDatabase(config *Config) *Database {
 // Whenever this is created, any existing data in the database is deleted.
 func NewTestDatabase(i int) *Database {
 	return NewDatabase(NewTestConfig(i))
+}
+
+func (db *Database) Config() *Config {
+	return db.config
 }
 
 const schema = `
