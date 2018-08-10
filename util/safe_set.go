@@ -30,7 +30,7 @@ func (set *SafeSet) Remove(s string) {
 	delete(set.data, s)
 }
 
-func (set *SafeSet) Contains(s string) {
+func (set *SafeSet) Contains(s string) bool {
 	set.mutex.Lock()
 	defer set.mutex.Unlock()
 
