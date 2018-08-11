@@ -37,3 +37,10 @@ func (set *SafeSet) Contains(s string) bool {
 	_, ok := set.data[s]
 	return ok
 }
+
+func (set *SafeSet) Size() int {
+	set.mutex.Lock()
+	defer set.mutex.Unlock()
+
+	return len(set.data)
+}
