@@ -44,3 +44,14 @@ func (set *SafeSet) Size() int {
 
 	return len(set.data)
 }
+
+func (set *SafeSet) Items() []string {
+	set.mutex.Lock()
+	defer set.mutex.Unlock()
+
+	answer := []string{}
+	for item, _ := range set.data {
+		answer = append(answer, item)
+	}
+	return answer
+}
