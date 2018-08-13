@@ -54,6 +54,9 @@ func stopServers(servers []*Server) {
 	for _, server := range servers {
 		server.Stop()
 	}
+	if DatabasesInUse.Size() != 0 {
+		panic("databases are still in use after stopServers")
+	}
 }
 
 func TestStartStop(t *testing.T) {
