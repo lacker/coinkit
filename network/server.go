@@ -407,7 +407,7 @@ func (s *Server) broadcastIntermittently() {
 			// It's time for a rebroadcast. Send out duplicate messages.
 			// This is a backstop against miscellaneous problems. If the
 			// network is functioning perfectly, this isn't necessary.
-			s.Logf("performing a backup rebroadcast")
+			// s.Logf("performing a backup rebroadcast")
 			s.broadcast(lastMessages)
 		}
 	}

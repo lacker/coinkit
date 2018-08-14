@@ -28,7 +28,7 @@ export default class Popup extends Component {
   render(props) {
     return (
       <div>
-        <button onClick={this.click} />
+        <button onClick={this.click}>load mint balance</button>
         <h1>message: {this.state.message}</h1>
       </div>
     );
