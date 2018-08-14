@@ -18,8 +18,15 @@ export default class KeyPair {
     this.publicKey = publicKey;
     this.privateKey = privateKey;
 
-    if (publicKey.length != 32 || privateKey.length != 64) {
-      throw new Error("bad keys");
+    if (publicKey.length != 32) {
+      throw new Error(
+        "public key length is " + publicKey.length + " but we expected 32"
+      );
+    }
+    if (privateKey.length != 64) {
+      throw new Error(
+        "private key length is " + privateKey.length + " but we expected 64"
+      );
     }
   }
 
