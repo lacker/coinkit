@@ -2,7 +2,7 @@
 // Annoyingly, our crypto library calls it a "secret key" while the Go library calls it
 // a "private key". We try to name things "private key" when possible here.
 
-import { toByteArray } from "base64-js";
+import { fromByteArray, toByteArray } from "base64-js";
 import nacl from "tweetnacl";
 
 // Adds padding to a base64-encoded string, which our library requires but some do not
@@ -29,7 +29,9 @@ export default class KeyPair {
     return new KeyPair(keys.publicKey, keys.secretKey);
   }
 
+  // Returns the signature as base 64
   sign(message) {
-    // TODO
+    let sig = nacl.sign.detached(message, this.privateKey);
+    return fromByteArray(sig);
   }
 }
