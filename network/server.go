@@ -509,6 +509,10 @@ func (s *Server) Stats() {
 	s.node.Stats()
 }
 
+func (s *Server) Port() int {
+	return s.port
+}
+
 func (s *Server) Stop() {
 	s.shutdown = true
 	close(s.quit)

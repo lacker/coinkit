@@ -205,7 +205,7 @@ kubectl get services
 
 Once it displays an external ip, go to `your.external.ip:8000/healthz` in the browser.
 You should see an `OK`.
-Port `8000` is where status information is, port `9000` runs the peer-to-peer protocol.
+Port `8000` is where the http interface is, port `9000` runs the peer-to-peer protocol.
 
 You're going to want this IP to be static. Go to https://console.cloud.google.com/networking/addresses/list and use the dropdown to make this static. Name it something like `cservice0-ip`, because the IP is attached to the service. As long as you don't delete the load balancing service, it'll keep the same IP.
 
