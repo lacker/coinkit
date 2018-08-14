@@ -476,8 +476,10 @@ func (s *Server) ServeHttpInBackground(port int) {
 		reader := bufio.NewReader(r.Body)
 		input, err := util.ReadSignedMessage(reader)
 		if err != nil {
+			util.Logger.Printf("error in reading signed message on /api: %s", err)
 			return
 		}
+		util.Logger.Printf("handling /api input: %s", input)
 		output, ok := s.handleMessage(input)
 		if !ok {
 			return
