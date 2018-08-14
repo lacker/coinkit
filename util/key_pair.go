@@ -74,7 +74,7 @@ func DeserializeKeyPair(serialized []byte) (*KeyPair, error) {
 
 	// Ensure that the keypair works. Otherwise we could accidentally have a public
 	// key and private key that do not match, and it would be hard to catch.
-	message := "Quartz jackdaws love my big sphinx of love"
+	message := "Jackdaws of quartz love my big sphinx"
 	sig := kp.Sign(message)
 	if !VerifySignature(kp.PublicKey(), message, sig) {
 		return nil, errors.New("keypair fails signature validation")

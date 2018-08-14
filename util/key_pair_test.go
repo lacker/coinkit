@@ -5,6 +5,28 @@ import (
 	"testing"
 )
 
+func TestSpecificSignature(t *testing.T) {
+	serialized := `{
+  "Public": "0x5cb9ad1487197f63a69f5c51c8bc53fefe6f55f7d01e5509dd0ad055d44eff4f9a86",
+  "Private": "1YBC5qpaM14DrVdsap5DtBWRv9IHf3Leyd95MOSSBV1cua0Uhxl/Y6afXFHIvFP+/m9V99AeVQndCtBV1E7/Tw"
+}
+`
+	kp, err := DeserializeKeyPair([]byte(serialized))
+	if err != nil {
+		t.Fatalf("deserialize failed: %s", err)
+	}
+	s2 := string(kp.Serialize())
+	if serialized != s2 {
+		t.Fatalf("serialized kps did not match: [%s] vs [%s]", serialized, s2)
+	}
+	message := "hello, hello"
+	sig := kp.Sign(message)
+	expected := "7cvpEprNqYCkSuf8rgyV+ESSyziubcCCQpCVtp61FxMff6A3eRVPgFiKnJkH6DfIB0uMEwOr65GFVWnd8n9JAw"
+	if sig != expected {
+		t.Fatalf("sig != expected: [%s] != [%s]", sig, expected)
+	}
+}
+
 func TestRejectingGarbage(t *testing.T) {
 	randomKey := NewKeyPair().PublicKey()
 	if VerifySignature(randomKey, "message", "garbagesig") {
