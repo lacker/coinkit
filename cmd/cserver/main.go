@@ -71,7 +71,7 @@ func main() {
 	if s == nil {
 		util.Fatalf("failed to start the server")
 	}
-	util.Printf("serving p2p interface on port %d", s.Port())
+
 	if httpPort != 0 {
 		s.ServeHttpInBackground(httpPort)
 		util.Printf("serving http interface on port %d", httpPort)
