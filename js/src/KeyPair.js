@@ -5,12 +5,12 @@
 import { fromByteArray, toByteArray } from "base64-js";
 import nacl from "tweetnacl";
 
-// Adds padding to a base64-encoded string, which our library requires but some do not
-function base64pad(s) {
+// Adds padding to a base64-encoded string, which our library requires but some do not.
+function bytesFromBase64(s) {
   while (s.length % 4 != 0) {
     s += "=";
   }
-  return s;
+  return toByteArray(s);
 }
 
 export default class KeyPair {
@@ -24,9 +24,17 @@ export default class KeyPair {
   }
 
   static fromPrivateKey(priv) {
-    let bytes = toByteArray(base64pad(priv));
+    let bytes = bytesFromBase64(priv);
     let keys = nacl.sign.keyPair.fromSecretKey(bytes);
     return new KeyPair(keys.publicKey, keys.secretKey);
+  }
+
+  // The input format is a serialized JSON string with 'Public' and 'Private' keys
+  static fromSerialized(s) {
+    let j = JSON.parse(s);
+    let pub = bytesFromBase64(j.Public);
+    let priv = bytesFromBase64(j.Private);
+    return new KeyPair(pub, priv);
   }
 
   // Returns the signature as base 64
