@@ -104,8 +104,12 @@ func TestNodeCatchupFromDatabase(t *testing.T) {
 	qs, names := consensus.MakeTestQuorumSlice(4)
 	nodes := []*Node{}
 	for i, name := range names {
+		util.Logger.Printf("creating initial node %d", i)
 		db := data.NewTestDatabase(i)
 		node := NewNode(name, qs, db)
+		if node == nil {
+			t.Fatal("NewNode failed")
+		}
 		nodes = append(nodes, node)
 	}
 
@@ -120,11 +124,15 @@ func TestNodeCatchupFromDatabase(t *testing.T) {
 			}
 		}
 	}
+	data.CheckAllDatabasesCommitted()
 
 	// Knock out and restart the first three nodes to force a db recovery
 	for i := 0; i <= 2; i++ {
 		util.Logger.Printf("restarting node %d", i)
 		nodes[i] = NewNode(names[i], qs, nodes[i].database)
+		if nodes[0] == nil {
+			t.Fatalf("NewNode failed")
+		}
 	}
 
 	// This should be enough to catch up one block
