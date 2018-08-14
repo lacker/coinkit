@@ -7,3 +7,7 @@ test("KeyPair can be constructed from a private key", () => {
   expect(kp.publicKey).toBeDefined();
   expect(kp.privateKey).toBeDefined();
 });
+
+test("KeyPair's signatures match Go", () => {
+  // TODO
+});
