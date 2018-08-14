@@ -55,7 +55,7 @@ func (pk PublicKey) Equal(other PublicKey) bool {
 
 // ReadPublicKey attempts to read a public key from a string format.
 // The string format starts with "0x" and is hex-encoded.
-// If the input format is not valid.
+// Returns an error if the input format is not valid.
 func ReadPublicKey(input string) (PublicKey, error) {
 	var invalid PublicKey
 	if len(input) != 70 {
