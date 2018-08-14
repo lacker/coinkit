@@ -5,7 +5,8 @@
   "main": "src/main.js",
   "scripts": {
     "build": "parcel --no-hmr build src/main.js -d extension/ -o bundle.js",
-    "watch": "parcel --no-hmr watch src/main.js -d extension/ -o bundle.js"
+    "watch": "parcel --no-hmr watch src/main.js -d extension/ -o bundle.js",
+    "test": "jest"
   },
   "author": "Kevin Lacker",
   "dependencies": {
@@ -22,5 +23,8 @@
   "license": "UNLICENSED",
   "browserslist": [
     "last 10 chrome versions"
-  ]
+  ],
+  "devDependencies": {
+    "jest": "^23.5.0"
+  }
 }
