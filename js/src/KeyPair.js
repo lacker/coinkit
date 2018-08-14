@@ -28,4 +28,8 @@ export default class KeyPair {
     let keys = nacl.sign.keyPair.fromSecretKey(bytes);
     return new KeyPair(keys.publicKey, keys.secretKey);
   }
+
+  sign(message) {
+    // TODO
+  }
 }
