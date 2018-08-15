@@ -26,6 +26,7 @@ test("KeyPair.readPublicKey", () => {
   );
 });
 
+/*
 test("KeyPair's signatures match Go", () => {
   let serialized = `{
   "Public": "0x5cb9ad1487197f63a69f5c51c8bc53fefe6f55f7d01e5509dd0ad055d44eff4f9a86",
@@ -36,3 +37,4 @@ test("KeyPair's signatures match Go", () => {
 
   // XXX
 });
+*/

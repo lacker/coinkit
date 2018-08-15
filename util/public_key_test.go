@@ -45,3 +45,11 @@ func TestValidation(t *testing.T) {
 		t.Fatal("WithoutChecksum should be undoable")
 	}
 }
+
+func TestCheckBytes(t *testing.T) {
+	var bytes [32]byte
+	check := checkBytes(bytes[:])
+	if check[0] != 175 || check[1] != 19 {
+		t.Fatalf("bad check bytes")
+	}
+}

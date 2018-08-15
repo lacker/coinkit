@@ -94,7 +94,9 @@ export default class KeyPair {
       .toHex()
       .substring(0, 4);
     if (checksum1 != checksum2) {
-      throw new Error("mismatched checksums");
+      throw new Error(
+        "mismatched checksums: " + checksum1 + " vs " + checksum2
+      );
     }
   }
 }
