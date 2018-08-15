@@ -1,6 +1,8 @@
 package util
 
 import (
+	"crypto/sha512"
+
 	"testing"
 )
 
@@ -46,10 +48,17 @@ func TestValidation(t *testing.T) {
 	}
 }
 
-func TestCheckBytes(t *testing.T) {
-	var bytes [32]byte
-	check := checkBytes(bytes[:])
-	if check[0] != 175 || check[1] != 19 {
-		t.Fatalf("bad check bytes")
+// Testing that our Go libraries work like our JavaScript libraries
+func TestCryptoBasics(t *testing.T) {
+	h := sha512.New512_256()
+	sum := h.Sum(nil)
+	if sum[0] != 198 {
+		t.Fatalf("first byte of hashed nothing should be 198")
+	}
+
+	h.Write([]byte("foo"))
+	sum = h.Sum(nil)
+	if sum[0] != 213 {
+		t.Fatalf("first byte of hashed foo should be 213")
 	}
 }

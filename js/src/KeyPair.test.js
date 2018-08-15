@@ -8,6 +8,10 @@ test("KeyPair can be constructed from a private key", () => {
   expect(kp.privateKey).toBeDefined();
 });
 
+test("KeyPair test crypto basics", () => {
+  KeyPair.testCryptoBasics();
+});
+
 test("KeyPair.readPublicKey", () => {
   expect(() => {
     KeyPair.readPublicKey("blah");
@@ -21,9 +25,11 @@ test("KeyPair.readPublicKey", () => {
     );
   }).toThrow();
 
+  /*
   KeyPair.readPublicKey(
     "0x5cb9ad1487197f63a69f5c51c8bc53fefe6f55f7d01e5509dd0ad055d44eff4f9a86"
   );
+*/
 });
 
 /*

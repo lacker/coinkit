@@ -87,7 +87,7 @@ export default class KeyPair {
     // Check the checksum
     let key = hexDecode(input.substring(2, 66));
     let checksum1 = input.substring(66, 70);
-    var md = forge.md.sha512.sha256.create();
+    let md = forge.md.sha512.sha256.create();
     md.update(key);
     let checksum2 = md
       .digest()
@@ -97,6 +97,21 @@ export default class KeyPair {
       throw new Error(
         "mismatched checksums: " + checksum1 + " vs " + checksum2
       );
+    }
+  }
+
+  // Testing that our JavaScript libraries work like our Go libraries
+  static testCryptoBasics() {
+    let hash = forge.md.sha512.sha256.create();
+    let sum = hash.digest().getBytes();
+    if (sum.charCodeAt(0) != 198) {
+      throw new Error("first byte of hashed nothing should be 198");
+    }
+
+    hash.update("foo", "utf-8");
+    sum = hash.digest().getBytes();
+    if (sum.charCodeAt(0) != 213) {
+      throw new Error("first byte of hashed foo should be 213");
     }
   }
 }
