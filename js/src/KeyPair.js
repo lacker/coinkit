@@ -34,6 +34,19 @@ function hexDecode(s) {
   return answer;
 }
 
+// Returns a hex checksum from a Uint8array public key.
+function hexChecksum(bytes) {
+  // Convert bytes to the format for bytes that forge wants
+  let s = "";
+  for (let i = 0; i < bytes.length; i++) {
+    s += String.fromCharCode(bytes[i]);
+  }
+  let hash = forge.md.sha512.sha256.create();
+  hash.update(s);
+  let digest = hash.digest();
+  return digest.toHex().substring(0, 4);
+}
+
 export default class KeyPair {
   constructor(publicKey, privateKey) {
     this.publicKey = publicKey;
@@ -89,10 +102,7 @@ export default class KeyPair {
     let checksum1 = input.substring(66, 70);
     let md = forge.md.sha512.sha256.create();
     md.update(key);
-    let checksum2 = md
-      .digest()
-      .toHex()
-      .substring(0, 4);
+    let checksum2 = hexChecksum(key);
     if (checksum1 != checksum2) {
       throw new Error(
         "mismatched checksums: " + checksum1 + " vs " + checksum2
