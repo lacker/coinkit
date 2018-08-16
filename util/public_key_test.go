@@ -56,9 +56,18 @@ func TestCryptoBasics(t *testing.T) {
 		t.Fatalf("first byte of hashed nothing should be 198")
 	}
 
-	h.Write([]byte("foo"))
+	foo := []byte("qq")
+	h = sha512.New512_256()
+	h.Write(foo)
 	sum = h.Sum(nil)
-	if sum[0] != 213 {
-		t.Fatalf("first byte of hashed foo should be 213")
+	if h.Sum(nil)[0] != 59 {
+		t.Fatalf("first byte of hashed qq should be 59")
+	}
+
+	bytes := []byte{1, 2, 3, 4}
+	h = sha512.New512_256()
+	h.Write(bytes)
+	if h.Sum(nil)[0] != 254 {
+		t.Fatalf("first byte of hashed {1, 2, 3, 4} should be 254", h.Sum(nil)[0])
 	}
 }

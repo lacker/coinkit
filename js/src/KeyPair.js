@@ -108,10 +108,19 @@ export default class KeyPair {
       throw new Error("first byte of hashed nothing should be 198");
     }
 
-    hash.update("foo", "utf-8");
+    hash = forge.md.sha512.sha256.create();
+    hash.update("qq", "utf-8");
     sum = hash.digest().getBytes();
-    if (sum.charCodeAt(0) != 213) {
-      throw new Error("first byte of hashed foo should be 213");
-    }
+    expect(sum.charCodeAt(0)).toBe(59);
+
+    let bytes =
+      String.fromCharCode(1) +
+      String.fromCharCode(2) +
+      String.fromCharCode(3) +
+      String.fromCharCode(4);
+    hash = forge.md.sha512.sha256.create();
+    hash.update(bytes);
+    sum = hash.digest().getBytes();
+    expect(sum.charCodeAt(0)).toBe(254);
   }
 }
