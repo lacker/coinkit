@@ -1,3 +1,5 @@
+import forge from "node-forge";
+
 import KeyPair from "./KeyPair";
 
 test("KeyPair can be constructed from a private key", () => {
@@ -6,10 +8,6 @@ test("KeyPair can be constructed from a private key", () => {
   );
   expect(kp.publicKey).toBeDefined();
   expect(kp.privateKey).toBeDefined();
-});
-
-test("KeyPair test crypto basics", () => {
-  KeyPair.testCryptoBasics();
 });
 
 test("KeyPair.readPublicKey", () => {
@@ -37,6 +35,32 @@ test("KeyPair's signatures match Go", () => {
 }
 `;
   let kp = KeyPair.fromSerialized(serialized);
+  let sig = kp.signString("hello, hello");
+  expect(sig).toBe(
+    "7cvpEprNqYCkSuf8rgyV+ESSyziubcCCQpCVtp61FxMff6A3eRVPgFiKnJkH6DfIB0uMEwOr65GFVWnd8n9JAw"
+  );
+});
 
-  // XXX
+// Testing that our JavaScript libraries work like our Go libraries
+test("crypto basics", () => {
+  let hash = forge.md.sha512.sha256.create();
+  let sum = hash.digest().getBytes();
+  if (sum.charCodeAt(0) != 198) {
+    throw new Error("first byte of hashed nothing should be 198");
+  }
+
+  hash = forge.md.sha512.sha256.create();
+  hash.update("qq", "utf-8");
+  sum = hash.digest().getBytes();
+  expect(sum.charCodeAt(0)).toBe(59);
+
+  let bytes =
+    String.fromCharCode(1) +
+    String.fromCharCode(2) +
+    String.fromCharCode(3) +
+    String.fromCharCode(4);
+  hash = forge.md.sha512.sha256.create();
+  hash.update(bytes);
+  sum = hash.digest().getBytes();
+  expect(sum.charCodeAt(0)).toBe(254);
 });

@@ -5,6 +5,7 @@
 import { fromByteArray, toByteArray } from "base64-js";
 import nacl from "tweetnacl";
 import forge from "node-forge";
+import { TextEncoder } from "text-encoding-shim";
 
 // Adds padding to a base64-encoded string, which our library requires but some do not.
 function bytesFromBase64(s) {
@@ -26,7 +27,7 @@ function hexDecode(s) {
     let value = parseInt(chunk, 16);
     if (value >= 256) {
       throw new Error(
-        "bad byte value " + digit + " while decoding " + chunk + " from " + s
+        "bad byte value " + value + " while decoding " + chunk + " from " + s
       );
     }
     answer[i] = value;
@@ -84,10 +85,18 @@ export default class KeyPair {
     return new KeyPair(pub, priv);
   }
 
-  // Returns the signature as base 64
-  sign(message) {
-    let sig = nacl.sign.detached(message, this.privateKey);
-    return fromByteArray(sig);
+  // Returns the signature as base 64.
+  // Strips equal signs for Go compatibility
+  sign(bytes) {
+    let sig = nacl.sign.detached(bytes, this.privateKey);
+    let padded = fromByteArray(sig);
+    return padded.replace(/=*$/, "");
+  }
+
+  // utf-8 encodes a string before signing
+  signString(string) {
+    let arr = new TextEncoder("utf-8").encode(string);
+    return this.sign(arr);
   }
 
   // readPublicKey reads a public key from a string format.
@@ -116,29 +125,5 @@ export default class KeyPair {
     }
 
     return key;
-  }
-
-  // Testing that our JavaScript libraries work like our Go libraries
-  static testCryptoBasics() {
-    let hash = forge.md.sha512.sha256.create();
-    let sum = hash.digest().getBytes();
-    if (sum.charCodeAt(0) != 198) {
-      throw new Error("first byte of hashed nothing should be 198");
-    }
-
-    hash = forge.md.sha512.sha256.create();
-    hash.update("qq", "utf-8");
-    sum = hash.digest().getBytes();
-    expect(sum.charCodeAt(0)).toBe(59);
-
-    let bytes =
-      String.fromCharCode(1) +
-      String.fromCharCode(2) +
-      String.fromCharCode(3) +
-      String.fromCharCode(4);
-    hash = forge.md.sha512.sha256.create();
-    hash.update(bytes);
-    sum = hash.digest().getBytes();
-    expect(sum.charCodeAt(0)).toBe(254);
   }
 }
