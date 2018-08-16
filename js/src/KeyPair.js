@@ -73,6 +73,12 @@ export default class KeyPair {
   // The input format is a serialized JSON string with 'Public' and 'Private' keys
   static fromSerialized(s) {
     let j = JSON.parse(s);
+    if (!j.Public) {
+      throw new Error("serialized key pair must have Public field");
+    }
+    if (!j.Private) {
+      throw new Error("serialized key pair must have Private field");
+    }
     let pub = KeyPair.readPublicKey(j.Public);
     let priv = bytesFromBase64(j.Private);
     return new KeyPair(pub, priv);
@@ -108,6 +114,8 @@ export default class KeyPair {
         "mismatched checksums: " + checksum1 + " vs " + checksum2
       );
     }
+
+    return key;
   }
 
   // Testing that our JavaScript libraries work like our Go libraries
