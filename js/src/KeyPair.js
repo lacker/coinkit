@@ -119,6 +119,19 @@ export default class KeyPair {
     return base64Encode(sig);
   }
 
+  // publicKey and signature are both base64-encoded strings
+  // Returns whether the signature is legitimate.
+  static verifySignature(publicKey, message, signature) {
+    let key = KeyPair.decodePublicKey(publicKey);
+    let msg = new TextEncoder("utf-8").encode(message);
+    let sig = base64Decode(signature);
+    try {
+      return nacl.sign.detached.verify(msg, sig, key);
+    } catch (e) {
+      return false;
+    }
+  }
+
   // decodePublicKey reads a public key from a string format.
   // This is parallel to Go's ReadPublicKey.
   // The string format starts with "0x" and is hex-encoded.
