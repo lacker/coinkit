@@ -39,9 +39,10 @@ test("KeyPair.decodePublicKey", () => {
     );
   }).toThrow();
 
-  KeyPair.decodePublicKey(
-    "0x5cb9ad1487197f63a69f5c51c8bc53fefe6f55f7d01e5509dd0ad055d44eff4f9a86"
-  );
+  let validHex =
+    "0x5cb9ad1487197f63a69f5c51c8bc53fefe6f55f7d01e5509dd0ad055d44eff4f9a86";
+  let pk = KeyPair.decodePublicKey(validHex);
+  expect(KeyPair.encodePublicKey(pk)).toBe(validHex);
 });
 
 test("KeyPair can be constructed from a private key", () => {
@@ -59,6 +60,8 @@ test("KeyPair specific signatures", () => {
 }
 `;
   let kp = KeyPair.fromSerialized(serialized);
+  // XXX expect(kp.serialize()).toBe(serialized);
+
   let sig = kp.signString("hello, hello");
   expect(sig).toBe(
     "7cvpEprNqYCkSuf8rgyV+ESSyziubcCCQpCVtp61FxMff6A3eRVPgFiKnJkH6DfIB0uMEwOr65GFVWnd8n9JAw"

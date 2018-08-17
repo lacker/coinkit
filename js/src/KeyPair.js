@@ -45,7 +45,9 @@ function hexDecode(s) {
 
 // Encodes a Uint8Array into a hex string.
 function hexEncode(bytes) {
-  return bytes.reduce((str, byte) => str + byte.toString(16).padStart(2, "0"));
+  return Array.from(bytes)
+    .map(byte => byte.toString(16).padStart(2, "0"))
+    .join("");
 }
 
 // Returns a hex checksum from a Uint8array public key.
@@ -105,8 +107,8 @@ export default class KeyPair {
       Private: base64Encode(this.privateKey)
     };
 
-    // TODO: prettify
-    return JSON.stringify(j);
+    // Pretty-encoding so that it looks comprehensible when saved to a file
+    return JSON.stringify(j, null, 2);
   }
 
   // Returns the signature as base 64.
