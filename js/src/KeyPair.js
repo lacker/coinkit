@@ -7,12 +7,20 @@ import nacl from "tweetnacl";
 import forge from "node-forge";
 import { TextEncoder } from "text-encoding-shim";
 
-// Adds padding to a base64-encoded string, which our library requires but some do not.
-function bytesFromBase64(s) {
+// Decodes a Uint8Array from a base64 string.
+// Adds = padding at the end, which our library requires but some do not.
+function base64Decode(s) {
   while (s.length % 4 != 0) {
     s += "=";
   }
   return toByteArray(s);
+}
+
+// Encodes a Uint8array into a base64 string.
+// Removes any = padding at the end.
+function base64Encode(bytes) {
+  let padded = fromByteArray(bytes);
+  return padded.replace(/=*$/, "");
 }
 
 // Decodes a Uint8Array from a hex string.
@@ -71,7 +79,7 @@ export default class KeyPair {
   }
 
   static fromPrivateKey(priv) {
-    let bytes = bytesFromBase64(priv);
+    let bytes = base64Decode(priv);
     let keys = nacl.sign.keyPair.fromSecretKey(bytes);
     return new KeyPair(keys.publicKey, keys.secretKey);
   }
@@ -86,7 +94,7 @@ export default class KeyPair {
       throw new Error("serialized key pair must have Private field");
     }
     let pub = KeyPair.readPublicKey(j.Public);
-    let priv = bytesFromBase64(j.Private);
+    let priv = base64Decode(j.Private);
     return new KeyPair(pub, priv);
   }
 
