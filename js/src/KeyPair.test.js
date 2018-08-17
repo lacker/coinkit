@@ -62,7 +62,7 @@ test("KeyPair specific signatures", () => {
   let kp = KeyPair.fromSerialized(serialized);
   expect(kp.serialize()).toBe(serialized);
 
-  let sig = kp.signString("hello, hello");
+  let sig = kp.sign("hello, hello");
   expect(sig).toBe(
     "7cvpEprNqYCkSuf8rgyV+ESSyziubcCCQpCVtp61FxMff6A3eRVPgFiKnJkH6DfIB0uMEwOr65GFVWnd8n9JAw"
   );

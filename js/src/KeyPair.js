@@ -111,18 +111,12 @@ export default class KeyPair {
     return JSON.stringify(j, null, 2) + "\n";
   }
 
-  // Returns the signature as base 64.
-  // Strips equal signs for Go compatibility
-  sign(bytes) {
+  // We sign a string by utf-8 encoding it and signing the bytes.
+  // Signatures are returned in base64 encoding.
+  sign(string) {
+    let bytes = new TextEncoder("utf-8").encode(string);
     let sig = nacl.sign.detached(bytes, this.privateKey);
-    let padded = fromByteArray(sig);
-    return padded.replace(/=*$/, "");
-  }
-
-  // utf-8 encodes a string before signing
-  signString(string) {
-    let arr = new TextEncoder("utf-8").encode(string);
-    return this.sign(arr);
+    return base64Encode(sig);
   }
 
   // decodePublicKey reads a public key from a string format.
