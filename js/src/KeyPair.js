@@ -100,7 +100,13 @@ export default class KeyPair {
 
   // serialize() returns a serialized JSON string with 'Public' and 'Private' keys
   serialize() {
-    // XXX
+    let j = {
+      Public: KeyPair.encodePublicKey(this.publicKey),
+      Private: base64Encode(this.privateKey)
+    };
+
+    // TODO: prettify
+    return JSON.stringify(j);
   }
 
   // Returns the signature as base 64.
