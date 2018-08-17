@@ -107,8 +107,8 @@ export default class KeyPair {
       Private: base64Encode(this.privateKey)
     };
 
-    // Pretty-encoding so that it looks comprehensible when saved to a file
-    return JSON.stringify(j, null, 2);
+    // Pretty-encoding so that it matches our code style when saved to a file
+    return JSON.stringify(j, null, 2) + "\n";
   }
 
   // Returns the signature as base 64.
