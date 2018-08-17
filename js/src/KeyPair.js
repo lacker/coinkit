@@ -93,7 +93,7 @@ export default class KeyPair {
     if (!j.Private) {
       throw new Error("serialized key pair must have Private field");
     }
-    let pub = KeyPair.readPublicKey(j.Public);
+    let pub = KeyPair.decodePublicKey(j.Public);
     let priv = base64Decode(j.Private);
     return new KeyPair(pub, priv);
   }
@@ -123,11 +123,11 @@ export default class KeyPair {
     return this.sign(arr);
   }
 
-  // readPublicKey reads a public key from a string format.
+  // decodePublicKey reads a public key from a string format.
   // This is parallel to Go's ReadPublicKey.
   // The string format starts with "0x" and is hex-encoded.
   // Throws an error if the input format is not valid.
-  static readPublicKey(input) {
+  static decodePublicKey(input) {
     if (input.length != 70) {
       throw new Error("public key " + input + " should be 70 characters long");
     }

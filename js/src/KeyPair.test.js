@@ -26,20 +26,20 @@ test("KeyPair crypto basics", () => {
   expect(sum.charCodeAt(0)).toBe(254);
 });
 
-test("KeyPair.readPublicKey", () => {
+test("KeyPair.decodePublicKey", () => {
   expect(() => {
-    KeyPair.readPublicKey("blah");
+    KeyPair.decodePublicKey("blah");
   }).toThrow();
   expect(() => {
-    KeyPair.readPublicKey("0xblahblahblah");
+    KeyPair.decodePublicKey("0xblahblahblah");
   }).toThrow();
   expect(() => {
-    KeyPair.readPublicKey(
+    KeyPair.decodePublicKey(
       "0x12345678901234567890123456789012345678901234567890123456789012345678"
     );
   }).toThrow();
 
-  KeyPair.readPublicKey(
+  KeyPair.decodePublicKey(
     "0x5cb9ad1487197f63a69f5c51c8bc53fefe6f55f7d01e5509dd0ad055d44eff4f9a86"
   );
 });
