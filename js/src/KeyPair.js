@@ -15,7 +15,7 @@ function bytesFromBase64(s) {
   return toByteArray(s);
 }
 
-// Decodes a Uint8array from a hex string.
+// Decodes a Uint8Array from a hex string.
 function hexDecode(s) {
   if (s.length % 2 != 0) {
     throw new Error("hex-encoded byte arrays should be even length");
@@ -33,6 +33,11 @@ function hexDecode(s) {
     answer[i] = value;
   }
   return answer;
+}
+
+// Encodes a Uint8Array into a hex string.
+function hexEncode(bytes) {
+  return bytes.reduce((str, byte) => str + byte.toString(16).padStart(2, "0"));
 }
 
 // Returns a hex checksum from a Uint8array public key.
@@ -85,6 +90,11 @@ export default class KeyPair {
     return new KeyPair(pub, priv);
   }
 
+  // serialize() returns a serialized JSON string with 'Public' and 'Private' keys
+  serialize() {
+    // XXX
+  }
+
   // Returns the signature as base 64.
   // Strips equal signs for Go compatibility
   sign(bytes) {
@@ -125,5 +135,14 @@ export default class KeyPair {
     }
 
     return key;
+  }
+
+  // encodePublicKey creates a string-format public key from Uint8Array.
+  // The checksum is added at the end
+  static encodePublicKey(key) {
+    if (key.length != 32) {
+      throw new Error("public keys should be 32 bytes long");
+    }
+    return "0x" + hexEncode(key) + hexChecksum(key);
   }
 }
