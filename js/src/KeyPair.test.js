@@ -75,5 +75,7 @@ test("KeyPair rejects garbage signatures", () => {
 });
 
 test("KeyPair generated randomly", () => {
-  // XXX
+  let kp = KeyPair.fromRandom();
+
+  // TODO: port TestNewKeyPair
 });

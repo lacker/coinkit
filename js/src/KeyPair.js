@@ -100,6 +100,12 @@ export default class KeyPair {
     return new KeyPair(pub, priv);
   }
 
+  // Generates a keypair randomly
+  static fromRandom() {
+    let keys = nacl.sign.keyPair();
+    return new KeyPair(keys.publicKey, keys.secretKey);
+  }
+
   // serialize() returns a serialized JSON string with 'Public' and 'Private' keys
   serialize() {
     let j = {
