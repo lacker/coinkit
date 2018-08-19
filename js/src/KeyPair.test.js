@@ -76,6 +76,11 @@ test("KeyPair rejects garbage signatures", () => {
 
 test("KeyPair generated randomly", () => {
   let kp = KeyPair.fromRandom();
+  let message1 =
+    "This is my message. There are many like it, but this one is mine.";
+  let sig1 = kp.sign(message1);
+  let message2 = "Another message";
+  let sig2 = kp.sign(message2);
 
   // TODO: port TestNewKeyPair
 });
