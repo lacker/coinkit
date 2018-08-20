@@ -180,8 +180,6 @@ export default class KeyPair {
     // Check the checksum
     let key = hexDecode(input.substring(2, 66));
     let checksum1 = input.substring(66, 70);
-    let md = forge.md.sha512.sha256.create();
-    md.update(key);
     let checksum2 = hexChecksum(key);
     if (checksum1 != checksum2) {
       throw new Error(
