@@ -22,7 +22,11 @@ export default class Popup extends Component {
     };
     let response = await this.client.query(query);
 
-    this.setState({ message: JSON.stringify(response) });
+    if (response.error) {
+      this.setState({ message: "error" });
+    } else {
+      this.setState({ message: response.messageString });
+    }
   }
 
   render(props) {
