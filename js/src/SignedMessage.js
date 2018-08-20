@@ -34,10 +34,11 @@ export default class SignedMessage {
   // Throws an error if it receives an invalid message
   static fromSerialized(serialized) {
     let parts = serialized.split(":");
-    if (parts.length != 4) {
+    if (parts.length < 4) {
       throw new Error("could not find 4 parts");
     }
-    let [version, signer, signature, messageString] = parts;
+    let [version, signer, signature] = parts.slice(0, 3);
+    let messageString = parts.slice(3).join(":");
     if (version != "e") {
       throw new Error("unrecognized version");
     }
