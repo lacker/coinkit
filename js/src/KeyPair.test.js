@@ -101,3 +101,11 @@ test("KeyPair.fromSecretPhrase", () => {
   let sig2 = kp2.sign(message);
   expect(sig1).toBe(sig2);
 });
+
+test("KeyPair.serialize", () => {
+  let kp1 = KeyPair.fromSecretPhrase("boopaboop");
+  let s = kp1.serialize();
+  let kp2 = KeyPair.fromSerialized(s);
+  expect(kp1.getPublicKey()).toEqual(kp2.getPublicKey());
+  expect(kp1.privateKey).toEqual(kp2.privateKey);
+});
