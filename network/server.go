@@ -471,15 +471,16 @@ func (s *Server) ServeHttpInBackground(port int) {
 		}
 	})
 
-	// /api is a bridge from the blockchain to http
-	http.HandleFunc("/api", func(w http.ResponseWriter, r *http.Request) {
+	// /messages/ accepts signed messages over http
+	// This also accepts posts on /messages
+	http.HandleFunc("/messages/", func(w http.ResponseWriter, r *http.Request) {
 		reader := bufio.NewReader(r.Body)
 		input, err := util.ReadSignedMessage(reader)
 		if err != nil {
-			util.Logger.Printf("error in reading signed message on /api: %s", err)
+			util.Logger.Printf("error in reading signed message on /messages/: %s", err)
 			return
 		}
-		util.Logger.Printf("handling /api input: %s", input)
+		util.Logger.Printf("handling /messages/ input: %s", input)
 		output, ok := s.handleMessage(input)
 		if !ok {
 			return
