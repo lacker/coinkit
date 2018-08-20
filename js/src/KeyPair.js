@@ -50,8 +50,8 @@ function hexEncode(bytes) {
     .join("");
 }
 
-// Returns a hex checksum from a Uint8array public key.
-function hexChecksum(bytes) {
+// Creates a forge sha512/256 hash object from bytes
+function forgeHash(bytes) {
   // Convert bytes to the format for bytes that forge wants
   let s = "";
   for (let i = 0; i < bytes.length; i++) {
@@ -59,8 +59,25 @@ function hexChecksum(bytes) {
   }
   let hash = forge.md.sha512.sha256.create();
   hash.update(s);
+  return hash;
+}
+
+// Returns a hex checksum from a Uint8array public key.
+function hexChecksum(bytes) {
+  let hash = forgeHash(bytes);
   let digest = hash.digest();
   return digest.toHex().substring(0, 4);
+}
+
+// Returns a Uint8Array sha512_256 hash from a Uint8Array input.
+function sha512_256(inputBytes) {
+  let hash = forgeHash(inputBytes);
+  let byteString = hash.digest().bytes();
+  let outputBytes = new Uint8Array(32);
+  for (let i = 0; i < 32; i++) {
+    outputBytes[i] = byteString.charCodeAt(i);
+  }
+  return outputBytes;
 }
 
 export default class KeyPair {
@@ -103,6 +120,15 @@ export default class KeyPair {
   // Generates a keypair randomly
   static fromRandom() {
     let keys = nacl.sign.keyPair();
+    return new KeyPair(keys.publicKey, keys.secretKey);
+  }
+
+  // Generates a keypair from a secret phrase
+  static fromSecretPhrase(phrase) {
+    // Hash the phrase for the ed25519 entropy seed bytes
+    let bytes = new TextEncoder("utf-8").encode(phrase);
+    let seed = sha512_256(bytes);
+    let keys = nacl.sign.keyPair.fromSeed(seed);
     return new KeyPair(keys.publicKey, keys.secretKey);
   }
 

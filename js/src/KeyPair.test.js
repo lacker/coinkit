@@ -74,7 +74,7 @@ test("KeyPair rejects garbage signatures", () => {
   expect(KeyPair.verifySignature(key, "message", "garbagesig")).toBe(false);
 });
 
-test("KeyPair generated randomly", () => {
+test("KeyPair.fromRandom", () => {
   let kp = KeyPair.fromRandom();
   let pub = kp.getPublicKey();
 
@@ -88,4 +88,16 @@ test("KeyPair generated randomly", () => {
   expect(KeyPair.verifySignature(pub, message2, sig2)).toBe(true);
   expect(KeyPair.verifySignature(pub, message1, sig2)).toBe(false);
   expect(KeyPair.verifySignature(pub, message2, sig1)).toBe(false);
+});
+
+test("KeyPair.fromSecretPhrase", () => {
+  let kp1 = KeyPair.fromSecretPhrase("monkey");
+  let pub = kp1.getPublicKey();
+  let kp2 = KeyPair.fromSecretPhrase("monkey");
+  expect(kp2.getPublicKey()).toBe(pub);
+
+  let message = "Hey yo here is a message";
+  let sig1 = kp1.sign(message);
+  let sig2 = kp2.sign(message);
+  expect(sig1).toBe(sig2);
 });
