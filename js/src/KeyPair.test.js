@@ -76,11 +76,16 @@ test("KeyPair rejects garbage signatures", () => {
 
 test("KeyPair generated randomly", () => {
   let kp = KeyPair.fromRandom();
+  let pub = kp.getPublicKey();
+
   let message1 =
     "This is my message. There are many like it, but this one is mine.";
   let sig1 = kp.sign(message1);
   let message2 = "Another message";
   let sig2 = kp.sign(message2);
 
-  // TODO: port TestNewKeyPair
+  expect(KeyPair.verifySignature(pub, message1, sig1)).toBe(true);
+  expect(KeyPair.verifySignature(pub, message2, sig2)).toBe(true);
+  expect(KeyPair.verifySignature(pub, message1, sig2)).toBe(false);
+  expect(KeyPair.verifySignature(pub, message2, sig1)).toBe(false);
 });

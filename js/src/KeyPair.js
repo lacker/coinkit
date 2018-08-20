@@ -174,4 +174,9 @@ export default class KeyPair {
     }
     return "0x" + hexEncode(key) + hexChecksum(key);
   }
+
+  // Returns the public key in hex format
+  getPublicKey() {
+    return KeyPair.encodePublicKey(this.publicKey);
+  }
 }
