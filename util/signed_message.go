@@ -103,6 +103,9 @@ func (sm *SignedMessage) Write(w io.Writer) {
 func ReadSignedMessage(r *bufio.Reader) (*SignedMessage, error) {
 	data, err := r.ReadString('\n')
 	if err != nil {
+		if err == io.EOF {
+			return nil, fmt.Errorf("no endline while reading %s", data)
+		}
 		return nil, err
 	}
 
