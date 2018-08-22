@@ -9,14 +9,14 @@ import (
 )
 
 type SignedOperation struct {
-	Operation
+	Operation `json:"operation"`
 
 	// The type of the operation
 	Type string `json:"type"`
 
 	// The signature to prove that the sender has signed this
 	// Nil if the operation has not been signed
-	Signature string
+	Signature string `json:"signature"`
 }
 
 func NewSignedOperation(op Operation, kp *util.KeyPair) *SignedOperation {

@@ -56,7 +56,7 @@ type DecodedMessage struct {
 	Type string `json:"type"`
 
 	// The message itself
-	Message Message
+	Message Message `json:"message"`
 }
 
 type PartiallyDecodedMessage struct {
