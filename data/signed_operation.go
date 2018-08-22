@@ -12,7 +12,7 @@ type SignedOperation struct {
 	Operation
 
 	// The type of the operation
-	Type string
+	Type string `json:"type"`
 
 	// The signature to prove that the sender has signed this
 	// Nil if the operation has not been signed

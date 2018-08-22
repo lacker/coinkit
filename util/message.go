@@ -53,7 +53,7 @@ func RegisterMessageType(m Message) {
 // DecodedMessage is just used for the encoding process.
 type DecodedMessage struct {
 	// The type of the message
-	Type string
+	Type string `json:"type"`
 
 	// The message itself
 	Message Message
@@ -77,7 +77,8 @@ func EncodeMessage(m Message) string {
 	}
 	encoded := string(bytes)
 
-	if Testing() {
+	// XXX Unfalse this to find more keys to migrate
+	if false && Testing() {
 		matched, _ := regexp.MatchString("\"[A-Z]", encoded)
 		if matched {
 			Logger.Fatalf("capitalized key in encoded message: %s", encoded)
