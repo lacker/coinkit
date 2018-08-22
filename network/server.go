@@ -479,11 +479,12 @@ func (s *Server) ServeHttpInBackground(port int) {
 			util.Logger.Printf("error in reading signed message: %s", err)
 			return
 		}
-		util.Logger.Printf("handling /messages/ input: %s", input)
+		util.Logger.Printf("handling /messages/ input: %v", input)
 		output, ok := s.handleMessage(input)
 		if !ok {
 			return
 		}
+		util.Logger.Printf("got response message: %v", output)
 		output.Write(w)
 	}
 	http.HandleFunc("/messages/", messageHandler)
