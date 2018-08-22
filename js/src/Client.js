@@ -13,7 +13,7 @@ export default class Client {
     console.log("XXX body", body);
     let response = await fetch(url, {
       method: "post",
-      body: '{"foo":"bar"}'
+      body: body
     });
     return response.text();
   }
