@@ -23,9 +23,9 @@ export default class Popup extends Component {
     let response = await this.client.query(query);
 
     if (response.error) {
-      this.setState({ message: "error" });
+      this.setState({ message: "error: " + response.error });
     } else {
-      this.setState({ message: response.messageString });
+      this.setState({ message: "balance is " + response.Accounts[mint] });
     }
   }
 
