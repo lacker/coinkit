@@ -74,7 +74,9 @@ func EncodeMessage(m Message) string {
 	if err != nil {
 		panic(err)
 	}
-	return string(bytes)
+	encoded := string(bytes)
+
+	return encoded
 }
 
 func DecodeMessage(encoded string) (Message, error) {
