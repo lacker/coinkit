@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net"
 	"net/http"
+	"net/http/httputil"
 	"os"
 	"time"
 
@@ -441,7 +442,7 @@ func (s *Server) ServeInBackground() {
 	go s.broadcastIntermittently()
 }
 
-// ServeHttpInBackground spawns a goroutine to serve the /somethingz urls.
+// ServeHttpInBackground spawns a goroutine to serve http.
 func (s *Server) ServeHttpInBackground(port int) {
 	// /healthz just returns OK as long as the server is healthy
 	http.HandleFunc("/healthz", func(w http.ResponseWriter, r *http.Request) {
@@ -471,13 +472,12 @@ func (s *Server) ServeHttpInBackground(port int) {
 		}
 	})
 
-	// /messages/ accepts signed messages over http
-	// This also accepts posts on /messages
-	http.HandleFunc("/messages/", func(w http.ResponseWriter, r *http.Request) {
+	// /messages/ accepts signed messages over http, with or without trailing slash
+	messageHandler := func(w http.ResponseWriter, r *http.Request) {
 		reader := bufio.NewReader(r.Body)
 		input, err := util.ReadSignedMessage(reader)
 		if err != nil {
-			util.Logger.Printf("error in reading signed message on /messages/: %s", err)
+			util.Logger.Printf("error in reading signed message: %s", err)
 			return
 		}
 		util.Logger.Printf("handling /messages/ input: %s", input)
@@ -486,14 +486,14 @@ func (s *Server) ServeHttpInBackground(port int) {
 			return
 		}
 		output.Write(w)
-	})
+	}
+	http.HandleFunc("/messages/", messageHandler)
+	http.HandleFunc("/messages", messageHandler)
 
 	srv := &http.Server{
 		Addr: fmt.Sprintf(":%d", port),
 	}
-
 	go srv.ListenAndServe()
-
 	go func() {
 		<-s.quit
 		srv.Shutdown(context.Background())

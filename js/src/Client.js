@@ -12,9 +12,8 @@ export default class Client {
     let body = sm.serialize() + "\n";
     console.log("XXX body", body);
     let response = await fetch(url, {
-      method: "POST",
-      contentType: "text/plain; charset=utf-8",
-      body: body
+      method: "post",
+      body: '{"foo":"bar"}'
     });
     return response.text();
   }
