@@ -86,7 +86,7 @@ func DecodeMessage(encoded string) (Message, error) {
 	}
 
 	if pdm.Type == "" {
-		return nil, fmt.Errorf("cannot decode message with no message type")
+		return nil, fmt.Errorf("cannot decode message %s with no message type", encoded)
 	}
 	messageType, ok := MessageTypeMap[pdm.Type]
 	if !ok {
