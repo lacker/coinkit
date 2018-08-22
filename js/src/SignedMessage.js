@@ -48,7 +48,14 @@ export default class SignedMessage {
       throw new Error("unrecognized version");
     }
     if (!KeyPair.verifySignature(signer, messageString, signature)) {
-      throw new Error("signature failed verification");
+      throw new Error(
+        "signature failed verification. msg " +
+          messageString +
+          " sig " +
+          signature +
+          " signer " +
+          signer
+      );
     }
     let message = JSON.parse(messageString);
     return new SignedMessage({ message, messageString, signer, signature });

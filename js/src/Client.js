@@ -25,8 +25,9 @@ export default class Client {
       body: body
     });
     let text = await response.text();
+    let serialized = text.replace(/\n$/, "");
     // TODO: sanely handle a bad message from the server
-    let serverMessage = SignedMessage.fromSerialized(text);
+    let serverMessage = SignedMessage.fromSerialized(serialized);
     return serverMessage.message;
   }
 

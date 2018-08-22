@@ -22,10 +22,12 @@ export default class Popup extends Component {
     };
     let response = await this.client.query(query);
 
-    if (response.error) {
-      this.setState({ message: "error: " + response.error });
+    if (response.Type == "Error") {
+      this.setState({ message: "error: " + response.Message.Error });
     } else {
-      this.setState({ message: "balance is " + response.Accounts[mint] });
+      this.setState({
+        message: "balance is " + response.Message.Accounts[mint].Balance
+      });
     }
   }
 
