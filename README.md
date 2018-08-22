@@ -66,8 +66,10 @@ Commands are from the `~/go/src/github.com/lacker/coinkit` directory.
 To run a local cluster of four cservers:
 
 ```
-./start-local.sh
+./debug-local.sh
 ```
+
+(Or `./start-local.sh` to run them in the background.)
 
 To stop the local cluster:
 
