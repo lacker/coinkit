@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"reflect"
+	"regexp"
 )
 
 // Message is an interface for the network-level communication between nodes.
@@ -75,6 +76,13 @@ func EncodeMessage(m Message) string {
 		panic(err)
 	}
 	encoded := string(bytes)
+
+	if Testing() {
+		matched, _ := regexp.MatchString("\"[A-Z]", encoded)
+		if matched {
+			Logger.Fatalf("capitalized key in encoded message: %s", encoded)
+		}
+	}
 
 	return encoded
 }
