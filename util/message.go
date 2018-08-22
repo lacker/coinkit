@@ -60,8 +60,8 @@ type DecodedMessage struct {
 }
 
 type PartiallyDecodedMessage struct {
-	Type    string
-	Message json.RawMessage
+	Type    string          `json:"type"`
+	Message json.RawMessage `json:"message"`
 }
 
 func EncodeMessage(m Message) string {

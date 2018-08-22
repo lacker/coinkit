@@ -42,9 +42,9 @@ func NewSignedOperation(op Operation, kp *util.KeyPair) *SignedOperation {
 }
 
 type partiallyUnmarshaledSignedOperation struct {
-	Operation json.RawMessage
-	Type      string
-	Signature string
+	Operation json.RawMessage `json:"operation"`
+	Type      string          `json:"type"`
+	Signature string          `json:"signature"`
 }
 
 func (s *SignedOperation) UnmarshalJSON(data []byte) error {
