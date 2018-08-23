@@ -11,18 +11,18 @@ import (
 type DataMessage struct {
 	// I is the last finalized slot occurring in the data snapshot used for this data.
 	// If I is zero, it just means we are not reporting which slot this reflects.
-	I int
+	I int `json:"i"`
 
 	// The contents of an account, keyed by owner.
 	// A nil value means there is no account for the owner key.
-	Accounts map[string]*Account
+	Accounts map[string]*Account `json:"accounts"`
 
 	// The contents of some blocks, keyed by slot.
 	// Nil values mean that the block is unknown because it has not been finalized yet.
-	Blocks map[int]*Block
+	Blocks map[int]*Block `json:"blocks"`
 
 	// A list of documents.
-	Documents []*Document
+	Documents []*Document `json:"documents"`
 }
 
 func (m *DataMessage) Slot() int {
