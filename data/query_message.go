@@ -14,13 +14,13 @@ import (
 type QueryMessage struct {
 	// When Account is nonempty, this message is requesting the account data for
 	// this particular user.
-	Account string
+	Account string `json:"account"`
 
 	// When Block is nonzero, this message is requesting data for a mined block.
-	Block int
+	Block int `json:"block"`
 
 	// When Documents is nonzero, this message is requesting data for matching documents.
-	Documents *DocumentQuery
+	Documents *DocumentQuery `json:"documents"`
 }
 
 func (m *QueryMessage) Slot() int {

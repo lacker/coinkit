@@ -21,7 +21,7 @@ type UpdateOperation struct {
 	ID uint64 `json:"id"`
 
 	// The data to update the document with.
-	Data *JSONObject
+	Data *JSONObject `json:"data"`
 }
 
 func (op *UpdateOperation) String() string {

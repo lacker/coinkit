@@ -11,7 +11,7 @@ import (
 
 // FakeMessage implements util.Message but does not get registered
 type FakeMessage struct {
-	Number int
+	Number int `json:"number"`
 }
 
 func (m *FakeMessage) Slot() int {

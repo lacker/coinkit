@@ -9,20 +9,20 @@ import (
 // SendOperation is used to send money from one account to another.
 type SendOperation struct {
 	// Who is sending this money
-	Signer string
+	Signer string `json:"signer"`
 
 	// The sequence number for this operation
-	Sequence uint32
+	Sequence uint32 `json:"sequence"`
 
 	// Who is receiving this money
-	To string
+	To string `json:"to"`
 
 	// The amount of currency to transfer
-	Amount uint64
+	Amount uint64 `json:"amount"`
 
 	// How much the sender is willing to pay to get this transfer registered
 	// This is on top of the amount
-	Fee uint64
+	Fee uint64 `json:"fee"`
 }
 
 func (op *SendOperation) String() string {

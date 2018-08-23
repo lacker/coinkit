@@ -77,9 +77,11 @@ func EncodeMessage(m Message) string {
 	}
 	encoded := string(bytes)
 
-	// XXX Unfalse this to find more keys to migrate
-	if false && Testing() {
-		matched, _ := regexp.MatchString("\"[A-Z]", encoded)
+	if Testing() {
+		// Check for capitalized fields.
+		// Fields in JSON messages can be capitalized if they are programmatic strings
+		// like public keys, but those are long. So only fail when it's short.
+		matched, _ := regexp.MatchString("[^:]\"[A-Z].{0,30}\"", encoded)
 		if matched {
 			Logger.Fatalf("capitalized key in encoded message: %s", encoded)
 		}

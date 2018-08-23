@@ -14,19 +14,19 @@ import (
 const TotalMoney = 1e9
 
 type Account struct {
-	Owner string
+	Owner string `json:"owner"`
 
 	// The sequence id of the last operation authorized by this account.
 	// 0 means there have never been any authorized operations.
 	// Used to prevent replay attacks.
-	Sequence uint32
+	Sequence uint32 `json:"sequence"`
 
 	// The current balance of this account.
-	Balance uint64
+	Balance uint64 `json:"balance"`
 
 	// How much data this account is currently storing.
 	// Storage can never exceed balance.
-	Storage uint64
+	Storage uint64 `json:"storage"`
 }
 
 // For debugging

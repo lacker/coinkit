@@ -8,17 +8,17 @@ import (
 // data.Block represents how the value for a single block gets stored to the database.
 type Block struct {
 	// Which block this is
-	Slot int
+	Slot int `json:"slot"`
 
 	// The LedgerChunk for this block
-	Chunk *LedgerChunk
+	Chunk *LedgerChunk `json:"chunk"`
 
 	// The ballot numbers this node confirmed.
-	C int
-	H int
+	C int `json:"c"`
+	H int `json:"h"`
 
 	// The quorum slice used to confirm this block
-	D *consensus.QuorumSlice
+	D *consensus.QuorumSlice `json:"d"`
 }
 
 // ExternalizeMessage() constructs a message with the metadata for how we came to
