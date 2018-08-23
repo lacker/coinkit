@@ -12,15 +12,15 @@ import (
 // https://www.stellar.org/papers/stellar-consensus-protocol.pdf
 type NominationMessage struct {
 	// What slot we are nominating values for
-	I int
+	I int `json:"i"`
 
 	// The values we have voted to nominate
-	Nom []SlotValue
+	Nom []SlotValue `json:"nom"`
 
 	// The values we have accepted as nominated
-	Acc []SlotValue
+	Acc []SlotValue `json:"acc"`
 
-	D *QuorumSlice
+	D *QuorumSlice `json:"d"`
 }
 
 func (m *NominationMessage) MessageType() string {
