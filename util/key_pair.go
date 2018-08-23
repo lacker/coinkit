@@ -49,8 +49,8 @@ func NewKeyPairFromSecretPhrase(phrase string) *KeyPair {
 }
 
 type SerializedKeyPair struct {
-	Public  string
-	Private string
+	Public  string `json:"public"`
+	Private string `json:"private"`
 }
 
 func DeserializeKeyPair(serialized []byte) (*KeyPair, error) {

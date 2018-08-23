@@ -13,12 +13,12 @@ type QuorumSlice struct {
 	// Members is a list of public keys for nodes that occur in the quorum slice.
 	// Members must be unique.
 	// Typically includes ourselves.
-	Members []string
+	Members []string `json:"members"`
 
 	// The number of members we require for consensus, including ourselves.
 	// The protocol can support other sorts of slices, like weighted or any wacky
 	// thing, but for now we only do this simple "any k out of these n" voting.
-	Threshold int
+	Threshold int `json:"threshold"`
 }
 
 func NewQuorumSlice(members []string, threshold int) *QuorumSlice {

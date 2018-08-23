@@ -119,25 +119,25 @@ func gteincompat(a *Ballot, b *Ballot) bool {
 // we have accepted that both p and p prime have already been prepared.
 type PrepareMessage struct {
 	// What slot we are preparing ballots for
-	I int
+	I int `json:"i"`
 
 	// The ballot we are voting to prepare
-	Bn int
-	Bx SlotValue
+	Bn int       `json:"bn"`
+	Bx SlotValue `json:"bx"`
 
 	// The contents of state.p, which we accept as prepared
-	Pn int
-	Px SlotValue
+	Pn int       `json:"pn"`
+	Px SlotValue `json:"px"`
 
 	// The contents of state.pPrime, which we accept as prepared
-	Ppn int
-	Ppx SlotValue
+	Ppn int       `json:"ppn"`
+	Ppx SlotValue `json:"ppx"`
 
 	// Ballot numbers for c and h
-	Cn int
-	Hn int
+	Cn int `json:"cn"`
+	Hn int `json:"hn"`
 
-	D *QuorumSlice
+	D *QuorumSlice `json:"d"`
 }
 
 func (m *PrepareMessage) String() string {
@@ -244,19 +244,19 @@ func (m *PrepareMessage) Slot() int {
 // quorum confirming.
 type ConfirmMessage struct {
 	// What slot we are confirming ballots for
-	I int
+	I int `json:"i"`
 
 	// The value that we are accepting a commit for.
-	X SlotValue
+	X SlotValue `json:"x"`
 
 	// state.p.n
-	Pn int
+	Pn int `json:"pn"`
 
 	// The range of ballot numbers we accept a commit for.
-	Cn int
-	Hn int
+	Cn int `json:"cn"`
+	Hn int `json:"hn"`
 
-	D *QuorumSlice
+	D *QuorumSlice `json:"d"`
 }
 
 func (m *ConfirmMessage) String() string {
@@ -321,16 +321,16 @@ func (m *ConfirmMessage) Slot() int {
 // Sent after we have confirmed a commit.
 type ExternalizeMessage struct {
 	// What slot we are externalizing
-	I int
+	I int `json:"i"`
 
 	// The value at this slot
-	X SlotValue
+	X SlotValue `json:"x"`
 
 	// The range of ballot numbers we confirm a commit for
-	Cn int
-	Hn int
+	Cn int `json:"cn"`
+	Hn int `json:"hn"`
 
-	D *QuorumSlice
+	D *QuorumSlice `json:"d"`
 }
 
 func (m *ExternalizeMessage) String() string {
