@@ -20,12 +20,12 @@ type LedgerChunk struct {
 	// The state of accounts after these operations have been processed.
 	// This only includes account information for the accounts that are
 	// mentioned in the operations.
-	Accounts map[string]*Account
+	Accounts map[string]*Account `json:"accounts"`
 
 	// The id for the next document to be created, after this chunk
-	NextDocumentId uint64
+	NextDocumentID uint64 `json:"nextDocumentID"`
 
-	Operations []*SignedOperation
+	Operations []*SignedOperation `json:"operations"`
 }
 
 func (c *LedgerChunk) Hash() consensus.SlotValue {

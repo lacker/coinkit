@@ -9,16 +9,16 @@ import (
 // CreateOperation is used to create a new document on the blockchain.
 type CreateOperation struct {
 	// Who is creating this document
-	Signer string
+	Signer string `json:"signer"`
 
 	// The sequence number for this operation
-	Sequence uint32
+	Sequence uint32 `json:"sequence"`
 
 	// How much the creator is willing to pay to get this document registered
-	Fee uint64
+	Fee uint64 `json:"fee"`
 
 	// The data to be created in the new document
-	Data *JSONObject
+	Data *JSONObject `json:"data"`
 }
 
 func (op *CreateOperation) String() string {

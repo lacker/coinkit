@@ -3,9 +3,9 @@ package data
 import ()
 
 type TestingOperation struct {
-	Number  int
-	Signer  string
-	Invalid bool
+	Number  int    `json:"number"`
+	Signer  string `json:"signer"`
+	Invalid bool   `json:"invalid"`
 }
 
 func (op *TestingOperation) OperationType() string {

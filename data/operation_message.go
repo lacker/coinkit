@@ -17,10 +17,10 @@ import (
 type OperationMessage struct {
 	// Should be sorted and non-nil
 	// Only contains operations that were not previously sent
-	Operations []*SignedOperation
+	Operations []*SignedOperation `json:"operations"`
 
 	// Contains any chunks that might be in the immediately following messages
-	Chunks map[consensus.SlotValue]*LedgerChunk
+	Chunks map[consensus.SlotValue]*LedgerChunk `json:"chunks"`
 }
 
 func (m *OperationMessage) Slot() int {

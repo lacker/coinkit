@@ -65,11 +65,11 @@ func NewOperationQueue(publicKey util.PublicKey, db *Database,
 		}
 		q.cache = NewCache()
 	} else {
-		nextDocumentId := uint64(1)
+		nextDocumentID := uint64(1)
 		if lastChunk != nil {
-			nextDocumentId = lastChunk.NextDocumentId
+			nextDocumentID = lastChunk.NextDocumentID
 		}
-		q.cache = NewDatabaseCache(db, nextDocumentId)
+		q.cache = NewDatabaseCache(db, nextDocumentID)
 	}
 	return q
 }
@@ -294,7 +294,7 @@ func (q *OperationQueue) NewChunk(
 	chunk := &LedgerChunk{
 		Operations:     ops,
 		Accounts:       state,
-		NextDocumentId: validator.NextDocumentId,
+		NextDocumentID: validator.NextDocumentID,
 	}
 	key := chunk.Hash()
 	if _, ok := q.chunks[key]; !ok {

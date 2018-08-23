@@ -43,7 +43,7 @@ type Cache struct {
 	// readOnly and database should not both be non-nil.
 	database *Database
 
-	NextDocumentId uint64
+	NextDocumentID uint64
 }
 
 func NewCache() *Cache {
@@ -51,14 +51,14 @@ func NewCache() *Cache {
 		accounts:       make(map[string]*Account),
 		blocks:         make(map[int]*Block),
 		documents:      make(map[uint64]*Document),
-		NextDocumentId: uint64(1),
+		NextDocumentID: uint64(1),
 	}
 }
 
-func NewDatabaseCache(database *Database, nextDocumentId uint64) *Cache {
+func NewDatabaseCache(database *Database, nextDocumentID uint64) *Cache {
 	c := NewCache()
 	c.database = database
-	c.NextDocumentId = nextDocumentId
+	c.NextDocumentID = nextDocumentID
 	return c
 }
 
@@ -68,7 +68,7 @@ func NewDatabaseCache(database *Database, nextDocumentId uint64) *Cache {
 func (cache *Cache) CowCopy() *Cache {
 	c := NewCache()
 	c.readOnly = cache
-	c.NextDocumentId = cache.NextDocumentId
+	c.NextDocumentID = cache.NextDocumentID
 	return c
 }
 
@@ -332,9 +332,9 @@ func (c *Cache) Process(operation Operation) bool {
 
 	case *CreateOperation:
 		c.IncrementSequence(op)
-		doc := op.Document(c.NextDocumentId)
+		doc := op.Document(c.NextDocumentID)
 		c.InsertDocument(doc)
-		c.NextDocumentId++
+		c.NextDocumentID++
 		return true
 
 	case *UpdateOperation:
@@ -417,8 +417,8 @@ func (c *Cache) ProcessChunk(chunk *LedgerChunk) error {
 		}
 	}
 
-	if c.NextDocumentId != chunk.NextDocumentId {
-		return fmt.Errorf("bad NextDocumentId")
+	if c.NextDocumentID != chunk.NextDocumentID {
+		return fmt.Errorf("bad NextDocumentID")
 	}
 
 	return nil
