@@ -14,11 +14,11 @@ type Document struct {
 	// id: a unique integer
 	// owner: the public key of the account that owns this document
 	// TODO: consider collection, createdAt, updatedAt
-	Data *JSONObject
+	Data *JSONObject `json:"data"`
 
 	// Every document has a unique id, starting at 1. It is stored twice in the
 	// database to enforce uniqueness.
-	Id uint64
+	ID uint64 `json:"id"`
 }
 
 func (d *Document) String() string {
@@ -33,6 +33,6 @@ func NewDocument(id uint64, data map[string]interface{}) *Document {
 
 	return &Document{
 		Data: NewJSONObject(fullData),
-		Id:   id,
+		ID:   id,
 	}
 }

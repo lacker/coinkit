@@ -8,20 +8,20 @@ import (
 
 type DeleteOperation struct {
 	// Who is deleting the document. Must be the owner
-	Signer string
+	Signer string `json:"signer"`
 
 	// The sequence number for this operation
-	Sequence uint32
+	Sequence uint32 `json:"sequence"`
 
 	// How much the updater is willing to pay to send this operation through
-	Fee uint64
+	Fee uint64 `json:"fee"`
 
 	// The id of the document to update
-	Id uint64
+	ID uint64 `json:"id"`
 }
 
 func (op *DeleteOperation) String() string {
-	return fmt.Sprintf("delete owner=%s, id=%d", util.Shorten(op.Signer), op.Id)
+	return fmt.Sprintf("delete owner=%s, id=%d", util.Shorten(op.Signer), op.ID)
 }
 
 func (op *DeleteOperation) OperationType() string {
@@ -50,7 +50,7 @@ func MakeTestDeleteOperation(id uint64, sequence int) *SignedOperation {
 	op := &DeleteOperation{
 		Signer:   mint.PublicKey().String(),
 		Sequence: uint32(sequence),
-		Id:       id,
+		ID:       id,
 		Fee:      0,
 	}
 	return NewSignedOperation(op, mint)

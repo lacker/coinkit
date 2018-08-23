@@ -274,7 +274,7 @@ func TestDocumentOperations(t *testing.T) {
 	dop := &data.DeleteOperation{
 		Signer:   wrong.PublicKey().String(),
 		Sequence: 3,
-		Id:       1,
+		ID:       1,
 		Fee:      0,
 	}
 	sop := data.NewSignedOperation(dop, wrong)
@@ -286,7 +286,7 @@ func TestDocumentOperations(t *testing.T) {
 	uop := &data.UpdateOperation{
 		Signer:   wrong.PublicKey().String(),
 		Sequence: 3,
-		Id:       1,
+		ID:       1,
 		Fee:      0,
 	}
 	sop = data.NewSignedOperation(uop, wrong)

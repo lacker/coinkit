@@ -9,23 +9,23 @@ import (
 // UpdateOperation is used to alter the contents of a document that is already stored.
 type UpdateOperation struct {
 	// Who is updating the document. Must be the owner
-	Signer string
+	Signer string `json:"signer"`
 
 	// The sequence number for this operation
-	Sequence uint32
+	Sequence uint32 `json:"sequence"`
 
 	// How much the updater is willing to pay to send this operation through
-	Fee uint64
+	Fee uint64 `json:"fee"`
 
 	// The id of the document to update
-	Id uint64
+	ID uint64 `json:"id"`
 
 	// The data to update the document with.
 	Data *JSONObject
 }
 
 func (op *UpdateOperation) String() string {
-	return fmt.Sprintf("update owner=%s, id=%d, data=%s", util.Shorten(op.Signer), op.Id, op.Data)
+	return fmt.Sprintf("update owner=%s, id=%d, data=%s", util.Shorten(op.Signer), op.ID, op.Data)
 }
 
 func (op *UpdateOperation) OperationType() string {
@@ -58,7 +58,7 @@ func MakeTestUpdateOperation(id uint64, sequence int) *SignedOperation {
 		Signer:   mint.PublicKey().String(),
 		Sequence: uint32(sequence),
 		Data:     data,
-		Id:       id,
+		ID:       id,
 		Fee:      0,
 	}
 	return NewSignedOperation(op, mint)

@@ -176,7 +176,7 @@ func (c *Cache) GetDocument(id uint64) *Document {
 // InsertDocument writes through to the underlying database (if there is one),
 // but it leaves it as a pending transaction. The caller must call db.Commit() themselves.
 func (c *Cache) InsertDocument(doc *Document) {
-	c.documents[doc.Id] = doc
+	c.documents[doc.ID] = doc
 	if c.database != nil {
 		err := c.database.InsertDocument(doc)
 		if err != nil {
@@ -193,7 +193,7 @@ func (c *Cache) UpdateDocument(id uint64, data *JSONObject) {
 		panic("no doc found for update")
 	}
 	newDoc := &Document{
-		Id:   id,
+		ID:   id,
 		Data: data,
 	}
 	c.documents[id] = newDoc
@@ -259,10 +259,10 @@ func (c *Cache) Validate(operation Operation) bool {
 		return true
 
 	case *UpdateOperation:
-		return c.DocExists(op.Id)
+		return c.DocExists(op.ID)
 
 	case *DeleteOperation:
-		return c.DocExists(op.Id)
+		return c.DocExists(op.ID)
 
 	default:
 		util.Printf("operation: %+v has type %s", operation, reflect.TypeOf(operation))
@@ -339,16 +339,16 @@ func (c *Cache) Process(operation Operation) bool {
 
 	case *UpdateOperation:
 		c.IncrementSequence(op)
-		c.UpdateDocument(op.Id, op.Data)
+		c.UpdateDocument(op.ID, op.Data)
 		return true
 
 	case *DeleteOperation:
-		doc := c.GetDocument(op.Id)
+		doc := c.GetDocument(op.ID)
 		if doc == nil {
 			return false
 		}
 		c.IncrementSequence(op)
-		c.DeleteDocument(op.Id)
+		c.DeleteDocument(op.ID)
 		return true
 
 	default:

@@ -64,7 +64,7 @@ func (op *CreateOperation) Document(id uint64) *Document {
 	data.Set("id", id)
 	return &Document{
 		Data: data,
-		Id:   id,
+		ID:   id,
 	}
 }
 
