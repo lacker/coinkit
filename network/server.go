@@ -473,18 +473,7 @@ func (s *Server) ServeHttpInBackground(port int) {
 
 	// /messages/ accepts signed messages over http, with or without trailing slash
 	messageHandler := func(w http.ResponseWriter, r *http.Request) {
-		reader := bufio.NewReader(r.Body)
-		input, err := util.ReadSignedMessage(reader)
-		if err != nil {
-			util.Logger.Printf("error in reading signed message: %s", err)
-			return
-		}
-		util.Logger.Printf("handling /messages/ input: %v", input)
-		output, ok := s.handleMessage(input)
-		if !ok {
-			return
-		}
-		util.Logger.Printf("got response message: %v", output)
+		output := s.handleMessageRequest(r)
 		output.Write(w)
 	}
 	http.HandleFunc("/messages/", messageHandler)
@@ -498,6 +487,33 @@ func (s *Server) ServeHttpInBackground(port int) {
 		<-s.quit
 		srv.Shutdown(context.Background())
 	}()
+}
+
+// Handles an http request containing a message, from a client.
+// Returns the message that should be returned.
+func (s *Server) handleMessageRequest(r *http.Request) *util.SignedMessage {
+	reader := bufio.NewReader(r.Body)
+	input, err := util.ReadSignedMessage(reader)
+	if err != nil {
+		return s.errorf("error in reading signed message: %s", err)
+	}
+
+	util.Logger.Printf("handling /messages/ input: %v", input)
+	output, ok := s.handleMessage(input)
+	if !ok {
+		return s.errorf("the server is overloaded or is shutting down")
+	}
+
+	util.Logger.Printf("got response message: %v", output)
+	return output
+}
+
+// Creates a signed error message
+func (s *Server) errorf(format string, a ...interface{}) *util.SignedMessage {
+	msg := &util.ErrorMessage{
+		Error: fmt.Sprintf(format, a...),
+	}
+	return util.NewSignedMessage(msg, s.keyPair)
 }
 
 // Uptime returns uptime in seconds
