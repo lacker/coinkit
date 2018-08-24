@@ -4,7 +4,7 @@ export default class SignedMessage {
   // Creates a signed message.
   // Users should generally not use this directly; use fromSigning or fromSerialized.
   // signer and signature are base64-encoded.
-  // message is a JSONable object.
+  // TODO: message is a JSONable object rather than a Message. fix
   constructor({ message, messageString, signer, signature, error }) {
     this.message = message;
     this.messageString = messageString;
@@ -18,6 +18,7 @@ export default class SignedMessage {
   }
 
   // Construct a SignedMessage by signing a message.
+  // TODO: take Message
   static fromSigning(message, keyPair) {
     if (!message) {
       throw new Error("cannot sign a falsy message");

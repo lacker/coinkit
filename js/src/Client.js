@@ -15,6 +15,9 @@ export default class Client {
 
   // Sends a message upstream, signing with our keypair.
   // Returns a promise for the response message.
+  // The format of the message is a json object with a "type" field added at the top level.
+  // It's slightly different than the wire format because "type" is
+  // added rather than nested.
   // All the signing and signature-checking is here; callers don't need to handle it.
   async sendMessage(message) {
     let clientMessage = SignedMessage.fromSigning(message, this.keyPair);
@@ -26,8 +29,9 @@ export default class Client {
     });
     let text = await response.text();
     let serialized = text.replace(/\n$/, "");
-    // TODO: sanely handle a bad message from the server
-    let serverMessage = SignedMessage.fromSerialized(serialized);
+
+    // TODO: sanely handle a bad message from the server, or no message
+    let signed = SignedMessage.fromSerialized(serialized);
     return serverMessage.message;
   }
 
