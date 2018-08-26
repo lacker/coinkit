@@ -13,12 +13,8 @@ export default class Client {
     }
   }
 
-  // Sends a message upstream, signing with our keypair.
-  // Returns a promise for the response message.
-  // The format of the message is a json object with a "type" field added at the top level.
-  // It's slightly different than the wire format because "type" is
-  // added rather than nested.
-  // All the signing and signature-checking is here; callers don't need to handle it.
+  // Sends a Message upstream, signing with our keypair.
+  // Returns a promise for the response Message.
   async sendMessage(message) {
     let clientMessage = SignedMessage.fromSigning(message, this.keyPair);
     let url = "http://localhost:8000/messages";
@@ -32,17 +28,14 @@ export default class Client {
 
     // TODO: sanely handle a bad message from the server, or no message
     let signed = SignedMessage.fromSerialized(serialized);
-    return serverMessage.message;
+    return signed.message;
   }
 
-  // Sends a query message.
+  // Sends a query message, given the query properties.
   // Returns a promise for a message - a data message if the query worked, an error
   // message if it did not.
-  async query(message) {
-    let queryMessage = {
-      Type: "Query",
-      Message: message
-    };
+  async query(properties) {
+    let queryMessage = new Message("Query", properties);
     return this.sendMessage(queryMessage);
   }
 }
