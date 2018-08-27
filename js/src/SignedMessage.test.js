@@ -1,8 +1,9 @@
 import KeyPair from "./KeyPair";
+import Message from "./Message";
 import SignedMessage from "./SignedMessage";
 
-test("SignedMessage", () => {
-  let m = { Number: 4 };
+test("SignedMessage basic behavior", () => {
+  let m = new Message("Test", { Number: 4 });
   let kp = KeyPair.fromSecretPhrase("foo");
   let sm = SignedMessage.fromSigning(m, kp);
   let serialized = sm.serialize();
