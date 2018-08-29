@@ -35,7 +35,11 @@ export default class SignedMessage {
 
   // Construct a SignedMessage from a serialized form
   // Throws an error if it receives an invalid message
+  // Returns null if the serialization is just an "ok"
   static fromSerialized(serialized) {
+    if (serialized == "ok") {
+      return null;
+    }
     let parts = serialized.split(":");
     if (parts.length < 4) {
       throw new Error("could not find 4 parts");
