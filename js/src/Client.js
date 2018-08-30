@@ -26,8 +26,11 @@ export default class Client {
     let text = await response.text();
     let serialized = text.replace(/\n$/, "");
 
-    // TODO: sanely handle a bad message from the server, or no message
+    // When there is an empty keepalive message from the server, we just return null
     let signed = SignedMessage.fromSerialized(serialized);
+    if (signed == null) {
+      return signed;
+    }
     return signed.message;
   }
 

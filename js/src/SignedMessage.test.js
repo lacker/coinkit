@@ -10,3 +10,8 @@ test("SignedMessage basic behavior", () => {
   let sm2 = SignedMessage.fromSerialized(serialized);
   expect(sm2).toEqual(sm);
 });
+
+test("SignedMessage from ok", () => {
+  let sm = SignedMessage.fromSerialized("ok");
+  expect(sm).toEqual(null);
+});
