@@ -1,3 +1,11 @@
+# Overview
+
+There are several different build targets produced by this JavaScript codebase.
+
+The chrome extension is built into `/extension/`.
+
+The sample app is built into `/app/`.
+
 # Installing the chrome extension locally
 
 1. Make sure you have the local servers running: `./start-local.sh`
