@@ -3,8 +3,9 @@
   "version": "0.1.0",
   "description": "a coinkit wallet",
   "scripts": {
-    "build": "parcel --no-hmr build src/extension.js -d extension/ -o bundle.js",
-    "watch": "parcel --no-hmr watch src/extension.js -d extension/ -o bundle.js",
+    "app": "parcel app/index.html",
+    "build": "parcel --no-hmr build src/popup-main.js -d extension/ -o bundle.js",
+    "watch": "parcel --no-hmr watch src/popup-main.js -d extension/ -o bundle.js",
     "test": "jest"
   },
   "author": "Kevin Lacker",
