@@ -2,20 +2,30 @@
 
 import React, { Component } from "react";
 
+import KeyPair from "./KeyPair";
+
 export default class App extends Component {
   constructor(props) {
     super(props);
 
     this.state = {
-      user: null
+      keyPair: null
     };
+  }
+
+  login(privateKey) {
+    // TODO: validate
+    this.setState({ keyPair: KeyPair.fromPrivateKey(privateKey) });
   }
 
   render(props) {
     return (
       <div>
         <h1>this is the sample app</h1>
-        <h1>{this.state.user || "nobody"} is logged in</h1>
+        <h1>
+          {this.state.keyPair ? this.state.keyPair.publicKey : "nobody"} is
+          logged in
+        </h1>
       </div>
     );
   }
