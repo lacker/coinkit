@@ -109,3 +109,7 @@ test("KeyPair.serialize", () => {
   expect(kp1.getPublicKey()).toEqual(kp2.getPublicKey());
   expect(kp1.privateKey).toEqual(kp2.privateKey);
 });
+
+test("KeyPair on a bad private key", () => {
+  expect(() => KeyPair.fromPrivateKey("boop")).toThrow();
+});
