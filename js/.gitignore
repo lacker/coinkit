@@ -1,3 +1,4 @@
 extension/bundle*
 node_modules/
 .cache/
+dist/

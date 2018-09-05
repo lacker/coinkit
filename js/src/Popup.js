@@ -2,6 +2,8 @@
 
 import React, { Component } from "react";
 
+import "./extension.scss";
+
 import Client from "./Client";
 
 export default class Popup extends Component {
@@ -33,7 +35,7 @@ export default class Popup extends Component {
 
   render(props) {
     return (
-      <div>
+      <div className="popup">
         <button onClick={this.click}>load mint balance</button>
         <h1>message: {this.state.message}</h1>
       </div>
