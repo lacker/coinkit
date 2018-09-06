@@ -2,3 +2,5 @@ extension/bundle*
 node_modules/
 .cache/
 dist/
+*woff
+*woff2

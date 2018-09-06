@@ -34,8 +34,16 @@ export default class Popup extends Component {
   }
 
   render(props) {
+    let style = {
+      display: "flex",
+      flexDirection: "column",
+      justifyContent: "flex-start",
+      alignItems: "center",
+      width: 360,
+      padding: 30
+    };
     return (
-      <div className="popup">
+      <div style={style}>
         <button onClick={this.click}>load mint balance</button>
         <h1>message: {this.state.message}</h1>
       </div>

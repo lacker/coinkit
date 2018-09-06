@@ -18,7 +18,8 @@
     "react": "^16.2.0",
     "react-dom": "^16.2.0",
     "text-encoding-shim": "^1.0.0",
-    "tweetnacl": "^1.0.0"
+    "tweetnacl": "^1.0.0",
+    "typeface-roboto": "0.0.54"
   },
   "repository": {
     "type": "git",
