@@ -23,8 +23,6 @@ export default class Popup extends Component {
     };
     let response = await this.client.query(query);
 
-    console.log("XXX response:", response);
-
     if (response.type == "Error") {
       this.setState({ message: "error: " + response.error });
     } else {
