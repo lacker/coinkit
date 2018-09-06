@@ -2,8 +2,6 @@
 
 import React, { Component } from "react";
 
-import "./extension.scss";
-
 import Client from "./Client";
 
 export default class Popup extends Component {
