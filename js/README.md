@@ -12,7 +12,7 @@ The sample app is built into `/app/`.
 
 2. Build the extension locally
    a. `npm install`
-   b. `npm run build`, or `npm run watch` to build continuously
+   b. `npm run build` (which will watch for changes and build continuously)
 
 3. Load the extension in Chrome
    a. Navigate to `chrome://extensions`

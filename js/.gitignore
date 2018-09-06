@@ -1,4 +1,4 @@
-extension/bundle*
+extension/*-main*
 node_modules/
 .cache/
 dist/
