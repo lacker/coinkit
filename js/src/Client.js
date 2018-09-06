@@ -1,4 +1,5 @@
 import KeyPair from "./KeyPair";
+import Message from "./Message";
 import SignedMessage from "./SignedMessage";
 
 // A client that handles interaction with the blockchain nodes.

@@ -5,7 +5,9 @@ export default class Message {
       type,
       message: properties
     });
-    Object.assign(properties, this);
+    for (let key in properties) {
+      this[key] = properties[key];
+    }
   }
 
   serialize() {

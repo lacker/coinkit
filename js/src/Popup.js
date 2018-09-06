@@ -1,6 +1,7 @@
 // The root to display in the extension popup.
 
 import React, { Component } from "react";
+import Button from "@material-ui/core/Button";
 
 import Client from "./Client";
 
@@ -22,6 +23,8 @@ export default class Popup extends Component {
     };
     let response = await this.client.query(query);
 
+    console.log("XXX response:", response);
+
     if (response.type == "Error") {
       this.setState({ message: "error: " + response.error });
     } else {
@@ -42,7 +45,7 @@ export default class Popup extends Component {
     };
     return (
       <div style={style}>
-        <button onClick={this.click}>load mint balance</button>
+        <Button onClick={this.click}>load mint balance</Button>
         <h1>message: {this.state.message}</h1>
       </div>
     );
