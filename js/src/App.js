@@ -18,7 +18,7 @@ export default class App extends Component {
     this.setState({ keyPair: KeyPair.fromPrivateKey(privateKey) });
   }
 
-  render(props) {
+  render() {
     return (
       <div>
         <h1>this is the sample app</h1>

@@ -1,6 +1,7 @@
 // The root to display in the extension popup.
 
 import React, { Component } from "react";
+i;
 import Button from "@material-ui/core/Button";
 
 import Client from "./Client";
@@ -32,7 +33,7 @@ export default class Popup extends Component {
     }
   }
 
-  render(props) {
+  render() {
     let style = {
       display: "flex",
       flexDirection: "column",
