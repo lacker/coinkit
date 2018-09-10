@@ -30,7 +30,9 @@ export default class Login extends Component {
   render() {
     return (
       <div>
-        <TextField>foo</TextField>
+        <h1>Welcome</h1>
+        <TextField>password or private key</TextField>
+        <a>create a new account</a>
       </div>
     );
   }

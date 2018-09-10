@@ -1,19 +1,28 @@
 // The root to display in the extension popup.
 
 import React, { Component } from "react";
-i;
+
 import Button from "@material-ui/core/Button";
 
 import Client from "./Client";
+import KeyPair from "./KeyPair";
 
 export default class Popup extends Component {
   constructor(props) {
     super(props);
 
-    this.state = { message: "hello world" };
+    this.state = {
+      message: "hello world",
+      keyPair: null
+    };
     this.client = new Client();
 
+    this.setKeyPair = this.setKeyPair.bind(this);
     this.click = this.click.bind(this);
+  }
+
+  setKeyPair(kp) {
+    this.setState({ keyPair: kp });
   }
 
   async click() {
@@ -42,6 +51,14 @@ export default class Popup extends Component {
       width: 360,
       padding: 30
     };
+    if (!this.state.keyPair) {
+      // Show the login screen
+      return (
+        <div style={style}>
+          <Login callback={this.setKeyPair} />
+        </div>
+      );
+    }
     return (
       <div style={style}>
         <Button onClick={this.click}>load mint balance</Button>
