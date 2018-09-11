@@ -12,6 +12,8 @@ export default class Login extends Component {
     super(props);
 
     this.popup = props.popup;
+    console.log("XXX popup:", props.popup);
+    this.newAccount = this.newAccount.bind(this);
   }
 
   // Returns whether the private key is valid.
@@ -23,8 +25,13 @@ export default class Login extends Component {
     } catch (e) {
       return false;
     }
-    this.popup.setKeyPair(kp);
+    this.popup.newKeyPair(kp);
     return true;
+  }
+
+  newAccount() {
+    console.log("XXX creating new account");
+    this.popup.newKeyPair(KeyPair.fromRandom());
   }
 
   render() {
@@ -41,7 +48,12 @@ export default class Login extends Component {
         <h1>Welcome</h1>
         <div>Password or private key</div>
         <TextField />
-        <div>Create a new account</div>
+        <div
+          style={{ color: "blue", cursor: "pointer" }}
+          onClick={this.newAccount}
+        >
+          Create a new account
+        </div>
       </div>
     );
   }
