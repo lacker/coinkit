@@ -6,6 +6,7 @@ import Button from "@material-ui/core/Button";
 
 import Client from "./Client";
 import KeyPair from "./KeyPair";
+import Login from "./Login";
 
 export default class Popup extends Component {
   constructor(props) {
