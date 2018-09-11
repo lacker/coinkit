@@ -7,6 +7,7 @@ import Button from "@material-ui/core/Button";
 import Client from "./Client";
 import KeyPair from "./KeyPair";
 import Login from "./Login";
+import NewPassword from "./NewPassword";
 
 export default class Popup extends Component {
   constructor(props) {
@@ -14,18 +15,23 @@ export default class Popup extends Component {
 
     this.state = {
       message: "hello world",
-      keyPair: null
+      keyPair: null,
+      password: null
     };
     this.client = new Client();
 
-    this.setKeyPair = this.setKeyPair.bind(this);
+    this.newKeyPair = this.newKeyPair.bind(this);
     this.click = this.click.bind(this);
   }
 
-  setKeyPair(kp) {
-    this.setState({ keyPair: kp });
+  newKeyPair(kp) {
+    this.setState({
+      keyPair: kp,
+      password: null
+    });
   }
 
+  // TODO: scrap this
   async click() {
     let mint =
       "0x32652ebe42a8d56314b8b11abf51c01916a238920c1f16db597ee87374515f4609d3";
@@ -54,10 +60,21 @@ export default class Popup extends Component {
       // Show the login screen
       return (
         <div style={style}>
-          <Login callback={this.setKeyPair} />
+          <Login popup={this} />
         </div>
       );
     }
+    if (!this.state.password) {
+      // They have a keypair but need to create a password.
+      // Show the new-password screen
+      return (
+        <div style={style}>
+          <NewPassword popup={this} />
+        </div>
+      );
+    }
+
+    // TODO: scrap this
     return (
       <div style={style}>
         <Button onClick={this.click}>load mint balance</Button>

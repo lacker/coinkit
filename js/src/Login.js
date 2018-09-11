@@ -7,11 +7,11 @@ import TextField from "@material-ui/core/TextField";
 import KeyPair from "./KeyPair";
 
 export default class Login extends Component {
-  // props.callback takes a keypair once the user has logged in
+  // props.popup is a reference to the root popup
   constructor(props) {
     super(props);
 
-    this.callback = props.callback;
+    this.popup = props.popup;
   }
 
   // Returns whether the private key is valid.
@@ -23,7 +23,7 @@ export default class Login extends Component {
     } catch (e) {
       return false;
     }
-    this.callback(kp);
+    this.popup.setKeyPair(kp);
     return true;
   }
 
