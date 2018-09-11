@@ -20,12 +20,20 @@ export default class Storage {
     }
 
     this.encrypted = await getFromLocalStorage("encrypted");
+    this.password = null;
+    this.data = null;
     this.initialized = true;
   }
 
   // Returns whether this password is a valid password for our encrypted data.
   // If it is valid, sets both password and data.
   async checkPassword(password) {
+    await this.init();
+
+    // TODO
+  }
+
+  async setPasswordAndData(password, data) {
     await this.init();
 
     // TODO
