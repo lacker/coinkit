@@ -46,11 +46,9 @@ export default class Popup extends Component {
   render() {
     let style = {
       display: "flex",
+      alignSelf: "stretch",
       flexDirection: "column",
-      justifyContent: "flex-start",
-      alignItems: "center",
-      width: 360,
-      padding: 30
+      justifyContent: "center"
     };
     if (!this.state.keyPair) {
       // Show the login screen

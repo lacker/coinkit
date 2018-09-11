@@ -28,11 +28,20 @@ export default class Login extends Component {
   }
 
   render() {
+    let style = {
+      display: "flex",
+      flexDirection: "column",
+      justifyContent: "flex-start",
+      alignItems: "center",
+      width: 360,
+      padding: 30
+    };
     return (
-      <div>
+      <div style={style}>
         <h1>Welcome</h1>
-        <TextField>password or private key</TextField>
-        <a>create a new account</a>
+        <div>Password or private key</div>
+        <TextField />
+        <div>Create a new account</div>
       </div>
     );
   }
