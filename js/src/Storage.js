@@ -8,15 +8,27 @@ export default class Storage {
     this.password = null;
     this.encrypted = null;
     this.data = null;
+    this.initialized = false;
   }
 
-  // Returns the encrypted data, lazy-loading if needed.
-  // Since encrypted data is lazy-loaded it may just have not been loaded yet.
-  async getEncrypted() {
-    if (!this.encrypted) {
-      this.encrypted = await getFromLocalStorage("encrypted");
+  // Once the Storage object is initialized, it will act as a write-through cache
+  // for browser storage.
+  // Before it is initialized, we shouldn't write to it.
+  async init() {
+    if (this.initialized) {
+      return;
     }
-    return this.encrypted;
+
+    this.encrypted = await getFromLocalStorage("encrypted");
+    this.initialized = true;
+  }
+
+  // Returns whether this password is a valid password for our encrypted data.
+  // If it is valid, sets both password and data.
+  async checkPassword(password) {
+    await this.init();
+
+    // TODO
   }
 }
 
