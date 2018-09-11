@@ -12,7 +12,6 @@ export default class Login extends Component {
     super(props);
 
     this.popup = props.popup;
-    console.log("XXX popup:", props.popup);
     this.newAccount = this.newAccount.bind(this);
   }
 
@@ -30,7 +29,6 @@ export default class Login extends Component {
   }
 
   newAccount() {
-    console.log("XXX creating new account");
     this.popup.newKeyPair(KeyPair.fromRandom());
   }
 
