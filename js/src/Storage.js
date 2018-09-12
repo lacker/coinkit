@@ -7,8 +7,10 @@ import Cipher from "./Cipher";
 
 export default class Storage {
   constructor() {
-    this.password = null;
+    // encrypted should be an object holding iv, salt, and ciphertext keys.
     this.encrypted = null;
+
+    this.password = null;
     this.data = null;
     this.initialized = false;
   }
@@ -22,6 +24,15 @@ export default class Storage {
     }
 
     this.encrypted = await getLocalStorage("encrypted");
+    if (
+      typeof this.encrypted != "object" ||
+      !this.encrypted.iv ||
+      !this.encrypted.salt ||
+      !this.encrypted.ciphertext
+    ) {
+      this.encrypted = null;
+    }
+
     this.password = null;
     this.data = null;
     this.initialized = true;
@@ -35,7 +46,12 @@ export default class Storage {
     if (!this.encrypted) {
       return false;
     }
-    let json = Cipher.decrypt(password, this.encrypted);
+    let json = Cipher.decrypt(
+      password,
+      this.encrypted.iv,
+      this.encrypted.salt,
+      this.encrypted.ciphertext
+    );
     if (!json) {
       return false;
     }
@@ -53,7 +69,14 @@ export default class Storage {
     await this.init();
 
     let json = JSON.stringify(data);
-    this.encrypted = Cipher.encrypt(password, json);
+    let iv = Cipher.makeIV();
+    let salt = Cipher.makeSalt();
+    let ciphertext = Cipher.encrypt(password, iv, salt, json);
+    this.encrypted = {
+      iv: iv,
+      salt: salt,
+      ciphertext: ciphertext
+    };
     this.data = data;
     this.password = password;
 
