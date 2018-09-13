@@ -13,6 +13,10 @@ export default class Login extends Component {
 
     this.popup = props.popup;
     this.newAccount = this.newAccount.bind(this);
+
+    this.state = {
+      input: ""
+    };
   }
 
   // Returns whether the private key is valid.
@@ -32,6 +36,18 @@ export default class Login extends Component {
     this.popup.newKeyPair(KeyPair.fromRandom());
   }
 
+  // this.state.input could be a password or private key
+  // TODO: handle password
+  handleInput() {
+    let kp = KeyPair.fromPrivateKey(this.state.input);
+    if (kp) {
+      this.popup.newKeyPair(kp);
+    }
+
+    // The input was not valid
+    this.setState({ input: "" });
+  }
+
   render() {
     let style = {
       display: "flex",
@@ -44,8 +60,27 @@ export default class Login extends Component {
     return (
       <div style={style}>
         <h1>Welcome</h1>
-        <div>Password or private key</div>
-        <TextField />
+        <form
+          onSubmit={event => {
+            event.preventDefault();
+            this.handleInput();
+          }}
+        >
+          <div>Password or private key</div>
+          <TextField
+            type="password"
+            value={this.state.input}
+            autoFocus={true}
+            onChange={event => {
+              this.setState({
+                input: event.target.value
+              });
+            }}
+          />
+          <Button variant="contained" color="primary" type="submit">
+            Log In
+          </Button>
+        </form>
         <div
           style={{ color: "blue", cursor: "pointer" }}
           onClick={this.newAccount}
