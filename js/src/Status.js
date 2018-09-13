@@ -5,7 +5,7 @@ import React, { Component } from "react";
 export default class Status extends Component {
   // props.popup is a reference to the root popup
   // props.keyPair is the key pair
-  // props.balance is the account balance
+  // props.balance is the account balance, or null if unknown
   constructor(props) {
     super(props);
 
@@ -32,7 +32,7 @@ export default class Status extends Component {
       <div style={style}>
         <h1>Status</h1>
         <div>Public key: {this.keyPair.publicKey}</div>
-        <div>Balance: {this.balance || "..."}</div>
+        <div>Balance: {this.balance == null ? "..." : this.balance}</div>
         <div style={{ color: "blue", cursor: "pointer" }} onClick={this.logOut}>
           Log out
         </div>

@@ -22,7 +22,6 @@ export default class Popup extends Component {
     this.client = new Client();
 
     this.newKeyPair = this.newKeyPair.bind(this);
-    this.click = this.click.bind(this);
 
     this.storage = chrome.extension.getBackgroundPage().storage;
     if (!this.storage) {
@@ -80,7 +79,7 @@ export default class Popup extends Component {
     // We have permissions for an account, so show its status
     return (
       <div style={style}>
-        <Status popup={this} />
+        <Status popup={this} keyPair={this.state.keyPair} balance={null} />
       </div>
     );
   }
