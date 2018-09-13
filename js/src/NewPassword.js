@@ -9,6 +9,11 @@ export default class NewPassword extends Component {
     super(props);
 
     this.popup = props.popup;
+
+    this.state = {
+      password: "",
+      repeatPassword: ""
+    };
   }
 
   render() {
@@ -21,13 +26,23 @@ export default class NewPassword extends Component {
       padding: 30
     };
 
+    let warning = "";
+    if (
+      this.state.password != "" &&
+      this.state.repeatPassword != "" &&
+      this.state.password != this.state.repeatPassword
+    ) {
+      warning = "passwords must match";
+    }
+
     return (
       <div style={style}>
         <h1>Choose a password</h1>
         <div>Password</div>
-        <TextField />
+        <TextField autofocus={true} value={this.state.password} />
         <div>Repeat your password</div>
-        <TextField />
+        <TextField value={this.state.repeatPassword} />
+        <div>{warning}</div>
       </div>
     );
   }
