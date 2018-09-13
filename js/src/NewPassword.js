@@ -1,6 +1,7 @@
 // A screen to let the user create a password to locally encrypt keys.
 
 import React, { Component } from "react";
+import Button from "@material-ui/core/Button";
 import TextField from "@material-ui/core/TextField";
 
 export default class NewPassword extends Component {
@@ -12,7 +13,8 @@ export default class NewPassword extends Component {
 
     this.state = {
       password: "",
-      repeatPassword: ""
+      repeatPassword: "",
+      warning: false
     };
   }
 
@@ -26,23 +28,69 @@ export default class NewPassword extends Component {
       padding: 30
     };
 
-    let warning = "";
-    if (
-      this.state.password != "" &&
-      this.state.repeatPassword != "" &&
-      this.state.password != this.state.repeatPassword
-    ) {
-      warning = "passwords must match";
-    }
-
     return (
       <div style={style}>
         <h1>Choose a password</h1>
-        <div>Password</div>
-        <TextField autofocus={true} value={this.state.password} />
-        <div>Repeat your password</div>
-        <TextField value={this.state.repeatPassword} />
-        <div>{warning}</div>
+        <form
+          onSubmit={event => {
+            event.preventDefault();
+
+            if (this.state.password == "") {
+              this.passwordField.focus();
+              return;
+            }
+
+            if (this.state.repeatPassword == "") {
+              this.repeatPasswordField.focus();
+              return;
+            }
+
+            if (this.state.password != this.state.repeatPassword) {
+              this.setState({
+                repeatPassword: "",
+                warning: true
+              });
+              this.repeatPasswordField.focus();
+              return;
+            }
+
+            // TODO: handle the case where we actually have a new password
+            console.log("XXX", this.state.password);
+          }}
+        >
+          <div>Password</div>
+          <TextField
+            type="password"
+            autoFocus={true}
+            value={this.state.password}
+            onChange={event => {
+              this.setState({
+                password: event.target.value
+              });
+            }}
+            inputRef={input => (this.passwordField = input)}
+          />
+          <div>
+            {this.state.warning
+              ? "Passwords must match"
+              : "Repeat your password"}
+          </div>
+          <TextField
+            type="password"
+            value={this.state.repeatPassword}
+            error={this.state.warning}
+            onChange={event => {
+              this.setState({
+                repeatPassword: event.target.value
+              });
+            }}
+            inputRef={input => (this.repeatPasswordField = input)}
+          />
+          <div />
+          <Button variant="contained" color="primary" type="submit">
+            Create Password
+          </Button>
+        </form>
       </div>
     );
   }
