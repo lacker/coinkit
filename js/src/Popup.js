@@ -8,6 +8,7 @@ import Client from "./Client";
 import KeyPair from "./KeyPair";
 import Login from "./Login";
 import NewPassword from "./NewPassword";
+import Status from "./Status";
 
 export default class Popup extends Component {
   constructor(props) {
@@ -22,6 +23,11 @@ export default class Popup extends Component {
 
     this.newKeyPair = this.newKeyPair.bind(this);
     this.click = this.click.bind(this);
+
+    this.storage = chrome.extension.getBackgroundPage().storage;
+    if (!this.storage) {
+      throw new Error("cannot find storage");
+    }
   }
 
   newKeyPair(kp) {
@@ -31,22 +37,19 @@ export default class Popup extends Component {
     });
   }
 
-  // TODO: scrap this
-  async click() {
-    let mint =
-      "0x32652ebe42a8d56314b8b11abf51c01916a238920c1f16db597ee87374515f4609d3";
-    let query = {
-      Account: mint
-    };
-    let response = await this.client.query(query);
-
-    if (response.type == "Error") {
-      this.setState({ message: "error: " + response.error });
-    } else {
-      this.setState({
-        message: "balance is " + response.accounts[mint].balance
-      });
+  newPassword(password) {
+    if (!this.state.keyPair) {
+      throw new Error("cannot set new password with no keypair");
     }
+    let data = {
+      keyPair: this.state.keyPair.serialize()
+    };
+
+    this.storage.setPasswordAndData(password, data).then(() => {
+      this.setState({
+        password: password
+      });
+    });
   }
 
   render() {
@@ -74,11 +77,10 @@ export default class Popup extends Component {
       );
     }
 
-    // TODO: scrap this
+    // We have permissions for an account, so show its status
     return (
       <div style={style}>
-        <Button onClick={this.click}>load mint balance</Button>
-        <h1>message: {this.state.message}</h1>
+        <Status popup={this} />
       </div>
     );
   }

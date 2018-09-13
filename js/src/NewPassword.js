@@ -54,8 +54,7 @@ export default class NewPassword extends Component {
               return;
             }
 
-            // TODO: handle the case where we actually have a new password
-            console.log("XXX", this.state.password);
+            this.popup.newPassword(this.state.password);
           }}
         >
           <div>Password</div>
