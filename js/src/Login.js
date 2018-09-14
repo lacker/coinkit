@@ -13,7 +13,6 @@ export default class Login extends Component {
     super(props);
 
     this.popup = props.popup;
-    this.newAccount = this.newAccount.bind(this);
 
     this.state = {
       input: ""
@@ -33,10 +32,6 @@ export default class Login extends Component {
     return true;
   }
 
-  newAccount() {
-    this.popup.newKeyPair(KeyPair.fromRandom());
-  }
-
   // this.state.input could be a password or private key
   // TODO: handle password
   handleInput() {
@@ -52,15 +47,30 @@ export default class Login extends Component {
   render() {
     return (
       <div style={Styles.popup}>
-        <h1>Login</h1>
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
+            flex: 3
+          }}
+        >
+          <h1>Login</h1>
+        </div>
         <form
+          style={{
+            flex: 2,
+            display: "flex",
+            flexDirection: "column",
+            width: "100%"
+          }}
           onSubmit={event => {
             event.preventDefault();
             this.handleInput();
           }}
         >
-          <div>Password or private key</div>
           <TextField
+            label="Password or private key"
             type="password"
             value={this.state.input}
             autoFocus={true}
@@ -73,13 +83,16 @@ export default class Login extends Component {
           <Button variant="contained" color="primary" type="submit">
             Log In
           </Button>
+          <Button
+            variant="contained"
+            color="default"
+            onClick={() => {
+              this.popup.newKeyPair(KeyPair.fromRandom());
+            }}
+          >
+            Create a new account
+          </Button>
         </form>
-        <div
-          style={{ color: "blue", cursor: "pointer" }}
-          onClick={this.newAccount}
-        >
-          Create a new account
-        </div>
       </div>
     );
   }
