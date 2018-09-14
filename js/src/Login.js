@@ -62,7 +62,8 @@ export default class Login extends Component {
             flex: 2,
             display: "flex",
             flexDirection: "column",
-            width: "100%"
+            width: "100%",
+            justifyContent: "space-evenly"
           }}
           onSubmit={event => {
             event.preventDefault();

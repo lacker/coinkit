@@ -23,8 +23,24 @@ export default class NewPassword extends Component {
   render() {
     return (
       <div style={Styles.popup}>
-        <h1>Choose a password</h1>
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
+            flex: 3
+          }}
+        >
+          <h1>Choose a password</h1>
+        </div>
         <form
+          style={{
+            flex: 2,
+            display: "flex",
+            flexDirection: "column",
+            width: "100%",
+            justifyContent: "space-evenly"
+          }}
           onSubmit={event => {
             event.preventDefault();
 
@@ -50,9 +66,10 @@ export default class NewPassword extends Component {
             this.popup.newPassword(this.state.password);
           }}
         >
-          <div>Password</div>
           <TextField
+            label="Password"
             type="password"
+            InputLabelProps={{ shrink: true }}
             autoFocus={true}
             value={this.state.password}
             onChange={event => {
@@ -62,13 +79,14 @@ export default class NewPassword extends Component {
             }}
             inputRef={input => (this.passwordField = input)}
           />
-          <div>
-            {this.state.warning
-              ? "Passwords must match"
-              : "Repeat your password"}
-          </div>
           <TextField
+            label={
+              this.state.warning
+                ? "Passwords must match"
+                : "Repeat your password"
+            }
             type="password"
+            InputLabelProps={{ shrink: true }}
             value={this.state.repeatPassword}
             error={this.state.warning}
             onChange={event => {
@@ -78,7 +96,6 @@ export default class NewPassword extends Component {
             }}
             inputRef={input => (this.repeatPasswordField = input)}
           />
-          <div />
           <Button variant="contained" color="primary" type="submit">
             Create Password
           </Button>
