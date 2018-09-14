@@ -6,7 +6,7 @@ let Styles = {
     flexDirection: "column",
     justifyContent: "flex-start",
     alignItems: "center",
-    width: 360,
+    width: 300,
     height: 480,
     padding: 30
   }
