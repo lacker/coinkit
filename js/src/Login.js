@@ -5,6 +5,7 @@ import Button from "@material-ui/core/Button";
 import TextField from "@material-ui/core/TextField";
 
 import KeyPair from "./KeyPair";
+import Styles from "./Styles";
 
 export default class Login extends Component {
   // props.popup is a reference to the root popup
@@ -49,17 +50,9 @@ export default class Login extends Component {
   }
 
   render() {
-    let style = {
-      display: "flex",
-      flexDirection: "column",
-      justifyContent: "flex-start",
-      alignItems: "center",
-      width: 360,
-      padding: 30
-    };
     return (
-      <div style={style}>
-        <h1>Welcome</h1>
+      <div style={Styles.popup}>
+        <h1>Login</h1>
         <form
           onSubmit={event => {
             event.preventDefault();

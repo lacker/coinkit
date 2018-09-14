@@ -4,6 +4,8 @@ import React, { Component } from "react";
 import Button from "@material-ui/core/Button";
 import TextField from "@material-ui/core/TextField";
 
+import Styles from "./Styles";
+
 export default class NewPassword extends Component {
   // props.popup is a reference to the root popup
   constructor(props) {
@@ -19,17 +21,8 @@ export default class NewPassword extends Component {
   }
 
   render() {
-    let style = {
-      display: "flex",
-      flexDirection: "column",
-      justifyContent: "flex-start",
-      alignItems: "center",
-      width: 360,
-      padding: 30
-    };
-
     return (
-      <div style={style}>
+      <div style={Styles.popup}>
         <h1>Choose a password</h1>
         <form
           onSubmit={event => {

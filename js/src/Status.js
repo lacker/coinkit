@@ -2,6 +2,8 @@
 
 import React, { Component } from "react";
 
+import Styles from "./Styles";
+
 export default class Status extends Component {
   // props.popup is a reference to the root popup
   // props.keyPair is the key pair
@@ -20,16 +22,8 @@ export default class Status extends Component {
   }
 
   render() {
-    let style = {
-      display: "flex",
-      flexDirection: "column",
-      justifyContent: "flex-start",
-      alignItems: "center",
-      width: 360,
-      padding: 30
-    };
     return (
-      <div style={style}>
+      <div style={Styles.popup}>
         <h1>Status</h1>
         <div>Public key: {this.keyPair.publicKey}</div>
         <div>Balance: {this.balance == null ? "..." : this.balance}</div>
