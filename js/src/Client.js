@@ -42,4 +42,14 @@ export default class Client {
     let queryMessage = new Message("Query", properties);
     return this.sendMessage(queryMessage);
   }
+
+  // Fetches the balance for this account
+  async balance() {
+    let pk = this.keyPair.getPublicKey();
+    let query = {
+      account: pk
+    };
+    let response = await this.query(query);
+    return response.accounts[pk].balance;
+  }
 }

@@ -135,7 +135,7 @@ export default class KeyPair {
   // serialize() returns a serialized JSON string with 'Public' and 'Private' keys
   serialize() {
     let j = {
-      Public: KeyPair.encodePublicKey(this.publicKey),
+      Public: this.getPublicKey(),
       Private: base64Encode(this.privateKey)
     };
 

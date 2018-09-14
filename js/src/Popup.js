@@ -17,7 +17,8 @@ export default class Popup extends Component {
     this.state = {
       message: "hello world",
       keyPair: null,
-      password: null
+      password: null,
+      balance: null
     };
     this.client = new Client();
 
@@ -30,9 +31,20 @@ export default class Popup extends Component {
   }
 
   newKeyPair(kp) {
+    this.client = new Client(kp);
     this.setState({
       keyPair: kp,
-      password: null
+      password: null,
+      balance: null
+    });
+
+    // Load the balance
+    this.client.balance().then(balance => {
+      if (this.state.keyPair == kp) {
+        this.setState({
+          balance: balance
+        });
+      }
     });
   }
 
@@ -79,7 +91,11 @@ export default class Popup extends Component {
     // We have permissions for an account, so show its status
     return (
       <div style={style}>
-        <Status popup={this} keyPair={this.state.keyPair} balance={null} />
+        <Status
+          popup={this}
+          keyPair={this.state.keyPair}
+          balance={this.state.balance}
+        />
       </div>
     );
   }
