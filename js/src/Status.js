@@ -28,12 +28,26 @@ export default class Status extends Component {
           style={{
             display: "flex",
             flexDirection: "column",
+            justifyContent: "space-evenly",
+            width: "100%",
             flex: 3
           }}
         >
           <h1>Status</h1>
-          <div>Public key: {this.keyPair.getPublicKey()}</div>
-          <div>Balance: {this.balance == null ? "..." : this.balance}</div>
+          <div>
+            Public key:
+            <div
+              style={{
+                wordWrap: "break-word"
+              }}
+            >
+              {this.keyPair.getPublicKey()}
+            </div>
+          </div>
+          <div>
+            Balance:
+            <div>{this.balance == null ? "loading..." : this.balance}</div>
+          </div>
         </div>
         <div
           style={{
