@@ -48,6 +48,7 @@ export default class Popup extends Component {
     });
   }
 
+  // Sets a new password for the already-existent keypair
   newPassword(password) {
     if (!this.state.keyPair) {
       throw new Error("cannot set new password with no keypair");
@@ -61,6 +62,13 @@ export default class Popup extends Component {
         password: password
       });
     });
+  }
+
+  // Tries to load stored data given the password that protects it
+  // Returns whether the password was valid
+  async checkPassword(password) {
+    // TODO
+    return false;
   }
 
   render() {
