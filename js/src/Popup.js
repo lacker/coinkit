@@ -67,8 +67,12 @@ export default class Popup extends Component {
   // Tries to load stored data given the password that protects it
   // Returns whether the password was valid
   async checkPassword(password) {
-    // TODO
-    return false;
+    let ok = this.storage.checkPassword(password);
+    if (!ok) {
+      return false;
+    }
+
+    throw new Error("TODO: load data from storage");
   }
 
   render() {
