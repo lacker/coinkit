@@ -2,7 +2,8 @@ import KeyPair from "./KeyPair";
 import Message from "./Message";
 import SignedMessage from "./SignedMessage";
 
-// A client that handles interaction with the blockchain nodes.
+// A trusted client that handles interaction with the blockchain nodes.
+// This client is trusted in the sense that it holds the user's keypair.
 export default class Client {
   // Create a new client with the provided keypair.
   // If no keypair is provided, use a random one.
