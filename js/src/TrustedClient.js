@@ -4,7 +4,8 @@ import SignedMessage from "./SignedMessage";
 
 // A trusted client that handles interaction with the blockchain nodes.
 // This client is trusted in the sense that it holds the user's keypair.
-export default class Client {
+// This object is therefore only kept by the extension.
+export default class TrustedClient {
   // Create a new client with the provided keypair.
   // If no keypair is provided, use a random one.
   constructor(keyPair) {

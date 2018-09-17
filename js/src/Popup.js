@@ -4,11 +4,11 @@ import React, { Component } from "react";
 
 import Button from "@material-ui/core/Button";
 
-import Client from "./Client";
 import KeyPair from "./KeyPair";
 import Login from "./Login";
 import NewPassword from "./NewPassword";
 import Status from "./Status";
+import TrustedClient from "./TrustedClient";
 
 export default class Popup extends Component {
   constructor(props) {
@@ -20,7 +20,7 @@ export default class Popup extends Component {
       password: null,
       balance: null
     };
-    this.client = new Client();
+    this.client = new TrustedClient();
 
     this.newKeyPair = this.newKeyPair.bind(this);
 
@@ -31,7 +31,7 @@ export default class Popup extends Component {
   }
 
   newKeyPair(kp) {
-    this.client = new Client(kp);
+    this.client = new TrustedClient(kp);
     this.setState({
       keyPair: kp,
       password: null,
