@@ -64,7 +64,7 @@ export default class Popup extends Component {
     });
   }
 
-  // Tries to load stored data given the password that protects it
+  // Tries to load a stored keypair given the password that protects it.
   // Returns whether the password was valid
   async checkPassword(password) {
     let ok = this.storage.checkPassword(password);
@@ -72,7 +72,20 @@ export default class Popup extends Component {
       return false;
     }
 
-    throw new Error("TODO: load data from storage");
+    if (typeof this.storage.data != "object") {
+      return false;
+    }
+
+    let kp;
+    try {
+      kp = KeyPair.fromSerialized(this.storage.data.keyPair);
+    } catch (e) {
+      console.log("invalid stored data:", this.storage.data);
+      return false;
+    }
+
+    this.newKeyPair(kp);
+    return true;
   }
 
   render() {
