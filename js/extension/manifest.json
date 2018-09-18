@@ -4,6 +4,7 @@
   "description": "An in-browser coinkit wallet.",
   "version": "1.0",
   "permissions": [
+    "activeTab",
     "storage",
     "http://localhost:9000/*",
     "http://localhost:9001/*",
@@ -17,5 +18,9 @@
   "background": {
     "scripts": ["background-main.js"],
     "persistent": true
-  }
+  },
+  "content_scripts": [{
+    "matches": ["*://*/*"],
+    "js": ["content-main.js"]
+  }]
 }
