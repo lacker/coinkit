@@ -12,4 +12,11 @@ export default class Client {
   async getPublicKey() {
     // TODO
   }
+
+  // Sends a query message, given the query properties.
+  // Returns a promise for a message - a data message if the query worked, an error
+  // message if it did not.
+  async query(properties) {
+    // TODO
+  }
 }
