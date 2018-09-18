@@ -1,5 +1,6 @@
 // This code runs in the persistent background page.
 import Storage from "./Storage";
+import TrustedClient from "./TrustedClient";
 
-// Access this from the popup with chrome.extension.getBackgroundPage().storage
+window.client = new TrustedClient();
 window.storage = new Storage();

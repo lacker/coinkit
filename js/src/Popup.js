@@ -20,9 +20,13 @@ export default class Popup extends Component {
       password: null,
       balance: null
     };
-    this.client = new TrustedClient();
 
     this.newKeyPair = this.newKeyPair.bind(this);
+
+    this.client = chrome.extension.getBackgroundPage().client;
+    if (!this.client) {
+      throw new Error("cannot find client");
+    }
 
     this.storage = chrome.extension.getBackgroundPage().storage;
     if (!this.storage) {
@@ -31,7 +35,7 @@ export default class Popup extends Component {
   }
 
   newKeyPair(kp) {
-    this.client = new TrustedClient(kp);
+    this.client.setKeyPair(kp);
     this.setState({
       keyPair: kp,
       password: null,

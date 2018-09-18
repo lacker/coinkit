@@ -6,20 +6,50 @@ import SignedMessage from "./SignedMessage";
 // This client is trusted in the sense that it holds the user's keypair.
 // This object is therefore only kept by the extension.
 export default class TrustedClient {
-  // Create a new client with the provided keypair.
-  // If no keypair is provided, use a random one.
-  constructor(keyPair) {
-    if (!keyPair) {
-      this.keyPair = KeyPair.fromRandom();
-    } else {
-      this.keyPair = keyPair;
-    }
+  // Create a new client with no keypair.
+  constructor() {
+    this.keyPair = null;
+
+    chrome.runtime.onMessage.addListener(
+      (serializedMessage, sender, sendResponse) => {
+        console.log("XXX message from", sender.tab);
+
+        if (!sender.tab) {
+          console.log("unexpected message from no tab:", serializedMessage);
+          return false;
+        }
+
+        let message = Message.fromSerialized(serializedMessage);
+
+        this.handleUntrustedMessage(message, sender.tab.url).then(
+          responseMessage => {
+            sendResponse(responseMessage.serialize());
+          }
+        );
+
+        return true;
+      }
+    );
+  }
+
+  setKeyPair(kp) {
+    this.keyPair = kp;
+  }
+
+  sign(message) {
+    let kp = this.keyPair || KeyPair.fromRandom();
+    return SignedMessage.fromSigning(message, kp);
+  }
+
+  async handleUntrustedMessage(message, url) {
+    // TODO: check permissions
+    return this.sendMessage(message);
   }
 
   // Sends a Message upstream, signing with our keypair.
   // Returns a promise for the response Message.
   async sendMessage(message) {
-    let clientMessage = SignedMessage.fromSigning(message, this.keyPair);
+    let clientMessage = this.sign(message);
     let url = "http://localhost:8000/messages";
     let body = clientMessage.serialize() + "\n";
     let response = await fetch(url, {
@@ -41,12 +71,15 @@ export default class TrustedClient {
   // Returns a promise for a message - a data message if the query worked, an error
   // message if it did not.
   async query(properties) {
-    let queryMessage = new Message("Query", properties);
-    return this.sendMessage(queryMessage);
+    let message = new Message("Query", properties);
+    return this.sendMessage(message);
   }
 
   // Fetches the balance for this account
   async balance() {
+    if (!this.keyPair) {
+      return 0;
+    }
     let pk = this.keyPair.getPublicKey();
     let query = {
       account: pk

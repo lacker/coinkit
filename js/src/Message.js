@@ -1,3 +1,4 @@
+// Used to communicate with the blockchain
 export default class Message {
   constructor(type, properties) {
     this.type = type;
