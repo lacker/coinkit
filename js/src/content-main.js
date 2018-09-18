@@ -11,12 +11,12 @@ window.addEventListener(
 
     chrome.runtime.sendMessage(event.data.message, response => {
       console.log("XXX content script got response", response);
-
-      window.postMessage({
+      let data = {
         id: event.data.id,
         type: "fromCoinkit",
         message: response
-      });
+      };
+      window.postMessage(data, "*");
     });
   },
   false
