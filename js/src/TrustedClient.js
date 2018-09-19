@@ -21,6 +21,8 @@ export default class TrustedClient {
 
         let message = Message.fromSerialized(serializedMessage);
 
+        // TODO: handle a permissions request
+
         this.handleUntrustedMessage(message, sender.tab.url).then(
           responseMessage => {
             sendResponse(responseMessage.serialize());

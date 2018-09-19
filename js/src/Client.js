@@ -56,9 +56,10 @@ export default class Client {
   }
 
   // Requests public key permission from the extension if we don't already have it.
-  // Returns null if permission is denied.
+  // This never returns if the permission request is not granted.
   async getPublicKey() {
-    // TODO
+    let message = new Message("RequestPermission", {});
+    let response = await this.sendMessage(message);
   }
 
   // Sends a query message, given the query properties.
