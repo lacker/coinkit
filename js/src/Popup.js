@@ -15,7 +15,6 @@ export default class Popup extends Component {
     super(props);
 
     this.state = {
-      message: "hello world",
       keyPair: null,
       password: null,
       balance: null
