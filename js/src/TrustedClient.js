@@ -21,8 +21,6 @@ export default class TrustedClient {
 
         let message = Message.fromSerialized(serializedMessage);
 
-        // TODO: handle a permissions request
-
         this.handleUntrustedMessage(message, sender.tab.url).then(
           responseMessage => {
             sendResponse(responseMessage.serialize());
@@ -44,8 +42,13 @@ export default class TrustedClient {
   }
 
   async handleUntrustedMessage(message, url) {
-    // TODO: check permissions
-    return this.sendMessage(message);
+    if (message.type == "RequestPermission") {
+      // TODO: check permissions
+    } else if (message.type == "Query") {
+      return this.sendMessage(message);
+    } else {
+      console.log("unexpected message type:", message.type);
+    }
   }
 
   // Sends a Message upstream, signing with our keypair.
