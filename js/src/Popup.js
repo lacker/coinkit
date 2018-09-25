@@ -92,9 +92,11 @@ export default class Popup extends Component {
   async checkPassword(password) {
     let ok = await this.storage.checkPassword(password);
     if (!ok) {
+      console.log("bad password:", password);
       return false;
     }
-    this.setState(this.stateFromStorage());
+    let state = this.stateFromStorage();
+    this.setState(state);
     return true;
   }
 

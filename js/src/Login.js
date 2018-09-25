@@ -35,7 +35,12 @@ export default class Login extends Component {
   // this.state.input could be a password or private key
   handleInput() {
     // Check if the input was a private key
-    let kp = KeyPair.fromPrivateKey(this.state.input);
+    let kp;
+    try {
+      KeyPair.fromPrivateKey(this.state.input);
+    } catch (e) {
+      // It's not a valid private key
+    }
     if (kp) {
       this.popup.newKeyPair(kp);
       return;

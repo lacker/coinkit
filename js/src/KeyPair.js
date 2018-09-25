@@ -97,6 +97,7 @@ export default class KeyPair {
     }
   }
 
+  // Throws an error if priv is not a valid private key.
   static fromPrivateKey(priv) {
     let bytes = base64Decode(priv);
     let keys = nacl.sign.keyPair.fromSecretKey(bytes);
