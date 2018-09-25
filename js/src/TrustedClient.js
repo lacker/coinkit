@@ -12,8 +12,6 @@ export default class TrustedClient {
 
     chrome.runtime.onMessage.addListener(
       (serializedMessage, sender, sendResponse) => {
-        console.log("XXX message from", sender.tab);
-
         if (!sender.tab) {
           console.log("unexpected message from no tab:", serializedMessage);
           return false;
@@ -90,6 +88,10 @@ export default class TrustedClient {
       account: pk
     };
     let response = await this.query(query);
-    return response.accounts[pk].balance;
+    let account = response.accounts[pk];
+    if (!account) {
+      return 0;
+    }
+    return account.balance;
   }
 }

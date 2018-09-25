@@ -75,6 +75,20 @@ export default class Popup extends Component {
     });
   }
 
+  loadBalance() {
+    if (this.state.balance != null) {
+      return;
+    }
+    let kp = this.state.keyPair;
+    this.client.balance().then(balance => {
+      if (this.state.keyPair == kp) {
+        this.setState({
+          balance: balance
+        });
+      }
+    });
+  }
+
   // Sets a new password for the already-existent keypair
   newPassword(password) {
     let data = {
@@ -101,18 +115,6 @@ export default class Popup extends Component {
   }
 
   render() {
-    if (this.state.balance == null) {
-      // Load the balance
-      let kp = this.state.keyPair;
-      this.client.balance().then(balance => {
-        if (this.state.keyPair == kp) {
-          this.setState({
-            balance: balance
-          });
-        }
-      });
-    }
-
     let style = {
       display: "flex",
       alignSelf: "stretch",

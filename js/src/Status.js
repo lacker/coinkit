@@ -9,19 +9,11 @@ export default class Status extends Component {
   // props.popup is a reference to the root popup
   // props.keyPair is the key pair
   // props.balance is the account balance, or null if unknown
-  constructor(props) {
-    super(props);
-
-    this.popup = props.popup;
-    this.keyPair = props.keyPair;
-    this.balance = props.balance;
-  }
-
-  logOut() {
-    this.popup.newKeyPair(null);
-  }
-
   render() {
+    if (this.props.balance == null) {
+      this.props.popup.loadBalance();
+    }
+
     return (
       <div style={Styles.popup}>
         <div
@@ -41,12 +33,14 @@ export default class Status extends Component {
                 wordWrap: "break-word"
               }}
             >
-              {this.keyPair.getPublicKey()}
+              {this.props.keyPair.getPublicKey()}
             </div>
           </div>
           <div>
             Balance:
-            <div>{this.balance == null ? "loading..." : this.balance}</div>
+            <div>
+              {this.props.balance == null ? "loading..." : this.props.balance}
+            </div>
           </div>
         </div>
         <div
@@ -62,7 +56,7 @@ export default class Status extends Component {
             variant="contained"
             color="default"
             onClick={() => {
-              this.popup.logOut();
+              this.props.popup.logOut();
             }}
           >
             Log out
