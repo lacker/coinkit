@@ -1,5 +1,6 @@
 import React from "react";
 import ReactDOM from "react-dom";
+import { Provider } from "react-redux";
 import "typeface-roboto";
 
 import Popup from "./Popup";
@@ -13,7 +14,17 @@ async function onload() {
   }
   await storage.init();
 
-  ReactDOM.render(<Popup />, document.getElementById("root"));
+  let store = chrome.extension.getBackgroundPage().store;
+  if (!store) {
+    throw new Error("cannot find store");
+  }
+
+  ReactDOM.render(
+    <Provider store={store}>
+      <Popup />
+    </Provider>,
+    document.getElementById("root")
+  );
 }
 
 window.onload = onload;
