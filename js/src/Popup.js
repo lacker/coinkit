@@ -10,6 +10,8 @@ import NewPassword from "./NewPassword";
 import Status from "./Status";
 import TrustedClient from "./TrustedClient";
 
+import { logOut, newKeyPair, setPassword } from "./reducers";
+
 class Popup extends Component {
   constructor(props) {
     super(props);
@@ -61,6 +63,9 @@ class Popup extends Component {
 
   newKeyPair(kp) {
     TrustedClient.get().setKeyPair(kp);
+
+    // XXX
+    this.props.dispatch;
     this.setState({
       keyPair: kp,
       password: null

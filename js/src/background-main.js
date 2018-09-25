@@ -5,9 +5,14 @@ import { createStore } from "redux";
 import Storage from "./Storage";
 import TrustedClient from "./TrustedClient";
 
+import { loadFromStorage } from "./actions";
 import reducers from "./reducers";
 
 TrustedClient.init();
 
-window.storage = new Storage();
 window.store = createStore(reducers);
+
+window.storage = new Storage();
+window.storage.init().then(() => {
+  window.store.dispatch(loadFromStorage(window.storage));
+});
