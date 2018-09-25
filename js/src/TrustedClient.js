@@ -42,6 +42,7 @@ export default class TrustedClient {
     if (!client) {
       throw new Error("cannot find client");
     }
+    return client;
   }
 
   setKeyPair(kp) {
