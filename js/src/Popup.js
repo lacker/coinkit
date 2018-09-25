@@ -1,7 +1,7 @@
 // The root to display in the extension popup.
 
 import React, { Component } from "react";
-
+import { connect } from "react-redux";
 import Button from "@material-ui/core/Button";
 
 import KeyPair from "./KeyPair";
@@ -10,7 +10,7 @@ import NewPassword from "./NewPassword";
 import Status from "./Status";
 import TrustedClient from "./TrustedClient";
 
-export default class Popup extends Component {
+class Popup extends Component {
   constructor(props) {
     super(props);
 
@@ -125,3 +125,12 @@ export default class Popup extends Component {
     );
   }
 }
+
+function mapStateToProps(state) {
+  return {
+    password: state.password,
+    keyPair: state.keyPair
+  };
+}
+
+export default connect(mapStateToProps)(Popup);
