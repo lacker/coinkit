@@ -15,6 +15,7 @@ export default class Login extends Component {
     this.popup = props.popup;
 
     this.state = {
+      error: false,
       input: ""
     };
   }
@@ -49,7 +50,10 @@ export default class Login extends Component {
     // Check if the input was a password
     this.popup.checkPassword(this.state.input).then(ok => {
       if (!ok) {
-        this.setState({ input: "" });
+        this.setState({
+          error: true,
+          input: ""
+        });
       }
     });
   }
@@ -81,7 +85,10 @@ export default class Login extends Component {
           }}
         >
           <TextField
-            label="Password or private key"
+            error={this.state.error}
+            label={
+              this.state.error ? "Invalid password" : "Password or private key"
+            }
             type="password"
             value={this.state.input}
             autoFocus={true}
