@@ -38,6 +38,12 @@ export default class Storage {
     this.initialized = true;
   }
 
+  // Drops the password and decrypted data
+  logOut() {
+    this.password = null;
+    this.data = null;
+  }
+
   // Returns whether this password is a valid password for our encrypted data.
   // If it is valid, sets both password and data.
   async checkPassword(password) {

@@ -62,7 +62,7 @@ export default class Popup extends Component {
   }
 
   logOut() {
-    this.storage.password = null;
+    this.storage.logOut();
     this.newKeyPair(null);
   }
 
