@@ -38,6 +38,15 @@ export default class Storage {
     this.initialized = true;
   }
 
+  static async get() {
+    let storage = chrome.extension.getBackgroundPage().storage;
+    if (!storage) {
+      throw new Error("cannot find storage");
+    }
+    await storage.init();
+    return storage;
+  }
+
   // Drops the password and decrypted data
   logOut() {
     this.password = null;

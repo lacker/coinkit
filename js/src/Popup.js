@@ -8,92 +8,48 @@ import KeyPair from "./KeyPair";
 import Login from "./Login";
 import NewPassword from "./NewPassword";
 import Status from "./Status";
+import Storage from "./Storage";
 import TrustedClient from "./TrustedClient";
 
-import { logOut, newKeyPair, setPassword } from "./reducers";
+import { loadFromStorage, logOut, newKeyPair, newPassword } from "./actions";
 
 class Popup extends Component {
   constructor(props) {
     super(props);
-
-    this.storage = chrome.extension.getBackgroundPage().storage;
-    if (!this.storage) {
-      throw new Error("cannot find storage");
-    }
-
-    this.state = this.stateFromStorage();
-  }
-
-  // Updates the client keypair as a side effect
-  // TODO: This isn't good design. Maybe the client should look directly at the storage
-  stateFromStorage() {
-    let clear = {
-      keyPair: null,
-      password: null
-    };
-
-    if (!this.storage.data) {
-      return clear;
-    }
-
-    if (typeof this.storage.data != "object") {
-      console.log("bad stored data:", this.storage.data);
-      return clear;
-    }
-
-    let kp;
-    try {
-      kp = KeyPair.fromSerialized(this.storage.data.keyPair);
-    } catch (e) {
-      console.log("invalid keypair from storage:", this.storage.data);
-      return clear;
-    }
-
-    TrustedClient.get().setKeyPair(kp);
-    return {
-      keyPair: kp,
-      password: this.storage.password
-    };
   }
 
   logOut() {
-    this.storage.logOut();
-    this.newKeyPair(null);
+    this.props.dispatch(logOut());
   }
 
   newKeyPair(kp) {
-    TrustedClient.get().setKeyPair(kp);
-
-    // XXX
-    this.props.dispatch;
-    this.setState({
-      keyPair: kp,
-      password: null
-    });
+    this.props.dispatch(newKeyPair(kp));
   }
 
   // Sets a new password for the already-existent keypair
   newPassword(password) {
     let data = {
-      keyPair: this.state.keyPair.serialize()
+      keyPair: this.props.keyPair.serialize()
     };
-    this.storage.setPasswordAndData(password, data).then(() => {
-      this.setState({
-        password: password
+    Storage.get()
+      .then(storage => {
+        return storage.setPasswordAndData(password, data);
+      })
+      .then(() => {
+        this.props.dispatch(newPassword(password));
       });
-    });
   }
 
   // Tries to load a stored keypair given the password that protects it.
   // Returns whether the password was valid
   async checkPassword(password) {
-    let ok = await this.storage.checkPassword(password);
+    let storage = await Storage.get();
+    let ok = await storage.checkPassword(password);
     if (!ok) {
       console.log("bad password:", password);
       return false;
     }
-    let state = this.stateFromStorage();
-    this.setState(state);
+    this.props.dispatch(loadFromStorage(storage));
     return true;
   }
 
@@ -104,7 +60,7 @@ class Popup extends Component {
       flexDirection: "column",
       justifyContent: "center"
     };
-    if (!this.state.keyPair) {
+    if (!this.props.keyPair) {
       // Show the login screen
       return (
         <div style={style}>
@@ -112,7 +68,7 @@ class Popup extends Component {
         </div>
       );
     }
-    if (!this.state.password) {
+    if (!this.props.password) {
       // They have a keypair but need to create a password.
       // Show the new-password screen
       return (
@@ -125,7 +81,7 @@ class Popup extends Component {
     // We have permissions for an account, so show its status
     return (
       <div style={style}>
-        <Status popup={this} keyPair={this.state.keyPair} />
+        <Status popup={this} keyPair={this.props.keyPair} />
       </div>
     );
   }

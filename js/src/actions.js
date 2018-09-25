@@ -1,10 +1,10 @@
 // Redux actions
 import KeyPair from "./KeyPair";
 
-export const LOAD_STATE = "LOAD_STATE";
+export const LOAD_FROM_STORAGE = "LOAD_FROM_STORAGE";
 export const LOG_OUT = "LOG_OUT";
 export const NEW_KEY_PAIR = "NEW_KEY_PAIR";
-export const SET_PASSWORD = "SET_PASSWORD";
+export const NEW_PASSWORD = "NEW_PASSWORD";
 
 export function logOut() {
   return { type: LOG_OUT };
@@ -22,14 +22,14 @@ export function loadFromStorage(storage) {
 
   let kp;
   try {
-    kp = KeyPair.fromSerialized(this.storage.data.keyPair);
+    kp = KeyPair.fromSerialized(storage.data.keyPair);
   } catch (e) {
-    console.log("invalid keypair from storage:", this.storage.data);
+    console.log("invalid keypair from storage:", storage.data);
     return logOut();
   }
 
   return {
-    type: LOAD_STATE,
+    type: LOAD_FROM_STORAGE,
     password: storage.password,
     keyPair: kp
   };
@@ -37,14 +37,14 @@ export function loadFromStorage(storage) {
 
 export function newKeyPair(kp) {
   return {
-    type: LOAD_STATE,
+    type: NEW_KEY_PAIR,
     keyPair: kp
   };
 }
 
-export function setPassword(password) {
+export function newPassword(password) {
   return {
-    type: SET_PASSWORD,
+    type: NEW_PASSWORD,
     password: password
   };
 }

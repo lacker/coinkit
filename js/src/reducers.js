@@ -1,9 +1,14 @@
 import { combineReducers } from "redux";
-import { LOAD_STATE, LOG_OUT, NEW_KEY_PAIR, SET_PASSWORD } from "./actions";
+import {
+  LOAD_FROM_STORAGE,
+  LOG_OUT,
+  NEW_KEY_PAIR,
+  NEW_PASSWORD
+} from "./actions";
 
 function password(state = null, action) {
   switch (action.type) {
-    case LOAD_STATE:
+    case LOAD_FROM_STORAGE:
       return action.password;
 
     case LOG_OUT:
@@ -12,7 +17,7 @@ function password(state = null, action) {
     case NEW_KEY_PAIR:
       return null;
 
-    case SET_PASSWORD:
+    case NEW_PASSWORD:
       return action.password;
 
     default:
@@ -22,7 +27,7 @@ function password(state = null, action) {
 
 function keyPair(state = null, action) {
   switch (action.type) {
-    case LOAD_STATE:
+    case LOAD_FROM_STORAGE:
       return action.keyPair;
 
     case LOG_OUT:

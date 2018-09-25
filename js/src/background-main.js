@@ -11,8 +11,4 @@ import reducers from "./reducers";
 TrustedClient.init();
 
 window.store = createStore(reducers);
-
 window.storage = new Storage();
-window.storage.init().then(() => {
-  window.store.dispatch(loadFromStorage(window.storage));
-});
