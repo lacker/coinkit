@@ -28,16 +28,7 @@ class Popup extends Component {
 
   // Sets a new password for the already-existent keypair
   newPassword(password) {
-    let data = {
-      keyPair: this.props.keyPair.serialize()
-    };
-    Storage.get()
-      .then(storage => {
-        return storage.setPasswordAndData(password, data);
-      })
-      .then(() => {
-        this.props.dispatch(newPassword(password));
-      });
+    this.props.dispatch(newPassword(password));
   }
 
   // Tries to load a stored keypair given the password that protects it.
