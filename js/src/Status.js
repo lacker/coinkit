@@ -23,6 +23,7 @@ export default class Status extends Component {
   // props.popup is a reference to the root popup
   // props.keyPair is the key pair
   render() {
+    console.log("XXX render status");
     return (
       <div style={Styles.popup}>
         <div

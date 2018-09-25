@@ -16,8 +16,8 @@ window.storage = new Storage();
 // Save all state updates when there is a password set to retrieve them
 window.store.subscribe(() => {
   let state = window.store.getState();
+  console.log("XXX new state:", state);
   if (state.password != null) {
-    // console.log("XXX saving state:", state);
     let data = {
       keyPair: state.keyPair.serialize()
     };

@@ -13,6 +13,8 @@ async function onload() {
     throw new Error("cannot find store");
   }
 
+  console.log("XXX initial state:", store.getState());
+
   ReactDOM.render(
     <Provider store={store}>
       <Popup />
