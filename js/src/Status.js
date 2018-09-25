@@ -4,16 +4,25 @@ import React, { Component } from "react";
 import Button from "@material-ui/core/Button";
 
 import Styles from "./Styles";
+import TrustedClient from "./TrustedClient";
 
 export default class Status extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      balance: null
+    };
+
+    TrustedClient.get()
+      .balance()
+      .then(balance => {
+        this.setState({ balance: balance });
+      });
+  }
+
   // props.popup is a reference to the root popup
   // props.keyPair is the key pair
-  // props.balance is the account balance, or null if unknown
   render() {
-    if (this.props.balance == null) {
-      this.props.popup.loadBalance();
-    }
-
     return (
       <div style={Styles.popup}>
         <div
@@ -39,7 +48,7 @@ export default class Status extends Component {
           <div>
             Balance:
             <div>
-              {this.props.balance == null ? "loading..." : this.props.balance}
+              {this.state.balance == null ? "loading..." : this.state.balance}
             </div>
           </div>
         </div>

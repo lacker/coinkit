@@ -27,8 +27,7 @@ export default class Popup extends Component {
   stateFromStorage() {
     let clear = {
       keyPair: null,
-      password: null,
-      balance: null
+      password: null
     };
 
     if (!this.storage.data) {
@@ -51,8 +50,7 @@ export default class Popup extends Component {
     TrustedClient.get().setKeyPair(kp);
     return {
       keyPair: kp,
-      password: this.storage.password,
-      balance: null
+      password: this.storage.password
     };
   }
 
@@ -65,8 +63,7 @@ export default class Popup extends Component {
     TrustedClient.get().setKeyPair(kp);
     this.setState({
       keyPair: kp,
-      password: null,
-      balance: null
+      password: null
     });
   }
 
@@ -139,11 +136,7 @@ export default class Popup extends Component {
     // We have permissions for an account, so show its status
     return (
       <div style={style}>
-        <Status
-          popup={this}
-          keyPair={this.state.keyPair}
-          balance={this.state.balance}
-        />
+        <Status popup={this} keyPair={this.state.keyPair} />
       </div>
     );
   }
