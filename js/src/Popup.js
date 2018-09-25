@@ -14,14 +14,6 @@ export default class Popup extends Component {
   constructor(props) {
     super(props);
 
-    this.state = {
-      keyPair: null,
-      password: null,
-      balance: null
-    };
-
-    this.newKeyPair = this.newKeyPair.bind(this);
-
     this.client = chrome.extension.getBackgroundPage().client;
     if (!this.client) {
       throw new Error("cannot find client");
@@ -31,6 +23,47 @@ export default class Popup extends Component {
     if (!this.storage) {
       throw new Error("cannot find storage");
     }
+
+    this.state = this.stateFromStorage();
+  }
+
+  // Updates the client keypair as a side effect
+  // TODO: This isn't good design. Maybe the client should look directly at the storage
+  stateFromStorage() {
+    let clear = {
+      keyPair: null,
+      password: null,
+      balance: null
+    };
+
+    if (!this.storage.data) {
+      return clear;
+    }
+
+    if (typeof this.storage.data != "object") {
+      console.log("bad stored data:", this.storage.data);
+      return clear;
+    }
+
+    let kp;
+    try {
+      kp = KeyPair.fromSerialized(this.storage.data.keyPair);
+    } catch (e) {
+      console.log("invalid keypair from storage:", this.storage.data);
+      return clear;
+    }
+
+    this.client.setKeyPair(kp);
+    return {
+      keyPair: kp,
+      password: this.storage.password,
+      balance: null
+    };
+  }
+
+  logOut() {
+    this.storage.password = null;
+    this.newKeyPair(null);
   }
 
   newKeyPair(kp) {
@@ -40,26 +73,13 @@ export default class Popup extends Component {
       password: null,
       balance: null
     });
-
-    // Load the balance
-    this.client.balance().then(balance => {
-      if (this.state.keyPair == kp) {
-        this.setState({
-          balance: balance
-        });
-      }
-    });
   }
 
   // Sets a new password for the already-existent keypair
   newPassword(password) {
-    if (!this.state.keyPair) {
-      throw new Error("cannot set new password with no keypair");
-    }
     let data = {
       keyPair: this.state.keyPair.serialize()
     };
-
     this.storage.setPasswordAndData(password, data).then(() => {
       this.setState({
         password: password
@@ -70,28 +90,27 @@ export default class Popup extends Component {
   // Tries to load a stored keypair given the password that protects it.
   // Returns whether the password was valid
   async checkPassword(password) {
-    let ok = this.storage.checkPassword(password);
+    let ok = await this.storage.checkPassword(password);
     if (!ok) {
       return false;
     }
-
-    if (typeof this.storage.data != "object") {
-      return false;
-    }
-
-    let kp;
-    try {
-      kp = KeyPair.fromSerialized(this.storage.data.keyPair);
-    } catch (e) {
-      console.log("invalid stored data:", this.storage.data);
-      return false;
-    }
-
-    this.newKeyPair(kp);
+    this.setState(this.stateFromStorage());
     return true;
   }
 
   render() {
+    if (this.state.balance == null) {
+      // Load the balance
+      let kp = this.state.keyPair;
+      this.client.balance().then(balance => {
+        if (this.state.keyPair == kp) {
+          this.setState({
+            balance: balance
+          });
+        }
+      });
+    }
+
     let style = {
       display: "flex",
       alignSelf: "stretch",

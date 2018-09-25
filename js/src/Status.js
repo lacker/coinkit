@@ -62,7 +62,7 @@ export default class Status extends Component {
             variant="contained"
             color="default"
             onClick={() => {
-              this.popup.newKeyPair(null);
+              this.popup.logOut();
             }}
           >
             Log out
