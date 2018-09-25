@@ -5,6 +5,7 @@ import SignedMessage from "./SignedMessage";
 // A trusted client that handles interaction with the blockchain nodes.
 // This client is trusted in the sense that it holds the user's keypair.
 // This object is therefore only kept by the extension.
+
 export default class TrustedClient {
   // Create a new client with no keypair.
   constructor() {
@@ -28,6 +29,19 @@ export default class TrustedClient {
         return true;
       }
     );
+  }
+
+  // Call from the background page
+  static init() {
+    window.client = new TrustedClient();
+  }
+
+  // Get the global trusted client from the background page
+  static get() {
+    let client = chrome.extension.getBackgroundPage().client;
+    if (!client) {
+      throw new Error("cannot find client");
+    }
   }
 
   setKeyPair(kp) {

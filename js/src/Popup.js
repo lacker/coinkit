@@ -14,11 +14,6 @@ export default class Popup extends Component {
   constructor(props) {
     super(props);
 
-    this.client = chrome.extension.getBackgroundPage().client;
-    if (!this.client) {
-      throw new Error("cannot find client");
-    }
-
     this.storage = chrome.extension.getBackgroundPage().storage;
     if (!this.storage) {
       throw new Error("cannot find storage");
@@ -53,7 +48,7 @@ export default class Popup extends Component {
       return clear;
     }
 
-    this.client.setKeyPair(kp);
+    TrustedClient.get().setKeyPair(kp);
     return {
       keyPair: kp,
       password: this.storage.password,
@@ -67,7 +62,7 @@ export default class Popup extends Component {
   }
 
   newKeyPair(kp) {
-    this.client.setKeyPair(kp);
+    TrustedClient.get().setKeyPair(kp);
     this.setState({
       keyPair: kp,
       password: null,
@@ -80,13 +75,15 @@ export default class Popup extends Component {
       return;
     }
     let kp = this.state.keyPair;
-    this.client.balance().then(balance => {
-      if (this.state.keyPair == kp) {
-        this.setState({
-          balance: balance
-        });
-      }
-    });
+    TrustedClient.get()
+      .balance()
+      .then(balance => {
+        if (this.state.keyPair == kp) {
+          this.setState({
+            balance: balance
+          });
+        }
+      });
   }
 
   // Sets a new password for the already-existent keypair

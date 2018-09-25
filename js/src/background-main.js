@@ -7,6 +7,7 @@ import TrustedClient from "./TrustedClient";
 
 import reducers from "./reducers";
 
-window.client = new TrustedClient();
+TrustedClient.init();
+
 window.storage = new Storage();
 window.store = createStore(reducers);
