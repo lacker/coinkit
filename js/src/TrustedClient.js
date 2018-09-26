@@ -45,22 +45,27 @@ export default class TrustedClient {
     return client;
   }
 
-  setKeyPair(kp) {
-    this.keyPair = kp;
-  }
-
   sign(message) {
     let kp = this.keyPair || KeyPair.fromRandom();
     return SignedMessage.fromSigning(message, kp);
   }
 
+  // Handles a message from an untrusted client.
+  // Returns the message they should get back, or null if there is none.
   async handleUntrustedMessage(message, url) {
-    if (message.type == "RequestPermission") {
-      // TODO: check permissions
-    } else if (message.type == "Query") {
-      return this.sendMessage(message);
-    } else {
-      console.log("unexpected message type:", message.type);
+    // TODO: check permissions
+
+    switch (message.type) {
+      case "RequestPermission":
+        return null;
+
+      case "Query":
+        let response = await this.sendMessage(message);
+        return response;
+
+      default:
+        console.log("unexpected message type:", message.type);
+        return null;
     }
   }
 
