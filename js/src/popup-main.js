@@ -1,19 +1,32 @@
 import React from "react";
 import ReactDOM from "react-dom";
 import { Provider } from "react-redux";
+import { createStore } from "redux";
 import "typeface-roboto";
 
 import Popup from "./Popup";
 import Storage from "./Storage";
+import { loadFromStorage } from "./actions";
+import reducers from "./reducers";
 
 // This code runs to load the popup of the chrome extension.
 async function onload() {
-  let store = chrome.extension.getBackgroundPage().store;
-  if (!store) {
-    throw new Error("cannot find store");
-  }
+  // Each popup gets its own redux store object.
+  // I tried to let them share one but ran into weird bugs.
+  let store = createStore(reducers);
+  let storage = await Storage.get();
+  store.dispatch(loadFromStorage(storage));
 
-  console.log("XXX initial state:", store.getState());
+  // Save all state updates when there is a password set to retrieve them
+  store.subscribe(() => {
+    let state = store.getState();
+    if (state.password != null) {
+      let data = {
+        keyPair: state.keyPair.serialize()
+      };
+      storage.setPasswordAndData(state.password, data);
+    }
+  });
 
   ReactDOM.render(
     <Provider store={store}>

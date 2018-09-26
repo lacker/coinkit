@@ -80,12 +80,10 @@ class Popup extends Component {
 }
 
 function mapStateToProps(state) {
-  console.log("XXX map state to props:", state);
   return {
     password: state.password,
     keyPair: state.keyPair
   };
 }
 
-console.log("XXX loading");
 export default connect(mapStateToProps)(Popup);
