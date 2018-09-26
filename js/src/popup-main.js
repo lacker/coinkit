@@ -20,7 +20,9 @@ async function onload() {
   // Save all state updates when there is a password set to retrieve them
   store.subscribe(() => {
     let state = store.getState();
-    if (state.password != null) {
+    if (state.password == null && state.keyPair == null) {
+      storage.logOut();
+    } else if (state.password != null) {
       let data = {
         keyPair: state.keyPair.serialize()
       };
