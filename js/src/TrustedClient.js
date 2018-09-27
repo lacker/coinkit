@@ -1,6 +1,7 @@
 import KeyPair from "./KeyPair";
 import Message from "./Message";
 import SignedMessage from "./SignedMessage";
+import Storage from "./Storage";
 
 // A trusted client that handles interaction with the blockchain nodes.
 // This client is trusted in the sense that it holds the user's keypair.
@@ -9,8 +10,6 @@ import SignedMessage from "./SignedMessage";
 export default class TrustedClient {
   // Create a new client with no keypair.
   constructor() {
-    this.keyPair = null;
-
     chrome.runtime.onMessage.addListener(
       (serializedMessage, sender, sendResponse) => {
         if (!sender.tab) {
@@ -45,8 +44,21 @@ export default class TrustedClient {
     return client;
   }
 
+  // Returns null if the user is not logged in
+  getKeyPair() {
+    let storage = Storage.get();
+    let data = storage.getData();
+    if (!data) {
+      return null;
+    }
+    return data.keyPair;
+  }
+
   sign(message) {
-    let kp = this.keyPair || KeyPair.fromRandom();
+    let kp = this.getKeyPair();
+    if (!kp) {
+      kp = KeyPair.fromRandom();
+    }
     return SignedMessage.fromSigning(message, kp);
   }
 
@@ -100,10 +112,11 @@ export default class TrustedClient {
 
   // Fetches the balance for this account
   async balance() {
-    if (!this.keyPair) {
+    let kp = this.getKeyPair();
+    if (!kp) {
       return 0;
     }
-    let pk = this.keyPair.getPublicKey();
+    let pk = kp.getPublicKey();
     let query = {
       account: pk
     };
