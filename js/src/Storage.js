@@ -3,6 +3,7 @@
 // machine may be able to read Chrome storage.
 // A Storage object should only be created from the background page, because it
 // stores encryption keys in memory, and thus should be as persistent as possible.
+
 import Cipher from "./Cipher";
 import KeyPair from "./KeyPair";
 
