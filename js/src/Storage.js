@@ -4,6 +4,7 @@
 // A Storage object should only be created from the background page, because it
 // stores encryption keys in memory, and thus should be as persistent as possible.
 import Cipher from "./Cipher";
+import KeyPair from "./KeyPair";
 
 export default class Storage {
   constructor() {
@@ -53,6 +54,26 @@ export default class Storage {
     this.data = null;
   }
 
+  // Returns a nice form of the data.
+  // this.data is jsonable, getData() returns something inflated with objects.
+  // Returns null if there is no data
+  getData() {
+    if (!this.data) {
+      return null;
+    }
+    let kp;
+    try {
+      kp = KeyPair.fromSerialized(this.data.keyPair);
+    } catch (e) {
+      console.log("invalid keypair in data:", this.data);
+      return null;
+    }
+
+    return {
+      keyPair: kp
+    };
+  }
+
   // Returns whether this password is a valid password for our encrypted data.
   // If it is valid, sets both password and data.
   async checkPassword(password) {
@@ -80,8 +101,12 @@ export default class Storage {
     return true;
   }
 
-  async setPasswordAndData(password, data) {
+  async setPasswordAndData(password, keyPair) {
     await this.init();
+
+    let data = {
+      keyPair: keyPair.serialize()
+    };
 
     let json = JSON.stringify(data);
     let iv = Cipher.makeIV();

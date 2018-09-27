@@ -23,10 +23,7 @@ async function onload() {
     if (state.password == null && state.keyPair == null) {
       storage.logOut();
     } else if (state.password != null) {
-      let data = {
-        keyPair: state.keyPair.serialize()
-      };
-      storage.setPasswordAndData(state.password, data);
+      storage.setPasswordAndData(state.password, state.keyPair);
     }
   });
 

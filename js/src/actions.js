@@ -11,27 +11,15 @@ export function logOut() {
 }
 
 export function loadFromStorage(storage) {
-  if (!storage.data) {
-    return logOut();
-  }
-
-  if (typeof storage.data != "object") {
-    console.log("bad stored data:", storage.data);
-    return logOut();
-  }
-
-  let kp;
-  try {
-    kp = KeyPair.fromSerialized(storage.data.keyPair);
-  } catch (e) {
-    console.log("invalid keypair from storage:", storage.data);
+  let data = storage.getData();
+  if (!data) {
     return logOut();
   }
 
   return {
     type: LOAD_FROM_STORAGE,
-    password: storage.password,
-    keyPair: kp
+    keyPair: data.keyPair,
+    password: storage.password
   };
 }
 
