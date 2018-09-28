@@ -26,6 +26,11 @@ export default class Client {
         return;
       }
 
+      if (event.data.popup) {
+        // TODO: show a popup here
+        return;
+      }
+
       let callback = this.callbacks[event.data.id];
       delete this.callbacks[event.data.id];
       if (!callback) {
