@@ -63,7 +63,7 @@ export default class Client {
   // Requests public key permission from the extension if we don't already have it.
   // This never returns if the permission request is not granted.
   async getPublicKey() {
-    let message = new Message("RequestPermission", {});
+    let message = new Message("RequestPermission", { publicKey: true });
     let response = await this.sendMessage(message);
   }
 
