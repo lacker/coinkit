@@ -27,7 +27,8 @@ export default class Client {
       }
 
       if (event.data.popup) {
-        // TODO: show a popup here
+        // TODO: show a popup of the extension here
+        window.open("about://blank");
         return;
       }
 
