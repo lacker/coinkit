@@ -68,7 +68,7 @@ export default class TrustedClient {
     // TODO: check permissions
 
     switch (message.type) {
-      case "RequestPermission":
+      case "Permission":
         return null;
 
       case "Query":

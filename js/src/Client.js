@@ -26,7 +26,8 @@ export default class Client {
         return;
       }
 
-      if (event.data.popup) {
+      let message = Message.fromSerialized(event.data.message);
+      if (message.type == "Permission") {
         // TODO: show a popup of the extension here
         window.open("about://blank");
         return;
@@ -38,7 +39,7 @@ export default class Client {
         return;
       }
 
-      callback(Message.fromSerialized(event.data.message));
+      callback(message);
     });
   }
 
@@ -64,7 +65,7 @@ export default class Client {
   // Requests public key permission from the extension if we don't already have it.
   // This never returns if the permission request is not granted.
   async getPublicKey() {
-    let message = new Message("RequestPermission", { publicKey: true });
+    let message = new Message("Permission", { publicKey: true });
     let response = await this.sendMessage(message);
   }
 
