@@ -10,15 +10,15 @@ export default class App extends Component {
     super(props);
 
     this.state = {
-      keyPair: null,
+      publicKey: null,
       mintBalance: null
     };
 
     this.client = new Client();
-    this.fetchMintBalance();
+    this.fetchData();
   }
 
-  async fetchMintBalance() {
+  async fetchData() {
     let mint =
       "0x32652ebe42a8d56314b8b11abf51c01916a238920c1f16db597ee87374515f4609d3";
     let query = {
@@ -28,6 +28,11 @@ export default class App extends Component {
     let balance = await this.client.query(query);
     this.setState({
       mintBalance: JSON.stringify(balance)
+    });
+
+    let pk = await this.client.getPublicKey();
+    this.setState({
+      publicKey: pk
     });
   }
 
@@ -41,8 +46,7 @@ export default class App extends Component {
       <div>
         <h1>this is the sample app</h1>
         <h1>
-          {this.state.keyPair ? this.state.keyPair.publicKey : "nobody"} is
-          logged in
+          {this.state.publicKey ? this.state.publicKey : "nobody"} is logged in
         </h1>
         <h1>
           mint balance is{" "}

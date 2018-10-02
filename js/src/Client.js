@@ -67,6 +67,8 @@ export default class Client {
   async getPublicKey() {
     let message = new Message("Permission", { publicKey: true });
     let response = await this.sendMessage(message);
+    this.publicKey = response.publicKey;
+    return this.publicKey;
   }
 
   // Sends a query message, given the query properties.
