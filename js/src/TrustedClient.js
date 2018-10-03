@@ -9,7 +9,9 @@ import Storage from "./Storage";
 
 export default class TrustedClient {
   // Create a new client with no keypair.
-  constructor() {
+  constructor(storage) {
+    this.storage = storage;
+
     chrome.runtime.onMessage.addListener(
       (serializedMessage, sender, sendResponse) => {
         if (!sender.tab) {
@@ -31,8 +33,8 @@ export default class TrustedClient {
   }
 
   // Call from the background page
-  static init() {
-    window.client = new TrustedClient();
+  static init(storage) {
+    window.client = new TrustedClient(storage);
   }
 
   // Get the global trusted client from the background page
@@ -46,8 +48,7 @@ export default class TrustedClient {
 
   // Returns null if the user is not logged in
   getKeyPair() {
-    let storage = Storage.get();
-    let data = storage.getData();
+    let data = this.storage.getData();
     if (!data) {
       return null;
     }
@@ -66,6 +67,7 @@ export default class TrustedClient {
   // Returns the message they should get back, or null if there is none.
   async handleUntrustedMessage(message, url) {
     // TODO: check permissions
+    console.log("XXX handling untrusted message:", message);
 
     switch (message.type) {
       case "Permission":

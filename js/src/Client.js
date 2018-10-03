@@ -27,6 +27,8 @@ export default class Client {
       }
 
       let message = Message.fromSerialized(event.data.message);
+      console.log("XXX got message from extension:", message);
+
       if (message.type == "Permission") {
         // TODO: show a popup of the extension here
         window.open("about://blank");
@@ -49,6 +51,7 @@ export default class Client {
   }
 
   async sendMessage(message) {
+    console.log("XXX sending message to extension:", message);
     let id = this.getMessageId();
     this.nextId++;
     let data = {

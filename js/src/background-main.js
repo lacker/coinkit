@@ -2,5 +2,5 @@
 import Storage from "./Storage";
 import TrustedClient from "./TrustedClient";
 
-TrustedClient.init();
 window.storage = new Storage();
+TrustedClient.init(window.storage);
