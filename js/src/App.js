@@ -21,7 +21,7 @@ export default class App extends Component {
     let mint =
       "0x32652ebe42a8d56314b8b11abf51c01916a238920c1f16db597ee87374515f4609d3";
     let query = {
-      Account: mint
+      account: mint
     };
 
     let response = await this.client.query(query);

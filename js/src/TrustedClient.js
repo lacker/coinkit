@@ -67,15 +67,20 @@ export default class TrustedClient {
 
   // Handles a message from an untrusted client.
   // Returns the message they should get back, or null if there is none.
+  // If the client is lacking permissions, we return a Permission message immediately.
+  // When the permissions are granted, another message should be returned with the response.
+  // XXX describe when this happens
   async handleUntrustedMessage(message, url) {
     // TODO: check permissions
-    console.log("XXX handling untrusted message:", message);
+    console.log("XXX handling untrusted message:", message, "from", url);
 
     switch (message.type) {
-      case "Permission":
-        return null;
-
       case "Query":
+        if (message.publicKey) {
+          // Queries for public key should be handled locally.
+          // XXX
+        }
+
         let response = await this.sendMessage(message);
         return response;
 
