@@ -23,7 +23,9 @@ export default class TrustedClient {
 
         this.handleUntrustedMessage(message, sender.tab.url).then(
           responseMessage => {
-            sendResponse(responseMessage.serialize());
+            if (responseMessage) {
+              sendResponse(responseMessage.serialize());
+            }
           }
         );
 
