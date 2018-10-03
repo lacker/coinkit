@@ -20,14 +20,13 @@ export default class TrustedClient {
         }
 
         let message = Message.fromSerialized(serializedMessage);
+        let host = new URL(sender.tab.url).host;
 
-        this.handleUntrustedMessage(message, sender.tab.url).then(
-          responseMessage => {
-            if (responseMessage) {
-              sendResponse(responseMessage.serialize());
-            }
+        this.handleUntrustedMessage(message, host).then(responseMessage => {
+          if (responseMessage) {
+            sendResponse(responseMessage.serialize());
           }
-        );
+        });
 
         return true;
       }
@@ -79,9 +78,9 @@ export default class TrustedClient {
   // If the client is lacking permissions, we return a NeedInteraction message immediately,
   // to tell the client to open a popup.
   // When the permissions are granted, another message should be returned with the response.
-  async handleUntrustedMessage(message, url) {
+  async handleUntrustedMessage(message, host) {
     // TODO: load the permissions object
-    console.log("XXX handling untrusted message:", message, "from", url);
+    console.log("XXX handling untrusted message:", message, "from", host);
 
     switch (message.type) {
       case "Query":
