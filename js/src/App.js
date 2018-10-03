@@ -28,7 +28,7 @@ export default class App extends Component {
     if (!response.accounts || !response.accounts[mint]) {
       console.log("bad message:", response);
     } else {
-      let balance = response.accounts[mint];
+      let balance = response.accounts[mint].balance;
       this.setState({
         mintBalance: balance
       });
