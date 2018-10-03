@@ -57,6 +57,15 @@ export default class TrustedClient {
     return data.keyPair;
   }
 
+  // Returns null if the user is not logged in
+  getPermissions() {
+    let data = this.storage.getData();
+    if (!data) {
+      return null;
+    }
+    return data.permissions;
+  }
+
   sign(message) {
     let kp = this.getKeyPair();
     if (!kp) {
@@ -67,11 +76,11 @@ export default class TrustedClient {
 
   // Handles a message from an untrusted client.
   // Returns the message they should get back, or null if there is none.
-  // If the client is lacking permissions, we return a Permission message immediately.
+  // If the client is lacking permissions, we return a NeedInteraction message immediately,
+  // to tell the client to open a popup.
   // When the permissions are granted, another message should be returned with the response.
-  // XXX describe when this happens
   async handleUntrustedMessage(message, url) {
-    // TODO: check permissions
+    // TODO: load the permissions object
     console.log("XXX handling untrusted message:", message, "from", url);
 
     switch (message.type) {
