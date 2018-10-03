@@ -24,10 +24,15 @@ export default class App extends Component {
       Account: mint
     };
 
-    let balance = await this.client.query(query);
-    this.setState({
-      mintBalance: JSON.stringify(balance)
-    });
+    let response = await this.client.query(query);
+    if (!response.accounts || !response.accounts[mint]) {
+      console.log("bad message:", response);
+    } else {
+      let balance = response.accounts[mint];
+      this.setState({
+        mintBalance: balance
+      });
+    }
 
     let pk = await this.client.getPublicKey();
     this.setState({
