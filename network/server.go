@@ -173,6 +173,9 @@ func (s *Server) handleMessage(sm *util.SignedMessage) (*util.SignedMessage, boo
 			util.Logger.Fatal("you must attach a database to handle QueryMessages")
 		}
 		dm := s.db.HandleQueryMessage(im)
+		if dm == nil {
+			return s.errorf("invalid query message"), true
+		}
 		return util.NewSignedMessage(dm, s.keyPair), true
 	}
 
