@@ -22,7 +22,11 @@ export default class Client {
     this.callbacks = {};
 
     window.addEventListener("message", event => {
-      if (event.source != window || event.data.type != "fromCoinkit") {
+      if (
+        event.source != window ||
+        event.data.type != "fromCoinkit" ||
+        !event.data.message
+      ) {
         return;
       }
 
