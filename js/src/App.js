@@ -15,7 +15,6 @@ export default class App extends Component {
     };
 
     this.client = new Client();
-    this.fetchData();
   }
 
   async fetchData() {
@@ -52,6 +51,13 @@ export default class App extends Component {
           mint balance is{" "}
           {this.state.mintBalance == null ? "unknown" : this.state.mintBalance}
         </h1>
+        <button
+          onClick={() => {
+            this.fetchData();
+          }}
+        >
+          Fetch Data
+        </button>
       </div>
     );
   }
