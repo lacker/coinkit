@@ -23,7 +23,11 @@ async function onload() {
     if (state.password == null && state.keyPair == null) {
       storage.logOut();
     } else if (state.password != null) {
-      storage.setPasswordAndData(state.password, state.keyPair);
+      storage.setPasswordAndData(
+        state.password,
+        state.keyPair,
+        state.permissions
+      );
     }
   });
 

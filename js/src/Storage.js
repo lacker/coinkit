@@ -55,9 +55,11 @@ export default class Storage {
     this.data = null;
   }
 
-  // Returns a nice form of the data.
+  // Returns a nice form of the data, an object with:
+  // keyPair: the keypair for the logged-in user
+  // permissions: an object with domain -> permissions objects
   // this.data is jsonable, getData() returns something inflated with objects.
-  // Returns null if there is no data
+  // Returns null if there is no data.
   getData() {
     if (!this.data) {
       return null;
@@ -71,7 +73,8 @@ export default class Storage {
     }
 
     return {
-      keyPair: kp
+      keyPair: kp,
+      permissions: this.data.permissions
     };
   }
 
@@ -102,11 +105,12 @@ export default class Storage {
     return true;
   }
 
-  async setPasswordAndData(password, keyPair) {
+  async setPasswordAndData(password, keyPair, permissions) {
     await this.init();
 
     let data = {
-      keyPair: keyPair.serialize()
+      keyPair: keyPair.serialize(),
+      permissions: permissions
     };
 
     let json = JSON.stringify(data);

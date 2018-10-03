@@ -19,7 +19,8 @@ export function loadFromStorage(storage) {
   return {
     type: LOAD_FROM_STORAGE,
     keyPair: data.keyPair,
-    password: storage.password
+    password: storage.password,
+    permissions: data.permissions
   };
 }
 

@@ -41,4 +41,20 @@ function keyPair(state = null, action) {
   }
 }
 
-export default combineReducers({ password, keyPair });
+function permissions(state = {}, action) {
+  switch (action.type) {
+    case LOAD_FROM_STORAGE:
+      return action.permissions;
+
+    case LOG_OUT:
+      return {};
+
+    case NEW_KEY_PAIR:
+      return {};
+
+    default:
+      return state;
+  }
+}
+
+export default combineReducers({ password, keyPair, permissions });
