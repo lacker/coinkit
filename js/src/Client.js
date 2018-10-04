@@ -76,9 +76,32 @@ export default class Client {
     });
   }
 
-  // Returns a permission message containing all the permissions.
+  // Returns whether the app has a set of permissions.
+  // It is possible that there is a race condition where permissions change between the
+  // time that permissions were stored locally and the time a request actually happens.
+  // Thus a properly written application still needs to handle the case
+  // where hasPermission returns true, but the request itself gets rejected for a
+  // permissions failure.
+  hasPermission(permissions) {
+    return hasPermission(this.permissions, permissions);
+  }
+
+  // Request the permissions that we do not already have, out of the provided set.
+  // This returns immediately if we already have the requested permissions, and creates
+  // a popup if the user needs to approve.
+  // Since it might create a popup, the application should call requestPermission as
+  // a direct response to a user action, so that the popup does not get hidden.
+  // Typically this is handling a click on a "log in" button.
+  //
+  // Returns a permission message containing all the permissions we have.
   // Throws an error if the user denies permission.
   async requestPermission(permissions) {
+    if (this.hasPermission(permissions)) {
+      return new Message("Permission", this.permissions);
+    }
+
+    // We need to prompt the user for approval
+    window.open("about://blank");
     throw new Error("XXX implement me");
   }
 

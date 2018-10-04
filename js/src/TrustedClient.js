@@ -81,6 +81,8 @@ export default class TrustedClient {
 
   // Handles a message from an untrusted client.
   // Returns the message they should get back, or null if there is none.
+  // When we reject a message because the app does not have the necessary permissions,
+  // we send back a Permission message showing the permissions the app does have.
   async handleUntrustedMessage(message, host) {
     console.log("XXX handling untrusted message:", message, "from", host);
     let permissions = this.getPermissions(host);
@@ -105,9 +107,7 @@ export default class TrustedClient {
               publicKey: this.getKeyPair().getPublicKey()
             });
           }
-          return new Message("Error", {
-            error: "" + host + " does not have public key permission"
-          });
+          return new Message("Permission", permissions);
         }
 
         let response = await this.sendMessage(message);
