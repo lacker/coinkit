@@ -1,5 +1,6 @@
 import KeyPair from "./KeyPair";
 import Message from "./Message";
+import { missingPermissions, hasPermission } from "./permission.js";
 import SignedMessage from "./SignedMessage";
 import Storage from "./Storage";
 
@@ -85,22 +86,38 @@ export default class TrustedClient {
     let permissions = this.getPermissions(host);
 
     switch (message.type) {
+      case "RequestPermission":
+        if (hasPermission(permissions, message)) {
+          // The app already has the requested permissions
+          return new Message("Permission", permissions);
+        }
+        // XXX: arrange to return a new permissions object later
+        console.log(
+          "XXX the extension realizes we need to prompt for permissions"
+        );
+        return null;
+
       case "Query":
+        // Handle public key queries locally
         if (message.publicKey) {
           if (permissions.publicKey) {
             return new Message("Data", {
               publicKey: this.getKeyPair().getPublicKey()
             });
-          } else {
-            return new Message("NeedPermission");
           }
+          return new Message("Error", {
+            error: "" + host + " does not have public key permission"
+          });
         }
 
         let response = await this.sendMessage(message);
         return response;
 
       default:
-        console.log("unexpected message type:", message.type);
+        console.log(
+          "the client sent an unexpected message type:",
+          message.type
+        );
         return null;
     }
   }

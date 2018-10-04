@@ -1,4 +1,5 @@
 import Message from "./Message";
+import { missingPermissions, hasPermission } from "./permission.js";
 
 // Client is designed to be included in applications and run in an untrusted application
 // environment. It gets permissions by requesting them from the extension, whose code
@@ -12,6 +13,9 @@ import Message from "./Message";
 // id: a random id string specifying this message
 // type: either "toCoinkit" or "fromCoinkit" for whether it is upstream or downstream
 // message: a serialized blockchain message
+//
+// When the extension sends a response message, it includes the same id as the message
+// that it was responding to.
 
 export default class Client {
   constructor() {
@@ -20,6 +24,11 @@ export default class Client {
 
     // Callbacks are keyed by message id
     this.callbacks = {};
+
+    // We store the most recent permission message we received from the extension.
+    // XXX: on startup, initialize this
+    // Before we receive any permission message, we just assume we have no permissions.
+    this.permissions = new Message("Permission");
 
     window.addEventListener("message", event => {
       if (
@@ -33,10 +42,8 @@ export default class Client {
       let message = Message.fromSerialized(event.data.message);
       console.log("XXX got message from extension:", message);
 
-      if (message.type == "NeedPermission") {
-        // The extension needs to interact with the user to continue
-        // TODO: show a popup of the extension here
-        return;
+      if (message.type == "Permission") {
+        this.permissions = message;
       }
 
       let callback = this.callbacks[event.data.id];
@@ -69,9 +76,18 @@ export default class Client {
     });
   }
 
+  // Returns a permission message containing all the permissions.
+  // Throws an error if the user denies permission.
+  async requestPermission(permissions) {
+    throw new Error("XXX implement me");
+  }
+
   // Requests public key permission from the extension if we don't already have it.
-  // This never returns if the permission request is not granted.
+  // Throws an error if the user denies permission.
   async getPublicKey() {
+    if (!hasPermission(this.permissions, { publicKey: true })) {
+      await this.requestPermission({ publicKey: true });
+    }
     let message = new Message("Query", { publicKey: true });
     let response = await this.sendMessage(message);
     this.publicKey = response.publicKey;
