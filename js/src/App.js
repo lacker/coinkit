@@ -17,9 +17,12 @@ export default class App extends Component {
     this.client = new Client();
   }
 
-  async fetchData() {
-    window.open("about://blank");
+  fetchData() {
+    this.fetchBalance();
+    this.fetchPublicKey();
+  }
 
+  async fetchBalance() {
     let mint =
       "0x32652ebe42a8d56314b8b11abf51c01916a238920c1f16db597ee87374515f4609d3";
     let query = {
@@ -35,7 +38,9 @@ export default class App extends Component {
         mintBalance: balance
       });
     }
+  }
 
+  async fetchPublicKey() {
     let pk = await this.client.getPublicKey();
     this.setState({
       publicKey: pk
