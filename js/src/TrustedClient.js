@@ -56,13 +56,18 @@ export default class TrustedClient {
     return data.keyPair;
   }
 
-  // Returns null if the user is not logged in
-  getPermissions() {
+  // Returns an empty object if there are no permissions for this host, including
+  // if the user is not logged in.
+  getPermissions(host) {
     let data = this.storage.getData();
     if (!data) {
-      return null;
+      return {};
     }
-    return data.permissions;
+    let answer = data.permissions[host];
+    if (!answer) {
+      return {};
+    }
+    return answer;
   }
 
   sign(message) {
@@ -75,18 +80,20 @@ export default class TrustedClient {
 
   // Handles a message from an untrusted client.
   // Returns the message they should get back, or null if there is none.
-  // If the client is lacking permissions, we return a NeedInteraction message immediately,
-  // to tell the client to open a popup.
-  // When the permissions are granted, another message should be returned with the response.
   async handleUntrustedMessage(message, host) {
-    // TODO: load the permissions object
     console.log("XXX handling untrusted message:", message, "from", host);
+    let permissions = this.getPermissions(host);
 
     switch (message.type) {
       case "Query":
         if (message.publicKey) {
-          // Queries for public key should be handled locally.
-          // XXX
+          if (permissions.publicKey) {
+            return new Message("Data", {
+              publicKey: this.getKeyPair().getPublicKey()
+            });
+          } else {
+            return new Message("NeedPermission");
+          }
         }
 
         let response = await this.sendMessage(message);

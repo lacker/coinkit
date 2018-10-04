@@ -1,6 +1,6 @@
 // Used to communicate with the blockchain
 export default class Message {
-  constructor(type, properties) {
+  constructor(type, properties = {}) {
     this.type = type;
     this._serialized = JSON.stringify({
       type,

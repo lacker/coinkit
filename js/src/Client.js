@@ -33,10 +33,9 @@ export default class Client {
       let message = Message.fromSerialized(event.data.message);
       console.log("XXX got message from extension:", message);
 
-      if (message.type == "NeedInteraction") {
+      if (message.type == "NeedPermission") {
         // The extension needs to interact with the user to continue
         // TODO: show a popup of the extension here
-        window.open("about://blank");
         return;
       }
 
