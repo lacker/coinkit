@@ -101,7 +101,7 @@ export default class Client {
     }
 
     // We need to prompt the user for approval
-    window.open("about://blank");
+    window.open("about://blank", "", "height=500,width=500");
     throw new Error("XXX implement me");
   }
 
