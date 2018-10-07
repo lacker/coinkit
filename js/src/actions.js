@@ -1,10 +1,18 @@
 // Redux actions
 import KeyPair from "./KeyPair";
 
+export const GRANT_PERMISSION = "GRANT_PERMISSION";
 export const LOAD_FROM_STORAGE = "LOAD_FROM_STORAGE";
 export const LOG_OUT = "LOG_OUT";
 export const NEW_KEY_PAIR = "NEW_KEY_PAIR";
 export const NEW_PASSWORD = "NEW_PASSWORD";
+
+export function grantPermission(permission) {
+  return {
+    type: GRANT_PERMISSION,
+    permission: permission
+  };
+}
 
 export function logOut() {
   return { type: LOG_OUT };
