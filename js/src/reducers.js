@@ -1,5 +1,6 @@
 import { combineReducers } from "redux";
 import {
+  GRANT_PERMISSION,
   LOAD_FROM_STORAGE,
   LOG_OUT,
   NEW_KEY_PAIR,
@@ -43,6 +44,10 @@ function keyPair(state = null, action) {
 
 function permissions(state = {}, action) {
   switch (action.type) {
+    case GRANT_PERMISSION:
+      // TODO: something more sane, like a diff
+      return action.permissions;
+
     case LOAD_FROM_STORAGE:
       return action.permissions;
 
