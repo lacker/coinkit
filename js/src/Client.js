@@ -100,9 +100,18 @@ export default class Client {
       return new Message("Permission", this.permissions);
     }
 
+    console.log("XXX url", document.coinkitURL);
+
     // We need to prompt the user for approval
-    window.open("about://blank", "", "height=500,width=500");
-    throw new Error("XXX implement me");
+    window.open(
+      document.coinkitURL,
+      "",
+      "height=500,width=500,top=100,left=100"
+    );
+
+    return await this.sendMessage(
+      new Message("RequestPermission", permissions)
+    );
   }
 
   // Requests public key permission from the extension if we don't already have it.
