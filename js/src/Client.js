@@ -26,9 +26,11 @@ export default class Client {
     this.callbacks = {};
 
     // We store the most recent permission message we received from the extension.
-    // XXX: on startup, initialize this
     // Before we receive any permission message, we just assume we have no permissions.
-    this.permissions = new Message("Permission");
+    this.permissions = {};
+
+    // Where to ask about new permissions
+    this.popupURL = null;
 
     window.addEventListener("message", event => {
       if (
@@ -43,7 +45,8 @@ export default class Client {
       console.log("XXX got message from extension:", message);
 
       if (message.type == "Permission") {
-        this.permissions = message;
+        this.permissions = message.permissions;
+        this.popupURL = message.popupURL;
       }
 
       let callback = this.callbacks[event.data.id];
@@ -54,6 +57,9 @@ export default class Client {
 
       callback(message);
     });
+
+    // Initialize the permissions by asking the extension for what we have
+    this.sendMessage(new Message("RequestPermission", { permissions: {} }));
   }
 
   // Each browser message has an id
@@ -97,20 +103,25 @@ export default class Client {
   // Throws an error if the user denies permission.
   async requestPermission(permissions) {
     if (this.hasPermission(permissions)) {
-      return new Message("Permission", this.permissions);
+      return new Message("Permission", { permissions: this.permissions });
     }
 
-    console.log("XXX url", document.coinkitURL);
+    if (!this.popupURL) {
+      return new Message("Error", {
+        error: "Client popupURL was not initialized"
+      });
+    }
 
     // We need to prompt the user for approval
+    console.log("XXX popupping", this.popupURL);
     window.open(
-      document.coinkitURL,
+      "chrome-extension://dglloakjckepmncinpmjffgdejcifakl/popup.html",
       "",
       "height=500,width=500,top=100,left=100"
     );
 
     return await this.sendMessage(
-      new Message("RequestPermission", permissions)
+      new Message("RequestPermission", { permissions: permissions })
     );
   }
 

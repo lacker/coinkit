@@ -22,5 +22,8 @@
   "content_scripts": [{
     "matches": ["*://*/*"],
     "js": ["content-main.js"]
-  }]
+  }],
+  "web_accessible_resources": [
+    "popup.html"
+  ]
 }

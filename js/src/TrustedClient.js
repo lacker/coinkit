@@ -91,7 +91,10 @@ export default class TrustedClient {
       case "RequestPermission":
         if (hasPermission(permissions, message)) {
           // The app already has the requested permissions
-          return new Message("Permission", permissions);
+          return new Message("Permission", {
+            permissions: permissions,
+            popupURL: chrome.runtime.getURL("popup.html")
+          });
         }
         // XXX: arrange to return a new permissions object later
         console.log(
@@ -107,7 +110,9 @@ export default class TrustedClient {
               publicKey: this.getKeyPair().getPublicKey()
             });
           }
-          return new Message("Permission", permissions);
+
+          // Reject because we don't have the permissions
+          return new Message("Error", { error: "Missing permission" });
         }
 
         let response = await this.sendMessage(message);
