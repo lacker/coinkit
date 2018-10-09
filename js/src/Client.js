@@ -117,7 +117,7 @@ export default class Client {
     window.open(
       "chrome-extension://dglloakjckepmncinpmjffgdejcifakl/popup.html",
       "",
-      "height=500,width=500,top=100,left=100"
+      "height=580,width=376,top=100,left=100"
     );
 
     return await this.sendMessage(
