@@ -25,8 +25,11 @@ export default class TrustedClient {
         let message = Message.fromSerialized(serializedMessage);
         let host = new URL(sender.tab.url).host;
 
+        console.log("XXX handling message from", host);
         this.handleUntrustedMessage(message, host).then(responseMessage => {
+          console.log("XXX hUM returned");
           if (responseMessage) {
+            console.log("XXX responding to", host);
             sendResponse(responseMessage.serialize());
           }
         });
@@ -97,6 +100,8 @@ export default class TrustedClient {
     }
 
     // Add a request for these permissions
+    // The redux store is used only to manipulate our storage in a
+    // consistent way
     let store = await Storage.makeStore();
     store.dispatch(requestPermission(host, requested));
 
@@ -108,20 +113,24 @@ export default class TrustedClient {
       if (ms > 1000 * 60 * 10) {
         break;
       }
-      let store = await Storage.makeStore();
-      if (!store.getState().request) {
+      let data = this.storage.getData();
+      if (data && !data.request) {
         break;
       }
     }
 
+    console.log("XXX user interaction detected. data:", this.storage.getData());
+
     permissions = this.getPermissions(host);
     if (hasPermission(permissions, requested)) {
+      console.log("XXX granted");
       // The user granted the requested permissions
       return new Message("Permission", {
         permissions: permissions,
         popupURL: chrome.runtime.getURL("popup.html")
       });
     } else {
+      console.log("XXX rejected");
       // The user rejected the requested permissions
       return null;
     }
@@ -134,14 +143,7 @@ export default class TrustedClient {
 
     switch (message.type) {
       case "RequestPermission":
-        return this.handleRequestPermission(host, message.permissions);
-
-        let answer = this.alreadyHasPermission(message);
-        if (!answer) {
-          let store = await Storage.makeStore();
-          store.dispatch(requestPermission(host, message.permissions));
-        }
-        return answer;
+        return await this.handleRequestPermission(host, message.permissions);
 
       case "Query":
         // Handle public key queries locally

@@ -47,13 +47,15 @@ function keyPair(state = null, action) {
 function permissions(state = {}, action) {
   switch (action.type) {
     case GRANT_PERMISSION:
-      let answer = {};
-      for (let key in state) {
-        answer[key] = state[key];
-      }
-      for (let key in action.permissions) {
-        answer[key] = action.permissions[key];
-      }
+      let hostPermissions = {} || state[action.host];
+      let answer = Object.assign({}, state);
+      answer[action.host] = Object.assign(
+        {},
+        hostPermissions,
+        action.permissions
+      );
+
+      console.log("XXX granting permissions", action, "->", answer);
       return answer;
 
     case LOAD_FROM_STORAGE:

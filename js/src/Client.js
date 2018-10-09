@@ -126,6 +126,7 @@ export default class Client {
     if (!hasPermission(this.permissions, { publicKey: true })) {
       await this.requestPermission({ publicKey: true });
     }
+    console.log("XXX permission acquired");
     let message = new Message("Query", { publicKey: true });
     let response = await this.sendMessage(message);
     this.publicKey = response.publicKey;
