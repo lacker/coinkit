@@ -104,7 +104,8 @@ export default class Storage {
 
     return {
       keyPair: kp,
-      permissions: this.data.permissions
+      permissions: this.data.permissions,
+      request: this.data.request
     };
   }
 
@@ -155,6 +156,8 @@ export default class Storage {
     };
     this.data = data;
     this.password = password;
+
+    console.log("XXX saving data:", data);
 
     await setLocalStorage("encrypted", this.encrypted);
   }

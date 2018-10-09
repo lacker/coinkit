@@ -41,6 +41,8 @@ export function loadFromStorage(storage) {
     return logOut();
   }
 
+  console.log("XXX loading data:", data);
+
   return {
     type: LOAD_FROM_STORAGE,
     keyPair: data.keyPair,
