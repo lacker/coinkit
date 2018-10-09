@@ -87,7 +87,6 @@ export default class TrustedClient {
   // If we already have permissions for this RequestPermission
   // message, return a Permission message saying so.
   // If we do not, wait until we do, before returning the message.
-  // TODO: add a time limit
   async handleRequestPermission(host, requested) {
     let permissions = this.getPermissions(host);
 
