@@ -113,12 +113,7 @@ export default class Client {
     }
 
     // We need to prompt the user for approval
-    console.log("XXX popupping", this.popupURL);
-    window.open(
-      "chrome-extension://dglloakjckepmncinpmjffgdejcifakl/popup.html",
-      "",
-      "height=580,width=376,top=100,left=100"
-    );
+    window.open(this.popupURL, "", "height=580,width=376,top=100,left=100");
 
     return await this.sendMessage(
       new Message("RequestPermission", { permissions: permissions })
