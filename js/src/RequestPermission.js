@@ -38,12 +38,12 @@ export default class RequestPermission extends Component {
           <h2>{this.props.host} requests:</h2>
           <ol>
             {this.permissionList().map(x => (
-              <li>{x}</li>
+              <li key={x}>{x}</li>
             ))}
           </ol>
         </div>
 
-        <form
+        <div
           style={{
             flex: 2,
             display: "flex",
@@ -53,13 +53,11 @@ export default class RequestPermission extends Component {
           }}
           onSubmit={event => {
             event.preventDefault();
-            this.handleInput();
           }}
         >
           <Button
             variant="contained"
             color="primary"
-            type="submit"
             onClick={() => this.props.accept()}
           >
             Accept
@@ -71,7 +69,7 @@ export default class RequestPermission extends Component {
           >
             Deny
           </Button>
-        </form>
+        </div>
       </div>
     );
   }
