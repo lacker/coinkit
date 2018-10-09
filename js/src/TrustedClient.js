@@ -25,11 +25,8 @@ export default class TrustedClient {
         let message = Message.fromSerialized(serializedMessage);
         let host = new URL(sender.tab.url).host;
 
-        console.log("XXX handling message from", host);
         this.handleUntrustedMessage(message, host).then(responseMessage => {
-          console.log("XXX hUM returned");
           if (responseMessage) {
-            console.log("XXX responding to", host);
             sendResponse(responseMessage.serialize());
           }
         });
@@ -118,18 +115,14 @@ export default class TrustedClient {
       }
     }
 
-    console.log("XXX user interaction detected. data:", this.storage.getData());
-
     permissions = this.getPermissions(host);
     if (hasPermission(permissions, requested)) {
-      console.log("XXX granted");
       // The user granted the requested permissions
       return new Message("Permission", {
         permissions: permissions,
         popupURL: chrome.runtime.getURL("popup.html")
       });
     } else {
-      console.log("XXX rejected");
       // The user rejected the requested permissions
       return null;
     }

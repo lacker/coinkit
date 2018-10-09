@@ -55,7 +55,6 @@ function permissions(state = {}, action) {
         action.permissions
       );
 
-      console.log("XXX granting permissions", action, "->", answer);
       return answer;
 
     case LOAD_FROM_STORAGE:

@@ -42,7 +42,6 @@ export default class Client {
       }
 
       let message = Message.fromSerialized(event.data.message);
-      console.log("XXX got message from extension:", message);
 
       if (message.type == "Permission") {
         this.permissions = message.permissions;
@@ -68,7 +67,6 @@ export default class Client {
   }
 
   async sendMessage(message) {
-    console.log("XXX sending message to extension:", message);
     let id = this.getMessageId();
     this.nextId++;
     let data = {
@@ -126,7 +124,6 @@ export default class Client {
     if (!hasPermission(this.permissions, { publicKey: true })) {
       await this.requestPermission({ publicKey: true });
     }
-    console.log("XXX permission acquired");
     let message = new Message("Query", { publicKey: true });
     let response = await this.sendMessage(message);
     this.publicKey = response.publicKey;
