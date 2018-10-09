@@ -1,6 +1,8 @@
 import { combineReducers } from "redux";
 import {
+  DENY_PERMISSION,
   GRANT_PERMISSION,
+  REQUEST_PERMISSION,
   LOAD_FROM_STORAGE,
   LOG_OUT,
   NEW_KEY_PAIR,
@@ -45,8 +47,14 @@ function keyPair(state = null, action) {
 function permissions(state = {}, action) {
   switch (action.type) {
     case GRANT_PERMISSION:
-      // TODO: something more sane, like a diff
-      return action.permissions;
+      let answer = {};
+      for (let key in state) {
+        answer[key] = state[key];
+      }
+      for (let key in action.permissions) {
+        answer[key] = action.permissions[key];
+      }
+      return answer;
 
     case LOAD_FROM_STORAGE:
       return action.permissions;
@@ -62,4 +70,23 @@ function permissions(state = {}, action) {
   }
 }
 
-export default combineReducers({ password, keyPair, permissions });
+// The 'request' field holds an object with host + the permissions
+// that are being requested, or null if there are none.
+function request(state = null, action) {
+  switch (action.type) {
+    case DENY_PERMISSION:
+      return null;
+    case GRANT_PERMISSION:
+      return null;
+    case REQUEST_PERMISSION:
+      return {
+        host: action.host,
+        permissions: action.permissions
+      };
+
+    case LOAD_FROM_STORAGE:
+      return action.request;
+  }
+}
+
+export default combineReducers({ password, keyPair, permissions, request });

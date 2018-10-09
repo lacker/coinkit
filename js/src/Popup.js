@@ -7,11 +7,19 @@ import Button from "@material-ui/core/Button";
 import KeyPair from "./KeyPair";
 import Login from "./Login";
 import NewPassword from "./NewPassword";
+import RequestPermission from "./RequestPermission";
 import Status from "./Status";
 import Storage from "./Storage";
 import TrustedClient from "./TrustedClient";
 
-import { loadFromStorage, logOut, newKeyPair, newPassword } from "./actions";
+import {
+  loadFromStorage,
+  logOut,
+  newKeyPair,
+  newPassword,
+  denyPermission,
+  grantPermission
+} from "./actions";
 
 class Popup extends Component {
   constructor(props) {
@@ -45,7 +53,6 @@ class Popup extends Component {
   }
 
   render() {
-    console.log("XXX render popup");
     let style = {
       display: "flex",
       alignSelf: "stretch",
@@ -70,6 +77,26 @@ class Popup extends Component {
       );
     }
 
+    if (this.props.request) {
+      let host = this.props.request.host;
+      let permissions = this.props.request.permissions;
+      // The app is requesting permissions
+      return (
+        <div style={style}>
+          <RequestPermission
+            host={host}
+            permissions={permissions}
+            accept={() => {
+              this.props.dispatch(grantPermission(host, permissions));
+            }}
+            deny={() => {
+              this.props.dispatch(denyPermission());
+            }}
+          />
+        </div>
+      );
+    }
+
     // We have permissions for an account, so show its status
     return (
       <div style={style}>
@@ -82,7 +109,8 @@ class Popup extends Component {
 function mapStateToProps(state) {
   return {
     password: state.password,
-    keyPair: state.keyPair
+    keyPair: state.keyPair,
+    request: state.request
   };
 }
 

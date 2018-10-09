@@ -1,12 +1,14 @@
 import KeyPair from "./KeyPair";
 import Message from "./Message";
-import { missingPermissions, hasPermission } from "./permission.js";
+import { requestPermission } from "./actions";
+import { missingPermissions, hasPermission } from "./permission";
 import SignedMessage from "./SignedMessage";
 import Storage from "./Storage";
 
 // A trusted client that handles interaction with the blockchain nodes.
 // This client is trusted in the sense that it holds the user's keypair.
 // This object is therefore only kept by the extension.
+// A single TrustedClient should exist, in the scope of the background page.
 
 export default class TrustedClient {
   // Create a new client with no keypair.
@@ -79,28 +81,67 @@ export default class TrustedClient {
     return SignedMessage.fromSigning(message, kp);
   }
 
+  // If we already have permissions for this RequestPermission
+  // message, return a Permission message saying so.
+  // If we do not, wait until we do, before returning the message.
+  // TODO: add a time limit
+  async handleRequestPermission(host, requested) {
+    let permissions = this.getPermissions(host);
+
+    if (hasPermission(permissions, requested)) {
+      // The app already has the requested permissions
+      return new Message("Permission", {
+        permissions: permissions,
+        popupURL: chrome.runtime.getURL("popup.html")
+      });
+    }
+
+    // Add a request for these permissions
+    let store = await Storage.makeStore();
+    store.dispatch(requestPermission(host, requested));
+
+    // Wait for the user to either accept or deny, or for ten minutes
+    let start = new Date();
+    while (true) {
+      await sleep(500);
+      let ms = new Date() - start;
+      if (ms > 1000 * 60 * 10) {
+        break;
+      }
+      let store = await Storage.makeStore();
+      if (!store.getState().request) {
+        break;
+      }
+    }
+
+    permissions = this.getPermissions(host);
+    if (hasPermission(permissions, requested)) {
+      // The user granted the requested permissions
+      return new Message("Permission", {
+        permissions: permissions,
+        popupURL: chrome.runtime.getURL("popup.html")
+      });
+    } else {
+      // The user rejected the requested permissions
+      return null;
+    }
+  }
+
   // Handles a message from an untrusted client.
   // Returns the message they should get back, or null if there is none.
-  // When we reject a message because the app does not have the necessary permissions,
-  // we send back a Permission message showing the permissions the app does have.
   async handleUntrustedMessage(message, host) {
-    console.log("XXX handling untrusted message:", message, "from", host);
     let permissions = this.getPermissions(host);
 
     switch (message.type) {
       case "RequestPermission":
-        if (hasPermission(permissions, message)) {
-          // The app already has the requested permissions
-          return new Message("Permission", {
-            permissions: permissions,
-            popupURL: chrome.runtime.getURL("popup.html")
-          });
+        return this.handleRequestPermission(host, message.permissions);
+
+        let answer = this.alreadyHasPermission(message);
+        if (!answer) {
+          let store = await Storage.makeStore();
+          store.dispatch(requestPermission(host, message.permissions));
         }
-        // XXX: arrange to return a new permissions object later
-        console.log(
-          "XXX the extension realizes we need to prompt for permissions"
-        );
-        return null;
+        return answer;
 
       case "Query":
         // Handle public key queries locally
@@ -173,4 +214,8 @@ export default class TrustedClient {
     }
     return account.balance;
   }
+}
+
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
 }

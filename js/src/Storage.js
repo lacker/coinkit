@@ -4,8 +4,12 @@
 // A Storage object should only be created from the background page, because it
 // stores encryption keys in memory, and thus should be as persistent as possible.
 
+import { createStore } from "redux";
+
 import Cipher from "./Cipher";
 import KeyPair from "./KeyPair";
+import { loadFromStorage } from "./actions";
+import reducers from "./reducers";
 
 export default class Storage {
   constructor() {
@@ -47,6 +51,32 @@ export default class Storage {
     }
     await storage.init();
     return storage;
+  }
+
+  // Makes a redux store that is persisted using this storage object
+  static async makeStore() {
+    // Each popup gets its own redux store object.
+    // I tried to let them share one but ran into weird bugs.
+    let store = createStore(reducers);
+    let storage = await Storage.get();
+    store.dispatch(loadFromStorage(storage));
+
+    // Save all state updates when there is a password set to retrieve them
+    store.subscribe(() => {
+      let state = store.getState();
+      if (state.password == null && state.keyPair == null) {
+        storage.logOut();
+      } else if (state.password != null) {
+        storage.setPasswordAndData(
+          state.password,
+          state.keyPair,
+          state.permissions,
+          state.request
+        );
+      }
+    });
+
+    return store;
   }
 
   // Drops the password and decrypted data
@@ -105,12 +135,13 @@ export default class Storage {
     return true;
   }
 
-  async setPasswordAndData(password, keyPair, permissions) {
+  async setPasswordAndData(password, keyPair, permissions, request) {
     await this.init();
 
     let data = {
       keyPair: keyPair.serialize(),
-      permissions: permissions
+      permissions: permissions,
+      request: request
     };
 
     let json = JSON.stringify(data);
