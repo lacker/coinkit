@@ -18,7 +18,7 @@ export default class App extends Component {
   }
 
   fetchData() {
-    this.fetchBalance();
+    // this.fetchBalance();
     this.fetchPublicKey();
   }
 

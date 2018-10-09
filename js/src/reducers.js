@@ -86,6 +86,9 @@ function request(state = null, action) {
 
     case LOAD_FROM_STORAGE:
       return action.request;
+
+    default:
+      return state;
   }
 }
 
