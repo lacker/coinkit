@@ -39,6 +39,15 @@ class Popup extends Component {
     this.props.dispatch(newPassword(password));
   }
 
+  // Closes the page if it ends in ?request
+  finishRequest() {
+    let parts = window.location.href.split("?");
+    console.log("XXX parts:", parts);
+    if (parts.length == 2 && parts[1] == "request") {
+      console.log("XXX close the page");
+    }
+  }
+
   // Tries to load a stored keypair given the password that protects it.
   // Returns whether the password was valid
   async checkPassword(password) {
@@ -88,9 +97,11 @@ class Popup extends Component {
             permissions={permissions}
             accept={() => {
               this.props.dispatch(grantPermission(host, permissions));
+              this.finishRequest();
             }}
             deny={() => {
               this.props.dispatch(denyPermission());
+              this.finishRequest();
             }}
           />
         </div>
