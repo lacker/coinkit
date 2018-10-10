@@ -1,7 +1,5 @@
 // This code runs in our content script, in the context of every web page.
 
-let coinkitURL = chrome.runtime.getURL("popup.html");
-
 window.addEventListener(
   "message",
   event => {
