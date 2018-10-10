@@ -42,9 +42,7 @@ class Popup extends Component {
   // Closes the page if it ends in ?request
   finishRequest() {
     let parts = window.location.href.split("?");
-    console.log("XXX parts:", parts);
     if (parts.length == 2 && parts[1] == "request") {
-      console.log("XXX close the page");
       window.close();
     }
   }
