@@ -59,7 +59,6 @@ export default class Storage {
 
   async handleStoreUpdate(store) {
     let state = store.getState();
-    console.log("XXX saving state", state);
     this.request = state.request;
 
     if (state.password == null && state.keyPair == null) {
@@ -82,11 +81,8 @@ export default class Storage {
     let action = loadFromStorage(storage);
     store.dispatch(action);
 
-    console.log("XXX making store with state:", store.getState());
-
     // Save all state updates when there is a password set to retrieve them
     store.subscribe(() => {
-      console.log("XXX storage:", storage);
       storage.handleStoreUpdate(store);
     });
 

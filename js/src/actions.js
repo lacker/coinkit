@@ -46,7 +46,6 @@ export function loadFromStorage(storage) {
     request: storage.request
   };
 
-  console.log("XXX loading:", action);
   return action;
 }
 
