@@ -98,8 +98,10 @@ export default class TrustedClient {
     // Add a request for these permissions
     // The redux store is used only to manipulate our storage in a
     // consistent way
+    console.log("XXX adding request");
     let store = await Storage.makeStore();
     store.dispatch(requestPermission(host, requested));
+    console.log("XXX added request");
 
     // Wait for the user to either accept or deny, or for ten minutes
     let start = new Date();
@@ -109,8 +111,7 @@ export default class TrustedClient {
       if (ms > 1000 * 60 * 10) {
         break;
       }
-      let data = this.storage.getData();
-      if (data && !data.request) {
+      if (!this.storage.request) {
         break;
       }
     }

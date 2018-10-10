@@ -36,18 +36,18 @@ export function logOut() {
 }
 
 export function loadFromStorage(storage) {
-  let data = storage.getData();
-  if (!data) {
-    return logOut();
-  }
+  let data = storage.getData() || {};
 
-  return {
+  let action = {
     type: LOAD_FROM_STORAGE,
-    keyPair: data.keyPair,
-    password: storage.password,
-    permissions: data.permissions,
-    request: data.request
+    keyPair: data.keyPair || null,
+    password: data.password || null,
+    permissions: data.permissions || {},
+    request: storage.request
   };
+
+  console.log("XXX loading:", action);
+  return action;
 }
 
 export function newKeyPair(kp) {
