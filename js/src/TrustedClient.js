@@ -87,11 +87,13 @@ export default class TrustedClient {
   async handleRequestPermission(host, requested) {
     let permissions = this.getPermissions(host);
 
+    let popupURL = chrome.runtime.getURL("popup.html?request");
+
     if (hasPermission(permissions, requested)) {
       // The app already has the requested permissions
       return new Message("Permission", {
         permissions: permissions,
-        popupURL: chrome.runtime.getURL("popup.html")
+        popupURL: popupURL
       });
     }
 
@@ -119,7 +121,7 @@ export default class TrustedClient {
       // The user granted the requested permissions
       return new Message("Permission", {
         permissions: permissions,
-        popupURL: chrome.runtime.getURL("popup.html")
+        popupURL: popupURL
       });
     } else {
       // The user rejected the requested permissions
