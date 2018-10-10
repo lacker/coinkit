@@ -45,6 +45,7 @@ class Popup extends Component {
     console.log("XXX parts:", parts);
     if (parts.length == 2 && parts[1] == "request") {
       console.log("XXX close the page");
+      window.close();
     }
   }
 
