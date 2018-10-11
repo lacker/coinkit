@@ -41,7 +41,7 @@ export function loadFromStorage(storage) {
   let action = {
     type: LOAD_FROM_STORAGE,
     keyPair: data.keyPair || null,
-    password: data.password || null,
+    password: storage.password,
     permissions: data.permissions || {},
     request: storage.request
   };

@@ -12,7 +12,9 @@ import { loadFromStorage } from "./actions";
 import reducers from "./reducers";
 
 export default class Storage {
-  constructor() {
+  constructor(local) {
+    this.local = local;
+
     // encrypted should be an object holding iv, salt, and ciphertext keys.
     this.encrypted = null;
 
@@ -33,7 +35,7 @@ export default class Storage {
       return;
     }
 
-    this.encrypted = await getLocalStorage("encrypted");
+    this.encrypted = await this.local.get("encrypted");
     if (
       typeof this.encrypted != "object" ||
       !this.encrypted.iv ||
@@ -59,6 +61,7 @@ export default class Storage {
 
   async handleStoreUpdate(store) {
     let state = store.getState();
+    console.log("XXX state updated:", state);
     this.request = state.request;
 
     if (state.password == null && state.keyPair == null) {
@@ -79,6 +82,7 @@ export default class Storage {
     let store = createStore(reducers);
     let storage = await Storage.get();
     let action = loadFromStorage(storage);
+    console.log("XXX loading from storage:", action);
     store.dispatch(action);
 
     // Save all state updates when there is a password set to retrieve them
@@ -165,24 +169,6 @@ export default class Storage {
     this.data = data;
     this.password = password;
 
-    await setLocalStorage("encrypted", this.encrypted);
+    await this.local.set("encrypted", this.encrypted);
   }
-}
-
-// A helper to fetch local storage and return a promise
-// Resolves to null if there is no data but the fetch worked
-async function getLocalStorage(key) {
-  return new Promise((resolve, reject) => {
-    chrome.storage.local.get([key], result => {
-      resolve(result[key]);
-    });
-  });
-}
-
-async function setLocalStorage(key, value) {
-  return new Promise((resolve, reject) => {
-    chrome.storage.local.set({ key, value }, () => {
-      resolve();
-    });
-  });
 }
