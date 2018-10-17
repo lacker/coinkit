@@ -51,7 +51,7 @@ class Popup extends Component {
   // Returns whether the password was valid
   async checkPassword(password) {
     let storage = await Storage.get();
-    let ok = await storage.checkPassword(password);
+    let ok = storage.checkPassword(password);
     if (!ok) {
       console.log("bad password:", password);
       return false;

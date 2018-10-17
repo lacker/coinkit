@@ -3,6 +3,14 @@ export default class MockLocalStorage {
     this.data = {};
   }
 
+  numKeys() {
+    let answer = 0;
+    for (let key in this.data) {
+      answer++;
+    }
+    return answer;
+  }
+
   async get(key) {
     if (!(key in this.data)) {
       return null;

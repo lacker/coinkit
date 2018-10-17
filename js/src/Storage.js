@@ -32,11 +32,12 @@ export default class Storage {
   // Before it is initialized, we shouldn't write to it.
   async init() {
     if (this.initialized) {
-      return;
+      throw new Error("multiple storage init");
     }
 
     this.encrypted = await this.local.get("encrypted");
     if (
+      !this.encrypted ||
       typeof this.encrypted != "object" ||
       !this.encrypted.iv ||
       !this.encrypted.salt ||
@@ -58,13 +59,14 @@ export default class Storage {
     if (!storage) {
       throw new Error("cannot find storage");
     }
-    await storage.init();
+    if (!storage.initialized) {
+      await storage.init();
+    }
     return storage;
   }
 
   async handleStoreUpdate(store) {
     let state = store.getState();
-    console.log("XXX state updated:", state);
     this.request = state.request;
 
     if (state.password == null && state.keyPair == null) {
@@ -85,12 +87,11 @@ export default class Storage {
     let store = createStore(reducers);
     let storage = await Storage.get();
     let action = loadFromStorage(storage);
-    console.log("XXX loading from storage:", action);
     store.dispatch(action);
 
     // Save all state updates when there is a password set to retrieve them
-    store.subscribe(() => {
-      storage.handleStoreUpdate(store);
+    store.subscribe(async () => {
+      await storage.handleStoreUpdate(store);
     });
 
     return store;
@@ -127,9 +128,7 @@ export default class Storage {
 
   // Returns whether this password is a valid password for our encrypted data.
   // If it is valid, sets both password and data.
-  async checkPassword(password) {
-    await this.init();
-
+  checkPassword(password) {
     if (!this.encrypted) {
       return false;
     }
@@ -153,8 +152,6 @@ export default class Storage {
   }
 
   async setPasswordAndData(password, keyPair, permissions) {
-    await this.init();
-
     let data = {
       keyPair: keyPair.serialize(),
       permissions: permissions

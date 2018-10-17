@@ -43,6 +43,11 @@ function hexDecode(s) {
   return answer;
 }
 
+// Shorten a string where the inside doesn't matter, typically some key for display
+function shorten(s) {
+  return s.slice(0, 6) + "..." + s.slice(-4);
+}
+
 // Encodes a Uint8Array into a hex string.
 function hexEncode(bytes) {
   return Array.from(bytes)
@@ -97,6 +102,16 @@ export default class KeyPair {
     }
   }
 
+  inspect() {
+    return (
+      "KeyPair(" +
+      shorten(this.getPublicKey()) +
+      ", " +
+      shorten(this.getPrivateKey()) +
+      ")"
+    );
+  }
+
   // Throws an error if priv is not a valid private key.
   static fromPrivateKey(priv) {
     let bytes = base64Decode(priv);
@@ -137,7 +152,7 @@ export default class KeyPair {
   serialize() {
     let j = {
       Public: this.getPublicKey(),
-      Private: base64Encode(this.privateKey)
+      Private: this.getPrivateKey()
     };
 
     // Pretty-encoding so that it matches our code style when saved to a file
@@ -203,5 +218,10 @@ export default class KeyPair {
   // Returns the public key in hex format
   getPublicKey() {
     return KeyPair.encodePublicKey(this.publicKey);
+  }
+
+  // Returns the private key in base64 format
+  getPrivateKey() {
+    return base64Encode(this.privateKey);
   }
 }
