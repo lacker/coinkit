@@ -20,6 +20,30 @@ export default class RequestPermission extends Component {
     if (this.props.permissions.publicKey) {
       answer.push("to know your public identity");
     }
+    if (
+      this.props.permissions.write &&
+      this.props.permissions.write.length > 0
+    ) {
+      let classes = [];
+      for (let cls of this.props.permissions.write) {
+        classes.push(cls);
+      }
+      classes.sort();
+      classes.reverse();
+      let clause = "to modify your";
+      while (true) {
+        if (classes.length == 1) {
+          clause += " " + classes.pop();
+          break;
+        }
+        if (classes.length == 2) {
+          clause += " " + classes.pop() + " and " + classes.pop();
+          break;
+        }
+        clause += " " + classes.pop() + ",";
+      }
+      answer.push(clause + " objects");
+    }
     return answer;
   }
 
