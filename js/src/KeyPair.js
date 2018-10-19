@@ -167,6 +167,15 @@ export default class KeyPair {
     return base64Encode(sig);
   }
 
+  // Signs an operation, represented as a plain old object.
+  // A "signer" field is automatically added.
+  signOperation(type, operation) {
+    let op = {
+      ...operation,
+      signer: this.getPublicKey()
+    };
+  }
+
   // publicKey and signature are both base64-encoded strings
   // Returns whether the signature is legitimate.
   static verifySignature(publicKey, message, signature) {
