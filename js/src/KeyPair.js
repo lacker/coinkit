@@ -174,6 +174,13 @@ export default class KeyPair {
       ...operation,
       signer: this.getPublicKey()
     };
+    let json = JSON.stringify(op);
+    let signed = {
+      operation: op,
+      type: type,
+      signature: this.sign(type + json)
+    };
+    return signed;
   }
 
   // publicKey and signature are both base64-encoded strings
