@@ -20,6 +20,7 @@ type OperationMessage struct {
 	Operations []*SignedOperation `json:"operations"`
 
 	// Contains any chunks that might be in the immediately following messages
+	// TODO: document this comment better
 	Chunks map[consensus.SlotValue]*LedgerChunk `json:"chunks"`
 }
 

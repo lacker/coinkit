@@ -59,6 +59,16 @@ export default class TrustedClient {
     return data.keyPair;
   }
 
+  // Signs the individual operations in an operation message
+  signOperationMessage(opm) {
+    let kp = this.getKeyPair();
+    if (kp == null) {
+      throw new Error("cannot sign operation message without a keypair");
+    }
+
+    // TODO: implement more
+  }
+
   // Returns an empty object if there are no permissions for this host, including
   // if the user is not logged in.
   getPermissions(host) {
