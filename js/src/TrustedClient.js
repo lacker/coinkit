@@ -73,7 +73,15 @@ export default class TrustedClient {
     let operations = [];
     for (let op of opm.operations) {
       // TODO: sign stuff
+      let signature = kp.sign(op.type + JSON.stringify(op.operation));
+      operations.push({
+        operation: op.operation,
+        type: op.type,
+        signature
+      });
     }
+
+    return new Message("Operation", { operations });
   }
 
   // Returns an empty object if there are no permissions for this host, including
