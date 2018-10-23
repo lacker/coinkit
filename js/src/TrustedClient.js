@@ -15,25 +15,27 @@ export default class TrustedClient {
   constructor(storage) {
     this.storage = storage;
 
-    chrome.runtime.onMessage.addListener(
-      (serializedMessage, sender, sendResponse) => {
-        if (!sender.tab) {
-          console.log("unexpected message from no tab:", serializedMessage);
-          return false;
-        }
-
-        let message = Message.fromSerialized(serializedMessage);
-        let host = new URL(sender.tab.url).host;
-
-        this.handleUntrustedMessage(message, host).then(responseMessage => {
-          if (responseMessage) {
-            sendResponse(responseMessage.serialize());
+    if (typeof chrome == "object") {
+      chrome.runtime.onMessage.addListener(
+        (serializedMessage, sender, sendResponse) => {
+          if (!sender.tab) {
+            console.log("unexpected message from no tab:", serializedMessage);
+            return false;
           }
-        });
 
-        return true;
-      }
-    );
+          let message = Message.fromSerialized(serializedMessage);
+          let host = new URL(sender.tab.url).host;
+
+          this.handleUntrustedMessage(message, host).then(responseMessage => {
+            if (responseMessage) {
+              sendResponse(responseMessage.serialize());
+            }
+          });
+
+          return true;
+        }
+      );
+    }
   }
 
   // Call from the background page
