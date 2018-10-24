@@ -1,11 +1,13 @@
+import KeyPair from "./KeyPair";
 import Message from "./Message";
 import MockLocalStorage from "./MockLocalStorage";
 import Storage from "./Storage";
 import TrustedClient from "./TrustedClient";
 
-test("Operation message signing", () => {
+test("Operation message signing", async () => {
   let local = new MockLocalStorage();
   let storage = new Storage(local);
+  await storage.setPasswordAndData("monkey", KeyPair.fromRandom(), {});
   let client = new TrustedClient(storage);
   let unsigned = new Message("Operation", {
     operations: [
