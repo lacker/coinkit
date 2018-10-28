@@ -73,11 +73,15 @@ export default class TrustedClient {
     }
 
     let operations = [];
-    for (let op of opm.operations) {
-      let signature = kp.sign(op.type + JSON.stringify(op.operation));
+    for (let sop of opm.operations) {
+      let op = {
+        signer: kp.getPublicKey(),
+        ...sop.operation
+      };
+      let signature = kp.sign(sop.type + JSON.stringify(op));
       operations.push({
-        operation: op.operation,
-        type: op.type,
+        operation: op,
+        type: sop.type,
         signature
       });
     }

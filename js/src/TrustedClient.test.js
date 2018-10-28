@@ -16,7 +16,6 @@ test("Operation message signing", async () => {
       {
         type: "Create",
         operation: {
-          signer: client.getKeyPair().getPublicKey(),
           sequence: 1,
           fee: 1,
           data: {
