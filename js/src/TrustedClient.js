@@ -222,8 +222,7 @@ export default class TrustedClient {
     return this.sendMessage(message);
   }
 
-  // Fetches the balance for this account
-  async balance() {
+  async getAccount() {
     let kp = this.getKeyPair();
     if (!kp) {
       return 0;
@@ -233,7 +232,12 @@ export default class TrustedClient {
       account: pk
     };
     let response = await this.query(query);
-    let account = response.accounts[pk];
+    return response.accounts[pk];
+  }
+
+  // Fetches the balance for this account
+  async balance() {
+    let account = await this.getAccount();
     if (!account) {
       return 0;
     }
