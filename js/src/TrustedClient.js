@@ -225,7 +225,7 @@ export default class TrustedClient {
   async getAccount() {
     let kp = this.getKeyPair();
     if (!kp) {
-      return 0;
+      return null;
     }
     let pk = kp.getPublicKey();
     let query = {
