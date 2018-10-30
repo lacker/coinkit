@@ -243,6 +243,16 @@ export default class TrustedClient {
     }
     return account.balance;
   }
+
+  // Fetches the "sequence" for this account, which is the sequence id of the last
+  // operation used.
+  async sequence() {
+    let account = await this.getAccount();
+    if (!account) {
+      return 0;
+    }
+    return account.sequence;
+  }
 }
 
 function sleep(ms) {
