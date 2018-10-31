@@ -21,6 +21,10 @@ type QueryMessage struct {
 
 	// When Documents is nonzero, this message is requesting data for matching documents.
 	Documents *DocumentQuery `json:"documents"`
+
+	// When Signature is nonempty, this message is requesting a committed
+	// SignedOperation with this signature.
+	Signature string `json:"signature"`
 }
 
 func (m *QueryMessage) Slot() int {
