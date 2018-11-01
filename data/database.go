@@ -446,6 +446,26 @@ func (db *Database) LastBlock() *Block {
 	return answer
 }
 
+// TailBlocks returns the last n blocks, or all blocks if there are less than n.
+// They are in reverse chronological order.
+func (db *Database) TailBlocks(n int) []*Block {
+	rows, err := db.postgres.Queryx("SELECT * FROM blocks ORDER BY slot DESC LIMIT $1", n)
+	db.reads++
+	if err != nil {
+		panic(err)
+	}
+	answer := []*Block{}
+	for rows.Next() {
+		b := &Block{}
+		err := rows.StructScan(b)
+		if err != nil {
+			panic(err)
+		}
+		answer = append(answer, b)
+	}
+	return answer
+}
+
 // ForBlocks calls f on each block in the db, from lowest to highest number.
 // It returns the number of blocks that were processed.
 func (db *Database) ForBlocks(f func(b *Block)) int {
