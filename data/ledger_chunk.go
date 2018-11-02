@@ -58,6 +58,15 @@ func (c *LedgerChunk) Value() (driver.Value, error) {
 	return driver.Value(bytes), err
 }
 
+func (c *LedgerChunk) GetOperation(signature string) *SignedOperation {
+	for _, op := range c.Operations {
+		if op.signature == signature {
+			return op
+		}
+	}
+	return nil
+}
+
 func (c *LedgerChunk) Scan(src interface{}) error {
 	bytes, ok := src.([]byte)
 	if !ok {
