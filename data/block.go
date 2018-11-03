@@ -41,3 +41,8 @@ func (b *Block) OperationMessage() *OperationMessage {
 func (b *Block) String() string {
 	return string(util.PrettyJSON(b))
 }
+
+// Returns nil if the operation with this signature is not in this block.
+func (b *Block) GetOperation(signature string) *SignedOperation {
+	return b.Chunk.GetOperation(signature)
+}
