@@ -288,6 +288,10 @@ func (db *Database) HandleQueryMessage(m *QueryMessage) *DataMessage {
 		return db.DocumentDataMessage(m.Documents)
 	}
 
+	if m.Signature != nil {
+		return db.SignatureDataMessage(m.Signature)
+	}
+
 	return nil
 }
 
@@ -361,6 +365,10 @@ func (db *Database) DocumentDataMessage(q *DocumentQuery) *DataMessage {
 		I:         slot,
 	}
 	return message
+}
+
+func (db *Database) SignatureDataMessage(q *DocumentQuery) *DataMessage {
+	panic("TODO")
 }
 
 // CheckAccountsMatchBlocks replays the blockchain from the beginning
