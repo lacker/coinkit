@@ -23,6 +23,9 @@ type DataMessage struct {
 
 	// A list of documents.
 	Documents []*Document `json:"documents"`
+
+	// The contents of some committed operations, keyed by signature.
+	Operations map[int]*SignedOperation `json:"operations"`
 }
 
 func (m *DataMessage) Slot() int {

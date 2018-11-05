@@ -367,8 +367,23 @@ func (db *Database) DocumentDataMessage(q *DocumentQuery) *DataMessage {
 	return message
 }
 
+// Currently just checks the last 20 blocks for the right operation.
+// TODO: store ops by signature somewhere
 func (db *Database) SignatureDataMessage(q *DocumentQuery) *DataMessage {
-	panic("TODO")
+	blocks := db.TailBlocks(20)
+	answer := &DataMessage{
+		Operations: map[int]*SignedOperation{},
+	}
+	for _, block := range blocks {
+		if block.Slot > answer.I {
+			answer.I = block.Slot
+		}
+		op := block.GetOperation(q.Signature)
+		if op != nil {
+			answer.Operations[q.Signature] = op
+		}
+	}
+	return answer
 }
 
 // CheckAccountsMatchBlocks replays the blockchain from the beginning
