@@ -288,7 +288,7 @@ func (db *Database) HandleQueryMessage(m *QueryMessage) *DataMessage {
 		return db.DocumentDataMessage(m.Documents)
 	}
 
-	if m.Signature != nil {
+	if m.Signature != "" {
 		return db.SignatureDataMessage(m.Signature)
 	}
 
@@ -369,7 +369,7 @@ func (db *Database) DocumentDataMessage(q *DocumentQuery) *DataMessage {
 
 // Currently just checks the last 20 blocks for the right operation.
 // TODO: store ops by signature somewhere
-func (db *Database) SignatureDataMessage(q *DocumentQuery) *DataMessage {
+func (db *Database) SignatureDataMessage(signature string) *DataMessage {
 	blocks := db.TailBlocks(20)
 	answer := &DataMessage{
 		Operations: map[int]*SignedOperation{},
@@ -378,9 +378,9 @@ func (db *Database) SignatureDataMessage(q *DocumentQuery) *DataMessage {
 		if block.Slot > answer.I {
 			answer.I = block.Slot
 		}
-		op := block.GetOperation(q.Signature)
+		op := block.GetOperation(signature)
 		if op != nil {
-			answer.Operations[q.Signature] = op
+			answer.Operations[signature] = op
 		}
 	}
 	return answer
