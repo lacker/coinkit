@@ -372,7 +372,7 @@ func (db *Database) DocumentDataMessage(q *DocumentQuery) *DataMessage {
 func (db *Database) SignatureDataMessage(signature string) *DataMessage {
 	blocks := db.TailBlocks(20)
 	answer := &DataMessage{
-		Operations: map[int]*SignedOperation{},
+		Operations: map[string]*SignedOperation{},
 	}
 	for _, block := range blocks {
 		if block.Slot > answer.I {

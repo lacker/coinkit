@@ -60,7 +60,7 @@ func (c *LedgerChunk) Value() (driver.Value, error) {
 
 func (c *LedgerChunk) GetOperation(signature string) *SignedOperation {
 	for _, op := range c.Operations {
-		if op.signature == signature {
+		if op.Signature == signature {
 			return op
 		}
 	}
