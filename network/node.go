@@ -128,6 +128,9 @@ func (node *Node) Handle(sender string, message util.Message) (util.Message, boo
 		answer, ok := node.handleChainMessage(sender, m)
 		return answer, ok
 
+	case *util.ErrorMessage:
+		util.Logger.Printf("received error message: %s", m)
+
 	default:
 		util.Logger.Printf("Node received unexpected message: %+v", m)
 		return nil, false
