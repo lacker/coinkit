@@ -130,6 +130,7 @@ func (node *Node) Handle(sender string, message util.Message) (util.Message, boo
 
 	case *util.ErrorMessage:
 		util.Logger.Printf("received error message: %s", m)
+		return nil, false
 
 	default:
 		util.Logger.Printf("Node received unexpected message: %+v", m)
