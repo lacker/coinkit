@@ -59,7 +59,12 @@ func NewDatabase(config *Config) *Database {
 		util.Logger.Printf("(password hidden)")
 		info = fmt.Sprintf("%s password=%s", info, config.Password)
 	}
-	postgres := sqlx.MustConnect("postgres", info)
+	postgres, err := sqlx.Connect("postgres", info)
+	if err != nil {
+		util.Logger.Printf("failed to connect to postgres with user %s, db %s",
+			username, config.Database)
+		panic(err)
+	}
 
 	if config.testOnly {
 		// util.Logger.Printf("clearing test-only database %s", config.Database)
