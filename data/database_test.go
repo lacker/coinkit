@@ -75,8 +75,10 @@ func TestLastBlock(t *testing.T) {
 		t.Fatalf("expected last block nil but got %+v", b)
 	}
 	b = &Block{
-		Slot:  1,
-		Chunk: &LedgerChunk{},
+		Slot: 1,
+		Chunk: &LedgerChunk{
+			Operations: []*SignedOperation{makeTestSendOperation(1)},
+		},
 	}
 	err := db.InsertBlock(b)
 	if err != nil {
@@ -100,7 +102,7 @@ func TestLastBlock(t *testing.T) {
 		t.Fatalf("b3: %+v", b3)
 	}
 
-	// We should also be able to retrieve it with a query message
+	// We should also be able to retrieve it with a query on the slot
 	qm := &QueryMessage{
 		Block: b.Slot,
 	}
