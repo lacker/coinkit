@@ -74,10 +74,11 @@ func TestLastBlock(t *testing.T) {
 	if b != nil {
 		t.Fatalf("expected last block nil but got %+v", b)
 	}
+	op := makeTestSendOperation(1)
 	b = &Block{
 		Slot: 1,
 		Chunk: &LedgerChunk{
-			Operations: []*SignedOperation{makeTestSendOperation(1)},
+			Operations: []*SignedOperation{op},
 		},
 	}
 	err := db.InsertBlock(b)
@@ -114,6 +115,13 @@ func TestLastBlock(t *testing.T) {
 	if b4 == nil || b4.Slot != b.Slot {
 		t.Fatalf("got bad data message: %+v", dm)
 	}
+
+	// We should be able to retrieve the op by signature
+	qm = &QueryMessage{
+		Signature: op.Signature,
+	}
+	dm = db.HandleQueryMessage(qm)
+	// TODO: check dm
 }
 
 func TestForBlocks(t *testing.T) {
