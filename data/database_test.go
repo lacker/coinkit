@@ -121,7 +121,11 @@ func TestLastBlock(t *testing.T) {
 		Signature: op.Signature,
 	}
 	dm = db.HandleQueryMessage(qm)
-	// TODO: check dm
+	if dm == nil {
+		t.Fatalf("got nil data message")
+	}
+
+	// TODO: check dm more
 }
 
 func TestForBlocks(t *testing.T) {
