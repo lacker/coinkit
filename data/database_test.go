@@ -125,7 +125,11 @@ func TestLastBlock(t *testing.T) {
 		t.Fatalf("got nil data message")
 	}
 
-	// TODO: check dm more
+	sop := dm.Operations[op.Signature]
+	if op == nil {
+		// TODO: check dm more
+		t.Fatalf("got bad op in data message: %+v", dm)
+	}
 }
 
 func TestForBlocks(t *testing.T) {
