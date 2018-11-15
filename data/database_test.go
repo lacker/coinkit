@@ -126,8 +126,7 @@ func TestLastBlock(t *testing.T) {
 	}
 
 	sop := dm.Operations[op.Signature]
-	if op == nil {
-		// TODO: check dm more
+	if op == nil || sop.Signature != op.Signature {
 		t.Fatalf("got bad op in data message: %+v", dm)
 	}
 }
