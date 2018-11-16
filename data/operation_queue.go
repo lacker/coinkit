@@ -198,10 +198,11 @@ func (q *OperationQueue) HandleQueryMessage(m *QueryMessage) *DataMessage {
 }
 
 // Handles an operation message from another node.
-// Returns whether it made any internal updates.
-func (q *OperationQueue) HandleOperationMessage(m *OperationMessage) bool {
+// Returns whether it made any internal updates, and an error message if there is any.
+// TODO: describe when an error message is returned.
+func (q *OperationQueue) HandleOperationMessage(m *OperationMessage) (*util.ErrorMessage, bool) {
 	if m == nil {
-		return false
+		return nil, false
 	}
 
 	updated := false
@@ -226,7 +227,7 @@ func (q *OperationQueue) HandleOperationMessage(m *OperationMessage) bool {
 			updated = true
 		}
 	}
-	return updated
+	return nil, updated
 }
 
 func (q *OperationQueue) Size() int {

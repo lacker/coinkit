@@ -110,7 +110,8 @@ func (node *Node) Handle(sender string, message util.Message) (util.Message, boo
 		return nil, false
 
 	case *data.OperationMessage:
-		if node.queue.HandleOperationMessage(m) {
+		em, updated := node.queue.HandleOperationMessage(m)
+		if updated {
 			node.chain.ValueStoreUpdated()
 		}
 		return nil, false
