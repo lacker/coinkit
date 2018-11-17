@@ -211,12 +211,16 @@ func (q *OperationQueue) HandleOperationMessage(m *OperationMessage) (*util.Erro
 			updated = updated || q.Add(op)
 		}
 	}
+	var em *util.ErrorMessage
 	if m.Chunks != nil {
 		for key, chunk := range m.Chunks {
 			if _, ok := q.chunks[key]; ok {
 				continue
 			}
 			if q.cache.ValidateChunk(chunk) != nil {
+				em = &ErrorMessage{
+					Error: fmt.Sprintf("invalid chunk: %+v", chunk),
+				}
 				continue
 			}
 			if chunk.Hash() != key {
@@ -227,7 +231,7 @@ func (q *OperationQueue) HandleOperationMessage(m *OperationMessage) (*util.Erro
 			updated = true
 		}
 	}
-	return nil, updated
+	return em, updated
 }
 
 func (q *OperationQueue) Size() int {

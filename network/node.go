@@ -114,7 +114,7 @@ func (node *Node) Handle(sender string, message util.Message) (util.Message, boo
 		if updated {
 			node.chain.ValueStoreUpdated()
 		}
-		return nil, false
+		return em, em != nil
 
 	case *consensus.NominationMessage:
 		answer, ok := node.handleChainMessage(sender, m)
