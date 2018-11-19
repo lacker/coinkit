@@ -204,10 +204,16 @@ func (q *OperationQueue) HandleOperationMessage(m *OperationMessage) (*util.Erro
 		return nil, false
 	}
 
+	var em *util.ErrorMessage
 	updated := false
 	if m.Operations != nil {
 		for _, op := range m.Operations {
 			updated = updated || q.Add(op)
+		}
+		if !updated {
+			em = &util.ErrorMessage{
+				Error: "no valid operations in operation message",
+			}
 		}
 	}
 	if m.Chunks != nil {
@@ -229,7 +235,7 @@ func (q *OperationQueue) HandleOperationMessage(m *OperationMessage) (*util.Erro
 			updated = true
 		}
 	}
-	return nil, updated
+	return em, updated
 }
 
 func (q *OperationQueue) Size() int {
