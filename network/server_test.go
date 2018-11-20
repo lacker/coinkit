@@ -182,7 +182,7 @@ func BenchmarkSendMoney30(b *testing.B) {
 	benchmarkSendMoney(30, b)
 }
 
-func TestServerOkayWithFakeWellFormattedMessage(t *testing.T) {
+func TestServerHandlesBadMessages(t *testing.T) {
 	config, kps := NewUnitTestNetwork()
 	s := NewServer(kps[0], config, nil)
 
@@ -196,9 +196,13 @@ func TestServerOkayWithFakeWellFormattedMessage(t *testing.T) {
 	}
 
 	s.ServeInBackground()
-	s.requests <- fakeRequest
-	// This hits the right code path but it feels like we ought to have a
-	// better assertion here
+
+	response := s.handleMessageRequest(fakeRequest)
+	// TODO: should the server actually return an error?
+	if response != nil {
+		t.Fatalf("expected no response but got %+v", response)
+	}
+
 	s.Stop()
 }
 
@@ -234,5 +238,6 @@ func TestDataOperations(t *testing.T) {
 	if elapsed > 10.0 {
 		t.Fatalf("data operations are too slow: %.2f seconds", elapsed)
 	}
+
 	stopServers(servers)
 }
