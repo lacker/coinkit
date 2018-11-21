@@ -188,12 +188,16 @@ func TestServerHandlesBadMessages(t *testing.T) {
 
 	m := &FakeMessage{Number: 4}
 	kp := util.NewKeyPairFromSecretPhrase("foo")
-	sm := util.NewSignedMessage(m, kp)
 
-	fakeRequest := &Request{
-		Message:  sm,
-		Response: nil,
+	makeRequest := func(m Message) *Request {
+		sm := util.NewSignedmessage(m, kp)
+		return &Request{
+			Message:  sm,
+			Response: nil,
+		}
 	}
+
+	fakeRequest := makeRequest(m)
 
 	s.ServeInBackground()
 
