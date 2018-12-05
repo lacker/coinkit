@@ -4,6 +4,7 @@
   "description": "Hosting files",
   "main": "main.js",
   "scripts": {
+    "start": "node main.js",
     "test": "jest"
   },
   "repository": {
