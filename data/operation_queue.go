@@ -1,6 +1,8 @@
 package data
 
 import (
+	"fmt"
+
 	"github.com/emirpasic/gods/sets/treeset"
 
 	"github.com/lacker/coinkit/consensus"
@@ -222,7 +224,7 @@ func (q *OperationQueue) HandleOperationMessage(m *OperationMessage) (*util.Erro
 				continue
 			}
 			if q.cache.ValidateChunk(chunk) != nil {
-				em = &ErrorMessage{
+				em = &util.ErrorMessage{
 					Error: fmt.Sprintf("invalid chunk: %+v", chunk),
 				}
 				continue
