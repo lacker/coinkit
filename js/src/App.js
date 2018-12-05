@@ -31,15 +31,18 @@ export default class App extends Component {
       "magnet:?xt=urn:btih:786005acb1312a764e90317e6b26ca3447583d12&dn=hello.txt&tr=udp%3A%2F%2Fexplodie.org%3A6969&tr=udp%3A%2F%2Ftracker.coppersurfer.tk%3A6969&tr=udp%3A%2F%2Ftracker.empire-js.us%3A1337&tr=udp%3A%2F%2Ftracker.leechers-paradise.org%3A6969&tr=udp%3A%2F%2Ftracker.opentrackr.org%3A1337&tr=wss%3A%2F%2Ftracker.btorrent.xyz&tr=wss%3A%2F%2Ftracker.fastcast.nz&tr=wss%3A%2F%2Ftracker.openwebtorrent.com";
 
     client.add(torrentId, torrent => {
-      // Torrents can contain many files. Let's use the .txt file
-      console.log("got files:", torrent.files);
-      let file = torrent.files.find(file => {
-        return file.name.endsWith(".txt");
+      torrent.on("done", () => {
+        let file = torrent.files[0];
+        console.log("got " + file.downloaded + " bytes");
+        file.getBlob((err, blob) => {
+          let reader = new FileReader();
+          reader.onload = () => {
+            console.log("result:", reader.result);
+            alert(reader.result);
+          };
+          reader.readAsText(blob);
+        });
       });
-      let reader = new FileReader();
-      reader.readAsText(file);
-      console.log("result:", reader.result);
-      alert("XXX " + reader.result);
     });
   }
 
