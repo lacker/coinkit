@@ -6,6 +6,10 @@
   "scripts": {
     "test": "jest"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lacker/coinkit.git"
+  },
   "author": "Kevin Lacker",
   "license": "UNLICENSED"
 }
