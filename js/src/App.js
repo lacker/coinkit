@@ -5,6 +5,8 @@ import React, { Component } from "react";
 import Client from "./Client";
 import KeyPair from "./KeyPair";
 
+import WebTorrent from "webtorrent";
+
 export default class App extends Component {
   constructor(props) {
     super(props);
@@ -17,9 +19,28 @@ export default class App extends Component {
     this.client = new Client();
   }
 
-  fetchData() {
+  fetchBlockchainData() {
     // this.fetchBalance();
     this.fetchPublicKey();
+  }
+
+  fetchPeerData() {
+    let client = new WebTorrent();
+
+    let torrentId =
+      "magnet:?xt=urn:btih:786005acb1312a764e90317e6b26ca3447583d12&dn=hello.txt&tr=udp%3A%2F%2Fexplodie.org%3A6969&tr=udp%3A%2F%2Ftracker.coppersurfer.tk%3A6969&tr=udp%3A%2F%2Ftracker.empire-js.us%3A1337&tr=udp%3A%2F%2Ftracker.leechers-paradise.org%3A6969&tr=udp%3A%2F%2Ftracker.opentrackr.org%3A1337&tr=wss%3A%2F%2Ftracker.btorrent.xyz&tr=wss%3A%2F%2Ftracker.fastcast.nz&tr=wss%3A%2F%2Ftracker.openwebtorrent.com";
+
+    client.add(torrentId, torrent => {
+      // Torrents can contain many files. Let's use the .txt file
+      console.log("got files:", torrent.files);
+      let file = torrent.files.find(file => {
+        return file.name.endsWith(".txt");
+      });
+      let reader = new FileReader();
+      reader.readAsText(file);
+      console.log("result:", reader.result);
+      alert("XXX " + reader.result);
+    });
   }
 
   async fetchBalance() {
@@ -65,10 +86,17 @@ export default class App extends Component {
         </h1>
         <button
           onClick={() => {
-            this.fetchData();
+            this.fetchBlockchainData();
           }}
         >
-          Fetch Data
+          Fetch Blockchain Data
+        </button>
+        <button
+          onClick={() => {
+            this.fetchPeerData();
+          }}
+        >
+          Fetch Peer Data
         </button>
       </div>
     );
