@@ -1,0 +1,11 @@
+{
+  "name": "hosting",
+  "version": "0.0.1",
+  "description": "Hosting files",
+  "main": "main.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "author": "Kevin Lacker",
+  "license": "UNLICENSED"
+}
