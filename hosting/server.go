@@ -17,9 +17,9 @@ func NewServer() *Server {
 }
 
 func (s *Server) Serve() {
-	s.context, s.cancel = context.WithCancel(context.Background())
+	cts, s.cancel = context.WithCancel(context.Background())
 
-	host, err := libp2p.New(s.context)
+	host, err := libp2p.New(ctx)
 	if err != nil {
 		panic(err)
 	}
