@@ -9,7 +9,7 @@
   },
   "author": "Kevin Lacker",
   "dependencies": {
-    "@material-ui/core": "^3.0.2",
+    "@material-ui/core": "^3.6.1",
     "babel-plugin-transform-object-rest-spread": "^6.26.0",
     "babel-preset-env": "^1.6.1",
     "babel-preset-react": "^6.24.1",
@@ -18,8 +18,8 @@
     "parcel-bundler": "^1.10.3",
     "react": "^16.6.3",
     "react-dom": "^16.6.3",
-    "react-redux": "^5.0.7",
-    "redux": "^4.0.0",
+    "react-redux": "^5.1.1",
+    "redux": "^4.0.1",
     "text-encoding-shim": "^1.0.0",
     "tweetnacl": "^1.0.0",
     "typeface-roboto": "0.0.54"

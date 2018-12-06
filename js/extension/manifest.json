@@ -6,10 +6,12 @@
   "permissions": [
     "activeTab",
     "storage",
+    "webRequest",
     "http://localhost:9000/*",
     "http://localhost:9001/*",
     "http://localhost:9002/*",
-    "http://localhost:9003/*"
+    "http://localhost:9003/*",
+    "*://*.coinkit/*"
   ],
   "browser_action": {
     "default_title": "cwallet",

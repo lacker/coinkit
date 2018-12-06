@@ -17,4 +17,4 @@ The sample app is built into `/app/`.
 3. Load the extension in Chrome
    a. Navigate to `chrome://extensions`
    b. Toggle "Developer Mode" on, if it's not on already
-   c. Click "Load Unpackaged" and select the `extension` directory
+   c. Click "Load Unpacked" and select the `coinkit/js/extension` directory
