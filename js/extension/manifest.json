@@ -5,8 +5,10 @@
   "version": "1.0",
   "permissions": [
     "activeTab",
+    "proxy",
     "storage",
     "webRequest",
+    "webRequestBlocking",
     "http://localhost:9000/*",
     "http://localhost:9001/*",
     "http://localhost:9002/*",

@@ -94,6 +94,7 @@ export default class App extends Component {
         >
           Fetch Blockchain Data
         </button>
+        <hr />
         <button
           onClick={() => {
             this.fetchPeerData();
@@ -101,6 +102,8 @@ export default class App extends Component {
         >
           Fetch Peer Data
         </button>
+        <hr />
+        <a href="http://hello.coinkit">Hello</a>
       </div>
     );
   }
