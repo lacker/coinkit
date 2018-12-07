@@ -1,4 +1,5 @@
 // This code runs in our content script, in the context of every web page.
+// It does not run in the context of web pages that failed to load.
 
 window.addEventListener(
   "message",

@@ -19,7 +19,12 @@ chrome.webRequest.onErrorOccurred.addListener(
       return;
     }
 
-    console.log("http request failed to domain:", domain);
+    console.log(
+      "http request failed to domain:",
+      domain,
+      "on tab",
+      details.tabId
+    );
   },
   {
     urls: ["*://*.coinkit/*"],

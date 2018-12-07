@@ -4,7 +4,7 @@
   "description": "a coinkit wallet",
   "scripts": {
     "app": "parcel app/index.html",
-    "extension": "parcel -p 2345 --no-hmr build src/popup-main.js src/background-main.js src/content-main.js -d extension/",
+    "extension": "parcel -p 2345 --no-hmr build src/popup-main.js src/background-main.js src/content-main.js src/loader-main.js -d extension/",
     "test": "jest"
   },
   "author": "Kevin Lacker",
