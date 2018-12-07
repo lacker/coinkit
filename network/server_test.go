@@ -1,7 +1,9 @@
 package network
 
 import (
+	"bytes"
 	"fmt"
+	"net/http"
 	"testing"
 	"time"
 
@@ -188,20 +190,17 @@ func TestServerHandlesBadMessages(t *testing.T) {
 
 	m := &FakeMessage{Number: 4}
 	kp := util.NewKeyPairFromSecretPhrase("foo")
-
-	makeRequest := func(m Message) *Request {
-		sm := util.NewSignedmessage(m, kp)
-		return &Request{
-			Message:  sm,
-			Response: nil,
-		}
+	sm := util.NewSignedMessage(m, kp)
+	buffer := new(bytes.Buffer)
+	sm.Write(buffer)
+	request, err := http.NewRequest("POST", "http://whatever.blah/messages/", buffer)
+	if err != nil {
+		t.Fatalf("error creating request: %s", err)
 	}
-
-	fakeRequest := makeRequest(m)
 
 	s.ServeInBackground()
 
-	response := s.handleMessageRequest(fakeRequest)
+	response := s.handleMessageRequest(request)
 	// TODO: should the server actually return an error?
 	if response != nil {
 		t.Fatalf("expected no response but got %+v", response)
