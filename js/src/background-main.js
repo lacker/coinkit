@@ -23,6 +23,9 @@ chrome.webRequest.onBeforeRequest.addListener(
 
 let script = `
 function FindProxyForURL(url, host) {
+  if (shExpMatch(host, "*.coinkit")) {
+    return "PROXY about:blank";
+  }
   return 'DIRECT';
 }
 `;
