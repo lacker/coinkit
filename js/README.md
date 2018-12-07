@@ -12,9 +12,12 @@ The sample app is built into `/app/`.
 
 2. Build the extension locally
    a. `npm install`
-   b. `npm run build` (which will watch for changes and build continuously)
+   b. `npm run extension` (which will watch for changes and build continuously)
 
 3. Load the extension in Chrome
    a. Navigate to `chrome://extensions`
    b. Toggle "Developer Mode" on, if it's not on already
    c. Click "Load Unpacked" and select the `coinkit/js/extension` directory
+
+4. Run the sample app to try things out
+   a. `npm run app`
