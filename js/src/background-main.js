@@ -7,7 +7,7 @@ window.storage = new Storage(new LocalStorage());
 TrustedClient.init(window.storage);
 
 /*
-// This changes the visible URL, which is unfortunate
+// This changes the visible URL, which is bad for main_frame requests
 chrome.webRequest.onBeforeRequest.addListener(
   details => {
     console.log("request initiated to", details.url);
@@ -21,11 +21,16 @@ chrome.webRequest.onBeforeRequest.addListener(
 );
 */
 
-// TODO: This doesn't seem to do anything
+let script = `
+function FindProxyForURL(url, host) {
+  return 'DIRECT';
+}
+`;
+
 let config = {
   mode: "pac_script",
   pacScript: {
-    data: "function FindProxyForURL(url, host) { return 'DIRECT'; }"
+    data: script
   }
 };
 chrome.proxy.settings.set({ value: config, scope: "regular" }, () => {
