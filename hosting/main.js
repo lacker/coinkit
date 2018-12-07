@@ -1,10 +1,11 @@
-const WebTorrent = require("webtorrent-hybrid");
+let http = require("http");
 
-// Run a black hole proxy - this just returns a blank document for every URL.
-// This is needed so that the extension can pretend a URL that doesn't resolve is
-// actually a functioning web page.
+let WebTorrent = require("webtorrent-hybrid");
 
-// TODO: see if we can just muck with the error page
+let proxy = http.createServer((req, res) => {
+  res.end("this is the black hole");
+});
+proxy.listen(3333);
 
 // Seed a WebTorrent
 let buf = new Buffer("Hello decentralized world!");

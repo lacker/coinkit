@@ -6,53 +6,13 @@ import TrustedClient from "./TrustedClient";
 window.storage = new Storage(new LocalStorage());
 TrustedClient.init(window.storage);
 
-chrome.webRequest.onErrorOccurred.addListener(
-  details => {
-    let a = document.createElement("a");
-    a.href = details.url;
-    let parts = a.hostname.split(".");
-    if (parts.length != 2) {
-      return;
-    }
-    let [domain, tld] = parts;
-    if (tld != "coinkit") {
-      return;
-    }
+// This proxies .coinkit requests somewhere, which requires that we have a proxy.
+// For now let's assume there is a proxy running on localhost:3333.
 
-    console.log(
-      "http request failed to domain:",
-      domain,
-      "on tab",
-      details.tabId
-    );
-  },
-  {
-    urls: ["*://*.coinkit/*"],
-    types: ["main_frame"]
-  }
-);
-
-/*
-// This changes the visible URL, which is bad for main_frame requests
-chrome.webRequest.onBeforeRequest.addListener(
-  details => {
-    console.log("request initiated to", details.url);
-
-    return { redirectUrl: "data:text/plain,hello world" };
-  },
-  {
-    urls: ["*://*.coinkit/*"]
-  },
-  ["blocking"]
-);
-*/
-
-/*
-// This proxies .coinkit requests somewhere, which requires that we have a proxy
 let script = `
 function FindProxyForURL(url, host) {
   if (shExpMatch(host, "*.coinkit")) {
-    return "PROXY about:blank";
+    return "PROXY localhost:3333";
   }
   return 'DIRECT';
 }
@@ -67,4 +27,3 @@ let config = {
 chrome.proxy.settings.set({ value: config, scope: "regular" }, () => {
   console.log("proxy settings have been set:", config);
 });
-*/
