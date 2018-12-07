@@ -21,3 +21,4 @@ The sample app is built into `/app/`.
 
 4. Run the sample app to try things out
    a. `npm run app`
+   b. Go to `localhost:1234`
