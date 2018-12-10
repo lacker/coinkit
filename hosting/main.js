@@ -24,6 +24,7 @@ client.seed(buf, torrent => {
   console.log("running fake chain on port", fakeChainPort);
 });
 
+// This code should never run because the document load gets canceled
 let content = `
 <html>
 <head>
