@@ -8,7 +8,7 @@ TrustedClient.init(window.storage);
 
 // This proxies .coinkit requests somewhere, which requires that we have a proxy.
 // For now let's assume there is a proxy running on localhost:3333.
-
+// Later this proxy address will need to be loaded dynamically from somewhere.
 let script = `
 function FindProxyForURL(url, host) {
   if (shExpMatch(host, "*.coinkit")) {
@@ -27,3 +27,20 @@ let config = {
 chrome.proxy.settings.set({ value: config, scope: "regular" }, () => {
   console.log("proxy settings have been set:", config);
 });
+
+chrome.webRequest.onCompleted.addListener(
+  details => {
+    console.log(details.responseHeaders);
+
+    let a = document.createElement("a");
+    a.href = details.url;
+    let parts = a.hostname.split(".");
+    let tld = parts.pop();
+    let domain = parts.pop();
+    console.log("request completed for:", domain, tld);
+  },
+  {
+    urls: ["*://*.coinkit/*"],
+    types: ["main_frame"]
+  }
+);

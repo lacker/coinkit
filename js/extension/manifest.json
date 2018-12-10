@@ -27,6 +27,10 @@
   "content_scripts": [{
     "matches": ["*://*/*"],
     "js": ["content-main.js"]
+  }, {
+    "matches": ["*://*.coinkit/*"],
+    "js": ["loader-main.js"],
+    "run_at": "document_start"
   }],
   "web_accessible_resources": [
     "popup.html"
