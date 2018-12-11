@@ -1,12 +1,12 @@
 let http = require("http");
+let path = require("path");
 
 let WebTorrent = require("webtorrent-hybrid");
 
 // Seed a WebTorrent
-let buf = new Buffer("Hello decentralized world!");
-buf.name = "hello.txt";
 let client = new WebTorrent();
-client.seed(buf, torrent => {
+let dir = path.resolve(__dirname, "app");
+client.seed(dir, torrent => {
   console.log("info hash: " + torrent.infoHash);
   console.log("magnet uri: " + torrent.magnetURI);
 
