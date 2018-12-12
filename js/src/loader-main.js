@@ -16,7 +16,11 @@ fetch("http://localhost:4444")
 
     client.add(json.magnet, torrent => {
       torrent.on("done", () => {
-        let file = torrent.files[0];
+        let file = torrent.files.find(file => file.name === "index.html");
+        if (!file) {
+          console.log("could not find index.html");
+          return;
+        }
         console.log("length:", file.length, "downloaded:", file.downloaded);
         file.getBlob((err, blob) => {
           let reader = new FileReader();
