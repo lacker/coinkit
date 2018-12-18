@@ -1,4 +1,5 @@
-// The TorrentClient finds the right torrent for a domain and uses that to return subsequent files.
+// The TorrentClient finds the right torrent for a domain and uses that to return subsequent
+// files.
 
 // TODO: give this functions that lets it serve up subsequent files like image files
 
@@ -39,5 +40,9 @@ class TorrentClient {
     let torrent = await this.loadMagnet(magnet);
     this.torrents[domain] = torrent;
     return;
+  }
+
+  isReady(domain) {
+    return domain in this.torrents;
   }
 }
