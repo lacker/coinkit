@@ -45,4 +45,27 @@ class TorrentClient {
   isReady(domain) {
     return domain in this.torrents;
   }
+
+  // Rejects if there is no such file.
+  // TODO: this should wait for readiness if not ready
+  async getAsText(domain, name) {
+    let torrent = this.torrents[domain];
+    let file = torrent.files.find(file => file.name === name);
+    if (!file) {
+      return Promise.reject();
+    }
+
+    return new Promise((resolve, reject) => {
+      file.getBlog((err, blob) => {
+        if (err) {
+          reject(err);
+        }
+        let reader = new FileReader();
+        reader.onload = e => {
+          resolve(e.target.result);
+        };
+        reader.readAsText(blob);
+      });
+    });
+  }
 }
