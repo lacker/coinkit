@@ -35,15 +35,16 @@ class TorrentClient {
   }
 
   // Starts downloading a domain and resolves when the root URL is ready
+  // Resolves to the torrent object
   // TODO: require a certain amount of domain newness
   async loadDomain(domain) {
     if (this.torrents[domain]) {
-      return;
+      return this.torrents[domain];
     }
     let magnet = await this.getMagnet(domain);
     let torrent = await this.loadMagnet(magnet);
     this.torrents[domain] = torrent;
-    return;
+    return torrent;
   }
 
   isReady(domain) {
@@ -51,9 +52,8 @@ class TorrentClient {
   }
 
   // Rejects if there is no such file.
-  // TODO: this should wait for readiness if not ready
   async getAsText(domain, name) {
-    let torrent = this.torrents[domain];
+    let torrent = await this.loadDomain(domain);
     let file = torrent.files.find(file => file.name === name);
     if (!file) {
       return Promise.reject();
