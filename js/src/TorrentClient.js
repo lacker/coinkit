@@ -36,6 +36,9 @@ class TorrentClient {
 
   // Starts downloading a domain and resolves when the root URL is ready
   async loadDomain(domain) {
+    if (this.torrents[domain]) {
+      return;
+    }
     let magnet = await this.getMagnet(domain);
     let torrent = await this.loadMagnet(magnet);
     this.torrents[domain] = torrent;
