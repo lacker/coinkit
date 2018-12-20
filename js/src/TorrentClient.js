@@ -35,6 +35,7 @@ class TorrentClient {
   }
 
   // Starts downloading a domain and resolves when the root URL is ready
+  // TODO: require a certain amount of domain newness
   async loadDomain(domain) {
     if (this.torrents[domain]) {
       return;
