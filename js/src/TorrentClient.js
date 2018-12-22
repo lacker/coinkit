@@ -12,6 +12,9 @@ class TorrentClient {
   constructor() {
     this.client = new WebTorrent();
 
+    // Maps domain to {magnet, time} object
+    this.magnets = {};
+
     // Maps domain to torrent
     this.torrents = {};
   }
