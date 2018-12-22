@@ -31,10 +31,17 @@ class TorrentClient {
   }
 
   // Returns a promise that maps to a magnet url
+  // TODO: sometimes read from cache instead of just writing to it
   async getMagnet(domain) {
     let response = await fetch(BOOTSTRAP);
     let json = await response.json();
-    return json.magnet;
+    let magnet = json.magnet;
+    let now = new Date();
+    this.magnets[domain] = {
+      magnet,
+      time: now
+    };
+    return magnet;
   }
 
   // Starts downloading a domain and resolves when the root URL is ready
