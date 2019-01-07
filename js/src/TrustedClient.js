@@ -16,25 +16,27 @@ export default class TrustedClient {
     this.storage = storage;
 
     if (typeof chrome == "object") {
-      chrome.runtime.onMessage.addListener(
-        (serializedMessage, sender, sendResponse) => {
-          if (!sender.tab) {
-            console.log("unexpected message from no tab:", serializedMessage);
-            return false;
-          }
-
-          let message = Message.fromSerialized(serializedMessage);
-          let host = new URL(sender.tab.url).host;
-
-          this.handleUntrustedMessage(message, host).then(responseMessage => {
-            if (responseMessage) {
-              sendResponse(responseMessage.serialize());
-            }
-          });
-
-          return true;
+      chrome.runtime.onMessage.addListener((m, sender, sendResponse) => {
+        if (!m.toCoinkit) {
+          return false;
         }
-      );
+        let serializedMessage = m.toCoinkit;
+        if (!sender.tab) {
+          console.log("unexpected message from no tab:", serializedMessage);
+          return false;
+        }
+
+        let message = Message.fromSerialized(serializedMessage);
+        let host = new URL(sender.tab.url).host;
+
+        this.handleUntrustedMessage(message, host).then(responseMessage => {
+          if (responseMessage) {
+            sendResponse(responseMessage.serialize());
+          }
+        });
+
+        return true;
+      });
     }
   }
 

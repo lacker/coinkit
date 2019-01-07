@@ -1,6 +1,7 @@
 // This code runs in the persistent background page.
 import LocalStorage from "./LocalStorage";
 import Storage from "./Storage";
+import TorrentClient from "./TorrentClient";
 import TrustedClient from "./TrustedClient";
 
 window.storage = new Storage(new LocalStorage());
@@ -28,6 +29,7 @@ chrome.proxy.settings.set({ value: config, scope: "regular" }, () => {
   console.log("proxy settings have been set:", config);
 });
 
+// Just logs completed coinkit requests
 chrome.webRequest.onCompleted.addListener(
   details => {
     console.log(details.responseHeaders);
@@ -44,3 +46,5 @@ chrome.webRequest.onCompleted.addListener(
     types: ["main_frame"]
   }
 );
+
+let client = new TorrentClient();

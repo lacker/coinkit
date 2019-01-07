@@ -11,7 +11,7 @@ window.addEventListener(
       return;
     }
 
-    chrome.runtime.sendMessage(event.data.message, response => {
+    chrome.runtime.sendMessage({ toCoinkit: event.data.message }, response => {
       let data = {
         id: event.data.id,
         type: "fromCoinkit",
