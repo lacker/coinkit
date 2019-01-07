@@ -5,6 +5,8 @@ import TorrentClient from "./TorrentClient";
 console.log("torrent-loading", window.location.href);
 window.stop();
 
+console.log("extension id is", chrome.runtime.id);
+
 async function load() {
   let client = new TorrentClient();
   let html = await client.getFile(

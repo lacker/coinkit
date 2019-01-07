@@ -48,3 +48,5 @@ chrome.webRequest.onCompleted.addListener(
 );
 
 let client = new TorrentClient();
+
+// TODO: listen for the loader wanting a file
