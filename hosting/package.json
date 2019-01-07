@@ -12,5 +12,8 @@
     "url": "https://github.com/lacker/coinkit.git"
   },
   "author": "Kevin Lacker",
-  "license": "UNLICENSED"
+  "license": "UNLICENSED",
+  "dependencies": {
+    "webtorrent-hybrid": "^2.1.0"
+  }
 }

@@ -22,7 +22,8 @@
     "redux": "^4.0.1",
     "text-encoding-shim": "^1.0.0",
     "tweetnacl": "^1.0.0",
-    "typeface-roboto": "0.0.54"
+    "typeface-roboto": "0.0.54",
+    "webtorrent-hybrid": "^2.1.0"
   },
   "repository": {
     "type": "git",
