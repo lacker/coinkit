@@ -7,6 +7,10 @@ window.stop();
 
 console.log("extension id is", chrome.runtime.id);
 
+chrome.runtime.sendMessage({ getFile: "hello" }, response => {
+  console.log("loader-main got response:", response);
+});
+
 async function load() {
   let client = new TorrentClient();
   let html = await client.getFile(

@@ -39,7 +39,7 @@ chrome.webRequest.onCompleted.addListener(
     let parts = a.hostname.split(".");
     let tld = parts.pop();
     let domain = parts.pop();
-    console.log("request completed for:", domain, tld);
+    console.log("request completed for:", domain + "." + tld);
   },
   {
     urls: ["*://*.coinkit/*"],
@@ -49,4 +49,12 @@ chrome.webRequest.onCompleted.addListener(
 
 let client = new TorrentClient();
 
-// TODO: listen for the loader wanting a file
+// Listen for the loader wanting a file
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  console.log("XXX background-main got message:", message);
+  if (!message.getFile) {
+    return false;
+  }
+  sendResponse("XXX hello client");
+  return true;
+});

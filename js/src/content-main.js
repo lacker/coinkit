@@ -11,14 +11,17 @@ window.addEventListener(
       return;
     }
 
-    chrome.runtime.sendMessage({ toCoinkit: event.data.message }, response => {
-      let data = {
-        id: event.data.id,
-        type: "fromCoinkit",
-        message: response
-      };
-      window.postMessage(data, "*");
-    });
+    chrome.runtime.sendMessage(
+      { TrustedClient: event.data.message },
+      response => {
+        let data = {
+          id: event.data.id,
+          type: "fromCoinkit",
+          message: response
+        };
+        window.postMessage(data, "*");
+      }
+    );
   },
   false
 );

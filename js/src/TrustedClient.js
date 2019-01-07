@@ -17,10 +17,11 @@ export default class TrustedClient {
 
     if (typeof chrome == "object") {
       chrome.runtime.onMessage.addListener((m, sender, sendResponse) => {
-        if (!m.toCoinkit) {
+        console.log("XXX TrustedClient got message:", m);
+        if (!m.TrustedClient) {
           return false;
         }
-        let serializedMessage = m.toCoinkit;
+        let serializedMessage = m.TrustedClient;
         if (!sender.tab) {
           console.log("unexpected message from no tab:", serializedMessage);
           return false;
