@@ -1,4 +1,4 @@
-// The TorrentClient finds the right torrent for a domain and uses that to return
+// The TorrentClient finds the right torrent for a hostname and uses that to return
 // subsequent files.
 
 import WebTorrent from "webtorrent";
@@ -58,7 +58,7 @@ export default class TorrentClient {
   constructor() {
     this.client = new WebTorrent();
 
-    // Maps domain to {magnet, time} object
+    // Maps hostname to {magnet, time} object
     this.magnets = {};
 
     // this.cache[magnet][filename] is the text cache for the file
@@ -79,30 +79,30 @@ export default class TorrentClient {
 
   // Returns a promise that maps to a magnet url
   // TODO: sometimes read from cache instead of just writing to it, have staleness logic
-  async getMagnetURL(domain) {
+  async getMagnetURL(hostname) {
     let response = await fetch(BOOTSTRAP);
     let json = await response.json();
     let magnet = json.magnet;
     let now = new Date();
-    this.magnets[domain] = {
+    this.magnets[hostname] = {
       magnet,
       time: now
     };
     return magnet;
   }
 
-  // Starts downloading a domain and resolves when all files are ready
+  // Starts downloading all files from a hostname and resolves when they are ready
   // Resolves to a map from filename to content
-  async downloadDomain(domain) {
-    let magnet = await this.getMagnetURL(domain);
+  async downloadHostname(hostname) {
+    let magnet = await this.getMagnetURL(hostname);
     return await this.downloadMagnet(magnet);
   }
 
   // Returns null if the file is not in the cache.
-  getFileFromCache(domain, pathname) {
+  getFileFromCache(hostname, pathname) {
     pathname = cleanPathname(pathname);
 
-    let magnetData = this.magnets[domain];
+    let magnetData = this.magnets[hostname];
     if (!magnetData) {
       return null;
     }
@@ -116,11 +116,11 @@ export default class TorrentClient {
   }
 
   // Rejects if there is no such file.
-  async getFile(domain, pathname) {
+  async getFile(hostname, pathname) {
     pathname = cleanPathname(pathname);
-    console.log("loading", pathname, "from the", domain, "domain");
+    console.log("loading", pathname, "from", hostname);
 
-    let data = await this.downloadDomain(domain);
+    let data = await this.downloadHostname(hostname);
     return data[pathname];
   }
 }

@@ -7,13 +7,10 @@ window.stop();
 
 async function load() {
   let client = new TorrentClient();
-  let parts = window.location.hostname.split(".");
-  if (parts.length != 2 || parts[1] != "coinkit") {
-    throw new Error("unexpected hostname: " + window.location.hostname);
-  }
-  let domain = parts[0];
-  let pathname = window.location.pathname;
-  let html = await client.getFile(domain, pathname);
+  let html = await client.getFile(
+    window.location.hostname,
+    window.location.pathname
+  );
   document.write(html);
 }
 
