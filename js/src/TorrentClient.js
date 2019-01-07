@@ -1,5 +1,5 @@
-// The TorrentClient finds the right torrent for a domain and uses that to return subsequent
-// files.
+// The TorrentClient finds the right torrent for a domain and uses that to return
+// subsequent files.
 
 // TODO: give this functions that lets it serve up subsequent files like image files
 
