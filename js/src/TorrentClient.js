@@ -1,14 +1,12 @@
 // The TorrentClient finds the right torrent for a domain and uses that to return
 // subsequent files.
 
-// TODO: give this functions that lets it serve up subsequent files like image files
-
 import WebTorrent from "webtorrent";
 
 // The initial server that tells us where to start finding peers
 let BOOTSTRAP = "http://localhost:4444";
 
-class TorrentClient {
+export default class TorrentClient {
   constructor() {
     this.client = new WebTorrent();
 
@@ -44,7 +42,7 @@ class TorrentClient {
     return magnet;
   }
 
-  // Starts downloading a domain and resolves when the root URL is ready
+  // Starts downloading a domain and resolves when all files are ready
   // Resolves to the torrent object
   // TODO: require a certain amount of domain newness
   async loadDomain(domain) {
@@ -62,15 +60,20 @@ class TorrentClient {
   }
 
   // Rejects if there is no such file.
-  async getAsText(domain, name) {
+  async getAsText(domain, pathname) {
+    if (pathname.charAt(0) === "/") {
+      pathname = pathname.substr(1);
+    }
+    console.log("loading", pathname, "from the", domain, "domain");
     let torrent = await this.loadDomain(domain);
-    let file = torrent.files.find(file => file.name === name);
+    let file = torrent.files.find(file => file.name === pathname);
     if (!file) {
-      return Promise.reject();
+      console.log("files:", torrent.files);
+      return Promise.reject(new Error("no file named " + pathname));
     }
 
     return new Promise((resolve, reject) => {
-      file.getBlog((err, blob) => {
+      file.getBlob((err, blob) => {
         if (err) {
           reject(err);
         }

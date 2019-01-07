@@ -1,34 +1,25 @@
 // This code is injected into .coinkit pages in order to load their actual content.
 
-import WebTorrent from "webtorrent";
+import TorrentClient from "./TorrentClient";
 
-console.log("running loader-main.js");
+console.log("torrent-loading", window.location.href);
 window.stop();
 
-let client = new WebTorrent();
+async function load() {
+  let client = new TorrentClient();
+  let parts = window.location.hostname.split(".");
+  if (parts.length != 2 || parts[1] != "coinkit") {
+    throw new Error("unexpected hostname: " + window.location.hostname);
+  }
+  let domain = parts[0];
+  let pathname = window.location.pathname;
+  if (pathname.endsWith("/")) {
+    pathname += "index.html";
+  }
+  let html = await client.getAsText(domain, pathname);
+  document.write(html);
+}
 
-fetch("http://localhost:4444")
-  .then(response => {
-    return response.json();
-  })
-  .then(json => {
-    console.log(json.magnet);
-
-    client.add(json.magnet, torrent => {
-      torrent.on("done", () => {
-        let file = torrent.files.find(file => file.name === "index.html");
-        if (!file) {
-          console.log("could not find index.html");
-          return;
-        }
-        console.log("length:", file.length, "downloaded:", file.downloaded);
-        file.getBlob((err, blob) => {
-          let reader = new FileReader();
-          reader.onload = e => {
-            document.write(e.target.result);
-          };
-          reader.readAsText(blob);
-        });
-      });
-    });
-  });
+load().catch(e => {
+  console.log("loading error:", e);
+});
