@@ -68,6 +68,9 @@ export default class TorrentClient {
   // Starts downloading and resolves when the download finishes.
   // Resolves to a map of filename to content, which is also stored in this.cache.
   async downloadMagnet(magnet) {
+    if (this.cache[magnet]) {
+      return this.cache[magnet];
+    }
     let torrent = await downloadTorrent(this.client, magnet);
     let data = await readTorrent(torrent);
     this.cache[magnet] = data;
@@ -91,9 +94,6 @@ export default class TorrentClient {
   // Starts downloading a domain and resolves when all files are ready
   // Resolves to a map from filename to content
   async downloadDomain(domain) {
-    if (this.torrents[domain]) {
-      return this.torrents[domain];
-    }
     let magnet = await this.getMagnetURL(domain);
     return await this.downloadMagnet(magnet);
   }
