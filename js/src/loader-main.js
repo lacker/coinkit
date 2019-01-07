@@ -7,19 +7,14 @@ window.stop();
 
 console.log("extension id is", chrome.runtime.id);
 
-chrome.runtime.sendMessage({ getFile: "hello" }, response => {
-  console.log("loader-main got response:", response);
-});
-
-async function load() {
-  let client = new TorrentClient();
-  let html = await client.getFile(
-    window.location.hostname,
-    window.location.pathname
-  );
-  document.write(html);
-}
-
-load().catch(e => {
-  console.log("loading error:", e);
-});
+chrome.runtime.sendMessage(
+  {
+    getFile: {
+      hostname: window.location.hostname,
+      pathname: window.location.pathname
+    }
+  },
+  response => {
+    document.write(response);
+  }
+);

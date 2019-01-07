@@ -17,7 +17,6 @@ export default class TrustedClient {
 
     if (typeof chrome == "object") {
       chrome.runtime.onMessage.addListener((m, sender, sendResponse) => {
-        console.log("XXX TrustedClient got message:", m);
         if (!m.TrustedClient) {
           return false;
         }

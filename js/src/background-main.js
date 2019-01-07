@@ -51,10 +51,13 @@ let client = new TorrentClient();
 
 // Listen for the loader wanting a file
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  console.log("XXX background-main got message:", message);
   if (!message.getFile) {
     return false;
   }
-  sendResponse("XXX hello client");
+  let { hostname, pathname } = message.getFile;
+  client.getFile(hostname, pathname).then(file => {
+    console.log("sending response:", file);
+    sendResponse(file);
+  });
   return true;
 });
