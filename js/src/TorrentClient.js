@@ -6,6 +6,54 @@ import WebTorrent from "webtorrent";
 // The initial server that tells us where to start finding peers
 let BOOTSTRAP = "http://localhost:4444";
 
+// Removes a leading / and adds a trailing index.html if needed
+// so that callers can be indifferent
+function cleanPathname(pathname) {
+  if (pathname.endsWith("/")) {
+    pathname += "index.html";
+  }
+  if (pathname.charAt(0) === "/") {
+    pathname = pathname.substr(1);
+  }
+  return pathname;
+}
+
+// Async file reader
+async function readFile(file) {
+  return await new Promise((resolve, reject) => {
+    file.getBlob((err, blob) => {
+      if (err) {
+        reject(err);
+      }
+      let reader = new FileReader();
+      reader.onload = e => {
+        resolve(e.target.result);
+      };
+      reader.readAsText(blob);
+    });
+  });
+}
+
+// Turns a torrent into a map from filename to text data
+async function readTorrent(torrent) {
+  let data = {};
+  for (let file of torrent.files) {
+    data[file.name] = await readFile(file);
+  }
+  return data;
+}
+
+// Adds a magnet to a WebTorrent client and resolves when it finishes
+async function downloadTorrent(client, magnet) {
+  return await new Promise((resolve, reject) => {
+    client.add(magnet, torrent => {
+      torrent.on("done", () => {
+        resolve(torrent);
+      });
+    });
+  });
+}
+
 export default class TorrentClient {
   constructor() {
     this.client = new WebTorrent();
@@ -13,24 +61,22 @@ export default class TorrentClient {
     // Maps domain to {magnet, time} object
     this.magnets = {};
 
-    // Maps domain to torrent
-    this.torrents = {};
+    // this.cache[magnet][filename] is the text cache for the file
+    this.cache = {};
   }
 
-  // Starts downloading and resolves to a torrent object when the download finishes
-  async loadMagnet(magnet) {
-    return new Promise((resolve, reject) => {
-      this.client.add(magnet, torrent => {
-        torrent.on("done", () => {
-          resolve(torrent);
-        });
-      });
-    });
+  // Starts downloading and resolves when the download finishes.
+  // Resolves to a map of filename to content, which is also stored in this.cache.
+  async downloadMagnet(magnet) {
+    let torrent = await downloadTorrent(this.client, magnet);
+    let data = await readTorrent(torrent);
+    this.cache[magnet] = data;
+    return data;
   }
 
   // Returns a promise that maps to a magnet url
-  // TODO: sometimes read from cache instead of just writing to it
-  async getMagnet(domain) {
+  // TODO: sometimes read from cache instead of just writing to it, have staleness logic
+  async getMagnetURL(domain) {
     let response = await fetch(BOOTSTRAP);
     let json = await response.json();
     let magnet = json.magnet;
@@ -43,46 +89,38 @@ export default class TorrentClient {
   }
 
   // Starts downloading a domain and resolves when all files are ready
-  // Resolves to the torrent object
-  // TODO: require a certain amount of domain newness
-  async loadDomain(domain) {
+  // Resolves to a map from filename to content
+  async downloadDomain(domain) {
     if (this.torrents[domain]) {
       return this.torrents[domain];
     }
-    let magnet = await this.getMagnet(domain);
-    let torrent = await this.loadMagnet(magnet);
-    this.torrents[domain] = torrent;
-    return torrent;
+    let magnet = await this.getMagnetURL(domain);
+    return await this.downloadMagnet(magnet);
   }
 
-  isReady(domain) {
-    return domain in this.torrents;
+  // Returns null if the file is not in the cache.
+  getFileFromCache(domain, pathname) {
+    pathname = cleanPathname(pathname);
+
+    let magnetData = this.magnets[domain];
+    if (!magnetData) {
+      return null;
+    }
+    let magnet = magnetData.magnet;
+    let cache = this.cache[magnet];
+    if (!cache) {
+      return null;
+    }
+
+    return cache[pathname] || null;
   }
 
   // Rejects if there is no such file.
-  async getAsText(domain, pathname) {
-    if (pathname.charAt(0) === "/") {
-      pathname = pathname.substr(1);
-    }
+  async getFile(domain, pathname) {
+    pathname = cleanPathname(pathname);
     console.log("loading", pathname, "from the", domain, "domain");
-    let torrent = await this.loadDomain(domain);
-    let file = torrent.files.find(file => file.name === pathname);
-    if (!file) {
-      console.log("files:", torrent.files);
-      return Promise.reject(new Error("no file named " + pathname));
-    }
 
-    return new Promise((resolve, reject) => {
-      file.getBlob((err, blob) => {
-        if (err) {
-          reject(err);
-        }
-        let reader = new FileReader();
-        reader.onload = e => {
-          resolve(e.target.result);
-        };
-        reader.readAsText(blob);
-      });
-    });
+    let data = await this.downloadDomain(domain);
+    return data[pathname];
   }
 }

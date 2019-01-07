@@ -13,10 +13,7 @@ async function load() {
   }
   let domain = parts[0];
   let pathname = window.location.pathname;
-  if (pathname.endsWith("/")) {
-    pathname += "index.html";
-  }
-  let html = await client.getAsText(domain, pathname);
+  let html = await client.getFile(domain, pathname);
   document.write(html);
 }
 
