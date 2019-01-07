@@ -40,6 +40,7 @@ this is the black hole proxy
 
 let proxyPort = 3333;
 let proxy = http.createServer((req, res) => {
+  console.log("proxying", req.url);
   res.end(content);
 });
 proxy.listen(proxyPort);
