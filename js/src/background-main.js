@@ -55,6 +55,16 @@ setProxy("localhost:3333", {}).then(() => {
   console.log("initial proxy configuration complete");
 });
 
+chrome.webRequest.onBeforeRequest.addListener(
+  details => {
+    console.log("request initiated for:", details.url);
+  },
+  {
+    urls: ["*://*.coinkit/*"]
+  },
+  ["blocking"]
+);
+
 // Just logs completed coinkit requests
 chrome.webRequest.onCompleted.addListener(
   details => {
