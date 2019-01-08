@@ -27,7 +27,7 @@ async function readFile(file) {
       }
       let reader = new FileReader();
 
-      if (file.endsWith(".html")) {
+      if (file.name.endsWith(".html")) {
         reader.onload = e => {
           resolve({ html: e.target.result });
         };
