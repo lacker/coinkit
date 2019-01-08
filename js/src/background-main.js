@@ -7,14 +7,23 @@ import TrustedClient from "./TrustedClient";
 window.storage = new Storage(new LocalStorage());
 TrustedClient.init(window.storage);
 
-// Creates a pac script so that:
-// staticMap defines a map that sends URL to static content
-// All other URLs ending in .coinkit get proxied to the provided proxy server
-// All the proxy server needs to do is return a valid http response. It can be blank.
-// It can be any other content, too, since the extension will stop it loading.
-// But it might as well be blank.
-function buildScript(server, staticMap) {
-  // TODO: handle staticMap
+// Creates a pac script so that all .coinkit URLs get proxied to a
+// black hole server.
+//
+// All that a "black hole server" needs to do is return a valid http
+// response. It can be blank. It can be any other content, too, since
+// the extension will stop all content loading and load the real site
+// via the distributed system. So the content might as well be blank.
+//
+// We need to do this method for redirecting .coinkit domains so that
+// the URL still appears as .coinkit in the browser. I think this
+// necessary so that the behavior is comprehensible to the end user.
+//
+// This is not ideal architecturally. In particular, information on
+// what URLs we are loading does get leaked to the proxy. And we are
+// dependent on finding a usable proxy site. But I think the tradeoff
+// is worth it for increased usability.
+function buildBlackHoleScript(server) {
   let script = `
     function FindProxyForURL(url, host) {
       if (shExpMatch(host, "*.coinkit")) {
@@ -26,9 +35,9 @@ function buildScript(server, staticMap) {
   return script;
 }
 
-// Sets the browser's proxy configuration script
-async function setProxy(server, staticMap) {
-  let script = buildScript(server, staticMap);
+// Update the black hole proxy
+async function setBlackHoleProxy(server) {
+  let script = buildBlackHoleScript(server);
   let config = {
     mode: "pac_script",
     pacScript: {
@@ -38,48 +47,48 @@ async function setProxy(server, staticMap) {
 
   return await new Promise((resolve, reject) => {
     chrome.proxy.settings.set({ value: config, scope: "regular" }, () => {
-      console.log(
-        "proxy settings updated. black hole is",
-        server,
-        "with static content for",
-        Object.keys(staticMap).join(", ")
-      );
+      console.log("proxy settings updated. black hole is", server);
       resolve();
     });
   });
 }
 
-// For now let's assume there is a proxy running on localhost:3333.
+// For now there must be a black hole proxy running on localhost:3333.
 // Later this proxy address will need to be loaded dynamically from somewhere.
-setProxy("localhost:3333", {}).then(() => {
-  console.log("initial proxy configuration complete");
+setBlackHoleProxy("localhost:3333", {}).then(() => {
+  console.log("initial black hole proxy configuration complete");
 });
 
+// Handle non-html requests by redirecting them to a data URL
 chrome.webRequest.onBeforeRequest.addListener(
   details => {
-    console.log("request initiated for:", details.url);
+    let url = new URL(details.url);
+    console.log("data request initiated for", url.hostname, url.pathname);
   },
   {
-    urls: ["*://*.coinkit/*"]
+    urls: ["*://*.coinkit/*"],
+    types: [
+      "font",
+      "image",
+      "media",
+      "object",
+      "script",
+      "stylesheet",
+      "xmlhttprequest"
+    ]
   },
   ["blocking"]
 );
 
-// Just logs completed coinkit requests
+// Just logs completed coinkit navigation requests
 chrome.webRequest.onCompleted.addListener(
   details => {
-    console.log(details.responseHeaders);
-
-    let a = document.createElement("a");
-    a.href = details.url;
-    let parts = a.hostname.split(".");
-    let tld = parts.pop();
-    let domain = parts.pop();
-    console.log("request completed for:", domain + "." + tld);
+    let url = new URL(details.url);
+    console.log("html request completed for", url.hostname, url.pathname);
   },
   {
     urls: ["*://*.coinkit/*"],
-    types: ["main_frame"]
+    types: ["main_frame", "sub_frame"]
   }
 );
 
