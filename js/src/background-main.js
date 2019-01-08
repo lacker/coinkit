@@ -38,7 +38,12 @@ async function setProxy(server, staticMap) {
 
   return await new Promise((resolve, reject) => {
     chrome.proxy.settings.set({ value: config, scope: "regular" }, () => {
-      console.log("proxy settings have been set:", config);
+      console.log(
+        "proxy settings updated. black hole is",
+        server,
+        "with static content for",
+        Object.keys(staticMap).join(", ")
+      );
       resolve();
     });
   });
@@ -46,7 +51,9 @@ async function setProxy(server, staticMap) {
 
 // For now let's assume there is a proxy running on localhost:3333.
 // Later this proxy address will need to be loaded dynamically from somewhere.
-setProxy("localhost:3333", {});
+setProxy("localhost:3333", {}).then(() => {
+  console.log("initial proxy configuration complete");
+});
 
 // Just logs completed coinkit requests
 chrome.webRequest.onCompleted.addListener(
