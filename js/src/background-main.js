@@ -59,11 +59,20 @@ setBlackHoleProxy("localhost:3333", {}).then(() => {
   console.log("initial black hole proxy configuration complete");
 });
 
+let client = new TorrentClient();
+
 // Handle non-html requests by redirecting them to a data URL
 chrome.webRequest.onBeforeRequest.addListener(
   details => {
     let url = new URL(details.url);
-    console.log("data request initiated for", url.hostname, url.pathname);
+    let file = client.getFileFromCache(url.hostname, url.pathname);
+    if (!file) {
+      console.log("no data found for", url.hostname, url.pathname);
+      return { redirectUrl: "about:blank" };
+    }
+    console.log("data found for", url.hostname, url.pathname);
+    // TODO: something better here
+    return null;
   },
   {
     urls: ["*://*.coinkit/*"],
@@ -91,8 +100,6 @@ chrome.webRequest.onCompleted.addListener(
     types: ["main_frame", "sub_frame"]
   }
 );
-
-let client = new TorrentClient();
 
 // Listen for the loader wanting a file
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
