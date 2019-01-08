@@ -7,27 +7,46 @@ import TrustedClient from "./TrustedClient";
 window.storage = new Storage(new LocalStorage());
 TrustedClient.init(window.storage);
 
-// This proxies .coinkit requests somewhere, which requires that we have a proxy.
+// Creates a pac script so that:
+// staticMap defines a map that sends URL to static content
+// All other URLs ending in .coinkit get proxied to the provided proxy server
+// All the proxy server needs to do is return a valid http response. It can be blank.
+// It can be any other content, too, since the extension will stop it loading.
+// But it might as well be blank.
+function buildScript(server, staticMap) {
+  // TODO: handle staticMap
+  let script = `
+    function FindProxyForURL(url, host) {
+      if (shExpMatch(host, "*.coinkit")) {
+        return "PROXY ${server}";
+      }
+      return 'DIRECT';
+    }
+  `;
+  return script;
+}
+
+// Sets the browser's proxy configuration script
+async function setProxy(server, staticMap) {
+  let script = buildScript(server, staticMap);
+  let config = {
+    mode: "pac_script",
+    pacScript: {
+      data: script
+    }
+  };
+
+  return await new Promise((resolve, reject) => {
+    chrome.proxy.settings.set({ value: config, scope: "regular" }, () => {
+      console.log("proxy settings have been set:", config);
+      resolve();
+    });
+  });
+}
+
 // For now let's assume there is a proxy running on localhost:3333.
 // Later this proxy address will need to be loaded dynamically from somewhere.
-let script = `
-function FindProxyForURL(url, host) {
-  if (shExpMatch(host, "*.coinkit")) {
-    return "PROXY localhost:3333";
-  }
-  return 'DIRECT';
-}
-`;
-
-let config = {
-  mode: "pac_script",
-  pacScript: {
-    data: script
-  }
-};
-chrome.proxy.settings.set({ value: config, scope: "regular" }, () => {
-  console.log("proxy settings have been set:", config);
-});
+setProxy("localhost:3333", {});
 
 // Just logs completed coinkit requests
 chrome.webRequest.onCompleted.addListener(
