@@ -36,7 +36,7 @@ async function readFile(file) {
         reader.onload = e => {
           resolve({ data: e.target.result });
         };
-        reader.readAsDataURL();
+        reader.readAsDataURL(blob);
       }
     });
   });
