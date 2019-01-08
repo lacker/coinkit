@@ -66,13 +66,12 @@ chrome.webRequest.onBeforeRequest.addListener(
   details => {
     let url = new URL(details.url);
     let file = client.getFileFromCache(url.hostname, url.pathname);
-    if (!file) {
+    if (!file.data) {
       console.log("no data found for", url.hostname, url.pathname);
       return { redirectUrl: "about:blank" };
     }
     console.log("data found for", url.hostname, url.pathname);
-    // TODO: something better here
-    return null;
+    return { redirectUrl: file.data };
   },
   {
     urls: ["*://*.coinkit/*"],
@@ -108,8 +107,9 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   }
   let { hostname, pathname } = message.getFile;
   client.getFile(hostname, pathname).then(file => {
-    console.log("sending response:", file);
-    sendResponse(file);
+    // TODO: handle non html stuff
+    console.log("sending response:", file.html);
+    sendResponse(file.html);
   });
   return true;
 });

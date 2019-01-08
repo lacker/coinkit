@@ -26,15 +26,23 @@ async function readFile(file) {
         reject(err);
       }
       let reader = new FileReader();
-      reader.onload = e => {
-        resolve(e.target.result);
-      };
-      reader.readAsText(blob);
+
+      if (file.endsWith(".html")) {
+        reader.onload = e => {
+          resolve({ html: e.target.result });
+        };
+        reader.readAsText(blob);
+      } else {
+        reader.onload = e => {
+          resolve({ data: e.target.result });
+        };
+        reader.readAsDataURL();
+      }
     });
   });
 }
 
-// Turns a torrent into a map from filename to text data
+// Turns a torrent into a map from filename to data
 async function readTorrent(torrent) {
   let data = {};
   for (let file of torrent.files) {
@@ -61,7 +69,8 @@ export default class TorrentClient {
     // Maps hostname to {magnet, time} object
     this.magnets = {};
 
-    // this.cache[magnet][filename] is the text cache for the file
+    // this.cache[magnet][filename] is the cache for the file.
+    // files are stored either as { html: html } or { data: dataURL } objects.
     this.cache = {};
   }
 
