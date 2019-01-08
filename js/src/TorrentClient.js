@@ -66,6 +66,9 @@ export default class TorrentClient {
   constructor() {
     this.client = new WebTorrent();
 
+    // The last time a file from a hostname was fetched
+    this.lastFetchTime = {};
+
     // Maps hostname to {magnet, time} object
     this.magnets = {};
 
@@ -121,6 +124,7 @@ export default class TorrentClient {
       return null;
     }
 
+    this.lastFetchTime[hostname] = new Date();
     return cache[pathname] || null;
   }
 
@@ -130,6 +134,7 @@ export default class TorrentClient {
     console.log("loading", pathname, "from", hostname);
 
     let data = await this.downloadHostname(hostname);
+    this.lastFetchTime[hostname] = new Date();
     return data[pathname];
   }
 }
