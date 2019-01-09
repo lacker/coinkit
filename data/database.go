@@ -758,3 +758,28 @@ func (db *Database) GetDocuments(match map[string]interface{}, limit int) ([]*Do
 
 	return answer, slot
 }
+
+//////////////
+// Buckets
+//////////////
+
+const bucketInsert = `
+INSERT INTO buckets (name, owner, size)
+VALUES (:name, :owner, :size)
+`
+
+// InsertBucket returns an error if it failed because there is already a bucket with
+// this name.
+// It uses the transaction.
+// It panics if there is a fundamental database problem.
+// If this returns an error, the pending transaction will be unusable.
+func (db *Database) InsertBucket(b *Bucket) error {
+	_, err := db.namedExecTx(bucketInsert, b)
+	if err == nil {
+		if isUniquenessError(err) {
+			return err
+		}
+		panic(err)
+	}
+	return nil
+}
