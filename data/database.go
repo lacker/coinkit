@@ -429,6 +429,9 @@ VALUES (:slot, :chunk, :c, :h, :d)
 `
 
 func isUniquenessError(e error) bool {
+	if e == nil {
+		return false
+	}
 	return strings.Contains(e.Error(), "duplicate key value violates unique constraint")
 }
 
@@ -775,7 +778,7 @@ VALUES (:name, :owner, :size)
 // If this returns an error, the pending transaction will be unusable.
 func (db *Database) InsertBucket(b *Bucket) error {
 	_, err := db.namedExecTx(bucketInsert, b)
-	if err == nil {
+	if err != nil {
 		if isUniquenessError(err) {
 			return err
 		}
