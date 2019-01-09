@@ -384,3 +384,17 @@ func TestAccounts(t *testing.T) {
 		t.Fatalf("got unexpected data message: %+v", dm)
 	}
 }
+
+func TestBuckets(t *testing.T) {
+	db := NewTestDatabase(0)
+	b := &Bucket{
+		Name:  "mybucket",
+		Owner: "bob",
+		Size:  100,
+	}
+	err := db.InsertBucket(b)
+	if err != nil {
+		t.Fatal(err)
+	}
+	db.Commit()
+}
