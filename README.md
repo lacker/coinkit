@@ -44,6 +44,9 @@ cd ~/go/src/github.com/lacker/coinkit
 go get -t ./...
 
 # Create databases
+# This expects your postgres setup to allow a login with your username
+# and the password "test".
+# If you get an authentication failure you will have to set that up yourself.
 ./create-databases.sh
 
 # Run the unit tests

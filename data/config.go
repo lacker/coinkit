@@ -35,6 +35,7 @@ func NewTestConfig(i int) *Config {
 		User:     "$USER",
 		Host:     "127.0.0.1",
 		Port:     5432,
+		Password: "test",
 		testOnly: true,
 	}
 }
