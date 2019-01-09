@@ -1,9 +1,10 @@
 package network
 
 import (
-	// "bytes"
+	"bytes"
 	"fmt"
-	// "net/http"
+	"net/http"
+	"strings"
 	"testing"
 	"time"
 
@@ -184,7 +185,6 @@ func BenchmarkSendMoney30(b *testing.B) {
 	benchmarkSendMoney(30, b)
 }
 
-/* Broken on Linux
 func TestServerHandlesBadMessages(t *testing.T) {
 	config, kps := NewUnitTestNetwork()
 	s := NewServer(kps[0], config, nil)
@@ -202,14 +202,19 @@ func TestServerHandlesBadMessages(t *testing.T) {
 	s.ServeInBackground()
 
 	response := s.handleMessageRequest(request)
-	// TODO: should the server actually return an error?
-	if response != nil {
-		t.Fatalf("expected no response but got %+v", response)
+	if response == nil {
+		t.Fatalf("expected error message but got nil")
+	}
+	em, ok := response.Message().(*util.ErrorMessage)
+	if !ok {
+		t.Fatalf("expected error message but got %+v", response.Message())
+	}
+	if strings.Count(em.Error, "unregistered message type") == 0 {
+		t.Fatalf("expected unregistered message type error but got %s", em)
 	}
 
 	s.Stop()
 }
-*/
 
 func TestDataOperations(t *testing.T) {
 	servers := makeServers(t)
