@@ -119,6 +119,14 @@ CREATE TABLE IF NOT EXISTS documents (
 
 CREATE UNIQUE INDEX IF NOT EXISTS document_id_idx ON documents (id);
 CREATE INDEX IF NOT EXISTS document_data_idx ON documents USING gin (data jsonb_path_ops);
+
+CREATE TABLE IF NOT EXISTS buckets (
+    name text,
+    owner text,
+    size integer
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS bucket_name_idx ON buckets (name);
 `
 
 // Not threadsafe, caller should hold mutex or be in init
