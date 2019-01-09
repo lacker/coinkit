@@ -25,7 +25,7 @@ type CreateBucketOperation struct {
 
 func (op *CreateBucketOperation) String() string {
 	return fmt.Sprintf("CreateBucket owner=%s, name=%s, size=%d",
-		util.Shorten(op.signer), op.Name, op.Size)
+		util.Shorten(op.Signer), op.Name, op.Size)
 }
 
 func (op *CreateBucketOperation) OperationType() string {
@@ -40,12 +40,12 @@ func (op *CreateBucketOperation) GetFee() uint64 {
 	return op.Fee
 }
 
-func (op *CreateOperation) GetSequence() uint32 {
+func (op *CreateBucketOperation) GetSequence() uint32 {
 	return op.Sequence
 }
 
 // TODO: should this do something?
-func (op *CreateOperation) Verify() bool {
+func (op *CreateBucketOperation) Verify() bool {
 	return true
 }
 
@@ -55,7 +55,7 @@ func MakeTestCreateBucketOperation(n int) *SignedOperation {
 		Signer:   mint.PublicKey().String(),
 		Sequence: uint32(n),
 		Name:     fmt.Sprintf("bucket%d", n),
-		Size:     n * 1000,
+		Size:     uint32(n * 1000),
 	}
 	return NewSignedOperation(op, mint)
 }

@@ -19,9 +19,10 @@ func TestCreateBucketOperationSerialization(t *testing.T) {
 	if op1.Signer != op2.Signer {
 		t.Fatalf("op1.Signer is %s, op2.Signer is %s", op1.Signer, op2.Signer)
 	}
-	if op1.Data.DefaultInt("foo", 0) != op2.Data.DefaultInt("foo", -1) {
-		t.Logf("op1.Data: %s", op1.Data)
-		t.Logf("op2.Data: %s", op2.Data)
-		t.Fatalf("op1.Data != op2.Data")
+	if op1.Name != op2.Name {
+		t.Fatalf("op1.Name is %s, op2.Name is %s", op1.Name, op2.Name)
+	}
+	if op1.Size != op2.Size {
+		t.Fatalf("op1.Size is %d, op2.Size is %d", op1.Size, op2.Size)
 	}
 }
