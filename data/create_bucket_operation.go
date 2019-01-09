@@ -49,6 +49,17 @@ func (op *CreateOperation) Verify() bool {
 	return true
 }
 
+func MakeTestCreateBucketOperation(n int) *SignedOperation {
+	mint := util.NewKeyPairFromSecretPhrase("mint")
+	op := &CreateBucketOperation{
+		Signer:   mint.PublicKey().String(),
+		Sequence: uint32(n),
+		Name:     fmt.Sprintf("bucket%d", n),
+		Size:     n * 1000,
+	}
+	return NewSignedOperation(op, mint)
+}
+
 func init() {
 	RegisterOperationType(&CreateBucketOperation{})
 }
