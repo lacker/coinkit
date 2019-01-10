@@ -19,8 +19,11 @@ type QueryMessage struct {
 	// When Block is nonzero, this message is requesting data for a mined block.
 	Block int `json:"block"`
 
-	// When Documents is nonzero, this message is requesting data for matching documents.
+	// When Documents is non-nil, this message is requesting data for matching documents.
 	Documents *DocumentQuery `json:"documents"`
+
+	// When Buckets is non-nil, this message is requesting data for matching buckets.
+	Buckets *BucketQuery `json:"buckets"`
 
 	// When Signature is nonempty, this message is requesting a committed
 	// SignedOperation with this signature.

@@ -787,8 +787,10 @@ WHERE name = $1
 // this name.
 // It uses the transaction.
 // It panics if there is a fundamental database problem.
-// If this returns an error, the pending transaction will be unusable.
 func (db *Database) InsertBucket(b *Bucket) error {
+	if b.Name == "" || b.Owner == "" {
+		return fmt.Errorf("invalid bucket to insert: %+v", b)
+	}
 	_, err := db.namedExecTx(bucketInsert, b)
 	if err != nil {
 		if isUniquenessError(err) {
@@ -842,7 +844,6 @@ func (db *Database) SetBucket(b *Bucket) error {
 
 // DeleteBucket deletes the bucket, using the transaction.
 // It errors when there is no such bucket.
-// If this returns an error, the pending transaction will still be usable.
 func (db *Database) DeleteBucket(name string) error {
 	res, err := db.execTx(bucketDelete, name)
 	if err != nil {
