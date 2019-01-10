@@ -786,3 +786,21 @@ func (db *Database) InsertBucket(b *Bucket) error {
 	}
 	return nil
 }
+
+// Returns nil if there is no such bucket
+func (db *Database) GetBucket(name string) *Bucket {
+	rows, err := db.postgres.Queryx(
+		"SELECT * FROM buckets WHERE name = $1 LIMIT 1", name)
+	if err != nil {
+		panic(err)
+	}
+	for rows.Next() {
+		b := &Bucket{}
+		err := rows.StructScan(b)
+		if err != nil {
+			panic(err)
+		}
+		return b
+	}
+	return nil
+}
