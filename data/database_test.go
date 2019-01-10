@@ -420,4 +420,10 @@ func TestBuckets(t *testing.T) {
 	if b3.Size != 200 {
 		t.Fatalf("bad bucket post update: %+v", b3)
 	}
+
+	db.DeleteBucket("mybucket")
+	db.Commit()
+	if db.GetBucket("mybucket") != nil {
+		t.Fatalf("delete bucket failed")
+	}
 }
