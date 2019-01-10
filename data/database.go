@@ -688,7 +688,7 @@ func (db *Database) SetDocument(doc *Document) error {
 		panic(err)
 	}
 	if count != 1 {
-		return fmt.Errorf("expected 1 row affected, got %d", count)
+		return fmt.Errorf("expected 1 document row affected, got %d", count)
 	}
 	return nil
 }
@@ -772,6 +772,12 @@ INSERT INTO buckets (name, owner, size)
 VALUES (:name, :owner, :size)
 `
 
+const bucketUpdate = `
+UPDATE buckets
+SET size = :size, owner = :owner
+WHERE name = :name
+`
+
 // InsertBucket returns an error if it failed because there is already a bucket with
 // this name.
 // It uses the transaction.
@@ -802,6 +808,29 @@ func (db *Database) GetBucket(name string) *Bucket {
 			panic(err)
 		}
 		return b
+	}
+	return nil
+}
+
+// SetBucket updates the contents of the bucket, using the transaction.
+// The name of a bucket cannot be changed, only size and owner.
+// Size and owner must be provided.
+// If there is no such bucket, this returns an error, no change is
+// made, and the pending transaction will still be usable.
+func (db *Database) SetBucket(b *Bucket) error {
+	if b.Size == 0 || b.Owner == "" || b.Name == "" {
+		t.Fatalf("invalid bucket in UpdateBucket: %+v", b)
+	}
+	res, err := db.namedExecTx(bucketUpdate, b)
+	if err != nil {
+		panic(err)
+	}
+	count, err := res.RowsAffected()
+	if err != nil {
+		panic(err)
+	}
+	if count != 1 {
+		return fmt.Errorf("expected 1 bucket row affected, got %d", count)
 	}
 	return nil
 }
