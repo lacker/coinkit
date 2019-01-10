@@ -128,6 +128,7 @@ CREATE TABLE IF NOT EXISTS buckets (
 );
 
 CREATE UNIQUE INDEX IF NOT EXISTS bucket_name_idx ON buckets (name);
+CREATE INDEX IF NOT EXISTS bucket_owner_idx ON buckets (owner);
 `
 
 // Not threadsafe, caller should hold mutex or be in init
