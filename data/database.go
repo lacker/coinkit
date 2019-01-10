@@ -45,6 +45,16 @@ type Database struct {
 
 var allDatabases = []*Database{}
 
+func boundLimit(limit int) int {
+	if limit <= 0 {
+		return 100
+	}
+	if limit > 500 {
+		return 500
+	}
+	return limit
+}
+
 func NewDatabase(config *Config) *Database {
 	user, err := user.Current()
 	if err != nil {
@@ -730,12 +740,7 @@ func (db *Database) DeleteDocument(id uint64) error {
 // GetDocuments returns a list of matching documents, along with the slot that this
 // data reflects.
 func (db *Database) GetDocuments(match map[string]interface{}, limit int) ([]*Document, int) {
-	if limit <= 0 {
-		limit = 100
-	}
-	if limit > 500 {
-		limit = 500
-	}
+	limit = boundLimit(limit)
 
 	bytes, err := json.Marshal(match)
 	if err != nil {
@@ -858,4 +863,45 @@ func (db *Database) DeleteBucket(name string) error {
 		return fmt.Errorf("expected 1 bucket deleted, got %d", count)
 	}
 	return nil
+}
+
+// GetBuckets returns a list of matching buckets, along with the slot
+// that this data reflects.
+// TODO: add some limit here
+// TODO: test various ways to call GetBuckets
+func (db *Database) GetBuckets(q *BucketQuery) ([]*Bucket, int) {
+	limit := boundLimit(q.Limit)
+
+	whereParts := []string{}
+	if q.Name != "" {
+		whereParts = append(whereParts, "name = :name")
+	}
+	if q.Owner != "" {
+		whereParts = append(whereParts, "owner = :owner")
+	}
+	if len(whereParts) == 0 {
+		util.Logger.Fatalf("bad GetBuckets query: %+v", q)
+	}
+	where := strings.Join(whereParts, " ")
+
+	tx, slot := db.readTransaction()
+	query := fmt.Sprintf("SELECT * FROM buckets WHERE %s LIMIT %d", where, limit)
+	rows, err := tx.NamedQuery(query, q)
+	if err != nil {
+		panic(err)
+	}
+
+	answer := []*Bucket{}
+	for rows.Next() {
+		b := &Bucket{}
+		err := rows.StructScan(b)
+		if err != nil {
+			panic(err)
+		}
+		answer = append(answer, b)
+	}
+
+	db.finishReadTransaction(tx)
+
+	return answer, slot
 }

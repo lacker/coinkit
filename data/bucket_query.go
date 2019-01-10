@@ -8,6 +8,7 @@ import (
 type BucketQuery struct {
 	Name  string `json:"name"`
 	Owner string `json:"owner"`
+	Limit int    `json:"limit"`
 }
 
 func (q *BucketQuery) String() string {
