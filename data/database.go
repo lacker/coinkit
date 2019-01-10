@@ -392,6 +392,15 @@ func (db *Database) DocumentDataMessage(q *DocumentQuery) *DataMessage {
 	return message
 }
 
+func (db *Database) BucketDataMessage(q *BucketQuery) *DataMessage {
+	buckets, slot := db.GetBuckets(q)
+	message := &DataMessage{
+		Buckets: buckets,
+		I:       slot,
+	}
+	return message
+}
+
 // Currently just checks the last 20 blocks for the right operation.
 // TODO: store ops by signature somewhere
 func (db *Database) SignatureDataMessage(signature string) *DataMessage {

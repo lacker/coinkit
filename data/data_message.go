@@ -24,6 +24,9 @@ type DataMessage struct {
 	// A list of documents.
 	Documents []*Document `json:"documents"`
 
+	// A list of buckets.
+	Buckets []*Bucket `json:"buckets"`
+
 	// The contents of some committed operations, keyed by signature.
 	Operations map[string]*SignedOperation `json:"operations"`
 }
