@@ -71,6 +71,7 @@ func NewDatabase(config *Config) *Database {
 		postgres.Exec("DELETE FROM blocks")
 		postgres.Exec("DELETE FROM accounts")
 		postgres.Exec("DELETE FROM documents")
+		postgres.Exec("DELETE FROM buckets")
 	}
 
 	db := &Database{
