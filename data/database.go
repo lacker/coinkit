@@ -710,7 +710,7 @@ func (db *Database) UpdateDocument(id uint64, data *JSONObject) error {
 
 // DeleteDocument deletes the document, using the transaction.
 // It errors when there is no such document.
-// If this returns an error, the pending transaction will be unusable.
+// If this returns an error, the pending transaction will still be usable.
 func (db *Database) DeleteDocument(id uint64) error {
 	res, err := db.execTx(documentDelete, id)
 	if err != nil {
@@ -721,7 +721,7 @@ func (db *Database) DeleteDocument(id uint64) error {
 		panic(err)
 	}
 	if count != 1 {
-		return fmt.Errorf("expected 1 row deleted, got %d", count)
+		return fmt.Errorf("expected 1 document deleted, got %d", count)
 	}
 	return nil
 }
@@ -778,6 +778,11 @@ SET size = :size, owner = :owner
 WHERE name = :name
 `
 
+const bucketDelete = `
+DELETE FROM buckets
+WHERE name = $1
+`
+
 // InsertBucket returns an error if it failed because there is already a bucket with
 // this name.
 // It uses the transaction.
@@ -831,6 +836,24 @@ func (db *Database) SetBucket(b *Bucket) error {
 	}
 	if count != 1 {
 		return fmt.Errorf("expected 1 bucket row affected, got %d", count)
+	}
+	return nil
+}
+
+// DeleteBucket deletes the bucket, using the transaction.
+// It errors when there is no such bucket.
+// If this returns an error, the pending transaction will still be usable.
+func (db *Database) DeleteBucket(name string) error {
+	res, err := db.execTx(bucketDelete, name)
+	if err != nil {
+		panic(err)
+	}
+	count, err := res.RowsAffected()
+	if err != nil {
+		panic(err)
+	}
+	if count != 1 {
+		return fmt.Errorf("expected 1 bucket deleted, got %d", count)
 	}
 	return nil
 }
