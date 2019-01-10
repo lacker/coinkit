@@ -396,5 +396,11 @@ func TestBuckets(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+
+	if db.GetBucket("mybucket") != nil {
+		t.Fatalf("mybucket should not be visible before commit")
+	}
+
 	db.Commit()
+
 }
