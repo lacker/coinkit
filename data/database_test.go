@@ -403,4 +403,11 @@ func TestBuckets(t *testing.T) {
 
 	db.Commit()
 
+	if db.GetBucket("blorp") != nil {
+		t.Fatalf("there should be no bucket named blorp")
+	}
+	b2 := db.GetBucket("mybucket")
+	if b2.Owner != "bob" {
+		t.Fatalf("GetBucket got %+v", b2)
+	}
 }
