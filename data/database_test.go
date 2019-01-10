@@ -410,4 +410,14 @@ func TestBuckets(t *testing.T) {
 	if b2.Owner != "bob" {
 		t.Fatalf("GetBucket got %+v", b2)
 	}
+
+	b.Size = 200
+	if err = db.SetBucket(b); err != nil {
+		t.Fatalf("SetBucket error: %s", err)
+	}
+	db.Commit()
+	b3 := db.GetBucket("mybucket")
+	if b3.Size != 200 {
+		t.Fatalf("bad bucket post update: %+v", b3)
+	}
 }

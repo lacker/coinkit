@@ -819,7 +819,7 @@ func (db *Database) GetBucket(name string) *Bucket {
 // made, and the pending transaction will still be usable.
 func (db *Database) SetBucket(b *Bucket) error {
 	if b.Size == 0 || b.Owner == "" || b.Name == "" {
-		t.Fatalf("invalid bucket in UpdateBucket: %+v", b)
+		util.Logger.Fatalf("invalid bucket in UpdateBucket: %+v", b)
 	}
 	res, err := db.namedExecTx(bucketUpdate, b)
 	if err != nil {
