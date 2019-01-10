@@ -13,13 +13,13 @@ type BucketQuery struct {
 func (q *BucketQuery) String() string {
 	parts := []string{}
 	if q.Name != "" {
-		parts = append(parts, fmt.Sprintf("name=%s"))
+		parts = append(parts, fmt.Sprintf("name=%s", q.Name))
 	}
 	if q.Owner != "" {
-		parts = append(parts, fmt.Sprintf("owner=%s"))
+		parts = append(parts, fmt.Sprintf("owner=%s", q.Owner))
 	}
-	if parts.length == 0 {
+	if len(parts) == 0 {
 		return "<empty>"
 	}
-	return string.Join(parts, " ")
+	return strings.Join(parts, " ")
 }
