@@ -148,7 +148,6 @@ CREATE TABLE IF NOT EXISTS providers (
 
 CREATE UNIQUE INDEX IF NOT EXISTS provider_id_idx ON providers(id);
 CREATE INDEX IF NOT EXISTS provider_owner_idx ON providers (owner);
-}
 `
 
 // Not threadsafe, caller should hold mutex or be in init
@@ -956,7 +955,7 @@ WHERE id = :id
 // It returns the provider id but does not mutate its argument.
 func (db *Database) InsertProvider(p *Provider) uint64 {
 	if p == nil || p.Owner == "" || p.Capacity == 0 || p.ID != 0 {
-		return fmt.Errorf("invalid provider to insert: %+v", p)
+		util.Logger.Fatalf("invalid provider to insert: %+v", p)
 	}
 
 	// Make the new id one more than the highest used provider id
@@ -975,7 +974,7 @@ func (db *Database) InsertProvider(p *Provider) uint64 {
 	// Make a copy to insert
 	insert := *p
 	insert.ID = id
-	_, err := db.namedExecTx(providerInsert, &insert)
+	_, err = db.namedExecTx(providerInsert, &insert)
 	if err != nil {
 		panic(err)
 	}
