@@ -5,9 +5,11 @@ import (
 )
 
 type Bucket struct {
-	Name  string
-	Owner string
-	Size  uint32
+	Name  string `json:"name"`
+	Owner string `json:"owner"`
+
+	// Measured in megabytes
+	Size uint32 `json:"size"`
 }
 
 func (b *Bucket) String() string {
