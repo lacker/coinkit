@@ -918,3 +918,23 @@ func (db *Database) GetBuckets(q *BucketQuery) ([]*Bucket, int) {
 
 	return answer, slot
 }
+
+////////////////
+// Providers
+////////////////
+
+const providerInsert = `
+INSERT INTO providers (id, owner, capacity)
+VALUES (:id, :owner, :capacity)
+`
+
+const providerUpdate = `
+UPDATE providers
+SET capacity = :capacity
+WHERE id = :id
+`
+
+const providerDelete = `
+DELETE FROM providers
+WHERE id = :id
+`
