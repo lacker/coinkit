@@ -421,12 +421,6 @@ func TestBuckets(t *testing.T) {
 		t.Fatalf("bad bucket post update: %+v", b3)
 	}
 
-	db.DeleteBucket("mybucket")
-	db.Commit()
-	if db.GetBucket("mybucket") != nil {
-		t.Fatalf("delete bucket failed")
-	}
-
 	type pair struct {
 		query *BucketQuery
 		count int
@@ -451,7 +445,14 @@ func TestBuckets(t *testing.T) {
 	for _, pair := range pairs {
 		buckets, _ := db.GetBuckets(pair.query)
 		if len(buckets) != pair.count {
-			t.Fatalf("query %+v got %d results but expected %d", pair.query, len(buckets), pair.count)
+			t.Fatalf("query %+v got %d results but expected %d",
+				pair.query, len(buckets), pair.count)
 		}
+	}
+
+	db.DeleteBucket("mybucket")
+	db.Commit()
+	if db.GetBucket("mybucket") != nil {
+		t.Fatalf("delete bucket failed")
 	}
 }

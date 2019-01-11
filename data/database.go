@@ -891,13 +891,13 @@ func (db *Database) GetBuckets(q *BucketQuery) ([]*Bucket, int) {
 	if len(whereParts) == 0 {
 		util.Logger.Fatalf("bad GetBuckets query: %+v", q)
 	}
-	where := strings.Join(whereParts, " ")
+	where := strings.Join(whereParts, " AND ")
 
 	tx, slot := db.readTransaction()
 	query := fmt.Sprintf("SELECT * FROM buckets WHERE %s LIMIT %d", where, limit)
 	rows, err := tx.NamedQuery(query, q)
 	if err != nil {
-		panic(err)
+		util.Logger.Fatalf("failed on query %s with error %s", query, err)
 	}
 
 	answer := []*Bucket{}
