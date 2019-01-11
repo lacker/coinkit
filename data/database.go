@@ -317,6 +317,10 @@ func (db *Database) HandleQueryMessage(m *QueryMessage) *DataMessage {
 		return db.SignatureDataMessage(m.Signature)
 	}
 
+	if m.Buckets != nil {
+		return db.BucketDataMessage(m.Buckets)
+	}
+
 	return nil
 }
 

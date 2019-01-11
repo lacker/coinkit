@@ -494,6 +494,16 @@ func TestBuckets(t *testing.T) {
 		}
 	}
 
+	dm := &QueryMessage{
+		Buckets: &BucketQuery{
+			Owner: "bob",
+		},
+	}
+	qm := db.HandleQueryMessage(dm)
+	if len(qm.Buckets) != 1 {
+		t.Fatalf("failed to HandleQueryMessage: %+v", qm)
+	}
+
 	db.DeleteBucket("mybucket")
 	db.Commit()
 	if db.GetBucket("mybucket") != nil {
