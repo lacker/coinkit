@@ -807,7 +807,7 @@ WHERE name = $1
 // It uses the transaction.
 // It panics if there is a fundamental database problem.
 func (db *Database) InsertBucket(b *Bucket) error {
-	if b.Name == "" || b.Owner == "" {
+	if b == nil || b.Name == "" || b.Owner == "" {
 		return fmt.Errorf("invalid bucket to insert: %+v", b)
 	}
 	_, err := db.namedExecTx(bucketInsert, b)
@@ -938,3 +938,36 @@ const providerDelete = `
 DELETE FROM providers
 WHERE id = :id
 `
+
+// InsertProvider takes a Provider that has no specified ID. It automatically assigns the
+// next unused id to this Provider and inserts it into the database.
+// It uses the transaction.
+// It panics if there is a fundamental database problem.
+// It returns the provider id but does not mutate its argument.
+func (db *Database) InsertProvider(p *Provider) uint64 {
+	if p == nil || p.Owner == "" || p.Capacity == 0 || p.ID != 0 {
+		return fmt.Errorf("invalid provider to insert: %+v", p)
+	}
+
+	// Make the new id one more than the highest used provider id
+	// This could reassign an id if the most recent provider got deleted but hopefully
+	// that is okay
+	highest := &Provider{}
+	err := db.getTx(highest, "SELECT * FROM providers ORDER BY id DESC LIMIT 1")
+	if err != nil {
+		panic(err)
+	}
+	id := uint64(1)
+	if highest != nil {
+		id = highest.ID + 1
+	}
+
+	// Make a copy to insert
+	insert := *p
+	insert.ID = id
+	_, err := db.namedExecTx(providerInsert, &insert)
+	if err != nil {
+		panic(err)
+	}
+	return id
+}
