@@ -440,6 +440,50 @@ func TestBuckets(t *testing.T) {
 			},
 			count: 1,
 		},
+		pair{
+			query: &BucketQuery{
+				Name: "mybucket",
+			},
+			count: 1,
+		},
+		pair{
+			query: &BucketQuery{
+				Owner: "zeke",
+				Name:  "mybucket",
+			},
+			count: 0,
+		},
+		pair{
+			query: &BucketQuery{
+				Owner: "bob",
+				Name:  "zorp",
+			},
+			count: 0,
+		},
+		pair{
+			query: &BucketQuery{
+				Owner: "zeke",
+			},
+			count: 0,
+		},
+		pair{
+			query: &BucketQuery{
+				Name: "zorp",
+			},
+			count: 0,
+		},
+		pair{
+			query: &BucketQuery{
+				Owner: "Bob",
+			},
+			count: 0,
+		},
+		pair{
+			query: &BucketQuery{
+				Name: "MyBucket",
+			},
+			count: 0,
+		},
 	}
 
 	for _, pair := range pairs {
