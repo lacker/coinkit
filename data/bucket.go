@@ -10,6 +10,8 @@ type Bucket struct {
 
 	// Measured in megabytes
 	Size uint32 `json:"size"`
+
+	Providers ProviderArray `json:"providers"`
 }
 
 func (b *Bucket) String() string {

@@ -83,6 +83,7 @@ func NewDatabase(config *Config) *Database {
 		postgres.Exec("DELETE FROM documents")
 		postgres.Exec("DELETE FROM buckets")
 		postgres.Exec("DELETE FROM providers")
+		postgres.Exec("DELETE FROM allocations")
 	}
 
 	db := &Database{
@@ -135,11 +136,13 @@ CREATE INDEX IF NOT EXISTS document_data_idx ON documents USING gin (data jsonb_
 CREATE TABLE IF NOT EXISTS buckets (
     name text,
     owner text,
-    size integer
+    size integer,
+    providers bigint[]
 );
 
 CREATE UNIQUE INDEX IF NOT EXISTS bucket_name_idx ON buckets (name);
 CREATE INDEX IF NOT EXISTS bucket_owner_idx ON buckets (owner);
+CREATE INDEX IF NOT EXISTS bucket_provider_idx ON buckets (providers);
 
 CREATE TABLE IF NOT EXISTS providers (
     id bigint,
@@ -147,7 +150,7 @@ CREATE TABLE IF NOT EXISTS providers (
     capacity integer
 );
 
-CREATE UNIQUE INDEX IF NOT EXISTS provider_id_idx ON providers(id);
+CREATE UNIQUE INDEX IF NOT EXISTS provider_id_idx ON providers (id);
 CREATE INDEX IF NOT EXISTS provider_owner_idx ON providers (owner);
 `
 
