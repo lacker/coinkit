@@ -855,14 +855,14 @@ func (db *Database) GetBucket(name string) *Bucket {
 	return nil
 }
 
-// SetBucket updates the contents of the bucket, using the transaction.
+// SetBucket sets the contents of the bucket, using the transaction.
 // The name of a bucket cannot be changed, only size and owner.
 // Size and owner must be provided.
-// If there is no such bucket, this returns an error, no change is
-// made, and the pending transaction will still be usable.
+// If there is no such bucket, this returns an error, and no change is
+// made.
 func (db *Database) SetBucket(b *Bucket) error {
 	if b.Size == 0 || b.Owner == "" || b.Name == "" {
-		util.Logger.Fatalf("invalid bucket in UpdateBucket: %+v", b)
+		util.Logger.Fatalf("invalid bucket in SetBucket: %+v", b)
 	}
 	res, err := db.namedExecTx(bucketUpdate, b)
 	if err != nil {
@@ -1011,7 +1011,7 @@ func (db *Database) GetProviders(q *ProviderQuery) ([]*Provider, int) {
 	limit := boundLimit(q.Limit)
 
 	whereParts := []string{}
-	if q.ID != "" {
+	if q.ID != 0 {
 		whereParts = append(whereParts, "id = :id")
 	}
 	if q.Owner != "" {
@@ -1042,4 +1042,25 @@ func (db *Database) GetProviders(q *ProviderQuery) ([]*Provider, int) {
 	db.finishReadTransaction(tx)
 
 	return answer, slot
+}
+
+// Changes capacity of a provider
+// If there is no such bucket,
+func (db *Database) SetCapacity(id uint64, capacity uint32) error {
+	p := &Provider{
+		ID:       id,
+		Capacity: capacity,
+	}
+	res, err := db.namedExecTx(providerUpdate, p)
+	if err != nil {
+		panic(err)
+	}
+	count, err := res.RowsAffected()
+	if err != nil {
+		panic(err)
+	}
+	if count != 1 {
+		return fmt.Errorf("expected 1 provider row affected, got %d", count)
+	}
+	return nil
 }
