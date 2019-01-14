@@ -535,4 +535,22 @@ func TestProviders(t *testing.T) {
 	if len(ps) != 2 {
 		t.Fatalf("GetProviders returned: %+v", ps)
 	}
+
+	err := db.SetCapacity(1, 200)
+	if err != nil {
+		t.Fatalf("SetCapacity error: %s", err)
+	}
+	db.Commit()
+
+	p2 := db.GetProvider(1)
+	if p2.Capacity != 200 {
+		t.Fatalf("SetCapacity failed: %+v", p2)
+	}
+
+	db.DeleteProvider(2)
+	db.Commit()
+	ps, _ = db.GetProviders(q)
+	if len(ps) != 1 {
+		t.Fatalf("delete did not seem to delete")
+	}
 }

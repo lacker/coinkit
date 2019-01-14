@@ -951,7 +951,7 @@ WHERE id = :id
 
 const providerDelete = `
 DELETE FROM providers
-WHERE id = :id
+WHERE id = $1
 `
 
 // InsertProvider takes a Provider that has no specified ID. It automatically assigns the
