@@ -453,6 +453,20 @@ func (db *Database) CheckAccountsMatchBlocks() error {
 	return cache.CheckAgainstDatabase(db)
 }
 
+func isUniquenessError(e error) bool {
+	if e == nil {
+		return false
+	}
+	return strings.Contains(e.Error(), "duplicate key value violates unique constraint")
+}
+
+func isNoRowsError(e error) bool {
+	if e == nil {
+		return false
+	}
+	return strings.Contains(e.Error(), "no rows in result set")
+}
+
 //////////////
 // Blocks
 //////////////
@@ -461,13 +475,6 @@ const blockInsert = `
 INSERT INTO blocks (slot, chunk, c, h, d)
 VALUES (:slot, :chunk, :c, :h, :d)
 `
-
-func isUniquenessError(e error) bool {
-	if e == nil {
-		return false
-	}
-	return strings.Contains(e.Error(), "duplicate key value violates unique constraint")
-}
 
 // InsertBlock returns an error if it failed because this block is already saved.
 // It panics if there is a fundamental database problem.
@@ -962,11 +969,11 @@ func (db *Database) InsertProvider(p *Provider) uint64 {
 	// This could reassign an id if the most recent provider got deleted but hopefully
 	// that is okay
 	highest := &Provider{}
+	id := uint64(1)
 	err := db.getTx(highest, "SELECT * FROM providers ORDER BY id DESC LIMIT 1")
-	if err != nil {
+	if err != nil && !isNoRowsError(err) {
 		panic(err)
 	}
-	id := uint64(1)
 	if highest != nil {
 		id = highest.ID + 1
 	}
