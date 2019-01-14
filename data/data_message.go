@@ -21,11 +21,10 @@ type DataMessage struct {
 	// Nil values mean that the block is unknown because it has not been finalized yet.
 	Blocks map[int]*Block `json:"blocks"`
 
-	// A list of documents.
+	// These lists are in response to queries.
 	Documents []*Document `json:"documents"`
-
-	// A list of buckets.
-	Buckets []*Bucket `json:"buckets"`
+	Buckets   []*Bucket   `json:"buckets"`
+	Providers []*Provider `json:"providers"`
 
 	// The contents of some committed operations, keyed by signature.
 	Operations map[string]*SignedOperation `json:"operations"`

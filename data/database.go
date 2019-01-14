@@ -331,6 +331,10 @@ func (db *Database) HandleQueryMessage(m *QueryMessage) *DataMessage {
 		return db.BucketDataMessage(m.Buckets)
 	}
 
+	if m.Providers != nil {
+		return db.ProviderDataMessage(m.Providers)
+	}
+
 	return nil
 }
 
@@ -411,6 +415,15 @@ func (db *Database) BucketDataMessage(q *BucketQuery) *DataMessage {
 	message := &DataMessage{
 		Buckets: buckets,
 		I:       slot,
+	}
+	return message
+}
+
+func (db *Database) ProviderDataMessage(q *ProviderQuery) *DataMessage {
+	providers, slot := db.GetProviders(q)
+	message := &DataMessage{
+		Providers: providers,
+		I:         slot,
 	}
 	return message
 }

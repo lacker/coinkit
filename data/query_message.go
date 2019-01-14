@@ -25,6 +25,9 @@ type QueryMessage struct {
 	// When Buckets is non-nil, this message is requesting data for matching buckets.
 	Buckets *BucketQuery `json:"buckets"`
 
+	// When Providers is non-nil, this message is requesting data for matching providers.
+	Providers *ProviderQuery `json:"providers"`
+
 	// When Signature is nonempty, this message is requesting a committed
 	// SignedOperation with this signature.
 	Signature string `json:"signature"`
