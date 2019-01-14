@@ -510,3 +510,23 @@ func TestBuckets(t *testing.T) {
 		t.Fatalf("delete bucket failed")
 	}
 }
+
+func TestProviders(t *testing.T) {
+	db := NewTestDatabase(0)
+
+	p := &Provider{
+		Owner:    "bob",
+		Capacity: 100,
+	}
+
+	id1 := db.InsertProvider(p)
+	id2 := db.InsertProvider(p)
+
+	if id1 != 1 || id2 != 2 {
+		t.Fatalf("id1: %d, id2: %d", id1, id2)
+	}
+
+	db.Commit()
+
+	// TODO: test there are now two providers
+}
