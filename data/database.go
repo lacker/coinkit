@@ -896,8 +896,6 @@ func (db *Database) DeleteBucket(name string) error {
 
 // GetBuckets returns a list of matching buckets, along with the slot
 // that this data reflects.
-// TODO: add some limit here
-// TODO: test various ways to call GetBuckets
 func (db *Database) GetBuckets(q *BucketQuery) ([]*Bucket, int) {
 	limit := boundLimit(q.Limit)
 
@@ -1004,4 +1002,43 @@ func (db *Database) GetProvider(id uint64) *Provider {
 		return p
 	}
 	return nil
+}
+
+// GetProviders returns a list of matching providers, along with the slot that this
+// data reflects.
+func (db *Database) GetProviders(q *ProviderQuery) ([]*Provider, int) {
+	limit := boundLimit(q.Limit)
+
+	whereParts := []string{}
+	if q.ID != "" {
+		whereParts = append(whereParts, "id = :id")
+	}
+	if q.Owner != "" {
+		whereParts = append(whereParts, "owner = :owner")
+	}
+	if len(whereParts) == 0 {
+		util.Logger.Fatalf("bad GetProviders query: %+v", q)
+	}
+	where := strings.Join(whereParts, " AND ")
+
+	tx, slot := db.readTransaction()
+	query := fmt.Sprintf("SELECT * FROM providers WHERE %s LIMIT %d", where, limit)
+	rows, err := tx.NamedQuery(query, q)
+	if err != nil {
+		util.Logger.Fatalf("failed on query %s with error %s", query, err)
+	}
+
+	answer := []*Provider{}
+	for rows.Next() {
+		p := &Provider{}
+		err := rows.StructScan(p)
+		if err != nil {
+			panic(err)
+		}
+		answer = append(answer, p)
+	}
+
+	db.finishReadTransaction(tx)
+
+	return answer, slot
 }
