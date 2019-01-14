@@ -1064,3 +1064,20 @@ func (db *Database) SetCapacity(id uint64, capacity uint32) error {
 	}
 	return nil
 }
+
+// DeleteProvider deletes the provider, using the transaction.
+// It errors when there is no such provider.
+func (db *Database) DeleteProvider(id uint64) error {
+	res, err := db.execTx(providerDelete, id)
+	if err != nil {
+		panic(err)
+	}
+	count, err := res.RowsAffected()
+	if err != nil {
+		panic(err)
+	}
+	if count != 1 {
+		return fmt.Errorf("expected 1 provider deleted, got %d", count)
+	}
+	return nil
+}
