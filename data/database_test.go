@@ -494,13 +494,13 @@ func TestBuckets(t *testing.T) {
 		}
 	}
 
-	dm := &QueryMessage{
+	qm := &QueryMessage{
 		Buckets: &BucketQuery{
 			Owner: "bob",
 		},
 	}
-	qm := db.HandleQueryMessage(dm)
-	if len(qm.Buckets) != 1 {
+	dm := db.HandleQueryMessage(qm)
+	if len(dm.Buckets) != 1 {
 		t.Fatalf("failed to HandleQueryMessage: %+v", qm)
 	}
 
@@ -552,5 +552,15 @@ func TestProviders(t *testing.T) {
 	ps, _ = db.GetProviders(q)
 	if len(ps) != 1 {
 		t.Fatalf("delete did not seem to delete")
+	}
+
+	qm := &QueryMessage{
+		Providers: &ProviderQuery{
+			ID: 1,
+		},
+	}
+	dm := db.HandleQueryMessage(qm)
+	if len(dm.Providers) != 1 {
+		t.Fatalf("failed to HandleQueryMessage: %+v", qm)
 	}
 }
