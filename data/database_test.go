@@ -528,5 +528,11 @@ func TestProviders(t *testing.T) {
 
 	db.Commit()
 
-	// TODO: test there are now two providers
+	q := &ProviderQuery{
+		Owner: "bob",
+	}
+	ps, _ := db.GetProviders(q)
+	if len(ps) != 2 {
+		t.Fatalf("GetProviders returned: %+v", ps)
+	}
 }
