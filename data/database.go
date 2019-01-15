@@ -214,7 +214,7 @@ func (db *Database) execTx(query string, args ...interface{}) (sql.Result, error
 	return res, err
 }
 
-// get is a helper function to execute a Get within the pending transaction.
+// getTx is a helper function to execute a Get within the pending transaction.
 func (db *Database) getTx(dest interface{}, query string, args ...interface{}) error {
 	db.mutex.Lock()
 	defer db.mutex.Unlock()
@@ -855,20 +855,15 @@ func (db *Database) InsertBucket(b *Bucket) error {
 
 // Returns nil if there is no such bucket
 func (db *Database) GetBucket(name string) *Bucket {
-	rows, err := db.postgres.Queryx(
-		"SELECT * FROM buckets WHERE name = $1 LIMIT 1", name)
-	if err != nil {
-		panic(err)
+	q := &BucketQuery{
+		Name:  name,
+		Limit: 1,
 	}
-	for rows.Next() {
-		b := &Bucket{}
-		err := rows.StructScan(b)
-		if err != nil {
-			panic(err)
-		}
-		return b
+	buckets, _ := db.GetBuckets(q)
+	if len(buckets) == 0 {
+		return nil
 	}
-	return nil
+	return buckets[0]
 }
 
 // SetBucket sets the contents of the bucket, using the transaction.
