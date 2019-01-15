@@ -36,14 +36,18 @@ func (ps *ProviderArray) Scan(src interface{}) error {
 	if src == nil {
 		return nil
 	}
-	str, ok := src.(string)
+	bytes, ok := src.([]byte)
 	if !ok {
-		return fmt.Errorf("could not stringify provider array from sql: %#v", src)
+		return fmt.Errorf("expected bytes from sql for provider array but got: %#v", src)
 	}
+	str := string(bytes)
 	trimmed := strings.Trim(str, "{}")
 	strs := strings.Split(trimmed, ",")
 	answer := []*Provider{}
 	for _, str := range strs {
+		if str == "" {
+			continue
+		}
 		i, err := strconv.ParseUint(str, 10, 64)
 		if err != nil {
 			return err
