@@ -496,7 +496,7 @@ func TestBuckets(t *testing.T) {
 			query: &BucketQuery{
 				Provider: 1,
 			},
-			count: 2,
+			count: 1,
 		},
 		pair{
 			query: &BucketQuery{
