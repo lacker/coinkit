@@ -933,19 +933,53 @@ func (db *Database) GetBuckets(q *BucketQuery) ([]*Bucket, int) {
 		util.Logger.Fatalf("failed on query %s with error %s", query, err)
 	}
 
-	answer := []*Bucket{}
+	// As we scan the buckets, also track the provider ids we need to inflate the providers.
+	buckets := []*Bucket{}
+	idSet := make(map[uint64]bool)
 	for rows.Next() {
 		b := &Bucket{}
 		err := rows.StructScan(b)
 		if err != nil {
 			panic(err)
 		}
-		answer = append(answer, b)
+		buckets = append(buckets, b)
+		for _, p := range b.Providers {
+			idSet[p.ID] = true
+		}
+	}
+
+	if len(idSet) > 0 {
+		// Fetch the provider data
+		ids := []string{}
+		for id, _ := range idSet {
+			ids = append(ids, fmt.Sprintf("%d", id))
+		}
+		query = fmt.Sprintf("SELECT * FROM providers WHERE id IN (%s)", strings.Join(ids, ","))
+		rows, err = tx.Queryx(query)
+		if err != nil {
+			util.Logger.Fatalf("query %s failed: %s", query, err)
+		}
+		providers := make(map[uint64]*Provider)
+		for rows.Next() {
+			p := &Provider{}
+			err := rows.StructScan(p)
+			if err != nil {
+				panic(err)
+			}
+			providers[p.ID] = p
+		}
+
+		// Inflate the provider data for each bucket
+		for _, b := range buckets {
+			for i, p := range b.Providers {
+				b.Providers[i] = providers[p.ID]
+			}
+		}
 	}
 
 	db.finishReadTransaction(tx)
 
-	return answer, slot
+	return buckets, slot
 }
 
 ////////////////
