@@ -1003,20 +1003,15 @@ func (db *Database) InsertProvider(p *Provider) uint64 {
 
 // Returns nil if there is no such provider
 func (db *Database) GetProvider(id uint64) *Provider {
-	rows, err := db.postgres.Queryx(
-		"SELECT * FROM providers WHERE id = $1 LIMIT 1", id)
-	if err != nil {
-		panic(err)
+	q := &ProviderQuery{
+		ID:    id,
+		Limit: 1,
 	}
-	for rows.Next() {
-		p := &Provider{}
-		err := rows.StructScan(p)
-		if err != nil {
-			panic(err)
-		}
-		return p
+	providers, _ := db.GetProviders(q)
+	if len(providers) == 0 {
+		return nil
 	}
-	return nil
+	return providers[0]
 }
 
 // GetProviders returns a list of matching providers, along with the slot that this
