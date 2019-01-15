@@ -826,7 +826,7 @@ VALUES (:name, :owner, :size)
 
 const bucketUpdate = `
 UPDATE buckets
-SET size = :size, owner = :owner
+SET size = :size, owner = :owner, providers = :providers
 WHERE name = :name
 `
 
