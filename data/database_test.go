@@ -420,6 +420,14 @@ func TestBuckets(t *testing.T) {
 	}
 
 	b.Size = 200
+	b.Providers = []*Provider{
+		&Provider{
+			ID: 1,
+		},
+		&Provider{
+			ID: 3,
+		},
+	}
 	if err = db.SetBucket(b); err != nil {
 		t.Fatalf("SetBucket error: %s", err)
 	}
@@ -500,7 +508,19 @@ func TestBuckets(t *testing.T) {
 		},
 		pair{
 			query: &BucketQuery{
+				Provider: 2,
+			},
+			count: 0,
+		},
+		pair{
+			query: &BucketQuery{
 				Provider: 3,
+			},
+			count: 1,
+		},
+		pair{
+			query: &BucketQuery{
+				Provider: 4,
 			},
 			count: 0,
 		},
