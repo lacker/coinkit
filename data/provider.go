@@ -27,9 +27,10 @@ type ProviderArray []*Provider
 func (ps ProviderArray) Value() (driver.Value, error) {
 	strs := []string{}
 	for _, p := range ps {
-		strs = append(strs, string(p.ID))
+		strs = append(strs, fmt.Sprintf("%d", p.ID))
 	}
-	return fmt.Sprintf("{%s}", strings.Join(strs, ",")), nil
+	answer := fmt.Sprintf("{%s}", strings.Join(strs, ","))
+	return answer, nil
 }
 
 func (ps *ProviderArray) Scan(src interface{}) error {

@@ -391,6 +391,14 @@ func TestBuckets(t *testing.T) {
 		Name:  "mybucket",
 		Owner: "bob",
 		Size:  100,
+		Providers: []*Provider{
+			&Provider{
+				ID: 1,
+			},
+			&Provider{
+				ID: 2,
+			},
+		},
 	}
 	err := db.InsertBucket(b)
 	if err != nil {
