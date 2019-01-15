@@ -492,6 +492,18 @@ func TestBuckets(t *testing.T) {
 			},
 			count: 0,
 		},
+		pair{
+			query: &BucketQuery{
+				Provider: 1,
+			},
+			count: 2,
+		},
+		pair{
+			query: &BucketQuery{
+				Provider: 3,
+			},
+			count: 0,
+		},
 	}
 
 	for _, pair := range pairs {

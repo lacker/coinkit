@@ -923,6 +923,9 @@ func (db *Database) GetBuckets(q *BucketQuery) ([]*Bucket, int) {
 	if q.Owner != "" {
 		whereParts = append(whereParts, "owner = :owner")
 	}
+	if q.Provider != 0 {
+		whereParts = append(whereParts, ":provider = ANY (providers)")
+	}
 	if len(whereParts) == 0 {
 		util.Logger.Fatalf("bad GetBuckets query: %+v", q)
 	}
