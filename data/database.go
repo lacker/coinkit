@@ -1148,8 +1148,8 @@ func (db *Database) DeleteProvider(id uint64) ([]*Bucket, error) {
 	query := &BucketQuery{
 		Provider: id,
 	}
-	// TODO: make this use the write transaction to avoid races
-	buckets, _ := db.GetBuckets(query)
+	// This uses the write transaction to avoid races
+	buckets := db.getBucketsTx(query)
 	for _, b := range buckets {
 		b.RemoveProvider(id)
 		db.SetBucket(b)
