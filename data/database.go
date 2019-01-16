@@ -166,8 +166,6 @@ func (db *Database) updateCurrentSlot() {
 
 // initialize makes sure the schemas are set up right and panics if not
 func (db *Database) initialize() {
-	// util.Logger.Printf("initializing database %s", db.name)
-
 	// There are some strange errors on initialization that I don't understand.
 	// Just sleep a bit and retry.
 	errors := 0
@@ -954,7 +952,8 @@ func (db *Database) GetBuckets(q *BucketQuery) ([]*Bucket, int) {
 		for id, _ := range idSet {
 			ids = append(ids, fmt.Sprintf("%d", id))
 		}
-		query = fmt.Sprintf("SELECT * FROM providers WHERE id IN (%s)", strings.Join(ids, ","))
+		query = fmt.Sprintf("SELECT * FROM providers WHERE id IN (%s)",
+			strings.Join(ids, ","))
 		rows, err = tx.Queryx(query)
 		if err != nil {
 			util.Logger.Fatalf("query %s failed: %s", query, err)
@@ -972,7 +971,10 @@ func (db *Database) GetBuckets(q *BucketQuery) ([]*Bucket, int) {
 		// Inflate the provider data for each bucket
 		for _, b := range buckets {
 			for i, p := range b.Providers {
-				b.Providers[i] = providers[p.ID]
+				provider := providers[p.ID]
+				if provider != nil {
+					b.Providers[i] = providers[p.ID]
+				}
 			}
 		}
 	}

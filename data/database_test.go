@@ -545,6 +545,7 @@ func TestBuckets(t *testing.T) {
 			t.Fatalf("expected in-order id of %d but got %d", i, id)
 		}
 	}
+	db.Commit()
 
 	qm := &QueryMessage{
 		Buckets: &BucketQuery{
@@ -561,7 +562,7 @@ func TestBuckets(t *testing.T) {
 	}
 	for _, p := range bucket.Providers {
 		if p == nil || p.Owner != "ricky" {
-			t.Fatalf("bad bucket data: %#v", bucket)
+			t.Fatalf("bad provider data: %#v", p)
 		}
 	}
 
