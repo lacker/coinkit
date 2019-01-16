@@ -1111,8 +1111,11 @@ func (db *Database) SetCapacity(id uint64, capacity uint32) error {
 }
 
 // DeleteProvider deletes the provider, using the transaction.
-// It errors when there is no such provider.
-func (db *Database) DeleteProvider(id uint64) error {
+// It also removes this provider from all buckets it is providing.
+// It returns a list of the updated buckets.
+// It also returns an error when there is no such provider.
+func (db *Database) DeleteProvider(id uint64) ([]*Bucket, error) {
+	// First delete the provider
 	res, err := db.execTx(providerDelete, id)
 	if err != nil {
 		panic(err)
@@ -1122,7 +1125,18 @@ func (db *Database) DeleteProvider(id uint64) error {
 		panic(err)
 	}
 	if count != 1 {
-		return fmt.Errorf("expected 1 provider deleted, got %d", count)
+		return nil, fmt.Errorf("expected 1 provider deleted, got %d", count)
 	}
-	return nil
+
+	// Find all the buckets this provider was providing
+	query := &BucketQuery{
+		Provider: id,
+	}
+	// TODO: make this use the write transaction to avoid races
+	buckets, _ := db.GetBuckets(query)
+	for _, b := range buckets {
+		b.RemoveProvider(id)
+		db.SetBucket(b)
+	}
+	return buckets, nil
 }
