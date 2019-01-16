@@ -534,6 +534,18 @@ func TestBuckets(t *testing.T) {
 		}
 	}
 
+	// Add some providers so that the lookups get data
+	for i := uint64(1); i <= 4; i++ {
+		p := &Provider{
+			Owner:    "ricky",
+			Capacity: 1000,
+		}
+		id := db.InsertProvider(p)
+		if id != i {
+			t.Fatalf("expected in-order id of %d but got %d", i, id)
+		}
+	}
+
 	qm := &QueryMessage{
 		Buckets: &BucketQuery{
 			Owner: "bob",
@@ -542,6 +554,15 @@ func TestBuckets(t *testing.T) {
 	dm := db.HandleQueryMessage(qm)
 	if len(dm.Buckets) != 1 {
 		t.Fatalf("failed to HandleQueryMessage: %+v", qm)
+	}
+	bucket := dm.Buckets[0]
+	if len(bucket.Providers) != 2 {
+		t.Fatalf("failed to retrieve providers")
+	}
+	for _, p := range bucket.Providers {
+		if p == nil || p.Owner != "ricky" {
+			t.Fatalf("bad bucket data: %#v", bucket)
+		}
 	}
 
 	db.DeleteBucket("mybucket")
