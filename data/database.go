@@ -192,10 +192,10 @@ func (db *Database) initialize() {
 func (db *Database) namedExecTx(query string, arg interface{}) (sql.Result, error) {
 	db.mutex.Lock()
 	defer db.mutex.Unlock()
-
 	if db.tx == nil {
 		db.tx = db.postgres.MustBegin()
 	}
+
 	res, err := db.tx.NamedExec(query, arg)
 	return res, err
 }
@@ -204,10 +204,10 @@ func (db *Database) namedExecTx(query string, arg interface{}) (sql.Result, erro
 func (db *Database) execTx(query string, args ...interface{}) (sql.Result, error) {
 	db.mutex.Lock()
 	defer db.mutex.Unlock()
-
 	if db.tx == nil {
 		db.tx = db.postgres.MustBegin()
 	}
+
 	res, err := db.tx.Exec(query, args...)
 	return res, err
 }
@@ -216,11 +216,22 @@ func (db *Database) execTx(query string, args ...interface{}) (sql.Result, error
 func (db *Database) getTx(dest interface{}, query string, args ...interface{}) error {
 	db.mutex.Lock()
 	defer db.mutex.Unlock()
-
 	if db.tx == nil {
 		db.tx = db.postgres.MustBegin()
 	}
+
 	return db.tx.Get(dest, query, args...)
+}
+
+// getBucketsTx is a helper function to retrieve buckets within the pending transaction.
+func (db *Database) getBucketsTx(q *BucketQuery) []*Bucket {
+	db.mutex.Lock()
+	defer db.mutex.Unlock()
+	if db.tx == nil {
+		db.tx = db.postgres.MustBegin()
+	}
+
+	return db.getBucketsUsingTx(q, db.tx)
 }
 
 func (db *Database) CurrentSlot() int {
@@ -908,13 +919,13 @@ func (db *Database) DeleteBucket(name string) error {
 // that this data reflects.
 func (db *Database) GetBuckets(q *BucketQuery) ([]*Bucket, int) {
 	tx, slot := db.readTransaction()
-	buckets := db.getBucketsTx(q, tx)
+	buckets := db.getBucketsUsingTx(q, tx)
 	db.finishReadTransaction(tx)
 	return buckets, slot
 }
 
 // getBucketsTx returns a list of matching buckets using the provided transaction.
-func (db *Database) getBucketsTx(q *BucketQuery, tx *sqlx.Tx) []*Bucket {
+func (db *Database) getBucketsUsingTx(q *BucketQuery, tx *sqlx.Tx) []*Bucket {
 	limit := boundLimit(q.Limit)
 
 	whereParts := []string{}
