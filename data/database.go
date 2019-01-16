@@ -907,6 +907,14 @@ func (db *Database) DeleteBucket(name string) error {
 // GetBuckets returns a list of matching buckets, along with the slot
 // that this data reflects.
 func (db *Database) GetBuckets(q *BucketQuery) ([]*Bucket, int) {
+	tx, slot := db.readTransaction()
+	buckets := db.getBucketsTx(q, tx)
+	db.finishReadTransaction(tx)
+	return buckets, slot
+}
+
+// getBucketsTx returns a list of matching buckets using the provided transaction.
+func (db *Database) getBucketsTx(q *BucketQuery, tx *sqlx.Tx) []*Bucket {
 	limit := boundLimit(q.Limit)
 
 	whereParts := []string{}
@@ -924,7 +932,6 @@ func (db *Database) GetBuckets(q *BucketQuery) ([]*Bucket, int) {
 	}
 	where := strings.Join(whereParts, " AND ")
 
-	tx, slot := db.readTransaction()
 	query := fmt.Sprintf("SELECT * FROM buckets WHERE %s LIMIT %d", where, limit)
 	rows, err := tx.NamedQuery(query, q)
 	if err != nil {
@@ -979,9 +986,7 @@ func (db *Database) GetBuckets(q *BucketQuery) ([]*Bucket, int) {
 		}
 	}
 
-	db.finishReadTransaction(tx)
-
-	return buckets, slot
+	return buckets
 }
 
 ////////////////
