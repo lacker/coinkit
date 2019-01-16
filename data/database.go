@@ -829,8 +829,8 @@ func (db *Database) GetDocuments(match map[string]interface{}, limit int) ([]*Do
 //////////////
 
 const bucketInsert = `
-INSERT INTO buckets (name, owner, size)
-VALUES (:name, :owner, :size)
+INSERT INTO buckets (name, owner, size, providers)
+VALUES (:name, :owner, :size, :providers)
 `
 
 const bucketUpdate = `

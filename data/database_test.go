@@ -589,7 +589,7 @@ func TestProviders(t *testing.T) {
 	}
 
 	b := &Bucket{
-		Name:  "mybucket",
+		Name:  "bucket1",
 		Owner: "jim",
 		Providers: []*Provider{
 			&Provider{
@@ -599,8 +599,12 @@ func TestProviders(t *testing.T) {
 		Size: 7,
 	}
 	db.InsertBucket(b)
-
 	db.Commit()
+
+	b = db.GetBucket("bucket1")
+	if len(b.Providers) != 1 {
+		t.Fatalf("expected one provider for %#v", b)
+	}
 
 	q := &ProviderQuery{
 		Owner: "bob",
@@ -621,13 +625,9 @@ func TestProviders(t *testing.T) {
 		t.Fatalf("SetCapacity failed: %+v", p2)
 	}
 
-	b = db.GetBucket("mybucket")
-	if len(b.Providers) != 1 {
-		t.Fatalf("expected one provider for %#v", b)
-	}
 	db.DeleteProvider(2)
 	db.Commit()
-	b = db.GetBucket("mybucket")
+	b = db.GetBucket("bucket1")
 	if len(b.Providers) != 0 {
 		t.Fatalf("expected zero providers for %#v", b)
 	}
