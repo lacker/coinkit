@@ -6,8 +6,9 @@ import (
 	"github.com/lacker/coinkit/util"
 )
 
-// UpdateOperation is used to alter the contents of a document that is already stored.
-type UpdateOperation struct {
+// UpdateDocumentOperation is used to alter the contents of a document that is
+// already stored.
+type UpdateDocumentOperation struct {
 	// Who is updating the document. Must be the owner
 	Signer string `json:"signer"`
 
@@ -24,37 +25,37 @@ type UpdateOperation struct {
 	Data *JSONObject `json:"data"`
 }
 
-func (op *UpdateOperation) String() string {
+func (op *UpdateDocumentOperation) String() string {
 	return fmt.Sprintf("update owner=%s, id=%d, data=%s", util.Shorten(op.Signer), op.ID, op.Data)
 }
 
-func (op *UpdateOperation) OperationType() string {
+func (op *UpdateDocumentOperation) OperationType() string {
 	return "Update"
 }
 
-func (op *UpdateOperation) GetSigner() string {
+func (op *UpdateDocumentOperation) GetSigner() string {
 	return op.Signer
 }
 
-func (op *UpdateOperation) GetFee() uint64 {
+func (op *UpdateDocumentOperation) GetFee() uint64 {
 	return op.Fee
 }
 
-func (op *UpdateOperation) GetSequence() uint32 {
+func (op *UpdateDocumentOperation) GetSequence() uint32 {
 	return op.Sequence
 }
 
 // TODO: should this do something?
-func (op *UpdateOperation) Verify() bool {
+func (op *UpdateDocumentOperation) Verify() bool {
 	return true
 }
 
 // Works with MakeTestCreateDocumentOperation to change the value
-func MakeTestUpdateOperation(id uint64, sequence int) *SignedOperation {
+func MakeTestUpdateDocumentOperation(id uint64, sequence int) *SignedOperation {
 	mint := util.NewKeyPairFromSecretPhrase("mint")
 	data := NewEmptyJSONObject()
 	data.Set("foo", sequence)
-	op := &UpdateOperation{
+	op := &UpdateDocumentOperation{
 		Signer:   mint.PublicKey().String(),
 		Sequence: uint32(sequence),
 		Data:     data,
@@ -65,5 +66,5 @@ func MakeTestUpdateOperation(id uint64, sequence int) *SignedOperation {
 }
 
 func init() {
-	RegisterOperationType(&UpdateOperation{})
+	RegisterOperationType(&UpdateDocumentOperation{})
 }

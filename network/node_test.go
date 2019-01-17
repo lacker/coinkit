@@ -247,7 +247,7 @@ func TestDocumentOperations(t *testing.T) {
 		t.Fatalf("after one create, slot should be 2 but is %d", nodes[0].Slot())
 	}
 
-	op = data.MakeTestUpdateOperation(1, 2)
+	op = data.MakeTestUpdateDocumentOperation(1, 2)
 	if !nodes[0].queue.Validate(op) {
 		t.Fatalf("the update op does not validate")
 	}
@@ -283,7 +283,7 @@ func TestDocumentOperations(t *testing.T) {
 	}
 
 	// Make sure the wrong user can't update our document
-	uop := &data.UpdateOperation{
+	uop := &data.UpdateDocumentOperation{
 		Signer:   wrong.PublicKey().String(),
 		Sequence: 3,
 		ID:       1,
@@ -295,7 +295,7 @@ func TestDocumentOperations(t *testing.T) {
 	}
 
 	// Try to update a nonexistent document
-	op = data.MakeTestUpdateOperation(1000, 1)
+	op = data.MakeTestUpdateDocumentOperation(1000, 1)
 	if nodes[0].queue.Validate(op) {
 		t.Fatalf("updating a nonexistent document should not validate")
 	}

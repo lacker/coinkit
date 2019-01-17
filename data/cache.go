@@ -258,7 +258,7 @@ func (c *Cache) Validate(operation Operation) bool {
 	case *CreateDocumentOperation:
 		return true
 
-	case *UpdateOperation:
+	case *UpdateDocumentOperation:
 		return c.DocExists(op.ID)
 
 	case *DeleteOperation:
@@ -337,7 +337,7 @@ func (c *Cache) Process(operation Operation) bool {
 		c.NextDocumentID++
 		return true
 
-	case *UpdateOperation:
+	case *UpdateDocumentOperation:
 		c.IncrementSequence(op)
 		c.UpdateDocument(op.ID, op.Data)
 		return true

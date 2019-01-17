@@ -98,13 +98,13 @@ func TestValidation(t *testing.T) {
 
 	// Update our document
 	badId := uint64(100)
-	if c.Validate(MakeTestUpdateOperation(badId, 2).Operation) {
+	if c.Validate(MakeTestUpdateDocumentOperation(badId, 2).Operation) {
 		t.Fatalf("badId for update should be bad")
 	}
-	if c.Validate(MakeTestUpdateOperation(1, 10).Operation) {
+	if c.Validate(MakeTestUpdateDocumentOperation(1, 10).Operation) {
 		t.Fatalf("sequence number of 10 should be bad for update")
 	}
-	if !c.Process(MakeTestUpdateOperation(1, 2).Operation) {
+	if !c.Process(MakeTestUpdateDocumentOperation(1, 2).Operation) {
 		t.Fatalf("update should work")
 	}
 
@@ -128,7 +128,7 @@ func TestValidation(t *testing.T) {
 	if c.Validate(MakeTestDeleteOperation(1, 4).Operation) {
 		t.Fatalf("delete-after-delete should not work")
 	}
-	if c.Validate(MakeTestUpdateOperation(1, 4).Operation) {
+	if c.Validate(MakeTestUpdateDocumentOperation(1, 4).Operation) {
 		t.Fatalf("update-after-delete should not work")
 	}
 
