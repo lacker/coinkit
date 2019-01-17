@@ -51,7 +51,7 @@ func MakeTestDeleteProviderOperation(id uint64, n int) *SignedOperation {
 	op := &DeleteProviderOperation{
 		Signer:   mint.PublicKey().String(),
 		Sequence: uint32(n),
-		ID:       it,
+		ID:       id,
 	}
 	return NewSignedOperation(op, mint)
 }
