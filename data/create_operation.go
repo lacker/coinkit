@@ -6,8 +6,8 @@ import (
 	"github.com/lacker/coinkit/util"
 )
 
-// CreateOperation is used to create a new document on the blockchain.
-type CreateOperation struct {
+// CreateDocumentOperation is used to create a new document on the blockchain.
+type CreateDocumentOperation struct {
 	// Who is creating this document
 	Signer string `json:"signer"`
 
@@ -21,36 +21,36 @@ type CreateOperation struct {
 	Data *JSONObject `json:"data"`
 }
 
-func (op *CreateOperation) String() string {
+func (op *CreateDocumentOperation) String() string {
 	return fmt.Sprintf("create owner=%s, data=%s", util.Shorten(op.Signer), op.Data)
 }
 
-func (op *CreateOperation) OperationType() string {
+func (op *CreateDocumentOperation) OperationType() string {
 	return "Create"
 }
 
-func (op *CreateOperation) GetSigner() string {
+func (op *CreateDocumentOperation) GetSigner() string {
 	return op.Signer
 }
 
-func (op *CreateOperation) GetFee() uint64 {
+func (op *CreateDocumentOperation) GetFee() uint64 {
 	return op.Fee
 }
 
-func (op *CreateOperation) GetSequence() uint32 {
+func (op *CreateDocumentOperation) GetSequence() uint32 {
 	return op.Sequence
 }
 
 // TODO: should this do something?
-func (op *CreateOperation) Verify() bool {
+func (op *CreateDocumentOperation) Verify() bool {
 	return true
 }
 
-func MakeTestCreateOperation(n int) *SignedOperation {
+func MakeTestCreateDocumentOperation(n int) *SignedOperation {
 	mint := util.NewKeyPairFromSecretPhrase("mint")
 	data := NewEmptyJSONObject()
 	data.Set("foo", n)
-	op := &CreateOperation{
+	op := &CreateDocumentOperation{
 		Signer:   mint.PublicKey().String(),
 		Sequence: uint32(n),
 		Data:     data,
@@ -59,7 +59,7 @@ func MakeTestCreateOperation(n int) *SignedOperation {
 	return NewSignedOperation(op, mint)
 }
 
-func (op *CreateOperation) Document(id uint64) *Document {
+func (op *CreateDocumentOperation) Document(id uint64) *Document {
 	data := op.Data.Copy()
 	data.Set("id", id)
 	return &Document{
@@ -69,5 +69,5 @@ func (op *CreateOperation) Document(id uint64) *Document {
 }
 
 func init() {
-	RegisterOperationType(&CreateOperation{})
+	RegisterOperationType(&CreateDocumentOperation{})
 }

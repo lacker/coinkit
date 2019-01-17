@@ -49,7 +49,7 @@ func (op *UpdateOperation) Verify() bool {
 	return true
 }
 
-// Works with MakeTestCreateOperation to change the value
+// Works with MakeTestCreateDocumentOperation to change the value
 func MakeTestUpdateOperation(id uint64, sequence int) *SignedOperation {
 	mint := util.NewKeyPairFromSecretPhrase("mint")
 	data := NewEmptyJSONObject()

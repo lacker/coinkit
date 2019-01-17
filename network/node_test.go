@@ -232,7 +232,7 @@ func TestDocumentOperations(t *testing.T) {
 	}
 
 	// Create a document
-	op := data.MakeTestCreateOperation(1)
+	op := data.MakeTestCreateDocumentOperation(1)
 	m := data.NewOperationMessage(op)
 	nodes[0].Handle(op.GetSigner(), m)
 

@@ -50,9 +50,9 @@ func TestSendOperation(t *testing.T) {
 	}
 }
 
-func TestCreateOperation(t *testing.T) {
+func TestCreateDocumentOperation(t *testing.T) {
 	q := NewTestingOperationQueue()
-	op := MakeTestCreateOperation(1)
+	op := MakeTestCreateDocumentOperation(1)
 	if !op.Verify() {
 		t.Fatal("bad op")
 	}

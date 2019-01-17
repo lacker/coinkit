@@ -223,7 +223,7 @@ func TestDataOperations(t *testing.T) {
 	conn := NewRedialConnection(servers[0].LocalhostAddress(), nil)
 
 	// Create a document
-	op := data.MakeTestCreateOperation(1)
+	op := data.MakeTestCreateDocumentOperation(1)
 	sendOperation(conn, mint, op)
 
 	// Query for the document.

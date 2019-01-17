@@ -5,13 +5,13 @@ import (
 	"testing"
 )
 
-func TestCreateOperationSerialization(t *testing.T) {
-	op1 := MakeTestCreateOperation(1).Operation.(*CreateOperation)
+func TestCreateDocumentOperationSerialization(t *testing.T) {
+	op1 := MakeTestCreateDocumentOperation(1).Operation.(*CreateDocumentOperation)
 	bytes, err := json.Marshal(op1)
 	if err != nil {
 		panic(err)
 	}
-	op2 := &CreateOperation{}
+	op2 := &CreateDocumentOperation{}
 	err = json.Unmarshal(bytes, op2)
 	if err != nil {
 		panic(err)

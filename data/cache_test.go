@@ -80,11 +80,11 @@ func TestValidation(t *testing.T) {
 	c.UpsertAccount(account)
 
 	// First create a document
-	op := MakeTestCreateOperation(2).Operation
+	op := MakeTestCreateDocumentOperation(2).Operation
 	if c.Validate(op) {
 		t.Fatalf("should get rejected for bad sequence")
 	}
-	op = MakeTestCreateOperation(1).Operation
+	op = MakeTestCreateDocumentOperation(1).Operation
 	if !c.Process(op) {
 		t.Fatalf("should be a valid create, id = 1 seq = 1")
 	}

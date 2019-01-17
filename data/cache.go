@@ -255,7 +255,7 @@ func (c *Cache) Validate(operation Operation) bool {
 	case *SendOperation:
 		return account.ValidateSendOperation(op)
 
-	case *CreateOperation:
+	case *CreateDocumentOperation:
 		return true
 
 	case *UpdateOperation:
@@ -330,7 +330,7 @@ func (c *Cache) Process(operation Operation) bool {
 	case *SendOperation:
 		return c.ProcessSendOperation(op)
 
-	case *CreateOperation:
+	case *CreateDocumentOperation:
 		c.IncrementSequence(op)
 		doc := op.Document(c.NextDocumentID)
 		c.InsertDocument(doc)
