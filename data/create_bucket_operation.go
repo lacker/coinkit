@@ -7,7 +7,7 @@ import (
 )
 
 type CreateBucketOperation struct {
-	// Who is creating this bucket
+	// Who is creating this bucket (and will own it)
 	Signer string `json:"signer"`
 
 	// The sequence number for this operation
