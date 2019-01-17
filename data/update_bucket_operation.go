@@ -7,7 +7,7 @@ import (
 )
 
 type UpdateBucketOperation struct {
-	// Who is creating this bucket
+	// Who is updating this bucket. Must match the owner
 	Signer string `json:"signer"`
 
 	// The sequence number for this operation
