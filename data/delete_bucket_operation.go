@@ -22,7 +22,7 @@ type DeleteBucketOperation struct {
 
 func (op *DeleteBucketOperation) String() string {
 	return fmt.Sprintf("DeleteBucket owner=%s, name=%s",
-		util.Shorten(op.Signer), op.Name, op.Size)
+		util.Shorten(op.Signer), op.Name)
 }
 
 func (op *DeleteBucketOperation) OperationType() string {
