@@ -7,7 +7,7 @@ import (
 )
 
 type DeleteBucketOperation struct {
-	// Who is creating this bucket
+	// Who is deleting this bucket. Must be the owner
 	Signer string `json:"signer"`
 
 	// The sequence number for this operation
