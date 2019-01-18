@@ -32,6 +32,8 @@ type Cache struct {
 	// buckets stores a subset of the buckets in the database.
 	// The key of the map is the bucket name.
 	// The provider data is not stored on these buckets, only the IDs.
+	// For any bucket data stored in this map, the corresponding provider data should also
+	// be stored in the cache.
 	buckets map[string]*Bucket
 
 	// providers stores a subset of the providers in the database.
@@ -114,8 +116,9 @@ func (c *Cache) CheckEqual(key string, account *Account) bool {
 	return a.Sequence == account.Sequence && a.Balance == account.Balance
 }
 
-// CheckAgainstDatabase returns an error if any of the data in the
+// CheckAgainstDatabase returns an error if any of the account data in the
 // memory part of the cache does not match against the database.
+// TODO: figure if blocks, documents, buckets, and providers should also be checked
 func (c *Cache) CheckAgainstDatabase(db *Database) error {
 	if db.TransactionInProgress() {
 		return fmt.Errorf("there is an uncommitted transaction")
@@ -182,6 +185,20 @@ func (c *Cache) GetDocument(id uint64) *Document {
 	}
 
 	return nil
+}
+
+// Do not modify the Bucket returned from GetBucket, because it might belong to the
+// readonly cache.
+// Returns nil if there is no such bucket.
+func (c *Cache) GetBucket(name string) *Bucket {
+	panic("TODO: implement")
+}
+
+// Do not modify the Provider returned from GetProvider, because it might belong to the
+// readonly cache.
+// Returns nil if there is no such provider.
+func (c *Cache) GetProvider(id uint64) *Provider {
+	panic("TODO: implement")
 }
 
 // InsertDocument writes through to the underlying database (if there is one),
