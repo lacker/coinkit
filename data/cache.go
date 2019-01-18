@@ -29,6 +29,11 @@ type Cache struct {
 	// nil means there is currently no such document.
 	documents map[uint64]*Document
 
+	// buckets stores a subset of the buckets in the database.
+	// The key of the map is the bucket name.
+	// The provider data is not stored on these buckets, only the IDs.
+	buckets map[string]*Bucket
+
 	// When we are doing a read operation and we don't have data, we can use the
 	// readOnly cache. This is useful so that we can make copy-on-write versions of
 	// this data, so that we can test destructive sequences of operations without

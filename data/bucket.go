@@ -27,3 +27,17 @@ func (b *Bucket) RemoveProvider(id uint64) {
 	}
 	b.Providers = providers
 }
+
+// Makes a copy of this bucket with all of the provider data removed except provider IDs.
+func (b *Bucket) StripProviderData() {
+	ps := []*Provider{}
+	for _, p := range b.Providers {
+		ps = append(ps, &Provider{
+			ID: p.ID,
+		})
+	}
+	copy := new(Bucket)
+	*copy = *b
+	copy.Providers = ps
+	return copy
+}
