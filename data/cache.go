@@ -261,7 +261,7 @@ func (c *Cache) Validate(operation Operation) bool {
 	case *UpdateDocumentOperation:
 		return c.DocExists(op.ID)
 
-	case *DeleteOperation:
+	case *DeleteDocumentOperation:
 		return c.DocExists(op.ID)
 
 	default:
@@ -342,7 +342,7 @@ func (c *Cache) Process(operation Operation) bool {
 		c.UpdateDocument(op.ID, op.Data)
 		return true
 
-	case *DeleteOperation:
+	case *DeleteDocumentOperation:
 		doc := c.GetDocument(op.ID)
 		if doc == nil {
 			return false

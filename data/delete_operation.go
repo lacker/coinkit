@@ -6,7 +6,7 @@ import (
 	"github.com/lacker/coinkit/util"
 )
 
-type DeleteOperation struct {
+type DeleteDocumentOperation struct {
 	// Who is deleting the document. Must be the owner
 	Signer string `json:"signer"`
 
@@ -20,34 +20,34 @@ type DeleteOperation struct {
 	ID uint64 `json:"id"`
 }
 
-func (op *DeleteOperation) String() string {
+func (op *DeleteDocumentOperation) String() string {
 	return fmt.Sprintf("delete owner=%s, id=%d", util.Shorten(op.Signer), op.ID)
 }
 
-func (op *DeleteOperation) OperationType() string {
+func (op *DeleteDocumentOperation) OperationType() string {
 	return "Delete"
 }
 
-func (op *DeleteOperation) GetSigner() string {
+func (op *DeleteDocumentOperation) GetSigner() string {
 	return op.Signer
 }
 
-func (op *DeleteOperation) GetFee() uint64 {
+func (op *DeleteDocumentOperation) GetFee() uint64 {
 	return op.Fee
 }
 
-func (op *DeleteOperation) GetSequence() uint32 {
+func (op *DeleteDocumentOperation) GetSequence() uint32 {
 	return op.Sequence
 }
 
 // TODO: should this do something?
-func (op *DeleteOperation) Verify() bool {
+func (op *DeleteDocumentOperation) Verify() bool {
 	return true
 }
 
-func MakeTestDeleteOperation(id uint64, sequence int) *SignedOperation {
+func MakeTestDeleteDocumentOperation(id uint64, sequence int) *SignedOperation {
 	mint := util.NewKeyPairFromSecretPhrase("mint")
-	op := &DeleteOperation{
+	op := &DeleteDocumentOperation{
 		Signer:   mint.PublicKey().String(),
 		Sequence: uint32(sequence),
 		ID:       id,
@@ -57,5 +57,5 @@ func MakeTestDeleteOperation(id uint64, sequence int) *SignedOperation {
 }
 
 func init() {
-	RegisterOperationType(&DeleteOperation{})
+	RegisterOperationType(&DeleteDocumentOperation{})
 }

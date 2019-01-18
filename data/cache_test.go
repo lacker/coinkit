@@ -116,16 +116,16 @@ func TestValidation(t *testing.T) {
 	}
 
 	// Delete our document
-	if c.Validate(MakeTestDeleteOperation(badId, 3).Operation) {
+	if c.Validate(MakeTestDeleteDocumentOperation(badId, 3).Operation) {
 		t.Fatalf("badId for delete should be bad")
 	}
-	if c.Validate(MakeTestDeleteOperation(1, 10).Operation) {
+	if c.Validate(MakeTestDeleteDocumentOperation(1, 10).Operation) {
 		t.Fatalf("sequence number of 10 should be bad for delete")
 	}
-	if !c.Process(MakeTestDeleteOperation(1, 3).Operation) {
+	if !c.Process(MakeTestDeleteDocumentOperation(1, 3).Operation) {
 		t.Fatalf("delete should work")
 	}
-	if c.Validate(MakeTestDeleteOperation(1, 4).Operation) {
+	if c.Validate(MakeTestDeleteDocumentOperation(1, 4).Operation) {
 		t.Fatalf("delete-after-delete should not work")
 	}
 	if c.Validate(MakeTestUpdateDocumentOperation(1, 4).Operation) {
