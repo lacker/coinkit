@@ -34,6 +34,10 @@ type Cache struct {
 	// The provider data is not stored on these buckets, only the IDs.
 	buckets map[string]*Bucket
 
+	// providers stores a subset of the providers in the database.
+	// The key of the map is the provider id.
+	providers map[uint64]*Provider
+
 	// When we are doing a read operation and we don't have data, we can use the
 	// readOnly cache. This is useful so that we can make copy-on-write versions of
 	// this data, so that we can test destructive sequences of operations without
@@ -56,6 +60,8 @@ func NewCache() *Cache {
 		accounts:       make(map[string]*Account),
 		blocks:         make(map[int]*Block),
 		documents:      make(map[uint64]*Document),
+		buckets:        make(map[string]*Bucket),
+		providers:      make(map[uint64]*Provider),
 		NextDocumentID: uint64(1),
 	}
 }
