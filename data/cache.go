@@ -187,12 +187,37 @@ func (c *Cache) GetDocument(id uint64) *Document {
 	return nil
 }
 
-// Do not modify the Bucket returned from GetBucket, because it might belong to the
-// readonly cache.
+// GetBucket returns a copy so you could modify it without borking the cache.
 // This includes the data from providers in the returned bucket.
 // Returns nil if there is no such bucket.
 func (c *Cache) GetBucket(name string) *Bucket {
-	panic("TODO: implement")
+	cached, ok := c.buckets[name]
+	if ok {
+		// Inflate the provider data.
+		bucket := cached.StripProviderData()
+		for i, p := range bucket.Providers {
+			provider := c.GetProvider(p.ID)
+			if provider == nil {
+				util.Logger.Fatalf("cache consistency error: missing provider %d", p.ID)
+			}
+			bucket.Providers[i] = provider
+		}
+		return bucket
+	}
+
+	if c.readOnly != nil {
+		return c.readOnly.GetBucket(name)
+	}
+	if c.database != nil {
+		// When there is a database, read from the database and cache it.
+		bucket := c.database.GetBucket(name)
+		for _, p := range bucket.Providers {
+			c.providers[p.ID] = p
+		}
+		c.buckets[name] = bucket.StripProviderData()
+	}
+
+	return nil
 }
 
 // Do not modify the Provider returned from GetProvider, because it might belong to the
