@@ -876,8 +876,8 @@ func (db *Database) GetBucket(name string) *Bucket {
 }
 
 // SetBucket sets the contents of the bucket, using the transaction.
-// The name of a bucket cannot be changed, only size and owner.
-// Size and owner must be provided.
+// The name of a bucket cannot be changed.
+// Size, owner, and providers must all be included.
 // If there is no such bucket, this returns an error, and no change is
 // made.
 func (db *Database) SetBucket(b *Bucket) error {

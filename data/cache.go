@@ -32,8 +32,6 @@ type Cache struct {
 	// buckets stores a subset of the buckets in the database.
 	// The key of the map is the bucket name.
 	// The provider data is not stored on these buckets, only the IDs.
-	// For any bucket data stored in this map, the corresponding provider data should also
-	// be stored in the cache.
 	buckets map[string]*Bucket
 
 	// providers stores a subset of the providers in the database.
@@ -188,7 +186,7 @@ func (c *Cache) GetDocument(id uint64) *Document {
 }
 
 // GetBucket returns a copy so you could modify it without borking the cache.
-// This includes the data from providers in the returned bucket.
+// This includes the data from providers in the returned bucket whenever that data exists.
 // Returns nil if there is no such bucket.
 func (c *Cache) GetBucket(name string) *Bucket {
 	cached, ok := c.buckets[name]
@@ -197,10 +195,9 @@ func (c *Cache) GetBucket(name string) *Bucket {
 		bucket := cached.StripProviderData()
 		for i, p := range bucket.Providers {
 			provider := c.GetProvider(p.ID)
-			if provider == nil {
-				util.Logger.Fatalf("cache consistency error: missing provider %d", p.ID)
+			if provider != nil {
+				bucket.Providers[i] = provider
 			}
-			bucket.Providers[i] = provider
 		}
 		return bucket
 	}
@@ -269,6 +266,19 @@ func (c *Cache) UpdateDocument(id uint64, data *JSONObject) {
 
 	if c.database != nil {
 		err := c.database.UpdateDocument(id, data)
+		if err != nil {
+			panic(err)
+		}
+	}
+}
+
+// InsertBucket writes through to the underlying database (if there is one).
+// This does not store or update provider data.
+func (c *Cache) InsertBucket(b *Bucket) {
+	bucket := b.StripProviderData()
+	c.buckets[bucket.Name] = bucket
+	if c.database != nil {
+		err := c.database.InsertBucket(bucket)
 		if err != nil {
 			panic(err)
 		}
