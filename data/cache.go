@@ -178,7 +178,7 @@ func (c *Cache) GetDocument(id uint64) *Document {
 		return c.readOnly.GetDocument(id)
 	}
 	if c.database != nil {
-		// When there is a database, cache reads.
+		// When there is a database, read from the database and cache it.
 		doc = c.database.GetDocument(id)
 		c.documents[id] = doc
 		return doc
@@ -189,6 +189,7 @@ func (c *Cache) GetDocument(id uint64) *Document {
 
 // Do not modify the Bucket returned from GetBucket, because it might belong to the
 // readonly cache.
+// This includes the data from providers in the returned bucket.
 // Returns nil if there is no such bucket.
 func (c *Cache) GetBucket(name string) *Bucket {
 	panic("TODO: implement")
@@ -198,7 +199,22 @@ func (c *Cache) GetBucket(name string) *Bucket {
 // readonly cache.
 // Returns nil if there is no such provider.
 func (c *Cache) GetProvider(id uint64) *Provider {
-	panic("TODO: implement")
+	p, ok := c.providers[id]
+	if ok {
+		return p
+	}
+
+	if c.readOnly != nil {
+		return c.readOnly.GetProvider(id)
+	}
+	if c.database != nil {
+		// When there is a database, read from the database and cache it.
+		p = c.database.GetProvider(id)
+		c.providers[id] = p
+		return p
+	}
+
+	return nil
 }
 
 // InsertDocument writes through to the underlying database (if there is one),
