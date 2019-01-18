@@ -273,12 +273,29 @@ func (c *Cache) UpdateDocument(id uint64, data *JSONObject) {
 }
 
 // InsertBucket writes through to the underlying database (if there is one).
+// It is left as a pending transaction, so the caller must call db.Commit() themselves.
 // This does not store or update provider data.
 func (c *Cache) InsertBucket(b *Bucket) {
 	bucket := b.StripProviderData()
 	c.buckets[bucket.Name] = bucket
+
 	if c.database != nil {
 		err := c.database.InsertBucket(bucket)
+		if err != nil {
+			panic(err)
+		}
+	}
+}
+
+// SetBucket writes through to the underlying database (if there is one).
+// It is left as a pending transaction, so the caller must call db.Commit() themselves.
+// This does not store or update provider data.
+func (c *Cache) SetBucket(b *Bucket) {
+	bucket := b.StripProviderData()
+	c.buckets[bucket.name] = bucket
+
+	if c.database != nil {
+		err := c.database.SetBucket(bucket)
 		if err != nil {
 			panic(err)
 		}
