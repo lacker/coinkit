@@ -24,6 +24,14 @@ func (p *Provider) String() string {
 	return fmt.Sprintf("provider #%d, owner:%s, capacity:%d", p.ID, p.Owner, p.Capacity)
 }
 
+// Makes a new provider that is a copy of this one with Available set correctly
+func (p *Provider) NewProvider() *Provider {
+	copy := new(Provider)
+	*copy = *p
+	copy.Available = copy.Capacity
+	return copy
+}
+
 func (p *Provider) CheckEqual(other *Provider) error {
 	panic("TODO: implement")
 }

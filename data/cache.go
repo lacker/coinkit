@@ -419,6 +419,21 @@ func (c *Cache) GetProvider(id uint64) *Provider {
 	return nil
 }
 
+// InsertProvider writes through to the underlying database (if there is one).
+// It is left as a pending transaction, so the caller must call db.Commit() themselves.
+func (c *Cache) InsertProvider(provider *Provider) {
+	p := provider.NewProvider()
+
+	if c.database != nil {
+		id := c.database.InsertProvider(p)
+		p.ID = id
+	} else {
+		panic("XXX We need to figure out this provider's ID ourselves")
+	}
+
+	c.providers[p.ID] = p
+}
+
 /////////////////////////////////////
 // General block processing stuff
 /////////////////////////////////////
