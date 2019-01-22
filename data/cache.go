@@ -456,7 +456,21 @@ func (c *Cache) InsertProvider(p *Provider) {
 // UpdateProvider writes through to the underlying database (if there is one) to change the
 // capacity for a provider, but leaves it as a pending transaction.
 func (c *Cache) UpdateProvider(id uint64, capacity uint32) {
-	panic("XXX")
+	p := c.GetProvider(id)
+	if p == nil {
+		panic("no provider found for update")
+	}
+	if capacity < p.Capacity {
+		panic("cannot shrink capacity")
+	}
+	c.providers[id].Capacity = capacity
+
+	if c.database != nil {
+		err := c.database.UpdateProvider(id, capacity)
+		if err != nil {
+			panic(err)
+		}
+	}
 }
 
 /////////////////////////////////////
