@@ -428,6 +428,9 @@ func (c *Cache) GetProvider(id uint64) *Provider {
 // It is left as a pending transaction, so the caller must call db.Commit() themselves.
 // This does not update NextProviderID.
 func (c *Cache) InsertProvider(p *Provider) {
+	if p.Capacity != p.Available {
+		panic("we should not be inserting nonempty providers")
+	}
 	c.providers[p.ID] = p
 
 	if c.database != nil {
