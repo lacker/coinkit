@@ -13,8 +13,11 @@ type Provider struct {
 
 	Owner string `json:"owner"`
 
-	// Measured in megabytes
+	// The total space this provider can provider. Measured in megabytes.
 	Capacity uint32 `json:"capacity"`
+
+	// The current available space on this provider.
+	Available uint32 `json:"available"`
 }
 
 func (p *Provider) String() string {

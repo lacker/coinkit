@@ -83,37 +83,6 @@ func (cache *Cache) CowCopy() *Cache {
 	return c
 }
 
-func (c *Cache) MaxBalance() uint64 {
-	if c.database != nil {
-		return c.database.MaxBalance()
-	}
-	answer := uint64(0)
-	for _, account := range c.accounts {
-		if account.Balance > answer {
-			answer = account.Balance
-		}
-	}
-	if c.readOnly != nil {
-		b := c.readOnly.MaxBalance()
-		if b > answer {
-			answer = b
-		}
-	}
-	return answer
-}
-
-// Checks that the data for an account is what we expect
-func (c *Cache) CheckEqual(key string, account *Account) bool {
-	a := c.GetAccount(key)
-	if a == nil && account == nil {
-		return true
-	}
-	if a == nil || account == nil {
-		return false
-	}
-	return a.Sequence == account.Sequence && a.Balance == account.Balance
-}
-
 // CheckAgainstDatabase returns an error if any of the account data in the
 // memory part of the cache does not match against the database.
 // Typically this will run on startup to check integrity.
@@ -161,6 +130,41 @@ func (c *Cache) CheckConsistency() error {
 	return c.CheckAgainstDatabase(c.database)
 }
 
+////////////////////
+// Account stuff
+////////////////////
+
+func (c *Cache) MaxBalance() uint64 {
+	if c.database != nil {
+		return c.database.MaxBalance()
+	}
+	answer := uint64(0)
+	for _, account := range c.accounts {
+		if account.Balance > answer {
+			answer = account.Balance
+		}
+	}
+	if c.readOnly != nil {
+		b := c.readOnly.MaxBalance()
+		if b > answer {
+			answer = b
+		}
+	}
+	return answer
+}
+
+// Checks that the data for an account is what we expect
+func (c *Cache) CheckEqual(key string, account *Account) bool {
+	a := c.GetAccount(key)
+	if a == nil && account == nil {
+		return true
+	}
+	if a == nil || account == nil {
+		return false
+	}
+	return a.Sequence == account.Sequence && a.Balance == account.Balance
+}
+
 // Do not modify the Account returned from GetAccount, because it might belong to
 // the readonly cache.
 func (c *Cache) GetAccount(owner string) *Account {
@@ -184,157 +188,6 @@ func (c *Cache) GetAccount(owner string) *Account {
 	return answer
 }
 
-// Do not modify the Document returned from GetDocument, because it might belong to
-// the readonly cache.
-// Returns nil if there is no such document.
-func (c *Cache) GetDocument(id uint64) *Document {
-	doc, ok := c.documents[id]
-	if ok {
-		return doc
-	}
-
-	if c.readOnly != nil {
-		return c.readOnly.GetDocument(id)
-	}
-	if c.database != nil {
-		// When there is a database, read from the database and cache it.
-		doc = c.database.GetDocument(id)
-		c.documents[id] = doc
-		return doc
-	}
-
-	return nil
-}
-
-// GetBucket returns a copy so you could modify it without borking the cache.
-// This includes the data from providers in the returned bucket whenever that data exists.
-// Returns nil if there is no such bucket.
-func (c *Cache) GetBucket(name string) *Bucket {
-	cached, ok := c.buckets[name]
-	if ok {
-		// Inflate the provider data.
-		bucket := cached.StripProviderData()
-		for i, p := range bucket.Providers {
-			provider := c.GetProvider(p.ID)
-			if provider != nil {
-				bucket.Providers[i] = provider
-			}
-		}
-		return bucket
-	}
-
-	if c.readOnly != nil {
-		return c.readOnly.GetBucket(name)
-	}
-	if c.database != nil {
-		// When there is a database, read from the database and cache it.
-		bucket := c.database.GetBucket(name)
-		for _, p := range bucket.Providers {
-			c.providers[p.ID] = p
-		}
-		c.buckets[name] = bucket.StripProviderData()
-	}
-
-	return nil
-}
-
-// Do not modify the Provider returned from GetProvider, because it might belong to the
-// readonly cache.
-// Returns nil if there is no such provider.
-func (c *Cache) GetProvider(id uint64) *Provider {
-	p, ok := c.providers[id]
-	if ok {
-		return p
-	}
-
-	if c.readOnly != nil {
-		return c.readOnly.GetProvider(id)
-	}
-	if c.database != nil {
-		// When there is a database, read from the database and cache it.
-		p = c.database.GetProvider(id)
-		c.providers[id] = p
-		return p
-	}
-
-	return nil
-}
-
-// InsertDocument writes through to the underlying database (if there is one),
-// but it leaves it as a pending transaction. The caller must call db.Commit() themselves.
-func (c *Cache) InsertDocument(doc *Document) {
-	c.documents[doc.ID] = doc
-	if c.database != nil {
-		err := c.database.InsertDocument(doc)
-		if err != nil {
-			panic(err)
-		}
-	}
-}
-
-// UpdateDocument writes through to the underlying database (if there is one),
-// but it leaves it as a pending transaction. The caller must call db.Commit() themselves.
-func (c *Cache) UpdateDocument(id uint64, data *JSONObject) {
-	doc := c.GetDocument(id)
-	if doc == nil {
-		panic("no doc found for update")
-	}
-	newDoc := &Document{
-		ID:   id,
-		Data: data,
-	}
-	c.documents[id] = newDoc
-
-	if c.database != nil {
-		err := c.database.UpdateDocument(id, data)
-		if err != nil {
-			panic(err)
-		}
-	}
-}
-
-// InsertBucket writes through to the underlying database (if there is one).
-// It is left as a pending transaction, so the caller must call db.Commit() themselves.
-// This does not store or update provider data.
-func (c *Cache) InsertBucket(b *Bucket) {
-	bucket := b.StripProviderData()
-	c.buckets[bucket.Name] = bucket
-
-	if c.database != nil {
-		err := c.database.InsertBucket(bucket)
-		if err != nil {
-			panic(err)
-		}
-	}
-}
-
-// SetBucket writes through to the underlying database (if there is one).
-// It is left as a pending transaction, so the caller must call db.Commit() themselves.
-// This does not store or update provider data.
-func (c *Cache) SetBucket(b *Bucket) {
-	bucket := b.StripProviderData()
-	c.buckets[bucket.Name] = bucket
-
-	if c.database != nil {
-		err := c.database.SetBucket(bucket)
-		if err != nil {
-			panic(err)
-		}
-	}
-}
-
-// DeleteDocument writes through to the underlying database (if there is one),
-// but it leaves it as a pending transaction. The caller must call db.Commit() themselves.
-func (c *Cache) DeleteDocument(id uint64) {
-	c.documents[id] = nil
-	if c.database != nil {
-		err := c.database.DeleteDocument(id)
-		if err != nil {
-			panic(err)
-		}
-	}
-}
-
 // UpsertAccount writes through to the underlying database (if there is one),
 // but it leaves it as a pending transaction. The caller must call db.Commit() themselves.
 func (c *Cache) UpsertAccount(account *Account) {
@@ -347,43 +200,6 @@ func (c *Cache) UpsertAccount(account *Account) {
 	c.accounts[account.Owner] = account
 	if c.database != nil {
 		c.database.UpsertAccount(account)
-	}
-}
-
-func (c *Cache) DocExists(id uint64) bool {
-	return c.GetDocument(id) != nil
-}
-
-// Validate returns whether this operation is valid
-func (c *Cache) Validate(operation Operation) bool {
-	account := c.GetAccount(operation.GetSigner())
-	if account == nil {
-		return false
-	}
-	if account.Sequence+1 != operation.GetSequence() {
-		return false
-	}
-	if account.Balance < operation.GetFee() {
-		return false
-	}
-
-	switch op := operation.(type) {
-
-	case *SendOperation:
-		return account.ValidateSendOperation(op)
-
-	case *CreateDocumentOperation:
-		return true
-
-	case *UpdateDocumentOperation:
-		return c.DocExists(op.ID)
-
-	case *DeleteDocumentOperation:
-		return c.DocExists(op.ID)
-
-	default:
-		util.Printf("operation: %+v has type %s", operation, reflect.TypeOf(operation))
-		panic("operation type cannot be validated")
 	}
 }
 
@@ -434,6 +250,210 @@ func (c *Cache) IncrementSequence(op Operation) {
 		Sequence: op.GetSequence(),
 	}
 	c.UpsertAccount(newAccount)
+}
+
+/////////////////////
+// Document stuff
+/////////////////////
+
+// InsertDocument writes through to the underlying database (if there is one),
+// but it leaves it as a pending transaction. The caller must call db.Commit() themselves.
+func (c *Cache) InsertDocument(doc *Document) {
+	c.documents[doc.ID] = doc
+	if c.database != nil {
+		err := c.database.InsertDocument(doc)
+		if err != nil {
+			panic(err)
+		}
+	}
+}
+
+// UpdateDocument writes through to the underlying database (if there is one),
+// but it leaves it as a pending transaction. The caller must call db.Commit() themselves.
+func (c *Cache) UpdateDocument(id uint64, data *JSONObject) {
+	doc := c.GetDocument(id)
+	if doc == nil {
+		panic("no doc found for update")
+	}
+	newDoc := &Document{
+		ID:   id,
+		Data: data,
+	}
+	c.documents[id] = newDoc
+
+	if c.database != nil {
+		err := c.database.UpdateDocument(id, data)
+		if err != nil {
+			panic(err)
+		}
+	}
+}
+
+// DeleteDocument writes through to the underlying database (if there is one),
+// but it leaves it as a pending transaction. The caller must call db.Commit() themselves.
+func (c *Cache) DeleteDocument(id uint64) {
+	c.documents[id] = nil
+	if c.database != nil {
+		err := c.database.DeleteDocument(id)
+		if err != nil {
+			panic(err)
+		}
+	}
+}
+
+func (c *Cache) DocExists(id uint64) bool {
+	return c.GetDocument(id) != nil
+}
+
+// Do not modify the Document returned from GetDocument, because it might belong to
+// the readonly cache.
+// Returns nil if there is no such document.
+func (c *Cache) GetDocument(id uint64) *Document {
+	doc, ok := c.documents[id]
+	if ok {
+		return doc
+	}
+
+	if c.readOnly != nil {
+		return c.readOnly.GetDocument(id)
+	}
+	if c.database != nil {
+		// When there is a database, read from the database and cache it.
+		doc = c.database.GetDocument(id)
+		c.documents[id] = doc
+		return doc
+	}
+
+	return nil
+}
+
+///////////////////
+// Bucket stuff
+///////////////////
+
+// GetBucket returns a copy so you could modify it without borking the cache.
+// This includes the data from providers in the returned bucket whenever that data exists.
+// Returns nil if there is no such bucket.
+func (c *Cache) GetBucket(name string) *Bucket {
+	cached, ok := c.buckets[name]
+	if ok {
+		// Inflate the provider data.
+		bucket := cached.StripProviderData()
+		for i, p := range bucket.Providers {
+			provider := c.GetProvider(p.ID)
+			if provider != nil {
+				bucket.Providers[i] = provider
+			}
+		}
+		return bucket
+	}
+
+	if c.readOnly != nil {
+		return c.readOnly.GetBucket(name)
+	}
+	if c.database != nil {
+		// When there is a database, read from the database and cache it.
+		bucket := c.database.GetBucket(name)
+		for _, p := range bucket.Providers {
+			c.providers[p.ID] = p
+		}
+		c.buckets[name] = bucket.StripProviderData()
+	}
+
+	return nil
+}
+
+// InsertBucket writes through to the underlying database (if there is one).
+// It is left as a pending transaction, so the caller must call db.Commit() themselves.
+// This does not store or update provider data.
+func (c *Cache) InsertBucket(b *Bucket) {
+	bucket := b.StripProviderData()
+	c.buckets[bucket.Name] = bucket
+
+	if c.database != nil {
+		err := c.database.InsertBucket(bucket)
+		if err != nil {
+			panic(err)
+		}
+	}
+}
+
+// SetBucket writes through to the underlying database (if there is one).
+// It is left as a pending transaction, so the caller must call db.Commit() themselves.
+// This does not store or update provider data.
+func (c *Cache) SetBucket(b *Bucket) {
+	bucket := b.StripProviderData()
+	c.buckets[bucket.Name] = bucket
+
+	if c.database != nil {
+		err := c.database.SetBucket(bucket)
+		if err != nil {
+			panic(err)
+		}
+	}
+}
+
+/////////////////////
+// Provider stuff
+/////////////////////
+
+// Do not modify the Provider returned from GetProvider, because it might belong to the
+// readonly cache.
+// Returns nil if there is no such provider.
+func (c *Cache) GetProvider(id uint64) *Provider {
+	p, ok := c.providers[id]
+	if ok {
+		return p
+	}
+
+	if c.readOnly != nil {
+		return c.readOnly.GetProvider(id)
+	}
+	if c.database != nil {
+		// When there is a database, read from the database and cache it.
+		p = c.database.GetProvider(id)
+		c.providers[id] = p
+		return p
+	}
+
+	return nil
+}
+
+/////////////////////////////////////
+// General block processing stuff
+/////////////////////////////////////
+
+// Validate returns whether this operation is valid
+func (c *Cache) Validate(operation Operation) bool {
+	account := c.GetAccount(operation.GetSigner())
+	if account == nil {
+		return false
+	}
+	if account.Sequence+1 != operation.GetSequence() {
+		return false
+	}
+	if account.Balance < operation.GetFee() {
+		return false
+	}
+
+	switch op := operation.(type) {
+
+	case *SendOperation:
+		return account.ValidateSendOperation(op)
+
+	case *CreateDocumentOperation:
+		return true
+
+	case *UpdateDocumentOperation:
+		return c.DocExists(op.ID)
+
+	case *DeleteDocumentOperation:
+		return c.DocExists(op.ID)
+
+	default:
+		util.Printf("operation: %+v has type %s", operation, reflect.TypeOf(operation))
+		panic("operation type cannot be validated")
+	}
 }
 
 // Process returns false if the operation cannot be processed
