@@ -1019,6 +1019,21 @@ DELETE FROM providers
 WHERE id = $1
 `
 
+// Returns the maximum provider id used in the database, or 0 if there are none.
+// This uses the pending transaction, so even though it does not write, you have to commit if you
+// use this.
+func (db *Database) MaxProviderID() uint64 {
+	highest := &Provider{}
+	err := db.getTx(highest, "SELECT * FROM providers ORDER BY id DESC LIMIT 1")
+	if isNoRowsError(err) {
+		return 0
+	}
+	if err != nil {
+		panic(err)
+	}
+	return highest.ID
+}
+
 // InsertProvider takes a Provider that has no specified ID. It automatically assigns the
 // next unused id to this Provider and inserts it into the database.
 // It uses the transaction.
@@ -1028,24 +1043,12 @@ func (db *Database) InsertProvider(p *Provider) uint64 {
 	if p == nil || p.Owner == "" || p.Capacity == 0 || p.ID != 0 {
 		util.Logger.Fatalf("invalid provider to insert: %+v", p)
 	}
-
-	// Make the new id one more than the highest used provider id
-	// This could reassign an id if the most recent provider got deleted but hopefully
-	// that is okay
-	highest := &Provider{}
-	id := uint64(1)
-	err := db.getTx(highest, "SELECT * FROM providers ORDER BY id DESC LIMIT 1")
-	if err != nil && !isNoRowsError(err) {
-		panic(err)
-	}
-	if highest != nil {
-		id = highest.ID + 1
-	}
+	id := db.MaxProviderID() + 1
 
 	// Make a copy to insert
 	insert := *p
 	insert.ID = id
-	_, err = db.namedExecTx(providerInsert, &insert)
+	_, err := db.namedExecTx(providerInsert, &insert)
 	if err != nil {
 		panic(err)
 	}
