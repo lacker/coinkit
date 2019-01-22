@@ -41,3 +41,22 @@ func (b *Bucket) StripProviderData() *Bucket {
 	copy.Providers = ps
 	return copy
 }
+
+func (b *Bucket) CheckEqual(other *Bucket) error {
+	if b == nil && other == nil {
+		return nil
+	}
+	if b == nil || other == nil {
+		return fmt.Errorf("b != other. b is %+v, other is %+v", b, other)
+	}
+	if b.Name != other.Name {
+		return fmt.Errorf("name %s != name %s", b.Name, other.Name)
+	}
+	if b.Owner != other.Owner {
+		return fmt.Errorf("owner %s != owner %s", b.Owner, other.Owner)
+	}
+	if b.Size != other.Size {
+		return fmt.Errorf("size %d != size %d", b.Size, other.Size)
+	}
+	return b.Providers.CheckEqual(other.Providers)
+}

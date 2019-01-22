@@ -117,18 +117,30 @@ func (c *Cache) CheckEqual(key string, account *Account) bool {
 // CheckAgainstDatabase returns an error if any of the account data in the
 // memory part of the cache does not match against the database.
 // Typically this will run on startup to check integrity.
-// TODO: check as much of documents, buckets, and providers as possible.
 func (c *Cache) CheckAgainstDatabase(db *Database) error {
 	if db.TransactionInProgress() {
 		return fmt.Errorf("there is an uncommitted transaction")
 	}
-	for owner, dataAccount := range c.accounts {
+
+	// Check accounts
+	for owner, cacheAccount := range c.accounts {
 		dbAccount := db.GetAccount(owner)
-		err := dataAccount.CheckEqual(dbAccount)
+		err := cacheAccount.CheckEqual(dbAccount)
 		if err != nil {
 			return err
 		}
 	}
+
+	// Check buckets
+	for name, cacheBucket := range c.buckets {
+		dbBucket := db.GetBucket(name)
+		err := cacheBucket.CheckEqual(dbBucket)
+		if err != nil {
+			return err
+		}
+	}
+
+	// TODO: Check providers
 	return nil
 }
 
@@ -293,7 +305,7 @@ func (c *Cache) InsertBucket(b *Bucket) {
 // This does not store or update provider data.
 func (c *Cache) SetBucket(b *Bucket) {
 	bucket := b.StripProviderData()
-	c.buckets[bucket.name] = bucket
+	c.buckets[bucket.Name] = bucket
 
 	if c.database != nil {
 		err := c.database.SetBucket(bucket)

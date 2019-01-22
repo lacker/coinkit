@@ -21,6 +21,10 @@ func (p *Provider) String() string {
 	return fmt.Sprintf("provider #%d, owner:%s, capacity:%d", p.ID, p.Owner, p.Capacity)
 }
 
+func (p *Provider) CheckEqual(other *Provider) error {
+	panic("TODO: implement")
+}
+
 // Value and Scan let a ProviderArray map to a sql bigint[] with only ids
 type ProviderArray []*Provider
 
@@ -58,5 +62,18 @@ func (ps *ProviderArray) Scan(src interface{}) error {
 		})
 	}
 	*ps = answer
+	return nil
+}
+
+func (ps ProviderArray) CheckEqual(other ProviderArray) error {
+	if len(ps) != len(other) {
+		return fmt.Errorf("len %d != len %d", len(ps), len(other))
+	}
+	for i, p := range ps {
+		err := p.CheckEqual(other[i])
+		if err != nil {
+			return err
+		}
+	}
 	return nil
 }
