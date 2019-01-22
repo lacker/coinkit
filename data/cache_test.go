@@ -36,12 +36,12 @@ func TestSendOperationProcessing(t *testing.T) {
 
 func TestReadThrough(t *testing.T) {
 	db := NewTestDatabase(0)
-	c1 := NewDatabaseCache(db, 1)
+	c1 := NewDatabaseCache(db, 1, 1)
 	a1 := c1.GetAccount("bob")
 	if a1 != nil {
 		t.Fatalf("expected nil account, got %+v", a1)
 	}
-	c2 := NewDatabaseCache(db, 1)
+	c2 := NewDatabaseCache(db, 1, 1)
 	a2 := &Account{
 		Owner:    "bob",
 		Sequence: 7,
@@ -141,7 +141,7 @@ func TestValidation(t *testing.T) {
 
 func TestWriteThrough(t *testing.T) {
 	db := NewTestDatabase(0)
-	c1 := NewDatabaseCache(db, 1)
+	c1 := NewDatabaseCache(db, 1, 1)
 	a1 := &Account{
 		Owner:    "bob",
 		Sequence: 8,
@@ -149,7 +149,7 @@ func TestWriteThrough(t *testing.T) {
 	}
 	c1.UpsertAccount(a1)
 	db.Commit()
-	c2 := NewDatabaseCache(db, 1)
+	c2 := NewDatabaseCache(db, 1, 1)
 	a2 := c2.GetAccount("bob")
 	if a2 == nil || a2.Balance != 200 {
 		t.Fatalf("writethrough fail: %+v", a2)

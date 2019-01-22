@@ -71,7 +71,13 @@ func NewOperationQueue(publicKey util.PublicKey, db *Database,
 		if lastChunk != nil {
 			nextDocumentID = lastChunk.NextDocumentID
 		}
-		q.cache = NewDatabaseCache(db, nextDocumentID)
+
+		nextProviderID := uint64(1)
+		if lastChunk != nil {
+			nextProviderID = lastChunk.NextProviderID
+		}
+
+		q.cache = NewDatabaseCache(db, nextDocumentID, nextProviderID)
 	}
 	return q
 }

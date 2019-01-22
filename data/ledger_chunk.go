@@ -25,6 +25,9 @@ type LedgerChunk struct {
 	// The id for the next document to be created, after this chunk
 	NextDocumentID uint64 `json:"nextDocumentID"`
 
+	// The id for the next provider to be created, after this chunk
+	NextProviderID uint64 `json:"nextProviderID"`
+
 	Operations []*SignedOperation `json:"operations"`
 }
 

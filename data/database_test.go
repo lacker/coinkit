@@ -537,13 +537,12 @@ func TestBuckets(t *testing.T) {
 	// Add some providers so that the lookups get data
 	for i := uint64(1); i <= 4; i++ {
 		p := &Provider{
-			Owner:    "ricky",
-			Capacity: 1000,
+			ID:        i,
+			Owner:     "ricky",
+			Capacity:  1000,
+			Available: 1000,
 		}
-		id := db.InsertProvider(p)
-		if id != i {
-			t.Fatalf("expected in-order id of %d but got %d", i, id)
-		}
+		db.InsertProvider(p)
 	}
 	db.Commit()
 
@@ -579,14 +578,12 @@ func TestProviders(t *testing.T) {
 	p := &Provider{
 		Owner:    "bob",
 		Capacity: 100,
+		ID:       1,
 	}
 
-	id1 := db.InsertProvider(p)
-	id2 := db.InsertProvider(p)
-
-	if id1 != 1 || id2 != 2 {
-		t.Fatalf("id1: %d, id2: %d", id1, id2)
-	}
+	db.InsertProvider(p)
+	p.ID = 2
+	db.InsertProvider(p)
 
 	b := &Bucket{
 		Name:  "bucket1",

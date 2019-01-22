@@ -53,6 +53,7 @@ type Cache struct {
 	database *Database
 
 	NextDocumentID uint64
+	NextProviderID uint64
 }
 
 func NewCache() *Cache {
@@ -63,13 +64,15 @@ func NewCache() *Cache {
 		buckets:        make(map[string]*Bucket),
 		providers:      make(map[uint64]*Provider),
 		NextDocumentID: uint64(1),
+		NextProviderID: uint64(1),
 	}
 }
 
-func NewDatabaseCache(database *Database, nextDocumentID uint64) *Cache {
+func NewDatabaseCache(database *Database, nextDocumentID uint64, nextProviderID uint64) *Cache {
 	c := NewCache()
 	c.database = database
 	c.NextDocumentID = nextDocumentID
+	c.NextProviderID = nextProviderID
 	return c
 }
 
@@ -80,6 +83,7 @@ func (cache *Cache) CowCopy() *Cache {
 	c := NewCache()
 	c.readOnly = cache
 	c.NextDocumentID = cache.NextDocumentID
+	c.NextProviderID = cache.NextProviderID
 	return c
 }
 
@@ -258,6 +262,7 @@ func (c *Cache) IncrementSequence(op Operation) {
 
 // InsertDocument writes through to the underlying database (if there is one),
 // but it leaves it as a pending transaction. The caller must call db.Commit() themselves.
+// This does not update NextDocumentID.
 func (c *Cache) InsertDocument(doc *Document) {
 	c.documents[doc.ID] = doc
 	if c.database != nil {
@@ -421,17 +426,16 @@ func (c *Cache) GetProvider(id uint64) *Provider {
 
 // InsertProvider writes through to the underlying database (if there is one).
 // It is left as a pending transaction, so the caller must call db.Commit() themselves.
-func (c *Cache) InsertProvider(provider *Provider) {
-	p := provider.NewProvider()
+// This does not update NextProviderID.
+func (c *Cache) InsertProvider(p *Provider) {
+	c.providers[p.ID] = p
 
 	if c.database != nil {
-		id := c.database.InsertProvider(p)
-		p.ID = id
-	} else {
-		panic("XXX We need to figure out this provider's ID ourselves")
+		err := c.database.InsertProvider(p)
+		if err != nil {
+			panic(err)
+		}
 	}
-
-	c.providers[p.ID] = p
 }
 
 /////////////////////////////////////
@@ -571,6 +575,10 @@ func (c *Cache) ProcessChunk(chunk *LedgerChunk) error {
 
 	if c.NextDocumentID != chunk.NextDocumentID {
 		return fmt.Errorf("bad NextDocumentID")
+	}
+
+	if c.NextProviderID != chunk.NextProviderID {
+		return fmt.Errorf("bad NextProviderID")
 	}
 
 	return nil
