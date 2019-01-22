@@ -611,7 +611,7 @@ func TestProviders(t *testing.T) {
 		t.Fatalf("GetProviders returned: %+v", ps)
 	}
 
-	err := db.SetCapacity(1, 200)
+	err := db.UpdateProvider(1, 200)
 	if err != nil {
 		t.Fatalf("SetCapacity error: %s", err)
 	}

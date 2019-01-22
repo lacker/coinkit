@@ -453,6 +453,12 @@ func (c *Cache) InsertProvider(p *Provider) {
 	}
 }
 
+// UpdateProvider writes through to the underlying database (if there is one) to change the
+// capacity for a provider, but leaves it as a pending transaction.
+func (c *Cache) UpdateProvider(id uint64, capacity uint32) {
+	panic("XXX")
+}
+
 /////////////////////////////////////
 // General block processing stuff
 /////////////////////////////////////
