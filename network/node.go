@@ -23,11 +23,11 @@ func NewNode(
 	publicKey util.PublicKey, qs *consensus.QuorumSlice, db *data.Database) *Node {
 	node := newNodeWithAccounts(publicKey, qs, db, data.Airdrop)
 
-	// We check on startup that our block history matches our current account data
+	// We check on startup that our block history matches our current data
 	if db != nil {
-		err := db.CheckAccountsMatchBlocks()
+		err := db.CheckBlockReplay()
 		if err != nil {
-			util.Printf("check failed: accounts do not match blocks: %s", err)
+			util.Printf("replay check failed: %s", err)
 			return nil
 		}
 	}

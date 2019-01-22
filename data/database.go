@@ -459,10 +459,9 @@ func (db *Database) SignatureDataMessage(signature string) *DataMessage {
 	return answer
 }
 
-// CheckAccountsMatchBlocks replays the blockchain from the beginning
-// and returns an error if the resulting information does not match
-// the information held in the accounts.
-func (db *Database) CheckAccountsMatchBlocks() error {
+// CheckBlockReplay replays the blockchain from the beginning
+// and returns an error if the result conflicts with the data held in our database.
+func (db *Database) CheckBlockReplay() error {
 	cache := NewCache()
 	for _, account := range Airdrop {
 		cache.UpsertAccount(account)

@@ -116,7 +116,8 @@ func (c *Cache) CheckEqual(key string, account *Account) bool {
 
 // CheckAgainstDatabase returns an error if any of the account data in the
 // memory part of the cache does not match against the database.
-// TODO: figure if blocks, documents, buckets, and providers should also be checked
+// Typically this will run on startup to check integrity.
+// TODO: check as much of documents, buckets, and providers as possible.
 func (c *Cache) CheckAgainstDatabase(db *Database) error {
 	if db.TransactionInProgress() {
 		return fmt.Errorf("there is an uncommitted transaction")
