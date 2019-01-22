@@ -398,6 +398,18 @@ func (c *Cache) SetBucket(b *Bucket) {
 	}
 }
 
+// DeleteBucket writes through to the underlying database (if there is one),
+// but it leaves it as a pending transaction. The caller must call db.Commit() themselves.
+func (c *Cache) DeleteBucket(name string) {
+	c.buckets[name] = nil
+	if c.database != nil {
+		err := c.database.DeleteBucket(name)
+		if err != nil {
+			panic(err)
+		}
+	}
+}
+
 /////////////////////
 // Provider stuff
 /////////////////////
