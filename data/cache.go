@@ -140,7 +140,15 @@ func (c *Cache) CheckAgainstDatabase(db *Database) error {
 		}
 	}
 
-	// TODO: Check providers
+	// Check providers
+	for id, cacheProvider := range c.providers {
+		dbProvider := db.GetProvider(id)
+		err := cacheProvider.CheckEqual(dbProvider)
+		if err != nil {
+			return err
+		}
+	}
+
 	return nil
 }
 
