@@ -57,6 +57,7 @@ func (p *Provider) CheckEqual(other *Provider) error {
 	if p.Available != other.Available {
 		return fmt.Errorf("available %d != available %d", p.Available, other.Available)
 	}
+	return nil
 }
 
 // Value and Scan let a ProviderArray map to a sql bigint[] with only ids
