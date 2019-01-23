@@ -14,6 +14,10 @@ type Bucket struct {
 	Providers ProviderArray `json:"providers"`
 }
 
+func IsValidBucketName(s string) bool {
+
+}
+
 func (b *Bucket) String() string {
 	return fmt.Sprintf("bucket:%s, size:%d", b.Name, b.Size)
 }
@@ -59,4 +63,30 @@ func (b *Bucket) CheckEqual(other *Bucket) error {
 		return fmt.Errorf("size %d != size %d", b.Size, other.Size)
 	}
 	return b.Providers.CheckEqual(other.Providers)
+}
+
+// Value and Scan let a BucketArray map to a sql text[] with just bucket names
+type BucketArray []*Bucket
+
+// TODO: escape things properly
+func (bs BucketArray) Value() (driver.Value, error) {
+	panic("TODO")
+}
+
+// TODO: unescape things properly
+func (bs *BucketArray) Scan(src interface{}) error {
+	panic("TODO")
+}
+
+func (bs BucketArray) CheckEqual(other BucketArray) error {
+	if len(bs) != len(other) {
+		return fmt.Errorf("len %d != len %d", len(bs), len(other))
+	}
+	for i, b := range bs {
+		err := b.CheckEqual(other[i])
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }

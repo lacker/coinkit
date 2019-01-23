@@ -18,6 +18,9 @@ type Provider struct {
 
 	// The current available space on this provider.
 	Available uint32 `json:"available"`
+
+	// The buckets this provider is currently providing.
+	Buckets BucketArray `json:"buckets"`
 }
 
 func (p *Provider) String() string {
