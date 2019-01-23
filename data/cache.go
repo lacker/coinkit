@@ -476,7 +476,10 @@ func (c *Cache) UpdateProvider(id uint64, capacity uint32) {
 }
 
 // DeleteProvider writes through.
-// XXX implement
+// It also removes this provider from all buckets it is providing.
+func (c *Cache) DeleteProvider(id uint64) {
+	panic("TODO: implement")
+}
 
 /////////////////////////////////////
 // General block processing stuff
