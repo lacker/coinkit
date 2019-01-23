@@ -1,7 +1,10 @@
 package data
 
 import (
+	"database/sql/driver"
 	"fmt"
+	"regexp"
+	"strings"
 )
 
 type Bucket struct {
@@ -14,8 +17,17 @@ type Bucket struct {
 	Providers ProviderArray `json:"providers"`
 }
 
-func IsValidBucketName(s string) bool {
+var validBucketName = regexp.MustCompile("^[-a-zA-Z0-9]*$")
 
+// Bucket names must be valid domain names, and can't begin or end with hyphen
+func IsValidBucketName(s string) bool {
+	if !validBucketName.MatchString(s) {
+		return false
+	}
+	if strings.HasPrefix(s, "-") || strings.HasSuffix(s, "-") {
+		return false
+	}
+	return true
 }
 
 func (b *Bucket) String() string {

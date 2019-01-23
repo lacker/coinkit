@@ -41,3 +41,18 @@ func TestStripProviderData(t *testing.T) {
 	bucket.Providers[0].Owner = ""
 	assertCompareJSON(t, bucket, stripped, true)
 }
+
+func TestIsValidBucketName(t *testing.T) {
+	for _, valid := range []string{
+		"89tfc7bn934ty7nb854y7GYUIGNUI",
+		"bob",
+		"A-Z",
+		"pn----AXAX",
+		"oof-------yeah",
+		"Q",
+	} {
+		if !IsValidBucketName(valid) {
+			t.Fatalf("%s should be a valid bucket name", valid)
+		}
+	}
+}
