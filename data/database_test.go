@@ -576,9 +576,10 @@ func TestProviders(t *testing.T) {
 	db := NewTestDatabase(0)
 
 	p := &Provider{
-		Owner:    "bob",
-		Capacity: 100,
-		ID:       1,
+		Owner:     "bob",
+		Capacity:  100,
+		Available: 100,
+		ID:        1,
 	}
 
 	db.InsertProvider(p)
