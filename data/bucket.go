@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"regexp"
 	"strings"
+
+	"github.com/lacker/coinkit/util"
 )
 
 type Bucket struct {
@@ -80,12 +82,21 @@ func (b *Bucket) CheckEqual(other *Bucket) error {
 // Value and Scan let a BucketArray map to a sql text[] with just bucket names
 type BucketArray []*Bucket
 
-// TODO: escape things properly
 func (bs BucketArray) Value() (driver.Value, error) {
-	panic("TODO")
+	strs := []string{}
+	for _, b := range bs {
+		if !IsValidBucketName(b.Name) {
+			util.Logger.Fatalf("should not write bad name %s to the db", b.Name)
+		}
+		// TODO: escape things properly here.
+		// We can avoid for now because bucket names are restricted
+		strs = append(strs, fmt.Sprintf("\"%s\"", b.Name))
+	}
+	answer := fmt.Sprintf("{%s}", strings.Join(strs, ","))
+	return answer, nil
 }
 
-// TODO: unescape things properly
+// TODO: unescape things properly. We can avoid for now because bucket names are restricted
 func (bs *BucketArray) Scan(src interface{}) error {
 	panic("TODO")
 }
