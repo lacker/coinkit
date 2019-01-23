@@ -24,12 +24,18 @@ func (p *Provider) String() string {
 	return fmt.Sprintf("provider #%d, owner:%s, capacity:%d", p.ID, p.Owner, p.Capacity)
 }
 
-// Makes a new provider that is a copy of this one with Available set correctly
-func (p *Provider) NewProvider() *Provider {
-	copy := new(Provider)
-	*copy = *p
-	copy.Available = copy.Capacity
-	return copy
+func (p *Provider) IsValidNewProvider() bool {
+	// Check fields that must be filled
+	if p == nil || p.Owner == "" || p.Capacity == 0 || p.ID == 0 {
+		return false
+	}
+
+	// New providers should always be empty
+	if p.Capacity != p.Available {
+		return false
+	}
+
+	return true
 }
 
 func (p *Provider) CheckEqual(other *Provider) error {

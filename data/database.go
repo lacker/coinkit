@@ -147,7 +147,8 @@ CREATE INDEX IF NOT EXISTS bucket_provider_idx ON buckets (providers);
 CREATE TABLE IF NOT EXISTS providers (
     id bigint,
     owner text,
-    capacity integer
+    capacity integer,
+    available integer
 );
 
 CREATE UNIQUE INDEX IF NOT EXISTS provider_id_idx ON providers (id);
@@ -1004,13 +1005,13 @@ func (db *Database) getBucketsUsingTx(q *BucketQuery, tx *sqlx.Tx) []*Bucket {
 ////////////////
 
 const providerInsert = `
-INSERT INTO providers (id, owner, capacity)
-VALUES (:id, :owner, :capacity)
+INSERT INTO providers (id, owner, capacity, available)
+VALUES (:id, :owner, :capacity, :available)
 `
 
 const providerUpdate = `
 UPDATE providers
-SET capacity = :capacity
+SET capacity = :capacity, available = :available
 WHERE id = :id
 `
 
@@ -1025,7 +1026,7 @@ WHERE id = $1
 // It panics if there is a fundamental database problem.
 // If this returns an error, the pending transaction will be unusable.
 func (db *Database) InsertProvider(p *Provider) error {
-	if p == nil || p.Owner == "" || p.Capacity == 0 || p.ID == 0 {
+	if !p.IsValidNewProvider() {
 		util.Logger.Fatalf("invalid provider to insert: %+v", p)
 	}
 
