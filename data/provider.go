@@ -39,7 +39,24 @@ func (p *Provider) IsValidNewProvider() bool {
 }
 
 func (p *Provider) CheckEqual(other *Provider) error {
-	panic("TODO: implement")
+	if p == nil && other == nil {
+		return nil
+	}
+	if p == nil || other == nil {
+		return fmt.Errorf("p != other. p is %+v, other is %+v", p, other)
+	}
+	if p.ID != other.ID {
+		return fmt.Errorf("id %d != id %d", p.ID, other.ID)
+	}
+	if p.Owner != other.Owner {
+		return fmt.Errorf("owner %s != owner %s", p.Owner, other.Owner)
+	}
+	if p.Capacity != other.Capacity {
+		return fmt.Errorf("capacity %d != capacity %d", p.Capacity, other.Capacity)
+	}
+	if p.Available != other.Available {
+		return fmt.Errorf("available %d != available %d", p.Available, other.Available)
+	}
 }
 
 // Value and Scan let a ProviderArray map to a sql bigint[] with only ids
