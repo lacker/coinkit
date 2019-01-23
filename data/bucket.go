@@ -17,7 +17,7 @@ type Bucket struct {
 	Providers ProviderArray `json:"providers"`
 }
 
-var validBucketName = regexp.MustCompile("^[-a-zA-Z0-9]*$")
+var validBucketName = regexp.MustCompile("^[-a-zA-Z0-9]+$")
 
 // Bucket names must be valid domain names, and can't begin or end with hyphen
 func IsValidBucketName(s string) bool {

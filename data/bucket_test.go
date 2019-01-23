@@ -55,4 +55,15 @@ func TestIsValidBucketName(t *testing.T) {
 			t.Fatalf("%s should be a valid bucket name", valid)
 		}
 	}
+
+	for _, invalid := range []string{
+		"",
+		"-bob",
+		"foo-",
+		"A?Z",
+	} {
+		if IsValidBucketName(invalid) {
+			t.Fatalf("%s should be an invalid bucket name", invalid)
+		}
+	}
 }
