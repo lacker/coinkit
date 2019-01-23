@@ -15,6 +15,14 @@ import (
 // Cache is not multithreaded.
 // If there are multiple Cache objects in use with the same cache.database
 // set, data can get stale, so don't do that.
+//
+// In general, some methods write through to the database if there is one, but leave
+// it as a pending transaction. Copy-on-write means that when you make a copy and write
+// to the copy, it won't write through.
+// When there is a db write-through, this means you need to call db.Commit() afterwards, or
+// else there is a transaction left on the database that will probably cause hangs during
+// subsequent database operations. In the comments this is just referred to as
+// "Foo writes through" - all writethroughs work this way.
 type Cache struct {
 	// Storing real account data.
 	// The key of the map is the owner of that account.
@@ -192,8 +200,7 @@ func (c *Cache) GetAccount(owner string) *Account {
 	return answer
 }
 
-// UpsertAccount writes through to the underlying database (if there is one),
-// but it leaves it as a pending transaction. The caller must call db.Commit() themselves.
+// UpsertAccount writes through.
 func (c *Cache) UpsertAccount(account *Account) {
 	if account == nil {
 		log.Fatal("cannot upsert nil account")
@@ -207,6 +214,7 @@ func (c *Cache) UpsertAccount(account *Account) {
 	}
 }
 
+// SetBalance writes through.
 func (c *Cache) SetBalance(owner string, amount uint64) {
 	oldAccount := c.GetAccount(owner)
 	sequence := uint32(0)
@@ -220,6 +228,7 @@ func (c *Cache) SetBalance(owner string, amount uint64) {
 	})
 }
 
+// ProcessSendOperation writes through.
 // ProcessSendOperation returns false if the operation cannot be processed
 func (c *Cache) ProcessSendOperation(op *SendOperation) bool {
 	source := c.GetAccount(op.Signer)
@@ -242,6 +251,7 @@ func (c *Cache) ProcessSendOperation(op *SendOperation) bool {
 	return true
 }
 
+// IncrementSequence writes through.
 // Increments the sequence number for the provided op.
 // The op should already have been validated.
 func (c *Cache) IncrementSequence(op Operation) {
@@ -260,8 +270,7 @@ func (c *Cache) IncrementSequence(op Operation) {
 // Document stuff
 /////////////////////
 
-// InsertDocument writes through to the underlying database (if there is one),
-// but it leaves it as a pending transaction. The caller must call db.Commit() themselves.
+// InsertDocument writes through.
 // This does not update NextDocumentID.
 func (c *Cache) InsertDocument(doc *Document) {
 	c.documents[doc.ID] = doc
@@ -273,8 +282,7 @@ func (c *Cache) InsertDocument(doc *Document) {
 	}
 }
 
-// UpdateDocument writes through to the underlying database (if there is one),
-// but it leaves it as a pending transaction. The caller must call db.Commit() themselves.
+// UpdateDocument writes through.
 func (c *Cache) UpdateDocument(id uint64, data *JSONObject) {
 	doc := c.GetDocument(id)
 	if doc == nil {
@@ -294,8 +302,7 @@ func (c *Cache) UpdateDocument(id uint64, data *JSONObject) {
 	}
 }
 
-// DeleteDocument writes through to the underlying database (if there is one),
-// but it leaves it as a pending transaction. The caller must call db.Commit() themselves.
+// DeleteDocument writes through.
 func (c *Cache) DeleteDocument(id uint64) {
 	c.documents[id] = nil
 	if c.database != nil {
@@ -368,8 +375,7 @@ func (c *Cache) GetBucket(name string) *Bucket {
 	return nil
 }
 
-// InsertBucket writes through to the underlying database (if there is one).
-// It is left as a pending transaction, so the caller must call db.Commit() themselves.
+// InsertBucket writes through.
 // This does not store or update provider data.
 func (c *Cache) InsertBucket(b *Bucket) {
 	bucket := b.StripProviderData()
@@ -383,8 +389,7 @@ func (c *Cache) InsertBucket(b *Bucket) {
 	}
 }
 
-// SetBucket writes through to the underlying database (if there is one).
-// It is left as a pending transaction, so the caller must call db.Commit() themselves.
+// SetBucket writes through.
 // This does not store or update provider data.
 func (c *Cache) SetBucket(b *Bucket) {
 	bucket := b.StripProviderData()
@@ -398,8 +403,7 @@ func (c *Cache) SetBucket(b *Bucket) {
 	}
 }
 
-// DeleteBucket writes through to the underlying database (if there is one),
-// but it leaves it as a pending transaction. The caller must call db.Commit() themselves.
+// DeleteBucket writes through.
 func (c *Cache) DeleteBucket(name string) {
 	c.buckets[name] = nil
 	if c.database != nil {
@@ -436,8 +440,7 @@ func (c *Cache) GetProvider(id uint64) *Provider {
 	return nil
 }
 
-// InsertProvider writes through to the underlying database (if there is one).
-// It is left as a pending transaction, so the caller must call db.Commit() themselves.
+// InsertProvider writes through.
 // This does not update NextProviderID.
 func (c *Cache) InsertProvider(p *Provider) {
 	if p.Capacity != p.Available {
@@ -453,8 +456,7 @@ func (c *Cache) InsertProvider(p *Provider) {
 	}
 }
 
-// UpdateProvider writes through to the underlying database (if there is one) to change the
-// capacity for a provider, but leaves it as a pending transaction.
+// UpdateProvider writes through.
 func (c *Cache) UpdateProvider(id uint64, capacity uint32) {
 	p := c.GetProvider(id)
 	if p == nil {
@@ -472,6 +474,9 @@ func (c *Cache) UpdateProvider(id uint64, capacity uint32) {
 		}
 	}
 }
+
+// DeleteProvider writes through.
+// XXX implement
 
 /////////////////////////////////////
 // General block processing stuff
