@@ -1151,20 +1151,20 @@ func (db *Database) Allocate(bucketName string, providerID uint64) error {
 		panic(err)
 	}
 	if count != 1 {
-		return nil, fmt.Errorf("cannot allocate nonexistent bucket: %s", bucketName)
+		return fmt.Errorf("cannot allocate nonexistent bucket: %s", bucketName)
 	}
 
 	// Point the provider to the bucket
-	res, err := db.execTc(providerAppend, providerID, bucketName)
+	res, err = db.execTx(providerAppend, providerID, bucketName)
 	if err != nil {
 		panic(err)
 	}
-	count, err := res.RowsAffected()
+	count, err = res.RowsAffected()
 	if err != nil {
 		panic(err)
 	}
 	if count != 1 {
-		return nil, fmt.Errorf("cannot allocate to nonexistent provider: %d", providerID)
+		return fmt.Errorf("cannot allocate to nonexistent provider: %d", providerID)
 	}
 
 	return nil
