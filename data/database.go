@@ -148,7 +148,8 @@ CREATE TABLE IF NOT EXISTS providers (
     id bigint,
     owner text,
     capacity integer,
-    available integer
+    available integer,
+    buckets text[]
 );
 
 CREATE UNIQUE INDEX IF NOT EXISTS provider_id_idx ON providers (id);
