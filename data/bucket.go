@@ -96,9 +96,33 @@ func (bs BucketArray) Value() (driver.Value, error) {
 	return answer, nil
 }
 
-// TODO: unescape things properly. We can avoid for now because bucket names are restricted
 func (bs *BucketArray) Scan(src interface{}) error {
-	panic("TODO")
+	if src == nil {
+		return nil
+	}
+	bytes, ok := src.([]byte)
+	if !ok {
+		return fmt.Errorf("expected bytes from sql for bucket array but got: %#v", src)
+	}
+	str := string(bytes)
+	// TODO: unescape things properly. We can avoid for now because bucket names are restricted
+	trimmed := strings.Trim(str, "{}")
+	strs := strings.Split(trimmed, ",")
+	answer := []*Bucket{}
+	for _, quoted := range strs {
+		if quoted == "" {
+			continue
+		}
+		name := strings.Trim(quoted, "\"")
+		if !IsValidBucketName(name) {
+			util.Logger.Fatalf("bad bucket name in the db: %s", name)
+		}
+		answer = append(answer, &Bucket{
+			Name: name,
+		})
+	}
+	*bs = answer
+	return nil
 }
 
 func (bs BucketArray) CheckEqual(other BucketArray) error {
