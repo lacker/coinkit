@@ -837,7 +837,7 @@ VALUES (:name, :owner, :size, :providers)
 
 const bucketDelete = `
 DELETE FROM buckets
-WHERE name = $1
+WHERE name = $1 AND array_length(providers, 1) = 0
 `
 
 // InsertBucket returns an error if it failed because there is already a bucket with
@@ -993,7 +993,7 @@ WHERE id = :id
 
 const providerDelete = `
 DELETE FROM providers
-WHERE id = $1
+WHERE id = $1 AND array_length(buckets, 1) = 0
 `
 
 // InsertProvider returns an error if it failed because there is already a provider with
@@ -1136,10 +1136,23 @@ SET buckets = array_append(buckets, $2)
 WHERE id = $1
 `
 
+const bucketRemove = `
+UPDATE buckets
+SET providers = array_remove(providers, $2)
+WHERE name = $1 AND $2 = ANY (providers)
+`
+
+const providerRemove = `
+UPDATE providers
+SET buckets = array_remove(buckets, $2)
+WHERE id = $1 and $2 = ANY (buckets)
+`
+
 // Allocates a bucket to a provider.
 // This information is denormalized, stored in the database twice, so that
 // caching does not require tracking query results.
 // If there is either no such bucket or no such provider, returns an error.
+// NOTE: this does not update available space.
 func (db *Database) Allocate(bucketName string, providerID uint64) error {
 	// Point the bucket to the provider
 	res, err := db.execTx(bucketAppend, bucketName, providerID)
@@ -1168,4 +1181,14 @@ func (db *Database) Allocate(bucketName string, providerID uint64) error {
 	}
 
 	return nil
+}
+
+// Unallocates a bucket from a provider.
+// This information is denormalized, stored in the database twice, so that
+// caching does not require tracking query results.
+// If there is either no such bucket or no such provider, returns an error.
+// NOTE: this does not update available space.
+func (db *Database) Unallocate(bucketName string, providerID uint64) error {
+	// Unpoint the bucket to the provider
+	// TODO
 }
