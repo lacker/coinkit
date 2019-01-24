@@ -1126,13 +1126,13 @@ func (db *Database) DeleteProvider(id uint64) ([]*Bucket, error) {
 
 const bucketAppend = `
 UPDATE buckets
-SET providers = providers || $2
+SET providers = array_append(providers, $2)
 WHERE name = $1
 `
 
 const providerAppend = `
 UPDATE providers
-SET buckets = buckets || $2
+SET buckets = array_append(buckets, $2)
 WHERE id = $1
 `
 

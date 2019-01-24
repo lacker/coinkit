@@ -572,6 +572,9 @@ func TestProviders(t *testing.T) {
 		Size:  7,
 	}
 	db.InsertBucket(b)
+
+	db.Allocate("bucket1", 1)
+
 	db.Commit()
 
 	b = db.GetBucket("bucket1")
