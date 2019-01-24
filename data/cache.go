@@ -389,20 +389,6 @@ func (c *Cache) InsertBucket(b *Bucket) {
 	}
 }
 
-// SetBucket writes through.
-// This does not store or update provider data.
-func (c *Cache) SetBucket(b *Bucket) {
-	bucket := b.StripProviderData()
-	c.buckets[bucket.Name] = bucket
-
-	if c.database != nil {
-		err := c.database.SetBucket(bucket)
-		if err != nil {
-			panic(err)
-		}
-	}
-}
-
 // DeleteBucket writes through.
 func (c *Cache) DeleteBucket(name string) {
 	c.buckets[name] = nil

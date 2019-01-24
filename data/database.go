@@ -835,12 +835,6 @@ INSERT INTO buckets (name, owner, size, providers)
 VALUES (:name, :owner, :size, :providers)
 `
 
-const bucketUpdate = `
-UPDATE buckets
-SET size = :size, owner = :owner, providers = :providers
-WHERE name = :name
-`
-
 const bucketDelete = `
 DELETE FROM buckets
 WHERE name = $1
@@ -853,6 +847,9 @@ WHERE name = $1
 func (db *Database) InsertBucket(b *Bucket) error {
 	if b == nil || b.Name == "" || b.Owner == "" {
 		return fmt.Errorf("invalid bucket to insert: %+v", b)
+	}
+	if len(b.Providers) > 0 {
+		return fmt.Errorf("buckets cannot be inserted with providers: %#v", b)
 	}
 	_, err := db.namedExecTx(bucketInsert, b)
 	if err != nil {
@@ -875,29 +872,6 @@ func (db *Database) GetBucket(name string) *Bucket {
 		return nil
 	}
 	return buckets[0]
-}
-
-// SetBucket sets the contents of the bucket, using the transaction.
-// The name of a bucket cannot be changed.
-// Size, owner, and providers must all be included.
-// If there is no such bucket, this returns an error, and no change is
-// made.
-func (db *Database) SetBucket(b *Bucket) error {
-	if b.Size == 0 || b.Owner == "" || b.Name == "" {
-		util.Logger.Fatalf("invalid bucket in SetBucket: %+v", b)
-	}
-	res, err := db.namedExecTx(bucketUpdate, b)
-	if err != nil {
-		panic(err)
-	}
-	count, err := res.RowsAffected()
-	if err != nil {
-		panic(err)
-	}
-	if count != 1 {
-		return fmt.Errorf("expected 1 bucket row affected, got %d", count)
-	}
-	return nil
 }
 
 // DeleteBucket deletes the bucket, using the transaction.
@@ -1141,7 +1115,7 @@ func (db *Database) DeleteProvider(id uint64) ([]*Bucket, error) {
 	buckets := db.getBucketsTx(query)
 	for _, b := range buckets {
 		b.RemoveProvider(id)
-		db.SetBucket(b)
+		// XXX db.SetBucket(b)
 	}
 	return buckets, nil
 }
