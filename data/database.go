@@ -1068,8 +1068,8 @@ func (db *Database) GetProviders(q *ProviderQuery) ([]*Provider, int) {
 	return answer, slot
 }
 
-// Changes capacity of a provider
-// If there is no such bucket,
+// Changes capacity of a provider.
+// If there is no such provider, returns an error.
 func (db *Database) UpdateProvider(id uint64, capacity uint32) error {
 	p := &Provider{
 		ID:       id,
