@@ -413,141 +413,141 @@ func TestBuckets(t *testing.T) {
 
 	// TODO: use allocate to change the bucket
 
-	/*
+	/* XXX
 
-		type pair struct {
-			query *BucketQuery
-			count int
-		}
+	type pair struct {
+		query *BucketQuery
+		count int
+	}
 
-		pairs := []pair{
-			pair{
-				query: &BucketQuery{
-					Owner: "bob",
-				},
-				count: 1,
-			},
-			pair{
-				query: &BucketQuery{
-					Owner: "bob",
-					Name:  "mybucket",
-				},
-				count: 1,
-			},
-			pair{
-				query: &BucketQuery{
-					Name: "mybucket",
-				},
-				count: 1,
-			},
-			pair{
-				query: &BucketQuery{
-					Owner: "zeke",
-					Name:  "mybucket",
-				},
-				count: 0,
-			},
-			pair{
-				query: &BucketQuery{
-					Owner: "bob",
-					Name:  "zorp",
-				},
-				count: 0,
-			},
-			pair{
-				query: &BucketQuery{
-					Owner: "zeke",
-				},
-				count: 0,
-			},
-			pair{
-				query: &BucketQuery{
-					Name: "zorp",
-				},
-				count: 0,
-			},
-			pair{
-				query: &BucketQuery{
-					Owner: "Bob",
-				},
-				count: 0,
-			},
-			pair{
-				query: &BucketQuery{
-					Name: "MyBucket",
-				},
-				count: 0,
-			},
-			pair{
-				query: &BucketQuery{
-					Provider: 1,
-				},
-				count: 1,
-			},
-			pair{
-				query: &BucketQuery{
-					Provider: 2,
-				},
-				count: 0,
-			},
-			pair{
-				query: &BucketQuery{
-					Provider: 3,
-				},
-				count: 1,
-			},
-			pair{
-				query: &BucketQuery{
-					Provider: 4,
-				},
-				count: 0,
-			},
-		}
-
-		for _, pair := range pairs {
-			buckets, _ := db.GetBuckets(pair.query)
-			if len(buckets) != pair.count {
-				t.Fatalf("query %+v got %d results but expected %d",
-					pair.query, len(buckets), pair.count)
-			}
-		}
-
-		// Add some providers so that the lookups get data
-		for i := uint64(1); i <= 4; i++ {
-			p := &Provider{
-				ID:        i,
-				Owner:     "ricky",
-				Capacity:  1000,
-				Available: 1000,
-			}
-			db.InsertProvider(p)
-		}
-		db.Commit()
-
-		qm := &QueryMessage{
-			Buckets: &BucketQuery{
+	pairs := []pair{
+		pair{
+			query: &BucketQuery{
 				Owner: "bob",
 			},
-		}
-		dm := db.HandleQueryMessage(qm)
-		if len(dm.Buckets) != 1 {
-			t.Fatalf("failed to HandleQueryMessage: %+v", qm)
-		}
-		bucket := dm.Buckets[0]
-		if len(bucket.Providers) != 2 {
-			t.Fatalf("failed to retrieve providers")
-		}
-		for _, p := range bucket.Providers {
-			if p == nil || p.Owner != "ricky" {
-				t.Fatalf("bad provider data: %#v", p)
-			}
-		}
+			count: 1,
+		},
+		pair{
+			query: &BucketQuery{
+				Owner: "bob",
+				Name:  "mybucket",
+			},
+			count: 1,
+		},
+		pair{
+			query: &BucketQuery{
+				Name: "mybucket",
+			},
+			count: 1,
+		},
+		pair{
+			query: &BucketQuery{
+				Owner: "zeke",
+				Name:  "mybucket",
+			},
+			count: 0,
+		},
+		pair{
+			query: &BucketQuery{
+				Owner: "bob",
+				Name:  "zorp",
+			},
+			count: 0,
+		},
+		pair{
+			query: &BucketQuery{
+				Owner: "zeke",
+			},
+			count: 0,
+		},
+		pair{
+			query: &BucketQuery{
+				Name: "zorp",
+			},
+			count: 0,
+		},
+		pair{
+			query: &BucketQuery{
+				Owner: "Bob",
+			},
+			count: 0,
+		},
+		pair{
+			query: &BucketQuery{
+				Name: "MyBucket",
+			},
+			count: 0,
+		},
+		pair{
+			query: &BucketQuery{
+				Provider: 1,
+			},
+			count: 1,
+		},
+		pair{
+			query: &BucketQuery{
+				Provider: 2,
+			},
+			count: 0,
+		},
+		pair{
+			query: &BucketQuery{
+				Provider: 3,
+			},
+			count: 1,
+		},
+		pair{
+			query: &BucketQuery{
+				Provider: 4,
+			},
+			count: 0,
+		},
+	}
 
-		db.DeleteBucket("mybucket")
-		db.Commit()
-		if db.GetBucket("mybucket") != nil {
-			t.Fatalf("delete bucket failed")
+	for _, pair := range pairs {
+		buckets, _ := db.GetBuckets(pair.query)
+		if len(buckets) != pair.count {
+			t.Fatalf("query %+v got %d results but expected %d",
+				pair.query, len(buckets), pair.count)
 		}
+	}
+
+	// Add some providers so that the lookups get data
+	for i := uint64(1); i <= 4; i++ {
+		p := &Provider{
+			ID:        i,
+			Owner:     "ricky",
+			Capacity:  1000,
+			Available: 1000,
+		}
+		db.InsertProvider(p)
+	}
+	db.Commit()
+
+	qm := &QueryMessage{
+		Buckets: &BucketQuery{
+			Owner: "bob",
+		},
+	}
+	dm := db.HandleQueryMessage(qm)
+	if len(dm.Buckets) != 1 {
+		t.Fatalf("failed to HandleQueryMessage: %+v", qm)
+	}
+	bucket := dm.Buckets[0]
+	if len(bucket.Providers) != 2 {
+		t.Fatalf("failed to retrieve providers")
+	}
+	for _, p := range bucket.Providers {
+		if p == nil || p.Owner != "ricky" {
+			t.Fatalf("bad provider data: %#v", p)
+		}
+	}
+
+	db.DeleteBucket("mybucket")
+	db.Commit()
+	if db.GetBucket("mybucket") != nil {
+		t.Fatalf("delete bucket failed")
+	}
 
 	*/
 }

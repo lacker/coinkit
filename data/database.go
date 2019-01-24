@@ -1119,3 +1119,53 @@ func (db *Database) DeleteProvider(id uint64) ([]*Bucket, error) {
 	}
 	return buckets, nil
 }
+
+/////////////////
+// Allocation
+/////////////////
+
+const bucketAppend = `
+UPDATE buckets
+SET providers = providers || $2
+WHERE name = $1
+`
+
+const providerAppend = `
+UPDATE providers
+SET buckets = buckets || $2
+WHERE id = $1
+`
+
+// Allocates a bucket to a provider.
+// This information is denormalized, stored in the database twice, so that
+// caching does not require tracking query results.
+// If there is either no such bucket or no such provider, returns an error.
+func (db *Database) Allocate(bucketName string, providerID uint64) error {
+	// Point the bucket to the provider
+	res, err := db.execTx(bucketAppend, bucketName, providerID)
+	if err != nil {
+		panic(err)
+	}
+	count, err := res.RowsAffected()
+	if err != nil {
+		panic(err)
+	}
+	if count != 1 {
+		return nil, fmt.Errorf("cannot allocate nonexistent bucket: %s", bucketName)
+	}
+
+	// Point the provider to the bucket
+	res, err := db.execTc(providerAppend, providerID, bucketName)
+	if err != nil {
+		panic(err)
+	}
+	count, err := res.RowsAffected()
+	if err != nil {
+		panic(err)
+	}
+	if count != 1 {
+		return nil, fmt.Errorf("cannot allocate to nonexistent provider: %d", providerID)
+	}
+
+	return nil
+}
