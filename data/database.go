@@ -154,6 +154,7 @@ CREATE TABLE IF NOT EXISTS providers (
 
 CREATE UNIQUE INDEX IF NOT EXISTS provider_id_idx ON providers (id);
 CREATE INDEX IF NOT EXISTS provider_owner_idx ON providers (owner);
+CREATE INDEX IF NOT EXISTS provider_bucket_idx ON providers (buckets);
 `
 
 // Not threadsafe, caller should hold mutex or be in init
