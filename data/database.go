@@ -1190,7 +1190,7 @@ func (db *Database) Allocate(bucketName string, providerID uint64) error {
 // NOTE: this does not update available space.
 func (db *Database) Unallocate(bucketName string, providerID uint64) error {
 	// Unpoint the bucket to the provider
-	res, err := db.execTc(bucketRemove, bucketName, providerID)
+	res, err := db.execTx(bucketRemove, bucketName, providerID)
 	if err != nil {
 		panic(err)
 	}
