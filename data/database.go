@@ -777,6 +777,7 @@ func (db *Database) GetDocuments(match map[string]interface{}, limit int) ([]*Do
 // Buckets
 //////////////
 
+// XXX take out the providers
 const bucketInsert = `
 INSERT INTO buckets (name, owner, size, providers)
 VALUES (:name, :owner, :size, :providers)
@@ -784,7 +785,7 @@ VALUES (:name, :owner, :size, :providers)
 
 const bucketDelete = `
 DELETE FROM buckets
-WHERE name = $1
+WHERE name = $1 AND coalesce(array_length(providers, 1), 0) = 0
 `
 
 // InsertBucket returns an error if it failed because there is already a bucket with

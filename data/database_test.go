@@ -414,6 +414,12 @@ func TestBuckets(t *testing.T) {
 	check(db.Allocate("mybucket", 3))
 	db.Commit()
 
+	err := db.DeleteBucket("mybucket")
+	db.Commit()
+	if err == nil {
+		t.Fatalf("a bucket with allocations should not be deletable")
+	}
+
 	type pair struct {
 		query *BucketQuery
 		count int
@@ -530,11 +536,10 @@ func TestBuckets(t *testing.T) {
 		}
 	}
 
-	db.DeleteBucket("mybucket")
+	check(db.Deallocate("mybucket", 1))
+	check(db.Deallocate("mybucket", 3))
+	check(db.DeleteBucket("mybucket"))
 	db.Commit()
-	if db.GetBucket("mybucket") != nil {
-		t.Fatalf("delete bucket failed")
-	}
 }
 
 func TestProviders(t *testing.T) {
@@ -562,7 +567,9 @@ func TestProviders(t *testing.T) {
 
 	db.Commit()
 
-	if db.DeleteProvider(1) == nil {
+	err := db.DeleteProvider(1)
+	db.Commit()
+	if err == nil {
 		t.Fatalf("should not be able to delete a provider with allocations")
 	}
 
