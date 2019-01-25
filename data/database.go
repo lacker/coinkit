@@ -43,6 +43,13 @@ type Database struct {
 	config *Config
 }
 
+// A helper function to panic if there is an error.
+func check(err error) {
+	if err != nil {
+		panic(err)
+	}
+}
+
 var allDatabases = []*Database{}
 
 func boundLimit(limit int) int {
@@ -57,9 +64,7 @@ func boundLimit(limit int) int {
 
 func NewDatabase(config *Config) *Database {
 	user, err := user.Current()
-	if err != nil {
-		panic(err)
-	}
+	check(err)
 	username := strings.Replace(config.User, "$USER", user.Username, 1)
 	info := fmt.Sprintf(
 		"host=%s port=%d user=%s dbname=%s sslmode=disable statement_timeout=%d",
@@ -264,10 +269,7 @@ func (db *Database) Commit() {
 	if db.tx == nil {
 		return
 	}
-	err := db.tx.Commit()
-	if err != nil {
-		panic(err)
-	}
+	check(db.tx.Commit())
 	db.tx = nil
 	db.commits++
 	db.updateCurrentSlot()
@@ -280,10 +282,7 @@ func (db *Database) Rollback() {
 	if db.tx == nil {
 		return
 	}
-	err := db.tx.Rollback()
-	if err != nil {
-		panic(err)
-	}
+	check(db.tx.Rollback())
 	db.tx = nil
 }
 
@@ -372,9 +371,8 @@ func (db *Database) readTransaction() (*sqlx.Tx, int) {
 	err := tx.Get(block, "SELECT * FROM blocks ORDER BY slot DESC LIMIT 1")
 	if err == sql.ErrNoRows {
 		slot = 0
-	} else if err != nil {
-		panic(err)
 	} else {
+		check(err)
 		slot = block.Slot
 	}
 
@@ -382,11 +380,7 @@ func (db *Database) readTransaction() (*sqlx.Tx, int) {
 }
 
 func (db *Database) finishReadTransaction(tx *sqlx.Tx) {
-	err := tx.Rollback()
-	if err != nil {
-		panic(err)
-	}
-
+	check(tx.Rollback())
 	db.reads++
 }
 
@@ -397,8 +391,8 @@ func (db *Database) AccountDataMessage(owner string) *DataMessage {
 	err := tx.Get(account, "SELECT * FROM accounts WHERE owner=$1", owner)
 	if err == sql.ErrNoRows {
 		account = nil
-	} else if err != nil {
-		panic(err)
+	} else {
+		check(err)
 	}
 
 	db.finishReadTransaction(tx)
@@ -517,12 +511,10 @@ func (db *Database) InsertBlock(b *Block) error {
 		util.Logger.Fatalf("inserting block at slot %d but db has slot %d", b.Slot, cur)
 	}
 	_, err := db.namedExecTx(blockInsert, b)
-	if err != nil {
-		if isUniquenessError(err) {
-			return err
-		}
-		panic(err)
+	if isUniquenessError(err) {
+		return err
 	}
+	check(err)
 	return nil
 }
 
@@ -534,9 +526,7 @@ func (db *Database) GetBlock(slot int) *Block {
 	if err == sql.ErrNoRows {
 		return nil
 	}
-	if err != nil {
-		panic(err)
-	}
+	check(err)
 	return answer
 }
 
@@ -548,9 +538,7 @@ func (db *Database) LastBlock() *Block {
 	if err == sql.ErrNoRows {
 		return nil
 	}
-	if err != nil {
-		panic(err)
-	}
+	check(err)
 	return answer
 }
 
@@ -559,16 +547,11 @@ func (db *Database) LastBlock() *Block {
 func (db *Database) TailBlocks(n int) []*Block {
 	rows, err := db.postgres.Queryx("SELECT * FROM blocks ORDER BY slot DESC LIMIT $1", n)
 	db.reads++
-	if err != nil {
-		panic(err)
-	}
+	check(err)
 	answer := []*Block{}
 	for rows.Next() {
 		b := &Block{}
-		err := rows.StructScan(b)
-		if err != nil {
-			panic(err)
-		}
+		check(rows.StructScan(b))
 		answer = append(answer, b)
 	}
 	return answer
@@ -580,15 +563,10 @@ func (db *Database) ForBlocks(f func(b *Block)) int {
 	slot := 0
 	rows, err := db.postgres.Queryx("SELECT * FROM blocks ORDER BY slot")
 	db.reads++
-	if err != nil {
-		panic(err)
-	}
+	check(err)
 	for rows.Next() {
 		b := &Block{}
-		err := rows.StructScan(b)
-		if err != nil {
-			panic(err)
-		}
+		check(rows.StructScan(b))
 		if b.Slot != slot+1 {
 			util.Logger.Fatalf(
 				"a block with slot %d exists, but no block has slot %d", b.Slot, slot+1)
@@ -614,9 +592,7 @@ ON CONFLICT (owner) DO UPDATE
 // Database.UpsertAccount will not finalize until Commit is called.
 func (db *Database) UpsertAccount(a *Account) error {
 	_, err := db.namedExecTx(accountUpsert, a)
-	if err != nil {
-		panic(err)
-	}
+	check(err)
 	return nil
 }
 
@@ -628,9 +604,7 @@ func (db *Database) GetAccount(owner string) *Account {
 	if err == sql.ErrNoRows {
 		return nil
 	}
-	if err != nil {
-		panic(err)
-	}
+	check(err)
 	return answer
 }
 
@@ -643,19 +617,14 @@ func (iter *DatabaseAccountIterator) Next() *Account {
 		return nil
 	}
 	a := &Account{}
-	err := iter.rows.StructScan(a)
-	if err != nil {
-		panic(err)
-	}
+	check(iter.rows.StructScan(a))
 	return a
 }
 
 func (db *Database) IterAccounts() AccountIterator {
 	rows, err := db.postgres.Queryx("SELECT * FROM accounts ORDER BY owner")
 	db.reads++
-	if err != nil {
-		panic(err)
-	}
+	check(err)
 	return &DatabaseAccountIterator{
 		rows: rows,
 	}
@@ -703,27 +672,20 @@ VALUES (:id, :data)
 // If this returns an error, the pending transaction will be unusable.
 func (db *Database) InsertDocument(d *Document) error {
 	_, err := db.namedExecTx(documentInsert, d)
-	if err != nil {
-		if isUniquenessError(err) {
-			return err
-		}
-		panic(err)
+	if isUniquenessError(err) {
+		return err
 	}
+	check(err)
 	return nil
 }
 
 func (db *Database) GetDocument(id uint64) *Document {
 	rows, err := db.postgres.Queryx(
 		"SELECT * FROM documents WHERE id = $1 LIMIT 1", id)
-	if err != nil {
-		panic(err)
-	}
+	check(err)
 	for rows.Next() {
 		d := &Document{}
-		err := rows.StructScan(d)
-		if err != nil {
-			panic(err)
-		}
+		check(rows.StructScan(d))
 		return d
 	}
 	return nil
@@ -748,13 +710,9 @@ WHERE id = $1
 // If there is no such document, no change is made.
 func (db *Database) SetDocument(doc *Document) error {
 	res, err := db.namedExecTx(documentUpdate, doc)
-	if err != nil {
-		panic(err)
-	}
+	check(err)
 	count, err := res.RowsAffected()
-	if err != nil {
-		panic(err)
-	}
+	check(err)
 	if count != 1 {
 		return fmt.Errorf("expected 1 document row affected, got %d", count)
 	}
@@ -781,13 +739,9 @@ func (db *Database) UpdateDocument(id uint64, data *JSONObject) error {
 // If this returns an error, the pending transaction will still be usable.
 func (db *Database) DeleteDocument(id uint64) error {
 	res, err := db.execTx(documentDelete, id)
-	if err != nil {
-		panic(err)
-	}
+	check(err)
 	count, err := res.RowsAffected()
-	if err != nil {
-		panic(err)
-	}
+	check(err)
 	if count != 1 {
 		return fmt.Errorf("expected 1 document deleted, got %d", count)
 	}
@@ -800,24 +754,17 @@ func (db *Database) GetDocuments(match map[string]interface{}, limit int) ([]*Do
 	limit = boundLimit(limit)
 
 	bytes, err := json.Marshal(match)
-	if err != nil {
-		panic(err)
-	}
+	check(err)
 
 	tx, slot := db.readTransaction()
 
 	rows, err := tx.Queryx(
 		"SELECT * FROM documents WHERE data @> $1 LIMIT $2", string(bytes), limit)
-	if err != nil {
-		panic(err)
-	}
+	check(err)
 	answer := []*Document{}
 	for rows.Next() {
 		d := &Document{}
-		err := rows.StructScan(d)
-		if err != nil {
-			panic(err)
-		}
+		check(rows.StructScan(d))
 		answer = append(answer, d)
 	}
 
@@ -852,12 +799,10 @@ func (db *Database) InsertBucket(b *Bucket) error {
 		return fmt.Errorf("buckets cannot be inserted with providers: %#v", b)
 	}
 	_, err := db.namedExecTx(bucketInsert, b)
-	if err != nil {
-		if isUniquenessError(err) {
-			return err
-		}
-		panic(err)
+	if isUniquenessError(err) {
+		return err
 	}
+	check(err)
 	return nil
 }
 
@@ -875,16 +820,13 @@ func (db *Database) GetBucket(name string) *Bucket {
 }
 
 // DeleteBucket deletes the bucket, using the transaction.
-// It errors when there is no such bucket.
+// Providers must be cleared before a bucket can be deleted.
+// It errors when there is no such bucket, or if providers have not been cleared.
 func (db *Database) DeleteBucket(name string) error {
 	res, err := db.execTx(bucketDelete, name)
-	if err != nil {
-		panic(err)
-	}
+	check(err)
 	count, err := res.RowsAffected()
-	if err != nil {
-		panic(err)
-	}
+	check(err)
 	if count != 1 {
 		return fmt.Errorf("expected 1 bucket deleted, got %d", count)
 	}
@@ -930,10 +872,7 @@ func (db *Database) getBucketsUsingTx(q *BucketQuery, tx *sqlx.Tx) []*Bucket {
 	idSet := make(map[uint64]bool)
 	for rows.Next() {
 		b := &Bucket{}
-		err := rows.StructScan(b)
-		if err != nil {
-			panic(err)
-		}
+		check(rows.StructScan(b))
 		buckets = append(buckets, b)
 		for _, p := range b.Providers {
 			idSet[p.ID] = true
@@ -955,10 +894,7 @@ func (db *Database) getBucketsUsingTx(q *BucketQuery, tx *sqlx.Tx) []*Bucket {
 		providers := make(map[uint64]*Provider)
 		for rows.Next() {
 			p := &Provider{}
-			err := rows.StructScan(p)
-			if err != nil {
-				panic(err)
-			}
+			check(rows.StructScan(p))
 			providers[p.ID] = p
 		}
 
@@ -1007,12 +943,10 @@ func (db *Database) InsertProvider(p *Provider) error {
 	}
 
 	_, err := db.namedExecTx(providerInsert, p)
-	if err != nil {
-		if isUniquenessError(err) {
-			return err
-		}
-		panic(err)
+	if isUniquenessError(err) {
+		return err
 	}
+	check(err)
 	return nil
 }
 
@@ -1056,10 +990,7 @@ func (db *Database) GetProviders(q *ProviderQuery) ([]*Provider, int) {
 	answer := []*Provider{}
 	for rows.Next() {
 		p := &Provider{}
-		err := rows.StructScan(p)
-		if err != nil {
-			panic(err)
-		}
+		check(rows.StructScan(p))
 		answer = append(answer, p)
 	}
 
@@ -1076,13 +1007,9 @@ func (db *Database) UpdateProvider(id uint64, capacity uint32) error {
 		Capacity: capacity,
 	}
 	res, err := db.namedExecTx(providerUpdate, p)
-	if err != nil {
-		panic(err)
-	}
+	check(err)
 	count, err := res.RowsAffected()
-	if err != nil {
-		panic(err)
-	}
+	check(err)
 	if count != 1 {
 		return fmt.Errorf("expected 1 provider row affected, got %d", count)
 	}
@@ -1090,34 +1017,18 @@ func (db *Database) UpdateProvider(id uint64, capacity uint32) error {
 }
 
 // DeleteProvider deletes the provider, using the transaction.
-// It also removes this provider from all buckets it is providing.
-// It returns a list of the updated buckets.
-// It also returns an error when there is no such provider.
-func (db *Database) DeleteProvider(id uint64) ([]*Bucket, error) {
+// Buckets must all be unallocated before a provider can be deleted.
+// It returns an error when there is no such provider or when buckets were still allocated.
+func (db *Database) DeleteProvider(id uint64) error {
 	// First delete the provider
 	res, err := db.execTx(providerDelete, id)
-	if err != nil {
-		panic(err)
-	}
+	check(err)
 	count, err := res.RowsAffected()
-	if err != nil {
-		panic(err)
-	}
+	check(err)
 	if count != 1 {
-		return nil, fmt.Errorf("expected 1 provider deleted, got %d", count)
+		return fmt.Errorf("expected 1 provider deleted, got %d", count)
 	}
-
-	// Find all the buckets this provider was providing
-	query := &BucketQuery{
-		Provider: id,
-	}
-	// This uses the write transaction to avoid races
-	buckets := db.getBucketsTx(query)
-	for _, b := range buckets {
-		b.RemoveProvider(id)
-		// XXX db.SetBucket(b)
-	}
-	return buckets, nil
+	return nil
 }
 
 /////////////////
@@ -1156,26 +1067,18 @@ WHERE id = $1 and $2 = ANY (buckets)
 func (db *Database) Allocate(bucketName string, providerID uint64) error {
 	// Point the bucket to the provider
 	res, err := db.execTx(bucketAppend, bucketName, providerID)
-	if err != nil {
-		panic(err)
-	}
+	check(err)
 	count, err := res.RowsAffected()
-	if err != nil {
-		panic(err)
-	}
+	check(err)
 	if count != 1 {
 		return fmt.Errorf("cannot allocate nonexistent bucket: %s", bucketName)
 	}
 
 	// Point the provider to the bucket
 	res, err = db.execTx(providerAppend, providerID, bucketName)
-	if err != nil {
-		panic(err)
-	}
+	check(err)
 	count, err = res.RowsAffected()
-	if err != nil {
-		panic(err)
-	}
+	check(err)
 	if count != 1 {
 		return fmt.Errorf("cannot allocate to nonexistent provider: %d", providerID)
 	}
@@ -1191,26 +1094,18 @@ func (db *Database) Allocate(bucketName string, providerID uint64) error {
 func (db *Database) Unallocate(bucketName string, providerID uint64) error {
 	// Unpoint the bucket to the provider
 	res, err := db.execTx(bucketRemove, bucketName, providerID)
-	if err != nil {
-		panic(err)
-	}
+	check(err)
 	count, err := res.RowsAffected()
-	if err != nil {
-		panic(err)
-	}
+	check(err)
 	if count != 1 {
 		return fmt.Errorf("bucket %s is not allocated to provider %d", bucketName, providerID)
 	}
 
 	// Unpoint the provider to the bucket
 	res, err = db.execTx(providerRemove, providerID, bucketName)
-	if err != nil {
-		panic(err)
-	}
+	check(err)
 	count, err = res.RowsAffected()
-	if err != nil {
-		panic(err)
-	}
+	check(err)
 	if count != 1 {
 		return fmt.Errorf("provider %d is not storing bucket %s", providerID, bucketName)
 	}

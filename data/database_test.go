@@ -7,6 +7,12 @@ import (
 	"github.com/lacker/coinkit/consensus"
 )
 
+func assume(err error) {
+	if err != nil {
+		panic(err)
+	}
+}
+
 func TestInsertAndGet(t *testing.T) {
 	db := NewTestDatabase(0)
 	qs, _ := consensus.MakeTestQuorumSlice(4)
