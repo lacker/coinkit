@@ -777,10 +777,9 @@ func (db *Database) GetDocuments(match map[string]interface{}, limit int) ([]*Do
 // Buckets
 //////////////
 
-// XXX take out the providers
 const bucketInsert = `
-INSERT INTO buckets (name, owner, size, providers)
-VALUES (:name, :owner, :size, :providers)
+INSERT INTO buckets (name, owner, size)
+VALUES (:name, :owner, :size)
 `
 
 const bucketDelete = `
