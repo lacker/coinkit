@@ -929,15 +929,8 @@ WHERE id = :id
 
 const providerDelete = `
 DELETE FROM providers
-WHERE id = $1
+WHERE id = $1 AND coalesce(array_length(buckets, 1), 0) = 0
 `
-
-/*
-const providerDelete = `
-DELETE FROM providers
-WHERE id = $1 AND array_length(buckets, 1) = 0
-`
-*/
 
 // InsertProvider returns an error if it failed because there is already a provider with
 // this id.

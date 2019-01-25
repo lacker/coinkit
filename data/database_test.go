@@ -595,7 +595,6 @@ func TestProviders(t *testing.T) {
 	if p.Capacity != 100 {
 		t.Fatalf("bad provider data: %#v", p)
 	}
-	t.Logf("XXX %#v", db.GetProvider(2))
 	check(db.DeleteProvider(2))
 	db.Commit()
 
