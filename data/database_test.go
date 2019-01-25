@@ -7,12 +7,6 @@ import (
 	"github.com/lacker/coinkit/consensus"
 )
 
-func assume(err error) {
-	if err != nil {
-		panic(err)
-	}
-}
-
 func TestInsertAndGet(t *testing.T) {
 	db := NewTestDatabase(0)
 	qs, _ := consensus.MakeTestQuorumSlice(4)
@@ -240,10 +234,7 @@ func TestDocumentOperations(t *testing.T) {
 	}
 
 	// Delete the document
-	err = db.DeleteDocument(3)
-	if err != nil {
-		panic(err)
-	}
+	check(db.DeleteDocument(3))
 	db.Commit()
 
 	// Check it deleted
@@ -286,10 +277,7 @@ func databaseForBenchmarking() *Database {
 				"b": b,
 				"c": c,
 			})
-			err := db.InsertDocument(d)
-			if err != nil {
-				log.Fatal(err)
-			}
+			check(db.InsertDocument(d))
 			items++
 		}
 	}
@@ -398,10 +386,7 @@ func TestBuckets(t *testing.T) {
 		Owner: "bob",
 		Size:  100,
 	}
-	err := db.InsertBucket(b)
-	if err != nil {
-		t.Fatal(err)
-	}
+	check(db.InsertBucket(b))
 
 	if db.GetBucket("mybucket") != nil {
 		t.Fatalf("mybucket should not be visible before commit")
@@ -596,10 +581,7 @@ func TestProviders(t *testing.T) {
 		t.Fatalf("GetProviders returned: %+v", ps)
 	}
 
-	err := db.UpdateProvider(1, 200)
-	if err != nil {
-		t.Fatalf("SetCapacity error: %s", err)
-	}
+	check(db.UpdateProvider(1, 200))
 	db.Commit()
 
 	p2 := db.GetProvider(1)
