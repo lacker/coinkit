@@ -402,7 +402,17 @@ func TestBuckets(t *testing.T) {
 		t.Fatalf("GetBucket got %+v", b2)
 	}
 
-	// TODO: use allocate to change the bucket
+	for i := uint64(1); i <= 4; i++ {
+		check(db.InsertProvider(&Provider{
+			Owner:     "sam",
+			Capacity:  100,
+			Available: 100,
+			ID:        i,
+		}))
+	}
+	check(db.Allocate("mybucket", 1))
+	check(db.Allocate("mybucket", 3))
+	db.Commit()
 
 	/* XXX
 
@@ -584,17 +594,26 @@ func TestProviders(t *testing.T) {
 	check(db.UpdateProvider(1, 200))
 	db.Commit()
 
-	p2 := db.GetProvider(1)
-	if p2.Capacity != 200 {
-		t.Fatalf("SetCapacity failed: %+v", p2)
+	p = db.GetProvider(1)
+	if p.Capacity != 200 {
+		t.Fatalf("SetCapacity failed: %+v", p)
 	}
 
-	check(db.DeleteProvider(2))
+	check(db.Deallocate("bucket1", 1))
 	db.Commit()
+
 	b = db.GetBucket("bucket1")
 	if len(b.Providers) != 0 {
 		t.Fatalf("expected zero providers for %#v", b)
 	}
+
+	p = db.GetProvider(2)
+	if p.Capacity != 100 {
+		t.Fatalf("bad provider data: %#v", p)
+	}
+	t.Logf("XXX %#v", db.GetProvider(2))
+	check(db.DeleteProvider(2))
+	db.Commit()
 
 	ps, _ = db.GetProviders(q)
 	if len(ps) != 1 {

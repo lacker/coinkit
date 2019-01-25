@@ -784,7 +784,7 @@ VALUES (:name, :owner, :size, :providers)
 
 const bucketDelete = `
 DELETE FROM buckets
-WHERE name = $1 AND array_length(providers, 1) = 0
+WHERE name = $1
 `
 
 // InsertBucket returns an error if it failed because there is already a bucket with
@@ -929,8 +929,15 @@ WHERE id = :id
 
 const providerDelete = `
 DELETE FROM providers
+WHERE id = $1
+`
+
+/*
+const providerDelete = `
+DELETE FROM providers
 WHERE id = $1 AND array_length(buckets, 1) = 0
 `
+*/
 
 // InsertProvider returns an error if it failed because there is already a provider with
 // this id.
@@ -1086,12 +1093,12 @@ func (db *Database) Allocate(bucketName string, providerID uint64) error {
 	return nil
 }
 
-// Unallocates a bucket from a provider.
+// Deallocates a bucket from a provider.
 // This information is denormalized, stored in the database twice, so that
 // caching does not require tracking query results.
 // If there is either no such bucket or no such provider, returns an error.
 // NOTE: this does not update available space.
-func (db *Database) Unallocate(bucketName string, providerID uint64) error {
+func (db *Database) Deallocate(bucketName string, providerID uint64) error {
 	// Unpoint the bucket to the provider
 	res, err := db.execTx(bucketRemove, bucketName, providerID)
 	check(err)
