@@ -553,18 +553,18 @@ func TestProviders(t *testing.T) {
 		ID:        1,
 	}
 
-	db.InsertProvider(p)
+	check(db.InsertProvider(p))
 	p.ID = 2
-	db.InsertProvider(p)
+	check(db.InsertProvider(p))
 
 	b := &Bucket{
 		Name:  "bucket1",
 		Owner: "jim",
 		Size:  7,
 	}
-	db.InsertBucket(b)
+	check(db.InsertBucket(b))
 
-	db.Allocate("bucket1", 1)
+	check(db.Allocate("bucket1", 1))
 
 	db.Commit()
 
@@ -589,7 +589,7 @@ func TestProviders(t *testing.T) {
 		t.Fatalf("SetCapacity failed: %+v", p2)
 	}
 
-	db.DeleteProvider(2)
+	check(db.DeleteProvider(2))
 	db.Commit()
 	b = db.GetBucket("bucket1")
 	if len(b.Providers) != 0 {
