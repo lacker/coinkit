@@ -404,17 +404,15 @@ func TestBuckets(t *testing.T) {
 
 	for i := uint64(1); i <= 4; i++ {
 		check(db.InsertProvider(&Provider{
-			Owner:     "sam",
-			Capacity:  100,
-			Available: 100,
+			Owner:     "ricky",
+			Capacity:  1000,
+			Available: 1000,
 			ID:        i,
 		}))
 	}
 	check(db.Allocate("mybucket", 1))
 	check(db.Allocate("mybucket", 3))
 	db.Commit()
-
-	/* XXX
 
 	type pair struct {
 		query *BucketQuery
@@ -513,18 +511,6 @@ func TestBuckets(t *testing.T) {
 		}
 	}
 
-	// Add some providers so that the lookups get data
-	for i := uint64(1); i <= 4; i++ {
-		p := &Provider{
-			ID:        i,
-			Owner:     "ricky",
-			Capacity:  1000,
-			Available: 1000,
-		}
-		db.InsertProvider(p)
-	}
-	db.Commit()
-
 	qm := &QueryMessage{
 		Buckets: &BucketQuery{
 			Owner: "bob",
@@ -549,8 +535,6 @@ func TestBuckets(t *testing.T) {
 	if db.GetBucket("mybucket") != nil {
 		t.Fatalf("delete bucket failed")
 	}
-
-	*/
 }
 
 func TestProviders(t *testing.T) {
