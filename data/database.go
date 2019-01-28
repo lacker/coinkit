@@ -795,6 +795,15 @@ func (db *Database) InsertBucket(b *Bucket) error {
 	return nil
 }
 
+// A helper to get a bucket within the current transaction.
+// Returns nil if there is none. Panics if there is a fundamental db error.
+func (db *Database) getBucketTx(bucketName string) *Bucket {
+	bucket := &Bucket{}
+	err := db.getTx(bucket, "SELECT * FROM buckets WHERE name = $1 LIMIT 1", bucketName)
+	check(err)
+	return bucket
+}
+
 // Returns nil if there is no such bucket
 func (db *Database) GetBucket(name string) *Bucket {
 	q := &BucketQuery{
@@ -1050,16 +1059,15 @@ WHERE id = $1 and $2 = ANY (buckets)
 // If there is no such bucket, no such provider, or not enough space
 // on the provider, this returns an error.
 func (db *Database) Allocate(bucketName string, providerID uint64) error {
-	// Get the bucket's size
-	bucket := &Bucket{}
-	err := db.getTx(bucket, "SELECT * FROM buckets WHERE name = $1 LIMIT 1", bucketName)
-	if err != nil {
-		return err
+	// Check that the provider has enough space for the bucket
+	bucket := db.getBucketTx(bucketName)
+	if bucket == nil {
+		return fmt.Errorf("cannot allocate nonexistent bucket: %s", bucketName)
 	}
 
 	// Check the provider's available space
 	provider := &Provider{}
-	err = db.getTx(provider, "SELECT * FROM providers WHERE id = $1 LIMIT 1", providerID)
+	err := db.getTx(provider, "SELECT * FROM providers WHERE id = $1 LIMIT 1", providerID)
 	if err != nil {
 		return err
 	}
@@ -1075,7 +1083,7 @@ func (db *Database) Allocate(bucketName string, providerID uint64) error {
 	count, err := res.RowsAffected()
 	check(err)
 	if count != 1 {
-		return fmt.Errorf("cannot allocate nonexistent bucket: %s", bucketName)
+		panic("db race condition on bucket in bucket allocation")
 	}
 
 	// Point the provider to the bucket
