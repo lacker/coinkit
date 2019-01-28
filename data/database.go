@@ -231,17 +231,6 @@ func (db *Database) getTx(dest interface{}, query string, args ...interface{}) e
 	return db.tx.Get(dest, query, args...)
 }
 
-// getBucketsTx is a helper function to retrieve buckets within the pending transaction.
-func (db *Database) getBucketsTx(q *BucketQuery) []*Bucket {
-	db.mutex.Lock()
-	defer db.mutex.Unlock()
-	if db.tx == nil {
-		db.tx = db.postgres.MustBegin()
-	}
-
-	return db.getBucketsUsingTx(q, db.tx)
-}
-
 func (db *Database) CurrentSlot() int {
 	db.mutex.Lock()
 	defer db.mutex.Unlock()
@@ -842,7 +831,7 @@ func (db *Database) GetBuckets(q *BucketQuery) ([]*Bucket, int) {
 	return buckets, slot
 }
 
-// getBucketsTx returns a list of matching buckets using the provided transaction.
+// getBucketsUsingTx returns a list of matching buckets using the provided transaction.
 func (db *Database) getBucketsUsingTx(q *BucketQuery, tx *sqlx.Tx) []*Bucket {
 	limit := boundLimit(q.Limit)
 
@@ -1110,7 +1099,7 @@ func (db *Database) Allocate(bucketName string, providerID uint64) error {
 // This information is denormalized, stored in the database twice, so that
 // caching does not require tracking query results.
 // If there is either no such bucket or no such provider, returns an error.
-// NOTE: this does not update available space.
+// This updates available space.
 func (db *Database) Deallocate(bucketName string, providerID uint64) error {
 	// Unpoint the bucket to the provider
 	res, err := db.execTx(bucketRemove, bucketName, providerID)
