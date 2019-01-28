@@ -24,7 +24,8 @@ type Provider struct {
 }
 
 func (p *Provider) String() string {
-	return fmt.Sprintf("provider #%d, owner:%s, capacity:%d", p.ID, p.Owner, p.Capacity)
+	return fmt.Sprintf("provider #%d, owner:%s, capacity:%d, available:%d",
+		p.ID, p.Owner, p.Capacity, p.Available)
 }
 
 func (p *Provider) IsValidNewProvider() bool {

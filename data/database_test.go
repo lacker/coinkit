@@ -596,16 +596,21 @@ func TestProviders(t *testing.T) {
 		t.Fatalf("GetProviders returned: %+v", ps)
 	}
 
-	check(db.UpdateProvider(1, 200))
+	check(db.AddCapacity(1, 100))
 	db.Commit()
 
 	p = db.GetProvider(1)
 	if p.Capacity != 200 {
-		t.Fatalf("SetCapacity failed: %+v", p)
+		t.Fatalf("AddCapacity failed: %+v", p)
 	}
 
 	check(db.Deallocate("bucket1", 1))
 	db.Commit()
+
+	p = db.GetProvider(1)
+	if p.Available != p.Capacity {
+		t.Fatalf("deallocating should have freed up available space: #%v", p)
+	}
 
 	b = db.GetBucket("bucket1")
 	if len(b.Providers) != 0 {

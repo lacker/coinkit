@@ -442,22 +442,19 @@ func (c *Cache) InsertProvider(p *Provider) {
 	}
 }
 
-// UpdateProvider writes through.
-func (c *Cache) UpdateProvider(id uint64, capacity uint32) {
+// AddCapacity increases the capacity on a provider.
+// AddCapacity writes through.
+func (c *Cache) AddCapacity(id uint64, amount uint32) {
 	p := c.GetProvider(id)
 	if p == nil {
 		panic("no provider found for update")
 	}
-	if capacity < p.Capacity {
-		panic("cannot shrink capacity")
-	}
-	c.providers[id].Capacity = capacity
+	c.providers[id].Capacity += amount
+	c.providers[id].Available += amount
 
 	if c.database != nil {
-		err := c.database.UpdateProvider(id, capacity)
-		if err != nil {
-			panic(err)
-		}
+		err := c.database.AddCapacity(id, amount)
+		check(err)
 	}
 }
 

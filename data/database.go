@@ -1007,13 +1007,12 @@ func (db *Database) GetProviders(q *ProviderQuery) ([]*Provider, int) {
 	return answer, slot
 }
 
-// Changes capacity of a provider.
+// Increases the capacity of a provider.
 // If there is no such provider, returns an error.
-func (db *Database) UpdateProvider(id uint64, capacity uint32) error {
-	p := &Provider{
-		ID:       id,
-		Capacity: capacity,
-	}
+func (db *Database) AddCapacity(id uint64, amount uint32) error {
+	p := db.getProviderTx(id)
+	p.Capacity += amount
+	p.Available += amount
 	res, err := db.namedExecTx(providerUpdate, p)
 	check(err)
 	count, err := res.RowsAffected()
