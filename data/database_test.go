@@ -384,7 +384,7 @@ func TestBuckets(t *testing.T) {
 	b := &Bucket{
 		Name:  "mybucket",
 		Owner: "bob",
-		Size:  100,
+		Size:  150,
 	}
 	check(db.InsertBucket(b))
 
@@ -403,18 +403,23 @@ func TestBuckets(t *testing.T) {
 	}
 
 	for i := uint64(1); i <= 4; i++ {
+		cap := uint32(500 - 100*i)
 		check(db.InsertProvider(&Provider{
 			Owner:     "ricky",
-			Capacity:  1000,
-			Available: 1000,
+			Capacity:  cap,
+			Available: cap,
 			ID:        i,
 		}))
 	}
 	check(db.Allocate("mybucket", 1))
 	check(db.Allocate("mybucket", 3))
+	err := db.Allocate("mybucket", 4)
+	if err == nil {
+		t.Fatalf("should fail to allocate when not enough space")
+	}
 	db.Commit()
 
-	err := db.DeleteBucket("mybucket")
+	err = db.DeleteBucket("mybucket")
 	db.Commit()
 	if err == nil {
 		t.Fatalf("a bucket with allocations should not be deletable")
@@ -531,7 +536,7 @@ func TestBuckets(t *testing.T) {
 		t.Fatalf("failed to retrieve providers")
 	}
 	for _, p := range bucket.Providers {
-		if p == nil || p.Owner != "ricky" {
+		if p == nil || p.Owner != "ricky" || p.Capacity == p.Available {
 			t.Fatalf("bad provider data: %#v", p)
 		}
 	}
