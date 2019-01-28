@@ -1043,7 +1043,7 @@ WHERE name = $1
 
 const providerAppend = `
 UPDATE providers
-SET buckets = array_append(buckets, $2)
+SET buckets = array_append(buckets, $2), available = $3
 WHERE id = $1
 `
 
@@ -1062,9 +1062,29 @@ WHERE id = $1 and $2 = ANY (buckets)
 // Allocates a bucket to a provider.
 // This information is denormalized, stored in the database twice, so that
 // caching does not require tracking query results.
-// If there is either no such bucket or no such provider, returns an error.
-// NOTE: this does not update available space.
+// This method also updates available space on the provider.
+// If there is no such bucket, no such provider, or not enough space
+// on the provider, this returns an error.
 func (db *Database) Allocate(bucketName string, providerID uint64) error {
+	// Get the bucket's size
+	bucket := &Bucket{}
+	err := db.getTx(bucket, "SELECT * FROM buckets WHERE name = $1 LIMIT 1", bucketName)
+	if err != nil {
+		return err
+	}
+
+	// Check the provider's available space
+	provider := &Provider{}
+	err = db.getTx(provider, "SELECT * FROM providers WHERE id = $1 LIMIT 1", providerID)
+	if err != nil {
+		return err
+	}
+	if provider.Available < bucket.Size {
+		return fmt.Errorf("cannot allocate bucket of size %d to provider with %d available",
+			bucket.Size, provider.Available)
+	}
+	newAvailable := provider.Available - bucket.Size
+
 	// Point the bucket to the provider
 	res, err := db.execTx(bucketAppend, bucketName, providerID)
 	check(err)
@@ -1075,7 +1095,7 @@ func (db *Database) Allocate(bucketName string, providerID uint64) error {
 	}
 
 	// Point the provider to the bucket
-	res, err = db.execTx(providerAppend, providerID, bucketName)
+	res, err = db.execTx(providerAppend, providerID, bucketName, newAvailable)
 	check(err)
 	count, err = res.RowsAffected()
 	check(err)
