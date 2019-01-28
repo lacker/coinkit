@@ -824,16 +824,10 @@ func (db *Database) DeleteBucket(name string) error {
 
 // GetBuckets returns a list of matching buckets, along with the slot
 // that this data reflects.
+// This inflates the provider data as well.
 func (db *Database) GetBuckets(q *BucketQuery) ([]*Bucket, int) {
-	tx, slot := db.readTransaction()
-	buckets := db.getBucketsUsingTx(q, tx)
-	db.finishReadTransaction(tx)
-	return buckets, slot
-}
-
-// getBucketsUsingTx returns a list of matching buckets using the provided transaction.
-func (db *Database) getBucketsUsingTx(q *BucketQuery, tx *sqlx.Tx) []*Bucket {
 	limit := boundLimit(q.Limit)
+	tx, slot := db.readTransaction()
 
 	whereParts := []string{}
 	if q.Name != "" {
@@ -898,7 +892,8 @@ func (db *Database) getBucketsUsingTx(q *BucketQuery, tx *sqlx.Tx) []*Bucket {
 		}
 	}
 
-	return buckets
+	db.finishReadTransaction(tx)
+	return buckets, slot
 }
 
 ////////////////
