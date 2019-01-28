@@ -390,6 +390,7 @@ func (c *Cache) InsertBucket(b *Bucket) {
 }
 
 // DeleteBucket writes through.
+// XXX: unallocate things first
 func (c *Cache) DeleteBucket(name string) {
 	c.buckets[name] = nil
 	if c.database != nil {
@@ -435,10 +436,7 @@ func (c *Cache) InsertProvider(p *Provider) {
 	c.providers[p.ID] = p
 
 	if c.database != nil {
-		err := c.database.InsertProvider(p)
-		if err != nil {
-			panic(err)
-		}
+		check(c.database.InsertProvider(p))
 	}
 }
 
@@ -461,7 +459,27 @@ func (c *Cache) AddCapacity(id uint64, amount uint32) {
 // DeleteProvider writes through.
 // It also removes this provider from all buckets it is providing.
 func (c *Cache) DeleteProvider(id uint64) {
-	panic("TODO: implement")
+	panic("XXX: implement")
+}
+
+/////////////////////
+// Allocation stuff
+/////////////////////
+
+// Allocate writes through.
+func (c *Cache) Allocate(bucketName string, providerID uint64) {
+	// Check that the provider has enough space for the bucket
+	b := c.GetBucket(bucketName)
+	p := c.GetProvider(providerID)
+	if b == nil || p == nil || b.Size > p.Available {
+		panic("invalid allocation")
+	}
+
+	cachedBucket := c.buckets[bucketName]
+	cachedBucket.Providers = append(cachedBucket.Providers, &Provider{ID: providerID})
+	cachedProvider := c.providers[providerID]
+	cachedProvider.Buckets = append(cachedProvider.Buckets, &Bucket{Name: bucketName})
+	cachedProvider.Available -= b.Size
 }
 
 /////////////////////////////////////
