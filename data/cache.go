@@ -275,10 +275,7 @@ func (c *Cache) IncrementSequence(op Operation) {
 func (c *Cache) InsertDocument(doc *Document) {
 	c.documents[doc.ID] = doc
 	if c.database != nil {
-		err := c.database.InsertDocument(doc)
-		if err != nil {
-			panic(err)
-		}
+		check(c.database.InsertDocument(doc))
 	}
 }
 
@@ -295,10 +292,7 @@ func (c *Cache) UpdateDocument(id uint64, data *JSONObject) {
 	c.documents[id] = newDoc
 
 	if c.database != nil {
-		err := c.database.UpdateDocument(id, data)
-		if err != nil {
-			panic(err)
-		}
+		check(c.database.UpdateDocument(id, data))
 	}
 }
 
@@ -379,10 +373,7 @@ func (c *Cache) InsertBucket(b *Bucket) {
 	c.buckets[bucket.Name] = bucket
 
 	if c.database != nil {
-		err := c.database.InsertBucket(bucket)
-		if err != nil {
-			panic(err)
-		}
+		check(c.database.InsertBucket(bucket))
 	}
 }
 
@@ -391,10 +382,7 @@ func (c *Cache) InsertBucket(b *Bucket) {
 func (c *Cache) DeleteBucket(name string) {
 	c.buckets[name] = nil
 	if c.database != nil {
-		err := c.database.DeleteBucket(name)
-		if err != nil {
-			panic(err)
-		}
+		check(c.database.DeleteBucket(name))
 	}
 }
 
@@ -579,10 +567,7 @@ func (c *Cache) FinalizeBlock(block *Block) {
 	c.blocks[block.Slot] = block
 
 	if c.database != nil {
-		err := c.database.InsertBlock(block)
-		if err != nil {
-			panic(err)
-		}
+		check(c.database.InsertBlock(block))
 		c.database.Commit()
 	}
 }
