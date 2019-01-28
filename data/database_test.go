@@ -381,6 +381,11 @@ func TestAccounts(t *testing.T) {
 
 func TestBuckets(t *testing.T) {
 	db := NewTestDatabase(0)
+
+	if db.getBucketTx("foo") != nil {
+		t.Fatalf("getBucketTx should return nil on empty db")
+	}
+
 	b := &Bucket{
 		Name:  "mybucket",
 		Owner: "bob",

@@ -800,6 +800,9 @@ func (db *Database) InsertBucket(b *Bucket) error {
 func (db *Database) getBucketTx(bucketName string) *Bucket {
 	bucket := &Bucket{}
 	err := db.getTx(bucket, "SELECT * FROM buckets WHERE name = $1 LIMIT 1", bucketName)
+	if isNoRowsError(err) {
+		return nil
+	}
 	check(err)
 	return bucket
 }
