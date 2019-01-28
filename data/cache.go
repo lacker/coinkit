@@ -306,10 +306,7 @@ func (c *Cache) UpdateDocument(id uint64, data *JSONObject) {
 func (c *Cache) DeleteDocument(id uint64) {
 	c.documents[id] = nil
 	if c.database != nil {
-		err := c.database.DeleteDocument(id)
-		if err != nil {
-			panic(err)
-		}
+		check(c.database.DeleteDocument(id))
 	}
 }
 
@@ -480,6 +477,10 @@ func (c *Cache) Allocate(bucketName string, providerID uint64) {
 	cachedProvider := c.providers[providerID]
 	cachedProvider.Buckets = append(cachedProvider.Buckets, &Bucket{Name: bucketName})
 	cachedProvider.Available -= b.Size
+
+	if c.database != nil {
+		check(c.database.Allocate(bucketName, providerID))
+	}
 }
 
 /////////////////////////////////////
