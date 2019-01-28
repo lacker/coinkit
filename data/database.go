@@ -946,6 +946,18 @@ func (db *Database) InsertProvider(p *Provider) error {
 	return nil
 }
 
+// A helper to get a provider within the current transaction.
+// Returns nil if there is none. Panics if there is a fundamental db error.
+func (db *Database) getProviderTx(providerID uint64) *Provider {
+	p := &Provider{}
+	err := db.getTx(p, "SELECT * FROM providers WHERE id = $1 LIMIT 1", providerID)
+	if isNoRowsError(err) {
+		return nil
+	}
+	check(err)
+	return p
+}
+
 // Returns nil if there is no such provider
 func (db *Database) GetProvider(id uint64) *Provider {
 	q := &ProviderQuery{
@@ -1013,7 +1025,7 @@ func (db *Database) UpdateProvider(id uint64, capacity uint32) error {
 }
 
 // DeleteProvider deletes the provider, using the transaction.
-// Buckets must all be unallocated before a provider can be deleted.
+// Buckets must all be deallocated before a provider can be deleted.
 // It returns an error when there is no such provider or when buckets were still allocated.
 func (db *Database) DeleteProvider(id uint64) error {
 	// First delete the provider
@@ -1051,7 +1063,7 @@ WHERE name = $1 AND $2 = ANY (providers)
 
 const providerRemove = `
 UPDATE providers
-SET buckets = array_remove(buckets, $2)
+SET buckets = array_remove(buckets, $2), available = $3
 WHERE id = $1 and $2 = ANY (buckets)
 `
 
@@ -1067,12 +1079,9 @@ func (db *Database) Allocate(bucketName string, providerID uint64) error {
 	if bucket == nil {
 		return fmt.Errorf("cannot allocate nonexistent bucket: %s", bucketName)
 	}
-
-	// Check the provider's available space
-	provider := &Provider{}
-	err := db.getTx(provider, "SELECT * FROM providers WHERE id = $1 LIMIT 1", providerID)
-	if err != nil {
-		return err
+	provider := db.getProviderTx(providerID)
+	if provider == nil {
+		return fmt.Errorf("cannot allocate to nonexistent provider: %d", providerID)
 	}
 	if provider.Available < bucket.Size {
 		return fmt.Errorf("cannot allocate bucket of size %d to provider with %d available",
@@ -1107,6 +1116,20 @@ func (db *Database) Allocate(bucketName string, providerID uint64) error {
 // If there is either no such bucket or no such provider, returns an error.
 // This updates available space.
 func (db *Database) Deallocate(bucketName string, providerID uint64) error {
+	// Figure out how much space will be available after the deallocation
+	bucket := db.getBucketTx(bucketName)
+	if bucket == nil {
+		return fmt.Errorf("cannot deallocate nonexistent bucket: %s", bucketName)
+	}
+	provider := db.getProviderTx(providerID)
+	if provider == nil {
+		return fmt.Errorf("cannot deallocate from nonexistent provider: %d", providerID)
+	}
+	newAvailable := provider.Available + bucket.Size
+	if newAvailable > provider.Capacity {
+		util.Logger.Fatalf("data inconsistency problem: provider %#v is oversubscribed", provider)
+	}
+
 	// Unpoint the bucket to the provider
 	res, err := db.execTx(bucketRemove, bucketName, providerID)
 	check(err)
@@ -1117,7 +1140,7 @@ func (db *Database) Deallocate(bucketName string, providerID uint64) error {
 	}
 
 	// Unpoint the provider to the bucket
-	res, err = db.execTx(providerRemove, providerID, bucketName)
+	res, err = db.execTx(providerRemove, providerID, bucketName, newAvailable)
 	check(err)
 	count, err = res.RowsAffected()
 	check(err)
