@@ -378,9 +378,18 @@ func (c *Cache) InsertBucket(b *Bucket) {
 	}
 }
 
+// DeleteBucket deallocates this bucket from all providers and then deletes the bucket object.
 // DeleteBucket writes through.
-// XXX: unallocate things first
 func (c *Cache) DeleteBucket(name string) {
+	b := c.GetBucket(name)
+	if b == nil {
+		util.Logger.Fatalf("cannot delete nonexistent bucket: %s", name)
+	}
+
+	for _, p := range b.Providers {
+		c.Deallocate(name, p.ID)
+	}
+
 	c.buckets[name] = nil
 	if c.database != nil {
 		check(c.database.DeleteBucket(name))
