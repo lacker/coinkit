@@ -540,11 +540,6 @@ func TestBuckets(t *testing.T) {
 	if len(bucket.Providers) != 2 {
 		t.Fatalf("failed to retrieve providers")
 	}
-	for _, p := range bucket.Providers {
-		if p == nil || p.Owner != "ricky" || p.Capacity == p.Available {
-			t.Fatalf("bad provider data: %#v", p)
-		}
-	}
 
 	check(db.Deallocate("mybucket", 1))
 	check(db.Deallocate("mybucket", 3))
