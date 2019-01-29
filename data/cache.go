@@ -464,7 +464,7 @@ func (c *Cache) DeleteProvider(id uint64) {
 
 	c.providers[id] = nil
 	if c.database != nil {
-		check(c.Database.DeleteProvider(id))
+		check(c.database.DeleteProvider(id))
 	}
 }
 
