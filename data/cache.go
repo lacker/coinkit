@@ -451,10 +451,21 @@ func (c *Cache) AddCapacity(id uint64, amount uint32) {
 	}
 }
 
+// DeleteProvider deallocates all buckets from this provider and then deletes the provider object.
 // DeleteProvider writes through.
-// It also removes this provider from all buckets it is providing.
 func (c *Cache) DeleteProvider(id uint64) {
-	panic("XXX: implement")
+	p := c.GetProvider(id)
+	if p == nil {
+		util.Logger.Fatalf("cannot delete nonexistent provider: %d", id)
+	}
+	for _, b := range p.Buckets {
+		c.Deallocate(b.Name, id)
+	}
+
+	c.providers[id] = nil
+	if c.database != nil {
+		check(c.Database.DeleteProvider(id))
+	}
 }
 
 /////////////////////
