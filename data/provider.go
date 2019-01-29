@@ -38,6 +38,9 @@ func (p *Provider) IsValidNewProvider() bool {
 	if p.Capacity != p.Available {
 		return false
 	}
+	if len(p.Buckets) > 0 {
+		return false
+	}
 
 	return true
 }

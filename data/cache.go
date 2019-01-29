@@ -415,8 +415,8 @@ func (c *Cache) GetProvider(id uint64) *Provider {
 // InsertProvider writes through.
 // This does not update NextProviderID.
 func (c *Cache) InsertProvider(p *Provider) {
-	if p.Capacity != p.Available {
-		panic("we should not be inserting nonempty providers")
+	if !p.IsValidNewProvider() {
+		util.Logger.Fatalf("invalid new provider to insert: #%v", p)
 	}
 	c.providers[p.ID] = p
 

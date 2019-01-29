@@ -155,3 +155,30 @@ func TestWriteThrough(t *testing.T) {
 		t.Fatalf("writethrough fail: %+v", a2)
 	}
 }
+
+func TestAllocation(t *testing.T) {
+	db := NewTestDatabase(0)
+	c := NewDatabaseCache(db, 1, 1)
+
+	b := &Bucket{
+		Name:  "mybucket",
+		Owner: "me",
+		Size:  10,
+	}
+	p := &Provider{
+		Owner:     "megacorp",
+		ID:        1,
+		Capacity:  100,
+		Available: 100,
+	}
+
+	c.InsertBucket(b)
+	c.InsertProvider(p)
+	c.Allocate("mybucket", 1)
+	db.Commit()
+
+	p2 := c.GetProvider(1)
+	if p2.Available != 90 {
+		t.Fatalf("unexpected provider post allocate: %+v", p2)
+	}
+}
