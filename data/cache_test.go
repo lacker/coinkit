@@ -191,4 +191,15 @@ func TestAllocation(t *testing.T) {
 	if c.GetProvider(1).Available != 100 {
 		t.Fatalf("provider should have freed up space")
 	}
+	c.DeleteProvider(1)
+	db.Commit()
+
+	setup()
+	c.DeleteProvider(1)
+	db.Commit()
+	if len(c.GetBucket("mybucket").Providers) != 0 {
+		t.Fatalf("bucket should have no providers")
+	}
+	c.DeleteBucket("mybucket")
+	db.Commit()
 }
