@@ -36,6 +36,20 @@ func (b *Bucket) String() string {
 	return fmt.Sprintf("bucket:%s, size:%d", b.Name, b.Size)
 }
 
+func (b *Bucket) IsValidNewBucket() bool {
+	// Check fields that must be filled
+	if b == nil || !IsValidBucketName(b.Name) || b.Owner == "" || b.Size == 0 {
+		return false
+	}
+
+	// New buckets should always be unallocated
+	if len(b.Providers) > 0 {
+		return false
+	}
+
+	return true
+}
+
 func (b *Bucket) RemoveProvider(id uint64) {
 	providers := []*Provider{}
 	for _, p := range b.Providers {

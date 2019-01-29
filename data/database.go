@@ -781,11 +781,8 @@ WHERE name = $1 AND coalesce(array_length(providers, 1), 0) = 0
 // It uses the transaction.
 // It panics if there is a fundamental database problem.
 func (db *Database) InsertBucket(b *Bucket) error {
-	if b == nil || b.Name == "" || b.Owner == "" {
-		return fmt.Errorf("invalid bucket to insert: %+v", b)
-	}
-	if len(b.Providers) > 0 {
-		return fmt.Errorf("buckets cannot be inserted with providers: %#v", b)
+	if !b.IsValidNewBucket() {
+		return fmt.Errorf("invalid new bucket: %+v", b)
 	}
 	_, err := db.namedExecTx(bucketInsert, b)
 	if isUniquenessError(err) {

@@ -367,13 +367,14 @@ func (c *Cache) GetBucket(name string) *Bucket {
 }
 
 // InsertBucket writes through.
-// This does not store or update provider data.
 func (c *Cache) InsertBucket(b *Bucket) {
-	bucket := b.StripProviderData()
-	c.buckets[bucket.Name] = bucket
+	if !b.IsValidNewBucket() {
+		util.Logger.Fatalf("cannot InsertBucket: %+v", b)
+	}
+	c.buckets[b.Name] = b
 
 	if c.database != nil {
-		check(c.database.InsertBucket(bucket))
+		check(c.database.InsertBucket(b))
 	}
 }
 
