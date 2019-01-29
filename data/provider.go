@@ -45,6 +45,26 @@ func (p *Provider) IsValidNewProvider() bool {
 	return true
 }
 
+func (p *Provider) HasBucket(name string) bool {
+	for _, b := range p.Buckets {
+		if b.Name == name {
+			return true
+		}
+	}
+	return false
+}
+
+// Does not modify Available
+func (p *Provider) RemoveBucket(name string) {
+	buckets := []*Bucket{}
+	for _, b := range p.Buckets {
+		if b.Name != name {
+			buckets = append(buckets, b)
+		}
+	}
+	p.Buckets = buckets
+}
+
 func (p *Provider) CheckEqual(other *Provider) error {
 	if p == nil && other == nil {
 		return nil

@@ -472,6 +472,25 @@ func (c *Cache) Allocate(bucketName string, providerID uint64) {
 	}
 }
 
+// Deallocate writes through.
+func (c *Cache) Deallocate(bucketName string, providerID uint64) {
+	// Check that this pair is actually an allocation
+	b := c.GetBucket(bucketName)
+	p := c.GetProvider(providerID)
+	if b == nil || p == nil || !b.HasProvider(providerID) || !p.HasBucket(bucketName) {
+		panic("invalid deallocation")
+	}
+
+	c.buckets[bucketName].RemoveProvider(providerID)
+	cachedProvider := c.providers[providerID]
+	cachedProvider.RemoveBucket(bucketName)
+	cachedProvider.Available += b.Size
+
+	if c.database != nil {
+		check(c.database.Deallocate(bucketName, providerID))
+	}
+}
+
 /////////////////////////////////////
 // General block processing stuff
 /////////////////////////////////////

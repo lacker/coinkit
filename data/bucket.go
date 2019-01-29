@@ -50,6 +50,15 @@ func (b *Bucket) IsValidNewBucket() bool {
 	return true
 }
 
+func (b *Bucket) HasProvider(id uint64) bool {
+	for _, p := range b.Providers {
+		if p.ID == id {
+			return true
+		}
+	}
+	return false
+}
+
 func (b *Bucket) RemoveProvider(id uint64) {
 	providers := []*Provider{}
 	for _, p := range b.Providers {
