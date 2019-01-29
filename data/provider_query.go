@@ -18,7 +18,7 @@ func (q *ProviderQuery) String() string {
 		parts = append(parts, fmt.Sprintf("id=%d", q.ID))
 	}
 	if len(q.IDs) != 0 {
-		parts = append(parts, fmt.Sprintf("ids=#+v", q.IDs))
+		parts = append(parts, fmt.Sprintf("ids=%+v", q.IDs))
 	}
 	if q.Owner != "" {
 		parts = append(parts, fmt.Sprintf("owner=%s", q.Owner))

@@ -43,13 +43,6 @@ type Database struct {
 	config *Config
 }
 
-// A helper function to panic if there is an error.
-func check(err error) {
-	if err != nil {
-		panic(err)
-	}
-}
-
 var allDatabases = []*Database{}
 
 func boundLimit(limit int) int {
