@@ -451,7 +451,8 @@ func (c *Cache) AddCapacity(id uint64, amount uint32) {
 	}
 }
 
-// DeleteProvider deallocates all buckets from this provider and then deletes the provider object.
+// DeleteProvider deallocates all buckets from this provider and then deletes the
+// provider object.
 // DeleteProvider writes through.
 func (c *Cache) DeleteProvider(id uint64) {
 	p := c.GetProvider(id)

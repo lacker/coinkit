@@ -44,8 +44,13 @@ func (op *CreateBucketOperation) GetSequence() uint32 {
 	return op.Sequence
 }
 
-// TODO: should this do something?
 func (op *CreateBucketOperation) Verify() bool {
+	if !IsValidBucketName(op.Name) {
+		return false
+	}
+	if op.Size == 0 {
+		return false
+	}
 	return true
 }
 
