@@ -386,12 +386,16 @@ func TestBuckets(t *testing.T) {
 		t.Fatalf("getBucketTx should return nil on empty db")
 	}
 
-	b := &Bucket{
+	check(db.InsertBucket(&Bucket{
 		Name:  "mybucket",
 		Owner: "bob",
 		Size:  150,
-	}
-	check(db.InsertBucket(b))
+	}))
+	check(db.InsertBucket(&Bucket{
+		Name:  "jimsbucket",
+		Owner: "jim",
+		Size:  150,
+	}))
 
 	if db.GetBucket("mybucket") != nil {
 		t.Fatalf("mybucket should not be visible before commit")
@@ -402,9 +406,9 @@ func TestBuckets(t *testing.T) {
 	if db.GetBucket("blorp") != nil {
 		t.Fatalf("there should be no bucket named blorp")
 	}
-	b2 := db.GetBucket("mybucket")
-	if b2.Owner != "bob" {
-		t.Fatalf("GetBucket got %+v", b2)
+	b := db.GetBucket("mybucket")
+	if b.Owner != "bob" {
+		t.Fatalf("GetBucket got %+v", b)
 	}
 
 	for i := uint64(1); i <= 4; i++ {
@@ -448,6 +452,12 @@ func TestBuckets(t *testing.T) {
 				Name:  "mybucket",
 			},
 			count: 1,
+		},
+		pair{
+			query: &BucketQuery{
+				Names: []string{"mybucket", "jimsbucket", "zorpsbucket"},
+			},
+			count: 2,
 		},
 		pair{
 			query: &BucketQuery{
