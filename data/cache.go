@@ -366,6 +366,10 @@ func (c *Cache) GetBucket(name string) *Bucket {
 	return nil
 }
 
+func (c *Cache) BucketExists(name string) bool {
+	return c.GetBucket(name) != nil
+}
+
 // InsertBucket writes through.
 func (c *Cache) InsertBucket(b *Bucket) {
 	if !b.IsValidNewBucket() {
@@ -516,7 +520,10 @@ func (c *Cache) Deallocate(bucketName string, providerID uint64) {
 // General block processing stuff
 /////////////////////////////////////
 
-// Validate returns whether this operation is valid
+// Validate returns whether this operation is valid.
+// Issues that can be caught just by looking at the operation itself should be checked in
+// the Verify method of the operation. Validation here is for checking whether operations
+// are consistent with the data that is already in the database.
 func (c *Cache) Validate(operation Operation) bool {
 	account := c.GetAccount(operation.GetSigner())
 	if account == nil {
@@ -542,6 +549,9 @@ func (c *Cache) Validate(operation Operation) bool {
 
 	case *DeleteDocumentOperation:
 		return c.DocExists(op.ID)
+
+	case *CreateBucketOperation:
+		return !c.BucketExists(op.Name)
 
 	default:
 		util.Printf("operation: %+v has type %s", operation, reflect.TypeOf(operation))
