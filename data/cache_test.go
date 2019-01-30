@@ -73,11 +73,14 @@ func TestReadThrough(t *testing.T) {
 func TestValidation(t *testing.T) {
 	c := NewCache()
 	mint := util.NewKeyPairFromSecretPhrase("mint")
-	account := &Account{
+	c.UpsertAccount(&Account{
 		Owner:   mint.PublicKey().String(),
 		Balance: 1000000,
-	}
-	c.UpsertAccount(account)
+	})
+	c.UpsertAccount(&Account{
+		Owner:   "jimmy",
+		Balance: 10000,
+	})
 
 	// First create a document
 	op := MakeTestCreateDocumentOperation(2).Operation
@@ -103,6 +106,11 @@ func TestValidation(t *testing.T) {
 	}
 	if c.Validate(MakeTestUpdateDocumentOperation(1, 10).Operation) {
 		t.Fatalf("sequence number of 10 should be bad for update")
+	}
+	uop := MakeTestUpdateDocumentOperation(1, 1).Operation.(*UpdateDocumentOperation)
+	uop.Signer = "jimmy"
+	if c.Validate(uop) {
+		t.Fatalf("only the doc owner should be allowed to update")
 	}
 	if !c.Process(MakeTestUpdateDocumentOperation(1, 2).Operation) {
 		t.Fatalf("update should work")

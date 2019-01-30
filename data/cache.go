@@ -308,6 +308,14 @@ func (c *Cache) DocExists(id uint64) bool {
 	return c.GetDocument(id) != nil
 }
 
+func (c *Cache) DocOwner(id uint64) string {
+	doc := c.GetDocument(id)
+	if doc == nil {
+		return ""
+	}
+	return doc.Owner()
+}
+
 // Do not modify the Document returned from GetDocument, because it might belong to
 // the readonly cache.
 // Returns nil if there is no such document.
@@ -545,10 +553,10 @@ func (c *Cache) Validate(operation Operation) bool {
 		return true
 
 	case *UpdateDocumentOperation:
-		return c.DocExists(op.ID)
+		return c.DocOwner(op.ID) == op.Signer
 
 	case *DeleteDocumentOperation:
-		return c.DocExists(op.ID)
+		return c.DocOwner(op.ID) == op.Signer
 
 	case *CreateBucketOperation:
 		return !c.BucketExists(op.Name)
@@ -562,6 +570,7 @@ func (c *Cache) Validate(operation Operation) bool {
 // Process returns false if the operation cannot be processed
 func (c *Cache) Process(operation Operation) bool {
 	if !c.Validate(operation) {
+		util.Logger.Printf("XXX Validate failed")
 		return false
 	}
 
@@ -583,10 +592,6 @@ func (c *Cache) Process(operation Operation) bool {
 		return true
 
 	case *DeleteDocumentOperation:
-		doc := c.GetDocument(op.ID)
-		if doc == nil {
-			return false
-		}
 		c.IncrementSequence(op)
 		c.DeleteDocument(op.ID)
 		return true

@@ -62,6 +62,7 @@ func MakeTestCreateDocumentOperation(n int) *SignedOperation {
 func (op *CreateDocumentOperation) Document(id uint64) *Document {
 	data := op.Data.Copy()
 	data.Set("id", id)
+	data.Set("owner", op.Signer)
 	return &Document{
 		Data: data,
 		ID:   id,

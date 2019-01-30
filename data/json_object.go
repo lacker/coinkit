@@ -135,6 +135,18 @@ func (ob *JSONObject) DefaultInt(key string, def int) int {
 	return def
 }
 
+// Returns ("", false) if the key does not exist, or is not string-y
+func (ob *JSONObject) GetString(key string) (string, bool) {
+	value, ok := ob.Get(key)
+	if ok {
+		stringValue, ok := value.(string)
+		if ok {
+			return stringValue, true
+		}
+	}
+	return "", false
+}
+
 func (ob *JSONObject) String() string {
 	return string(util.PrettyJSON(ob.content))
 }

@@ -36,3 +36,9 @@ func NewDocument(id uint64, data map[string]interface{}) *Document {
 		ID:   id,
 	}
 }
+
+// Returns "" if the owner is not specified
+func (d *Document) Owner() string {
+	owner, _ := d.Data.GetString("owner")
+	return owner
+}
