@@ -32,6 +32,18 @@ func IsValidBucketName(s string) bool {
 	return true
 }
 
+// Joins and '-quotes string names
+func joinBucketNamesForSQL(names []string) string {
+	parts := []string{}
+	for _, name := range names {
+		if !IsValidBucketName(name) {
+			util.Logger.Fatalf("bad bucket name in join: %s", name)
+		}
+		parts = append(parts, fmt.Sprintf("'%s'", name))
+	}
+	return strings.Join(parts, ",")
+}
+
 func (b *Bucket) String() string {
 	return fmt.Sprintf("bucket:%s, size:%d", b.Name, b.Size)
 }

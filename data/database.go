@@ -938,6 +938,9 @@ func (db *Database) GetProviders(q *ProviderQuery) ([]*Provider, int) {
 	if q.Owner != "" {
 		whereParts = append(whereParts, "owner = :owner")
 	}
+	if len(q.IDs) != 0 {
+		whereParts = append(whereParts, fmt.Sprintf("id IN (%s)", joinUint64s(q.IDs)))
+	}
 	if len(whereParts) == 0 {
 		util.Logger.Fatalf("bad GetProviders query: %+v", q)
 	}
