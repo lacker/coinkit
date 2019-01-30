@@ -133,6 +133,11 @@ func TestValidation(t *testing.T) {
 	if c.Validate(MakeTestDeleteDocumentOperation(1, 10).Operation) {
 		t.Fatalf("sequence number of 10 should be bad for delete")
 	}
+	dop := MakeTestDeleteDocumentOperation(1, 1).Operation.(*DeleteDocumentOperation)
+	dop.Signer = "jimmy"
+	if c.Validate(dop) {
+		t.Fatalf("only the doc owner should be allowed to delete")
+	}
 	if !c.Process(MakeTestDeleteDocumentOperation(1, 3).Operation) {
 		t.Fatalf("delete should work")
 	}
