@@ -841,6 +841,10 @@ func (db *Database) GetBuckets(q *BucketQuery) ([]*Bucket, int) {
 	if q.Provider != 0 {
 		whereParts = append(whereParts, ":provider = ANY (providers)")
 	}
+	if len(q.Names) != 0 {
+		whereParts = append(whereParts,
+			fmt.Sprintf("name IN (%s)", joinBucketNamesForSQL(q.Names)))
+	}
 	if len(whereParts) == 0 {
 		util.Logger.Fatalf("bad GetBuckets query: %+v", q)
 	}
@@ -928,6 +932,7 @@ func (db *Database) GetProvider(id uint64) *Provider {
 
 // GetProviders returns a list of matching providers, along with the slot that this
 // data reflects.
+// This does not inflate the bucket data.
 func (db *Database) GetProviders(q *ProviderQuery) ([]*Provider, int) {
 	limit := boundLimit(q.Limit)
 

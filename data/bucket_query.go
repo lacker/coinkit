@@ -6,10 +6,11 @@ import (
 )
 
 type BucketQuery struct {
-	Name     string `json:"name"`
-	Owner    string `json:"owner"`
-	Limit    int    `json:"limit"`
-	Provider uint64 `json:"provider"`
+	Name     string   `json:"name"`
+	Names    []string `json:"names"`
+	Owner    string   `json:"owner"`
+	Limit    int      `json:"limit"`
+	Provider uint64   `json:"provider"`
 }
 
 func (q *BucketQuery) String() string {
