@@ -37,6 +37,21 @@ func NewDocument(id uint64, data map[string]interface{}) *Document {
 	}
 }
 
+type DocumentOperation interface {
+	GetSigner() string
+	GetData() *JSONObject
+}
+
+func NewDocumentFromOperation(id uint64, op DocumentOperation) *Document {
+	data := op.GetData().Copy()
+	data.Set("id", id)
+	data.Set("owner", op.GetSigner())
+	return &Document{
+		Data: data,
+		ID:   id,
+	}
+}
+
 // Returns "" if the owner is not specified
 func (d *Document) Owner() string {
 	owner, _ := d.Data.GetString("owner")

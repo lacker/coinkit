@@ -45,7 +45,10 @@ func (op *UpdateDocumentOperation) GetSequence() uint32 {
 	return op.Sequence
 }
 
-// TODO: should this do something?
+func (op *UpdateDocumentOperation) GetData() *JSONObject {
+	return op.Data
+}
+
 func (op *UpdateDocumentOperation) Verify() bool {
 	return true
 }

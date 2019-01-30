@@ -123,6 +123,10 @@ func (ob *JSONObject) GetInt(key string) (int, bool) {
 		if ok {
 			return intValue, true
 		}
+		uint64Value, ok := value.(uint64)
+		if ok {
+			return int(uint64Value), true
+		}
 	}
 	return 0, false
 }

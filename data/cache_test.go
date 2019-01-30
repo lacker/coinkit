@@ -122,6 +122,9 @@ func TestValidation(t *testing.T) {
 	if !ok || foo != 2 {
 		t.Fatalf("expected doc.Data.foo to be 2")
 	}
+	if doc.Owner() != mint.PublicKey().String() {
+		t.Fatalf("bad doc owner: %s", doc.Owner())
+	}
 
 	// Delete our document
 	if c.Validate(MakeTestDeleteDocumentOperation(badId, 3).Operation) {

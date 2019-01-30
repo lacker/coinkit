@@ -280,19 +280,11 @@ func (c *Cache) InsertDocument(doc *Document) {
 }
 
 // UpdateDocument writes through.
-func (c *Cache) UpdateDocument(id uint64, data *JSONObject) {
-	doc := c.GetDocument(id)
-	if doc == nil {
-		panic("no doc found for update")
-	}
-	newDoc := &Document{
-		ID:   id,
-		Data: data,
-	}
-	c.documents[id] = newDoc
+func (c *Cache) UpdateDocument(doc *Document) {
+	c.documents[doc.ID] = doc
 
 	if c.database != nil {
-		check(c.database.UpdateDocument(id, data))
+		check(c.database.UpdateDocument(doc.ID, doc.Data))
 	}
 }
 
@@ -570,7 +562,6 @@ func (c *Cache) Validate(operation Operation) bool {
 // Process returns false if the operation cannot be processed
 func (c *Cache) Process(operation Operation) bool {
 	if !c.Validate(operation) {
-		util.Logger.Printf("XXX Validate failed")
 		return false
 	}
 
@@ -581,14 +572,15 @@ func (c *Cache) Process(operation Operation) bool {
 
 	case *CreateDocumentOperation:
 		c.IncrementSequence(op)
-		doc := op.Document(c.NextDocumentID)
+		doc := NewDocumentFromOperation(c.NextDocumentID, op)
 		c.InsertDocument(doc)
 		c.NextDocumentID++
 		return true
 
 	case *UpdateDocumentOperation:
 		c.IncrementSequence(op)
-		c.UpdateDocument(op.ID, op.Data)
+		doc := NewDocumentFromOperation(op.ID, op)
+		c.UpdateDocument(doc)
 		return true
 
 	case *DeleteDocumentOperation:
