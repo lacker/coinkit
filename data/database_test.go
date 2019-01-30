@@ -583,12 +583,14 @@ func TestProviders(t *testing.T) {
 		t.Fatalf("expected one provider for %#v", b)
 	}
 
-	q := &ProviderQuery{
-		Owner: "bob",
-	}
-	ps, _ := db.GetProviders(q)
-	if len(ps) != 2 {
-		t.Fatalf("GetProviders returned: %+v", ps)
+	for _, q := range []*ProviderQuery{
+		&ProviderQuery{Owner: "bob"},
+		&ProviderQuery{IDs: []uint64{1, 2}},
+	} {
+		ps, _ := db.GetProviders(q)
+		if len(ps) != 2 {
+			t.Fatalf("GetProviders returned: %+v", ps)
+		}
 	}
 
 	check(db.AddCapacity(1, 100))
@@ -619,7 +621,7 @@ func TestProviders(t *testing.T) {
 	check(db.DeleteProvider(2))
 	db.Commit()
 
-	ps, _ = db.GetProviders(q)
+	ps, _ := db.GetProviders(&ProviderQuery{Owner: "bob"})
 	if len(ps) != 1 {
 		t.Fatalf("delete did not seem to delete")
 	}
