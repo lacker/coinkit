@@ -588,6 +588,16 @@ func (c *Cache) Process(operation Operation) bool {
 		c.DeleteDocument(op.ID)
 		return true
 
+	case *CreateBucketOperation:
+		c.IncrementSequence(op)
+		bucket := &Bucket{
+			Name:  op.Name,
+			Owner: op.Signer,
+			Size:  op.Size,
+		}
+		c.InsertBucket(bucket)
+		return true
+
 	default:
 		util.Fatalf("unhanded type in cache.Process: %s", reflect.TypeOf(operation))
 		return false
