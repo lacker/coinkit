@@ -438,6 +438,14 @@ func (c *Cache) ProviderExists(id uint64) bool {
 	return c.GetProvider(id) != nil
 }
 
+func (c *Cache) ProviderOwner(id uint64) string {
+	p := c.GetProvider(id)
+	if p == nil {
+		return ""
+	}
+	return p.Owner
+}
+
 // InsertProvider writes through.
 // This does not update NextProviderID.
 func (c *Cache) InsertProvider(p *Provider) {
