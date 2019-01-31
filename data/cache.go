@@ -609,6 +609,11 @@ func (c *Cache) Process(operation Operation) bool {
 		c.InsertBucket(bucket)
 		return true
 
+	case *DeleteBucketOperation:
+		c.IncrementSequence(op)
+		c.DeleteBucket(op.Name)
+		return true
+
 	default:
 		util.Fatalf("unhanded type in cache.Process: %s", reflect.TypeOf(operation))
 		return false
