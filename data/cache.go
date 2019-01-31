@@ -576,6 +576,9 @@ func (c *Cache) Validate(operation Operation) bool {
 	case *DeleteBucketOperation:
 		return c.BucketOwner(op.Name) == op.Signer
 
+	case *CreateProviderOperation:
+		return true
+
 	default:
 		util.Printf("operation: %+v has type %s", operation, reflect.TypeOf(operation))
 		panic("operation type cannot be validated")
