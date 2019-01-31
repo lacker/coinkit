@@ -579,6 +579,9 @@ func (c *Cache) Validate(operation Operation) bool {
 	case *CreateProviderOperation:
 		return true
 
+	case *DeleteProviderOperation:
+		return c.ProviderOwner(op.ID) == op.Signer
+
 	default:
 		util.Printf("operation: %+v has type %s", operation, reflect.TypeOf(operation))
 		panic("operation type cannot be validated")
@@ -627,6 +630,18 @@ func (c *Cache) Process(operation Operation) bool {
 	case *DeleteBucketOperation:
 		c.IncrementSequence(op)
 		c.DeleteBucket(op.Name)
+		return true
+
+	case *CreateProviderOperation:
+		c.IncrementSequence(op)
+		p := &Provider{
+			ID:        c.NextProviderID,
+			Owner:     op.Signer,
+			Capacity:  op.Capacity,
+			Available: op.Capacity,
+		}
+		c.InsertProvider(p)
+		c.NextProviderID++
 		return true
 
 	default:
