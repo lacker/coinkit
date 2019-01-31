@@ -370,6 +370,14 @@ func (c *Cache) BucketExists(name string) bool {
 	return c.GetBucket(name) != nil
 }
 
+func (c *Cache) BucketOwner(name string) string {
+	b := c.GetBucket(name)
+	if b == nil {
+		return ""
+	}
+	return b.Owner
+}
+
 // InsertBucket writes through.
 func (c *Cache) InsertBucket(b *Bucket) {
 	if !b.IsValidNewBucket() {
