@@ -644,6 +644,11 @@ func (c *Cache) Process(operation Operation) bool {
 		c.NextProviderID++
 		return true
 
+	case *DeleteProviderOperation:
+		c.IncrementSequence(op)
+		c.DeleteProvider(op.ID)
+		return true
+
 	default:
 		util.Fatalf("unhanded type in cache.Process: %s", reflect.TypeOf(operation))
 		return false
