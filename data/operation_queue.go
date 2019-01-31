@@ -312,6 +312,7 @@ func (q *OperationQueue) NewChunk(
 		Operations:     ops,
 		Accounts:       state,
 		NextDocumentID: validator.NextDocumentID,
+		NextProviderID: validator.NextProviderID,
 	}
 	key := chunk.Hash()
 	if _, ok := q.chunks[key]; !ok {
