@@ -41,7 +41,6 @@ func (op *CreateProviderOperation) GetSequence() uint32 {
 	return op.Sequence
 }
 
-// TODO: should this do something?
 func (op *CreateProviderOperation) Verify() bool {
 	return true
 }
