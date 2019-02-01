@@ -1041,9 +1041,16 @@ func (db *Database) Allocate(bucketName string, providerID uint64) error {
 	if bucket == nil {
 		return fmt.Errorf("cannot allocate nonexistent bucket: %s", bucketName)
 	}
+	if bucket.HasProvider(providerID) {
+		return fmt.Errorf("bucket %s is already allocated to provider %d",
+			bucketName, providerID)
+	}
 	provider := db.getProviderTx(providerID)
 	if provider == nil {
 		return fmt.Errorf("cannot allocate to nonexistent provider: %d", providerID)
+	}
+	if provider.HasBucket(bucketName) {
+		panic("data inconsistency")
 	}
 	if provider.Available < bucket.Size {
 		return fmt.Errorf("cannot allocate bucket of size %d to provider with %d available",
