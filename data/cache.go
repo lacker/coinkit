@@ -599,6 +599,20 @@ func (c *Cache) Validate(operation Operation) bool {
 		}
 		return true
 
+	case *DeallocateOperation:
+		p := c.GetProvider(op.ID)
+		b := c.GetBucket(op.Name)
+		if p == nil || b == nil {
+			return false
+		}
+		if p.Owner != op.Signer && b.Owner != op.Signer {
+			return false
+		}
+		if !p.HasBucket(op.Name) || !b.HasProvider(op.ID) {
+			return false
+		}
+		return true
+
 	default:
 		util.Printf("operation: %+v has type %s", operation, reflect.TypeOf(operation))
 		panic("operation type cannot be validated")
