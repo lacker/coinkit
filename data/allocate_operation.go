@@ -1,6 +1,10 @@
 package data
 
-import ()
+import (
+	"fmt"
+
+	"github.com/lacker/coinkit/util"
+)
 
 type AllocateOperation struct {
 	// Who is performing this allocation. Can be either the bucket or provider owner
@@ -17,6 +21,37 @@ type AllocateOperation struct {
 
 	// The size of the bucket in megabytes
 	ID uint64 `json:"id"`
+}
+
+func (op *AllocateOperation) String() string {
+	return fmt.Sprintf("Allocate signer=%s, name=%s, id=%d",
+		util.Shorten(op.Signer), op.Name, op.ID)
+}
+
+func (op *AllocateOperation) OperationType() string {
+	return "Allocate"
+}
+
+func (op *AllocateOperation) GetSigner() string {
+	return op.Signer
+}
+
+func (op *AllocateOperation) GetFee() uint64 {
+	return op.Fee
+}
+
+func (op *AllocateOperation) GetSequence() uint32 {
+	return op.Sequence
+}
+
+func (op *AllocateOperation) Verify() bool {
+	if !IsValidBucketName(op.Name) {
+		return false
+	}
+	if op.ID == 0 {
+		return false
+	}
+	return true
 }
 
 func init() {
