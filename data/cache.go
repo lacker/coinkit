@@ -685,6 +685,11 @@ func (c *Cache) Process(operation Operation) bool {
 		c.Allocate(op.Name, op.ID)
 		return true
 
+	case *DeallocateOperation:
+		c.IncrementSequence(op)
+		c.Deallocate(op.Name, op.ID)
+		return true
+
 	default:
 		util.Fatalf("unhanded type in cache.Process: %s", reflect.TypeOf(operation))
 		return false
