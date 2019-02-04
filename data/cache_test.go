@@ -247,6 +247,10 @@ func TestAllocationProcessing(t *testing.T) {
 	if c.Validate(cpop) {
 		t.Fatalf("miney should not be able to make a provider with no account")
 	}
+	c.SetBalance("miney", 100)
+	if !c.Process(cpop) {
+		t.Fatalf("miney should be able to make a provider")
+	}
 
 	db.Commit()
 }
