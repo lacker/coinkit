@@ -219,3 +219,18 @@ func TestAllocation(t *testing.T) {
 	c.DeleteBucket("mybucket")
 	db.Commit()
 }
+
+func TestAllocationProcessing(t *testing.T) {
+	db := NewTestDatabase(0)
+	c := NewDatabaseCache(db, 1, 1)
+
+	cbop := &CreateBucketOperation{
+		Signer: "jim",
+		Name:   "jimsbucket",
+		Size:   100,
+	}
+
+	if !c.Process(cbop) {
+		t.Fatalf("jim should be able to make a bucket")
+	}
+}
