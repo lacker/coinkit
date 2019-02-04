@@ -238,4 +238,5 @@ func TestAllocationProcessing(t *testing.T) {
 	if !c.Process(cbop) {
 		t.Fatalf("jim should be able to create a bucket")
 	}
+	db.Commit()
 }

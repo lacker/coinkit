@@ -357,6 +357,9 @@ func (c *Cache) GetBucket(name string) *Bucket {
 	if c.database != nil {
 		// When there is a database, read from the database and cache it.
 		bucket := c.database.GetBucket(name)
+		if bucket == nil {
+			return nil
+		}
 		for _, p := range bucket.Providers {
 			c.providers[p.ID] = p
 		}
