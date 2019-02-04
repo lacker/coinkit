@@ -588,6 +588,12 @@ func TestProviders(t *testing.T) {
 		t.Fatalf("should not be able to delete a provider with allocations")
 	}
 
+	err = db.Allocate("bucket1", 1)
+	db.Commit()
+	if err == nil {
+		t.Fatalf("should not be able to double-allocate")
+	}
+
 	b = db.GetBucket("bucket1")
 	if b == nil || len(b.Providers) != 1 {
 		t.Fatalf("expected one provider for %#v", b)
