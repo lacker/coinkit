@@ -600,15 +600,15 @@ func (c *Cache) Validate(operation Operation) bool {
 		return true
 
 	case *DeallocateOperation:
-		p := c.GetProvider(op.ID)
-		b := c.GetBucket(op.Name)
+		p := c.GetProvider(op.ProviderID)
+		b := c.GetBucket(op.BucketName)
 		if p == nil || b == nil {
 			return false
 		}
 		if p.Owner != op.Signer && b.Owner != op.Signer {
 			return false
 		}
-		if !p.HasBucket(op.Name) || !b.HasProvider(op.ID) {
+		if !p.HasBucket(op.BucketName) || !b.HasProvider(op.ProviderID) {
 			return false
 		}
 		return true
@@ -687,7 +687,7 @@ func (c *Cache) Process(operation Operation) bool {
 
 	case *DeallocateOperation:
 		c.IncrementSequence(op)
-		c.Deallocate(op.Name, op.ID)
+		c.Deallocate(op.BucketName, op.ProviderID)
 		return true
 
 	default:
