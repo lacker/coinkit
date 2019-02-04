@@ -238,5 +238,15 @@ func TestAllocationProcessing(t *testing.T) {
 	if !c.Process(cbop) {
 		t.Fatalf("jim should be able to create a bucket")
 	}
+
+	cpop := &CreateProviderOperation{
+		Sequence: 1,
+		Signer:   "miney",
+		Capacity: 1000,
+	}
+	if c.Validate(cpop) {
+		t.Fatalf("miney should not be able to make a provider with no account")
+	}
+
 	db.Commit()
 }
