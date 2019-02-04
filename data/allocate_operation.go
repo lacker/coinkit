@@ -17,15 +17,15 @@ type AllocateOperation struct {
 	Fee uint64 `json:"fee"`
 
 	// The name of the bucket
-	Name string `json:"name"`
+	BucketName string `json:"bucketName"`
 
 	// The id of the provider
-	ID uint64 `json:"id"`
+	ProviderID uint64 `json:"providerID"`
 }
 
 func (op *AllocateOperation) String() string {
-	return fmt.Sprintf("Allocate signer=%s, name=%s, id=%d",
-		util.Shorten(op.Signer), op.Name, op.ID)
+	return fmt.Sprintf("Allocate signer=%s, bucketName=%s, providerID=%d",
+		util.Shorten(op.Signer), op.BucketName, op.ProviderID)
 }
 
 func (op *AllocateOperation) OperationType() string {
@@ -45,10 +45,10 @@ func (op *AllocateOperation) GetSequence() uint32 {
 }
 
 func (op *AllocateOperation) Verify() bool {
-	if !IsValidBucketName(op.Name) {
+	if !IsValidBucketName(op.BucketName) {
 		return false
 	}
-	if op.ID == 0 {
+	if op.ProviderID == 0 {
 		return false
 	}
 	return true

@@ -583,8 +583,8 @@ func (c *Cache) Validate(operation Operation) bool {
 		return c.ProviderOwner(op.ID) == op.Signer
 
 	case *AllocateOperation:
-		p := c.GetProvider(op.ID)
-		b := c.GetBucket(op.Name)
+		p := c.GetProvider(op.ProviderID)
+		b := c.GetBucket(op.BucketName)
 		if p == nil || b == nil {
 			return false
 		}
@@ -594,7 +594,7 @@ func (c *Cache) Validate(operation Operation) bool {
 		if p.Available < b.Size {
 			return false
 		}
-		if p.HasBucket(op.Name) || b.HasProvider(op.ID) {
+		if p.HasBucket(op.BucketName) || b.HasProvider(op.ProviderID) {
 			return false
 		}
 		return true
@@ -682,7 +682,7 @@ func (c *Cache) Process(operation Operation) bool {
 
 	case *AllocateOperation:
 		c.IncrementSequence(op)
-		c.Allocate(op.Name, op.ID)
+		c.Allocate(op.BucketName, op.ProviderID)
 		return true
 
 	case *DeallocateOperation:
