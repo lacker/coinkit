@@ -225,12 +225,13 @@ func TestAllocationProcessing(t *testing.T) {
 	c := NewDatabaseCache(db, 1, 1)
 
 	cbop := &CreateBucketOperation{
-		Signer: "jim",
-		Name:   "jimsbucket",
-		Size:   100,
+		Sequence: 1,
+		Signer:   "jim",
+		Name:     "jimsbucket",
+		Size:     100,
 	}
 
-	if !c.Process(cbop) {
-		t.Fatalf("jim should be able to make a bucket")
+	if c.Validate(cbop) {
+		t.Fatalf("jim should not be able to make a bucket with no account")
 	}
 }
