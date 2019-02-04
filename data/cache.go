@@ -334,36 +334,23 @@ func (c *Cache) GetDocument(id uint64) *Document {
 // Bucket stuff
 ///////////////////
 
-// GetBucket returns a copy so you could modify it without borking the cache.
-// This includes the data from providers in the returned bucket whenever that data exists.
+// Don't modify the bucket returned from GetBucket, because it's still in the cache.
+// This does not inflate provider data.
 // Returns nil if there is no such bucket.
 func (c *Cache) GetBucket(name string) *Bucket {
-	cached, ok := c.buckets[name]
+	bucket, ok := c.buckets[name]
 	if ok {
-		// Inflate the provider data.
-		bucket := cached.StripProviderData()
-		for i, p := range bucket.Providers {
-			provider := c.GetProvider(p.ID)
-			if provider != nil {
-				bucket.Providers[i] = provider
-			}
-		}
 		return bucket
 	}
-
 	if c.readOnly != nil {
 		return c.readOnly.GetBucket(name)
 	}
+
 	if c.database != nil {
 		// When there is a database, read from the database and cache it.
-		bucket := c.database.GetBucket(name)
-		if bucket == nil {
-			return nil
-		}
-		for _, p := range bucket.Providers {
-			c.providers[p.ID] = p
-		}
-		c.buckets[name] = bucket.StripProviderData()
+		bucket = c.database.GetBucket(name)
+		c.buckets[name] = bucket
+		return bucket
 	}
 
 	return nil
