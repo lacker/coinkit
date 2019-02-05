@@ -281,5 +281,14 @@ func TestAllocationProcessing(t *testing.T) {
 		t.Fatalf("should be able to delete bucket")
 	}
 
+	dpop := &DeleteProviderOperation{
+		Sequence: 2,
+		Signer:   "miney",
+		ID:       1,
+	}
+	if !c.Process(dpop) {
+		t.Fatalf("should be able to delete provider")
+	}
+
 	db.Commit()
 }
