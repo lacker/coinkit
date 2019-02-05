@@ -252,5 +252,15 @@ func TestAllocationProcessing(t *testing.T) {
 		t.Fatalf("miney should be able to make a provider")
 	}
 
+	aop := &AllocateOperation{
+		Sequence:   2,
+		Signer:     "jim",
+		BucketName: "jimsbucket",
+		ProviderID: 1,
+	}
+	if !c.Process(aop) {
+		t.Fatalf("should be able to allocate")
+	}
+
 	db.Commit()
 }
