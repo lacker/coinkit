@@ -272,5 +272,14 @@ func TestAllocationProcessing(t *testing.T) {
 		t.Fatalf("should be able to deallocate")
 	}
 
+	bdop := &DeleteBucketOperation{
+		Sequence: 4,
+		Signer:   "jim",
+		Name:     "jimsbucket",
+	}
+	if !c.Process(bdop) {
+		t.Fatalf("should be able to delete bucket")
+	}
+
 	db.Commit()
 }
