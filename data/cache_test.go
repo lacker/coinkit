@@ -262,5 +262,15 @@ func TestAllocationProcessing(t *testing.T) {
 		t.Fatalf("should be able to allocate")
 	}
 
+	dop := &DeallocateOperation{
+		Sequence:   3,
+		Signer:     "jim",
+		BucketName: "jimsbucket",
+		ProviderID: 1,
+	}
+	if !c.Process(dop) {
+		t.Fatalf("should be able to deallocate")
+	}
+
 	db.Commit()
 }
