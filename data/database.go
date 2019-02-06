@@ -764,6 +764,12 @@ INSERT INTO buckets (name, owner, size)
 VALUES (:name, :owner, :size)
 `
 
+const bucketUpdate = `
+UPDATE buckets
+SET magnet = :magnet
+WHERE name = :name
+`
+
 const bucketDelete = `
 DELETE FROM buckets
 WHERE name = $1 AND coalesce(array_length(providers, 1), 0) = 0
@@ -782,6 +788,17 @@ func (db *Database) InsertBucket(b *Bucket) error {
 		return err
 	}
 	check(err)
+	return nil
+}
+
+func (db *Database) UpdateBucket(b *Bucket) error {
+	res, err := db.namedExecTx(bucketUpdate, b)
+	check(err)
+	count, err := res.RowsAffected()
+	check(err)
+	if count != 1 {
+		return fmt.Errorf("expected 1 bucket row affected, got %d", count)
+	}
 	return nil
 }
 
