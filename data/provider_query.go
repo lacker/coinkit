@@ -6,10 +6,11 @@ import (
 )
 
 type ProviderQuery struct {
-	ID    uint64   `json:"id"`
-	IDs   []uint64 `json:"ids"`
-	Owner string   `json:"owner"`
-	Limit int      `json:"limit"`
+	ID        uint64   `json:"id"`
+	IDs       []uint64 `json:"ids"`
+	Owner     string   `json:"owner"`
+	Limit     int      `json:"limit"`
+	Available uint32   `json:"available"`
 }
 
 func (q *ProviderQuery) String() string {
@@ -22,6 +23,9 @@ func (q *ProviderQuery) String() string {
 	}
 	if q.Owner != "" {
 		parts = append(parts, fmt.Sprintf("owner=%s", q.Owner))
+	}
+	if q.Available != 0 {
+		parts = append(parts, fmt.Sprintf("available=%d", q.Available))
 	}
 	if len(parts) == 0 {
 		return "<empty>"
