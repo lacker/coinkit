@@ -946,6 +946,9 @@ func (db *Database) GetProviders(q *ProviderQuery) ([]*Provider, int) {
 	if len(q.IDs) != 0 {
 		whereParts = append(whereParts, fmt.Sprintf("id IN (%s)", joinUint64s(q.IDs)))
 	}
+	if q.Available != 0 {
+		whereParts = append(whereParts, "available >= :available")
+	}
 	if len(whereParts) == 0 {
 		util.Logger.Fatalf("bad GetProviders query: %+v", q)
 	}
