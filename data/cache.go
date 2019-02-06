@@ -334,7 +334,7 @@ func (c *Cache) GetDocument(id uint64) *Document {
 // Bucket stuff
 ///////////////////
 
-// Don't modify the bucket returned from GetBucket, because it's still in the cache.
+// The bucket returned from GetBucket is still in the cache.
 // This does not inflate provider data.
 // Returns nil if there is no such bucket.
 func (c *Cache) GetBucket(name string) *Bucket {
@@ -377,6 +377,15 @@ func (c *Cache) InsertBucket(b *Bucket) {
 
 	if c.database != nil {
 		check(c.database.InsertBucket(b))
+	}
+}
+
+// SetMagnet writes through.
+func (c *Cache) SetMagnet(name string, magnet string) {
+	b := c.GetBucket(name)
+	b.Magnet = magnet
+	if c.database != nil {
+		check(c.database.UpdateBucket(b))
 	}
 }
 
