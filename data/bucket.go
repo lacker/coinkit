@@ -16,6 +16,9 @@ type Bucket struct {
 	// Measured in megabytes
 	Size uint32 `json:"size"`
 
+	// The magnet URI to get this bucket from
+	Magnet string `json:"magnet"`
+
 	Providers ProviderArray `json:"providers"`
 }
 
