@@ -19,13 +19,13 @@ type UpdateBucketOperation struct {
 	// The name of the bucket
 	Name string `json:"name"`
 
-	// The size of the bucket in megabytes
-	Size uint32 `json:"size"`
+	// The new magnet uri
+	Magnet string `json:"magnet"`
 }
 
 func (op *UpdateBucketOperation) String() string {
-	return fmt.Sprintf("UpdateBucket owner=%s, name=%s, size=%d",
-		util.Shorten(op.Signer), op.Name, op.Size)
+	return fmt.Sprintf("UpdateBucket owner=%s, name=%s, magnet=%s",
+		util.Shorten(op.Signer), op.Name, op.Magnet)
 }
 
 func (op *UpdateBucketOperation) OperationType() string {
@@ -44,8 +44,8 @@ func (op *UpdateBucketOperation) GetSequence() uint32 {
 	return op.Sequence
 }
 
-// TODO: should this do something?
 func (op *UpdateBucketOperation) Verify() bool {
+	// TODO: check that Magnet is a valid URL
 	return true
 }
 
@@ -55,7 +55,7 @@ func MakeTestUpdateBucketOperation(n int) *SignedOperation {
 		Signer:   mint.PublicKey().String(),
 		Sequence: uint32(n),
 		Name:     fmt.Sprintf("bucket%d", n),
-		Size:     uint32(n * 2000),
+		Magnet:   fmt.Sprintf("http://example.com/%d", n),
 	}
 	return NewSignedOperation(op, mint)
 }
