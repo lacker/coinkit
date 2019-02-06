@@ -569,6 +569,8 @@ func TestProviders(t *testing.T) {
 
 	check(db.InsertProvider(p))
 	p.ID = 2
+	p.Capacity = 200
+	p.Available = 200
 	check(db.InsertProvider(p))
 
 	b := &Bucket{
@@ -602,6 +604,7 @@ func TestProviders(t *testing.T) {
 	for _, q := range []*ProviderQuery{
 		&ProviderQuery{Owner: "bob"},
 		&ProviderQuery{IDs: []uint64{1, 2}},
+		&ProviderQuery{Available: 50},
 	} {
 		ps, _ := db.GetProviders(q)
 		if len(ps) != 2 {
@@ -631,7 +634,7 @@ func TestProviders(t *testing.T) {
 	}
 
 	p = db.GetProvider(2)
-	if p.Capacity != 100 {
+	if p.Capacity != 200 {
 		t.Fatalf("bad provider data: %#v", p)
 	}
 	check(db.DeleteProvider(2))
