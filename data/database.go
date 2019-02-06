@@ -135,7 +135,8 @@ CREATE TABLE IF NOT EXISTS buckets (
     name text,
     owner text,
     size integer,
-    providers bigint[]
+    providers bigint[],
+    magnet text
 );
 
 CREATE UNIQUE INDEX IF NOT EXISTS bucket_name_idx ON buckets (name);
