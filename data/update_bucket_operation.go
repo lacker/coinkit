@@ -2,7 +2,6 @@ package data
 
 import (
 	"fmt"
-	"net/url"
 
 	"github.com/lacker/coinkit/util"
 )
@@ -46,8 +45,7 @@ func (op *UpdateBucketOperation) GetSequence() uint32 {
 }
 
 func (op *UpdateBucketOperation) Verify() bool {
-	_, err := url.ParseRequestURI(op.Magnet)
-	return err != nil
+	return IsValidMagnet(op.Magnet)
 }
 
 func MakeTestUpdateBucketOperation(n int) *SignedOperation {
