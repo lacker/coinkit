@@ -3,6 +3,7 @@ package data
 import (
 	"database/sql/driver"
 	"fmt"
+	"net/url"
 	"regexp"
 	"strings"
 
@@ -33,6 +34,12 @@ func IsValidBucketName(s string) bool {
 		return false
 	}
 	return true
+}
+
+// Magnet URIs must be valid urls
+func IsValidMagnet(m string) bool {
+	_, err := url.ParseRequestURI(m)
+	return err != nil
 }
 
 // Joins and '-quotes string names
