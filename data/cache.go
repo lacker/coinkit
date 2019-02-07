@@ -693,7 +693,7 @@ func (c *Cache) Process(operation Operation) bool {
 		return true
 
 	default:
-		util.Fatalf("unhanded type in cache.Process: %s", reflect.TypeOf(operation))
+		util.Fatalf("unhandled type in cache.Process: %s", reflect.TypeOf(operation))
 		return false
 	}
 	panic("you forgot to add a return statement in the cache.Process switch")
