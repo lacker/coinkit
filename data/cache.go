@@ -660,6 +660,11 @@ func (c *Cache) Process(operation Operation) bool {
 		c.InsertBucket(bucket)
 		return true
 
+	case *UpdateBucketOperation:
+		c.IncrementSequence(op)
+		c.SetMagnet(op.Name, op.Magnet)
+		return true
+
 	case *DeleteBucketOperation:
 		c.IncrementSequence(op)
 		c.DeleteBucket(op.Name)
