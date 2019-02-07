@@ -382,6 +382,9 @@ func (c *Cache) InsertBucket(b *Bucket) {
 
 // SetMagnet writes through.
 func (c *Cache) SetMagnet(name string, magnet string) {
+	if !IsValidMagnet(magnet) {
+		panic(fmt.Sprintf("bad magnet in SetMagnet: %s", magnet))
+	}
 	b := c.GetBucket(name)
 	b.Magnet = magnet
 	if c.database != nil {
