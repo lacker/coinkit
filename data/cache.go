@@ -572,6 +572,9 @@ func (c *Cache) Validate(operation Operation) bool {
 	case *CreateBucketOperation:
 		return !c.BucketExists(op.Name)
 
+	case *UpdateBucketOperation:
+		return c.BucketExists(op.Name)
+
 	case *DeleteBucketOperation:
 		return c.BucketOwner(op.Name) == op.Signer
 
