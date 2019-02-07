@@ -794,7 +794,8 @@ func (db *Database) InsertBucket(b *Bucket) error {
 
 func (db *Database) UpdateBucket(b *Bucket) error {
 	if !IsValidMagnet(b.Magnet) {
-		util.Logger.Fatalf("should not update db with bad magnet: %+v", b)
+		util.Logger.Printf("bad bucket in UpdateBucket: %+v", b)
+		panic("should not insert bad magnet into db")
 	}
 	res, err := db.namedExecTx(bucketUpdate, b)
 	check(err)
