@@ -19,7 +19,8 @@ export default class ChainClient {
     if (!this.active) {
       return;
     }
-    // TODO: do stuff
+
+    // TODO: update whatever data we're listening to
   }
 
   stop() {
