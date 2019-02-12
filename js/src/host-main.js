@@ -1,4 +1,9 @@
 // This is the entry point for the Node hosting server that miners run to store files.
+//
+// You may or may not first have to run:
+// `sudo apt-get install xvfb`
+// `sudo apt-get install libgconf-2-4`
+// It used to be necessary but the webtorrent library may have gotten updated.
 
 let http = require("http");
 let path = require("path");
