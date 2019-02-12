@@ -216,6 +216,12 @@ func TestAllocation(t *testing.T) {
 	if len(c.GetBucket("mybucket").Providers) != 0 {
 		t.Fatalf("bucket should have no providers")
 	}
+	url := "http://example.com/mybucket"
+	c.SetMagnet("mybucket", url)
+	db.Commit()
+	if c.GetBucket("mybucket").Magnet != url {
+		t.Fatalf("bucket should have magnet")
+	}
 	c.DeleteBucket("mybucket")
 	db.Commit()
 }
