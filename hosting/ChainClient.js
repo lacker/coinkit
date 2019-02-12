@@ -9,4 +9,15 @@ let URLS = [
   "http://localhost:8003"
 ];
 
-export default class ChainClient {}
+export default class ChainClient {
+  constructor() {
+    this.active = true;
+    this.tick();
+  }
+
+  tick() {
+    // TODO: do stuff
+  }
+
+  stop() {}
+}
