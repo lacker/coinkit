@@ -16,8 +16,13 @@ export default class ChainClient {
   }
 
   tick() {
+    if (!this.active) {
+      return;
+    }
     // TODO: do stuff
   }
 
-  stop() {}
+  stop() {
+    this.active = false;
+  }
 }
