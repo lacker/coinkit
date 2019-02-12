@@ -392,7 +392,8 @@ func (c *Cache) SetMagnet(name string, magnet string) {
 	}
 }
 
-// DeleteBucket deallocates this bucket from all providers and then deletes the bucket object.
+// DeleteBucket deallocates this bucket from all providers and then
+// deletes the bucket object.
 // DeleteBucket writes through.
 func (c *Cache) DeleteBucket(name string) {
 	b := c.GetBucket(name)
