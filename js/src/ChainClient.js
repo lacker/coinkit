@@ -1,5 +1,5 @@
-// A Node client for talking to the blockchain servers
-// TODO: think about how to combine some of this code with the web js client
+// A client for talking to the blockchain servers.
+// This code should work in both Node and in the browser.
 
 // TODO: load this in some way that distinguishes between local testing, and prod
 let URLS = [
@@ -11,19 +11,25 @@ let URLS = [
 
 export default class ChainClient {
   constructor() {
-    this.active = true;
+    this.listening = false;
+  }
+
+  listen() {
+    this.listening = true;
     this.tick();
   }
 
   tick() {
-    if (!this.active) {
+    if (!this.listening) {
       return;
     }
 
     // TODO: update whatever data we're listening to
+
+    setTimeout(() => this.tick(), 1000);
   }
 
-  stop() {
-    this.active = false;
+  stopListening() {
+    this.listening = false;
   }
 }
