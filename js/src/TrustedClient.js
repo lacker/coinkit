@@ -1,7 +1,9 @@
-import KeyPair from "./KeyPair";
-import Message from "./Message";
 import { requestPermission } from "./actions";
 import { missingPermissions, hasPermission } from "./permission";
+
+import ChainClient from "./ChainClient";
+import KeyPair from "./KeyPair";
+import Message from "./Message";
 import SignedMessage from "./SignedMessage";
 import Storage from "./Storage";
 
@@ -62,6 +64,15 @@ export default class TrustedClient {
       return null;
     }
     return data.keyPair;
+  }
+
+  // Returns a random keypair if the user is not logged in.
+  getBestEffortKeyPair() {
+    let kp = this.getKeyPair();
+    if (kp) {
+      return kp;
+    }
+    return KeyPair.fromRandom();
   }
 
   // Signs the individual operations in an operation message
@@ -181,22 +192,9 @@ export default class TrustedClient {
   // Sends a Message upstream, signing with our keypair.
   // Returns a promise for the response Message.
   async sendMessage(message) {
-    let clientMessage = this.sign(message);
-    let url = "http://localhost:8000/messages";
-    let body = clientMessage.serialize() + "\n";
-    let response = await fetch(url, {
-      method: "post",
-      body: body
-    });
-    let text = await response.text();
-    let serialized = text.replace(/\n$/, "");
-
-    // When there is an empty keepalive message from the server, we just return null
-    let signed = SignedMessage.fromSerialized(serialized);
-    if (signed == null) {
-      return signed;
-    }
-    return signed.message;
+    let kp = this.getBestEffortKeyPair();
+    let client = new ChainClient(kp);
+    return await client.sendMessage(message);
   }
 
   // Sends a query message, given the query properties.
