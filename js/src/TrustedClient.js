@@ -70,25 +70,7 @@ export default class TrustedClient {
     if (kp == null) {
       throw new Error("cannot sign operation message without a keypair");
     }
-    if (opm.type != "Operation") {
-      throw new Error("expected operation message in signOperationMessage");
-    }
-
-    let operations = [];
-    for (let sop of opm.operations) {
-      let op = {
-        signer: kp.getPublicKey(),
-        ...sop.operation
-      };
-      let signature = kp.sign(sop.type + JSON.stringify(op));
-      operations.push({
-        operation: op,
-        type: sop.type,
-        signature
-      });
-    }
-
-    return new Message("Operation", { operations });
+    return kp.signOperationMessage();
   }
 
   // Returns an empty object if there are no permissions for this host, including

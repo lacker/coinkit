@@ -7,6 +7,8 @@ import nacl from "tweetnacl";
 import forge from "node-forge";
 import { TextEncoder } from "text-encoding-shim";
 
+import Message from "./Message";
+
 // Decodes a Uint8Array from a base64 string.
 // Adds = padding at the end, which our library requires but some do not.
 function base64Decode(s) {
@@ -181,6 +183,30 @@ export default class KeyPair {
       signature: this.sign(type + json)
     };
     return signed;
+  }
+
+  // Signs the individual operations in an operation message
+  // Any other fields besides operations are dropped
+  signOperationMessage(opm) {
+    if (opm.type != "Operation") {
+      throw new Error("expected operation message in signOperationMessage");
+    }
+
+    let operations = [];
+    for (let sop of opm.operations) {
+      let op = {
+        signer: this.getPublicKey(),
+        ...sop.operation
+      };
+      let signature = this.sign(sop.type + JSON.stringify(op));
+      operations.push({
+        operation: op,
+        type: sop.type,
+        signature
+      });
+    }
+
+    return new Message("Operation", { operations });
   }
 
   // publicKey and signature are both base64-encoded strings
