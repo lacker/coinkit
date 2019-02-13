@@ -70,7 +70,7 @@ export default class TrustedClient {
     if (kp == null) {
       throw new Error("cannot sign operation message without a keypair");
     }
-    return kp.signOperationMessage();
+    return kp.signOperationMessage(opm);
   }
 
   // Returns an empty object if there are no permissions for this host, including
