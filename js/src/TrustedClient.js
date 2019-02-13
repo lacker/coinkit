@@ -9,6 +9,7 @@ import Storage from "./Storage";
 // This client is trusted in the sense that it holds the user's keypair.
 // This object is therefore only kept by the extension.
 // A single TrustedClient should exist, in the scope of the background page.
+// This wraps a ChainClient which handles the direct communication with the chain.
 
 export default class TrustedClient {
   // Create a new client with no keypair.
