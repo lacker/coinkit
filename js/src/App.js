@@ -2,7 +2,7 @@
 
 import React, { Component } from "react";
 
-import Client from "./Client";
+import UntrustedClient from "./UntrustedClient";
 import KeyPair from "./KeyPair";
 
 import WebTorrent from "webtorrent";
@@ -16,7 +16,7 @@ export default class App extends Component {
       mintBalance: null
     };
 
-    this.client = new Client();
+    this.client = new UntrustedClient();
   }
 
   fetchBlockchainData() {
