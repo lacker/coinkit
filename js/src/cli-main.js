@@ -36,7 +36,7 @@ async function status(user) {
 
   if (!dm.accounts || !dm.accounts[user]) {
     console.log("no account found for user", user);
-    return;
+    return null;
   }
   let account = dm.accounts[user];
 
