@@ -75,6 +75,10 @@ func TestNewKeyPairFromSecretPhrase(t *testing.T) {
 			t.Fatal("this should not verify")
 		}
 	}
+
+	if sig1 != "s8f4G7896NvyDAjCjyQP8439wRgMam1/vMGzkISAwJVSVZDDOMoKDdPOcZpC9wFCw7mtZ7nbVOkAMpf7Hel8Cg" {
+		t.Fatal("sig does not match js")
+	}
 }
 
 func TestSerializingKeyPair(t *testing.T) {

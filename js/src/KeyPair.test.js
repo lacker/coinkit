@@ -96,10 +96,15 @@ test("KeyPair.fromSecretPhrase", () => {
   let kp2 = KeyPair.fromSecretPhrase("monkey");
   expect(kp2.getPublicKey()).toBe(pub);
 
-  let message = "Hey yo here is a message";
+  let message =
+    "This is my message. There are many like it, but this one is mine.";
   let sig1 = kp1.sign(message);
   let sig2 = kp2.sign(message);
   expect(sig1).toBe(sig2);
+
+  expect(sig1).toBe(
+    "s8f4G7896NvyDAjCjyQP8439wRgMam1/vMGzkISAwJVSVZDDOMoKDdPOcZpC9wFCw7mtZ7nbVOkAMpf7Hel8Cg"
+  );
 });
 
 test("KeyPair.serialize", () => {
