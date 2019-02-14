@@ -2,6 +2,7 @@ let readline = require("readline");
 
 import ChainClient from "./ChainClient";
 import KeyPair from "./KeyPair";
+import Message from "./Message";
 
 function fatal(message) {
   console.log(message);
@@ -28,7 +29,19 @@ async function ask(question) {
 // Fetches, displays, and returns the account data for a user.
 async function status(user) {
   let client = new ChainClient();
-  // XXX TODO
+  let qm = new Message({
+    account: user
+  });
+  let dm = await client.sendMessage(qm);
+
+  if (!dm.accounts || !dm.accounts[user]) {
+    console.log("no account found for user", user);
+    return;
+  }
+  let account = dm.accounts[user];
+
+  console.log("account data for", user + ":", account);
+  return account;
 }
 
 // Asks for a login then displays the status
