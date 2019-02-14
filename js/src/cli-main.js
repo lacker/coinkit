@@ -28,7 +28,13 @@ async function ask(question) {
 // Fetches, displays, and returns the account data for a user.
 async function status(user) {
   let client = new ChainClient();
-  // TODO
+  // XXX TODO
+}
+
+// Asks for a login then displays the status
+async function ourStatus() {
+  let kp = await login();
+  await status(kp.getPublicKey());
 }
 
 async function generate() {
