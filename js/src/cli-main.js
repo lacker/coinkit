@@ -1,5 +1,7 @@
 let readline = require("readline");
 
+import KeyPair from "./KeyPair";
+
 function fatal(message) {
   console.log(message);
   process.exit(1);
@@ -29,7 +31,10 @@ function generate() {
 // Ask the user for a passphrase to log in.
 // Returns the keypair
 async function login() {
-  console.log("please enter your passphrase:");
+  let phrase = await ask("please enter your passphrase:");
+  let kp = KeyPair.fromSecretPhrase(phrase);
+  console.log("hello. your name is", kp.getPublicKey());
+  return kp;
 }
 
 function main() {
