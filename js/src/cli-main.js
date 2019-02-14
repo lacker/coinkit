@@ -24,8 +24,8 @@ async function ask(question) {
   return await p;
 }
 
-function generate() {
-  fatal("TODO: implement generate");
+async function generate() {
+  let kp = await login();
 }
 
 // Ask the user for a passphrase to log in.
@@ -37,7 +37,7 @@ async function login() {
   return kp;
 }
 
-function main() {
+async function main() {
   let args = process.argv.slice(2);
 
   if (args.length == 0) {
@@ -52,8 +52,13 @@ function main() {
       fatal("usage: npm run cli generate");
     }
 
-    generate();
+    await generate();
+    return;
   }
+
+  fatal("unrecognized operation: " + op);
 }
 
-main();
+main().then(() => {
+  console.log("done");
+});
