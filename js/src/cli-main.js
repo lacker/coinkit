@@ -1,5 +1,6 @@
 let readline = require("readline");
 
+import ChainClient from "./ChainClient";
 import KeyPair from "./KeyPair";
 
 function fatal(message) {
@@ -24,6 +25,12 @@ async function ask(question) {
   return await p;
 }
 
+// Fetches, displays, and returns the account data for a user.
+async function status(user) {
+  let client = new ChainClient();
+  // TODO
+}
+
 async function generate() {
   let kp = await login();
   console.log(kp.serialize());
@@ -43,15 +50,26 @@ async function main() {
   let args = process.argv.slice(2);
 
   if (args.length == 0) {
-    fatal("usage: npm run cli <operation> <arguments>");
+    fatal("Usage: npm run cli <operation> <arguments>");
   }
 
   let op = args[0];
   let rest = args.slice(1);
 
+  if (op === "status") {
+    if (rest.length > 1) {
+      fatal("Usage: npm run cli status [publickey]");
+    }
+    if (rest.length === 0) {
+      ourStatus();
+    } else {
+      status(rest[0]);
+    }
+  }
+
   if (op === "generate") {
     if (rest.length != 0) {
-      fatal("usage: npm run cli generate");
+      fatal("Usage: npm run cli generate");
     }
 
     await generate();

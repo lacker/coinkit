@@ -1,3 +1,4 @@
+import KeyPair from "./KeyPair";
 import SignedMessage from "./SignedMessage";
 
 // A client for talking to the blockchain servers.
@@ -21,6 +22,9 @@ function getServerURL() {
 
 export default class ChainClient {
   constructor(kp) {
+    if (!kp) {
+      kp = KeyPair.fromRandom();
+    }
     this.keyPair = kp;
     this.listening = false;
   }
