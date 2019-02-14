@@ -26,6 +26,8 @@ async function ask(question) {
 
 async function generate() {
   let kp = await login();
+  console.log(kp.serialize());
+  console.log("key pair generation complete");
 }
 
 // Ask the user for a passphrase to log in.
@@ -60,5 +62,5 @@ async function main() {
 }
 
 main().then(() => {
-  console.log("done");
+  // console.log("done");
 });
