@@ -98,6 +98,4 @@ async function main() {
   fatal("unrecognized operation: " + op);
 }
 
-main().then(() => {
-  // console.log("done");
-});
+main();
