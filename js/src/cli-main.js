@@ -32,14 +32,7 @@ async function status(user) {
   let qm = new Message({
     account: user
   });
-  let dm;
-  try {
-    dm = await client.sendMessage(qm);
-  } catch (e) {
-    console.log("error sending message to the blockchain:", e);
-    process.exit(1);
-  }
-
+  let dm = await client.sendMessage(qm);
   if (!dm.accounts || !dm.accounts[user]) {
     console.log("no account found for user", user);
     return null;
@@ -86,9 +79,9 @@ async function main() {
       fatal("Usage: npm run cli status [publickey]");
     }
     if (rest.length === 0) {
-      ourStatus();
+      await ourStatus();
     } else {
-      status(rest[0]);
+      await status(rest[0]);
     }
     return;
   }
@@ -105,4 +98,10 @@ async function main() {
   fatal("unrecognized operation: " + op);
 }
 
-main();
+main()
+  .then(() => {
+    console.log("done");
+  })
+  .catch(e => {
+    fatal("unhandled error: " + e);
+  });
