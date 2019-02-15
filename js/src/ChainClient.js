@@ -56,10 +56,11 @@ class ChainClient {
     let clientMessage = SignedMessage.fromSigning(message, this.keyPair);
     let url = getServerURL() + "/messages";
     let body = clientMessage.serialize() + "\n";
-    let text = await axios.post(url, body, {
+    let response = await axios.post(url, body, {
       headers: { "Content-Type": "text/plain" },
       responseType: "text"
     });
+    let text = response.data;
     let serialized = text.replace(/\n$/, "");
 
     // When there is an empty keepalive message from the server, we just return null

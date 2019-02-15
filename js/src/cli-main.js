@@ -33,6 +33,10 @@ async function status(user) {
     account: user
   });
   let dm = await client.sendMessage(qm);
+  if (dm.type === "Error") {
+    fatal("server reported error: " + dm.error);
+  }
+
   if (!dm.accounts || !dm.accounts[user]) {
     console.log("no account found for user", user);
     return null;
