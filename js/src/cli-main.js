@@ -29,7 +29,7 @@ async function ask(question) {
 // Fetches, displays, and returns the account data for a user.
 async function status(user) {
   let client = new ChainClient();
-  let qm = new Message({
+  let qm = new Message("Query", {
     account: user
   });
   let dm = await client.sendMessage(qm);
@@ -43,7 +43,8 @@ async function status(user) {
   }
   let account = dm.accounts[user];
 
-  console.log("account data for", user + ":", account);
+  console.log("account data:");
+  console.log(account);
   return account;
 }
 
@@ -104,7 +105,7 @@ async function main() {
 
 main()
   .then(() => {
-    console.log("done");
+    // console.log("done");
   })
   .catch(e => {
     fatal("Unhandled " + e);
