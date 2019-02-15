@@ -32,7 +32,13 @@ async function status(user) {
   let qm = new Message({
     account: user
   });
-  let dm = await client.sendMessage(qm);
+  let dm;
+  try {
+    dm = await client.sendMessage(qm);
+  } catch (e) {
+    console.log("error sending message to the blockchain:", e);
+    process.exit(1);
+  }
 
   if (!dm.accounts || !dm.accounts[user]) {
     console.log("no account found for user", user);
