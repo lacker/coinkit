@@ -1,5 +1,5 @@
 // Used to communicate with the blockchain
-export default class Message {
+class Message {
   constructor(type, properties = {}) {
     this.type = type;
     this._serialized = JSON.stringify({
@@ -20,3 +20,5 @@ export default class Message {
     return new Message(type, message);
   }
 }
+
+module.exports = Message;

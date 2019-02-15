@@ -2,12 +2,12 @@
 // Annoyingly, our crypto library calls it a "secret key" while the Go library calls it
 // a "private key". We try to name things "private key" when possible here.
 
-import { fromByteArray, toByteArray } from "base64-js";
-import nacl from "tweetnacl";
-import forge from "node-forge";
-import { TextEncoder } from "text-encoding-shim";
+const { fromByteArray, toByteArray } = require("base64-js");
+const nacl = require("tweetnacl");
+const forge = require("node-forge");
+const { TextEncoder } = require("text-encoding-shim");
 
-import Message from "./Message";
+const Message = require("./Message.js");
 
 // Decodes a Uint8Array from a base64 string.
 // Adds = padding at the end, which our library requires but some do not.
@@ -87,7 +87,7 @@ function sha512_256(inputBytes) {
   return outputBytes;
 }
 
-export default class KeyPair {
+class KeyPair {
   constructor(publicKey, privateKey) {
     this.publicKey = publicKey;
     this.privateKey = privateKey;
@@ -267,3 +267,5 @@ export default class KeyPair {
     return base64Encode(this.privateKey);
   }
 }
+
+module.exports = KeyPair;

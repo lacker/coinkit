@@ -20,7 +20,7 @@ function getServerURL() {
   return URLS[index];
 }
 
-module.exports = class ChainClient {
+class ChainClient {
   constructor(kp) {
     if (!kp) {
       kp = KeyPair.fromRandom();
@@ -68,4 +68,6 @@ module.exports = class ChainClient {
     }
     return signed.message;
   }
-};
+}
+
+module.exports = ChainClient;

@@ -1,7 +1,7 @@
-import KeyPair from "./KeyPair";
-import Message from "./Message";
+const KeyPair = require("./KeyPair.js");
+const Message = require("./Message.js");
 
-export default class SignedMessage {
+class SignedMessage {
   // Creates a signed message.
   // Users should generally not use this directly; use fromSigning or fromSerialized.
   // signer and signature are base64-encoded.
@@ -63,3 +63,5 @@ export default class SignedMessage {
     return new SignedMessage({ message, messageString, signer, signature });
   }
 }
+
+module.exports = SignedMessage;
