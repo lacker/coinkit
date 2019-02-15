@@ -1,5 +1,5 @@
-import KeyPair from "./KeyPair";
-import SignedMessage from "./SignedMessage";
+const KeyPair = require("./KeyPair.js");
+const SignedMessage = require("./SignedMessage.js");
 
 // A client for talking to the blockchain servers.
 // This client only uses one keypair across its lifetime.
@@ -20,7 +20,7 @@ function getServerURL() {
   return URLS[index];
 }
 
-export default class ChainClient {
+module.exports = class ChainClient {
   constructor(kp) {
     if (!kp) {
       kp = KeyPair.fromRandom();
@@ -68,4 +68,4 @@ export default class ChainClient {
     }
     return signed.message;
   }
-}
+};

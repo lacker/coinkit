@@ -1,8 +1,8 @@
-let readline = require("readline");
+const readline = require("readline");
 
-import ChainClient from "./ChainClient";
-import KeyPair from "./KeyPair";
-import Message from "./Message";
+const ChainClient = require("./ChainClient.js");
+const KeyPair = require("./KeyPair.js");
+const Message = require("./Message.js");
 
 function fatal(message) {
   console.log(message);
