@@ -84,6 +84,7 @@ async function main() {
     } else {
       status(rest[0]);
     }
+    return;
   }
 
   if (op === "generate") {
