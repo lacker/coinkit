@@ -1,3 +1,5 @@
+const axios = require("axios");
+
 const KeyPair = require("./KeyPair.js");
 const SignedMessage = require("./SignedMessage.js");
 
@@ -54,9 +56,8 @@ class ChainClient {
     let clientMessage = SignedMessage.fromSigning(message, this.keyPair);
     let url = getServerURL() + "/messages";
     let body = clientMessage.serialize() + "\n";
-    let response = await fetch(url, {
-      method: "post",
-      body: body
+    let response = await axios.post(url, body, {
+      headers: { "Content-Type": "text/plain" }
     });
     let text = await response.text();
     let serialized = text.replace(/\n$/, "");
