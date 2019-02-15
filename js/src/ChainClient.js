@@ -53,6 +53,8 @@ class ChainClient {
   // Sends a Message upstream, signing with our keypair.
   // Returns a promise for the response Message.
   async sendMessage(message) {
+    console.log("XXX sending message", message);
+
     let clientMessage = SignedMessage.fromSigning(message, this.keyPair);
     let url = getServerURL() + "/messages";
     let body = clientMessage.serialize() + "\n";

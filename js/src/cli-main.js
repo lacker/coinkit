@@ -107,5 +107,5 @@ main()
     console.log("done");
   })
   .catch(e => {
-    fatal("unhandled error: " + e);
+    fatal("Unhandled " + e);
   });

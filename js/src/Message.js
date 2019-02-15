@@ -1,6 +1,10 @@
 // Used to communicate with the blockchain
 class Message {
   constructor(type, properties = {}) {
+    if (typeof type !== "string") {
+      throw new Error("Message must be constructed with a string type");
+    }
+
     this.type = type;
     this._serialized = JSON.stringify({
       type,
