@@ -59,7 +59,7 @@ async function generate() {
 // Ask the user for a passphrase to log in.
 // Returns the keypair
 async function login() {
-  let phrase = await ask("please enter your passphrase:");
+  let phrase = await ask("please enter your passphrase: ");
   let kp = KeyPair.fromSecretPhrase(phrase);
   console.log("hello. your name is", kp.getPublicKey());
   return kp;

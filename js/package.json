@@ -6,7 +6,7 @@
     "app": "parcel app/index.html",
     "extension": "parcel -p 2345 --no-hmr build src/popup-main.js src/background-main.js src/content-main.js src/loader-main.js -d extension/",
     "host": "node src/host-main.js",
-    "cli": "node src/cli-main.js",
+    "cli": "node --no-warnings src/cli-main.js",
     "test": "jest"
   },
   "author": "Kevin Lacker",
