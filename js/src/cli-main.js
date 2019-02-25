@@ -9,8 +9,8 @@ function fatal(message) {
   process.exit(1);
 }
 
-// Asks the CLI user a question, asynchronously returns the response
-async function ask(question) {
+// Asks the CLI user a question, asynchronously returns the response.
+async function ask(question, hideResponse) {
   let r = readline.createInterface({
     input: process.stdin,
     output: process.stdout
@@ -21,9 +21,19 @@ async function ask(question) {
       r.close();
       resolve(answer);
     });
+    if (hideResponse) {
+      r.stdoutMuted = true;
+      r._writeToOutput = () => {
+        r.output.write("*");
+      };
+    }
   });
 
-  return await p;
+  let answer = await p;
+  if (hideResponse) {
+    console.log();
+  }
+  return answer;
 }
 
 // Fetches, displays, and returns the account data for a user.
@@ -63,7 +73,7 @@ async function generate() {
 // Ask the user for a passphrase to log in.
 // Returns the keypair
 async function login() {
-  let phrase = await ask("please enter your passphrase: ");
+  let phrase = await ask("please enter your passphrase: ", true);
   let kp = KeyPair.fromSecretPhrase(phrase);
   console.log("hello. your name is", kp.getPublicKey());
   return kp;
