@@ -36,25 +36,25 @@ class ChainClient {
     }
     this.keyPair = kp;
 
-    this.listening = false;
-    this.listenBuckets = {};
-    this.listenProviders = {};
+    // When providerID is set, we are listening to a single provider, and to the buckets
+    // it is supposed to be providing.
+    this.providerID = null;
+    this.provider = null;
+    this.buckets = {};
   }
 
-  listen() {
-    if (this.listening) {
-      return;
-    }
-    this.listening = true;
+  listen(providerID) {
+    this.providerID = providerID;
     this.tick();
   }
 
-  tick() {
-    if (!this.listening) {
+  async tick() {
+    if (this.providerID === null) {
       return;
     }
 
-    // TODO: update whatever data we're listening to
+    // TODO: update this.provider
+    // TODO: update this.buckets
 
     setTimeout(() => this.tick(), 1000);
   }
