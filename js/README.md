@@ -6,9 +6,13 @@ The chrome extension is built into `/extension/`.
 
 The sample app is built into `/app/`.
 
+The CLI is run as a Node app, via `npm run cli`.
+
+The hosting server is run as a Node app, via `npm run host`.
+
 # Installing the chrome extension locally
 
-1. Make sure you have the local servers running: `./start-local.sh`
+1. Make sure you have the local blockchain running: `./start-local.sh`
 
 2. Build the extension locally
    a. `npm install`
@@ -22,3 +26,9 @@ The sample app is built into `/app/`.
 4. Run the sample app to try things out
    a. `npm run app`
    b. Go to `localhost:1234`
+
+# Running the CLI locally
+
+1. Make sure you have the local blockchain running: `./start-local.sh`
+
+2. Try `npm run cli status`. The mint is set up by default.
