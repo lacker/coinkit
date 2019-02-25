@@ -42,15 +42,22 @@ class ChainClient {
   // If there is no such provider, returns null.
   // If the server returns an error, we throw it.
   async getProvider(providerID) {
-    let qm = new Message("Query", { providers: { id: providerID } });
-    let dm = await this.sendMessage(qm);
-    if (dm.type === "Error") {
-      throw new Error(dm.error);
-    }
+    let dm = await this.query({ providers: { id: providerID } });
     if (!dm.providers || !dm.providers[providerID]) {
       return null;
     }
     return dm.providers[providerID];
+  }
+
+  // Sends a query message. Returns the data message response.
+  // Throws an error if we get an error message back.
+  async query(params) {
+    let qm = new Message("Query", params);
+    let dm = await this.sendMessage(qm);
+    if (dm.type === "Error") {
+      throw new Error(dm.error);
+    }
+    return dm;
   }
 
   // Sends a Message upstream, signing with our keypair.
