@@ -1,6 +1,7 @@
 const axios = require("axios");
 
 const KeyPair = require("./KeyPair.js");
+const Message = require("./Message.js");
 const SignedMessage = require("./SignedMessage.js");
 
 // A client for talking to the blockchain servers.
@@ -35,28 +36,21 @@ class ChainClient {
       kp = KeyPair.fromRandom();
     }
     this.keyPair = kp;
-
-    // When providerID is set, we are listening to a single provider, and to the buckets
-    // it is supposed to be providing.
-    this.providerID = null;
-    this.provider = null;
-    this.buckets = {};
   }
 
-  listen(providerID) {
-    this.providerID = providerID;
-    this.tick();
-  }
-
-  async tick() {
-    if (this.providerID === null) {
-      return;
+  // Fetches the provider with the given provider id.
+  // If there is no such provider, returns null.
+  // If the server returns an error, we throw it.
+  async getProvider(providerID) {
+    let qm = new Message("Query", { providers: { id: providerID } });
+    let dm = await this.sendMessage(qm);
+    if (dm.type === "Error") {
+      throw new Error(dm.error);
     }
-
-    // TODO: update this.provider
-    // TODO: update this.buckets
-
-    setTimeout(() => this.tick(), 1000);
+    if (!dm.providers || !dm.providers[providerID]) {
+      return null;
+    }
+    return dm.providers[providerID];
   }
 
   // Sends a Message upstream, signing with our keypair.
