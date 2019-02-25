@@ -22,6 +22,13 @@ function getServerURL() {
   return URLS[index];
 }
 
+function isEmpty(object) {
+  for (let key in object) {
+    return false;
+  }
+  return true;
+}
+
 class ChainClient {
   constructor(kp) {
     if (!kp) {
