@@ -40,13 +40,21 @@ class ChainClient {
 
   // Fetches the provider with the given provider id.
   // If there is no such provider, returns null.
-  // If the server returns an error, we throw it.
   async getProvider(providerID) {
     let dm = await this.query({ providers: { id: providerID } });
     if (!dm.providers || !dm.providers[providerID]) {
       return null;
     }
     return dm.providers[providerID];
+  }
+
+  // Fetches the account with the given user, or null if there is no such account.
+  async getAccount(user) {
+    let dm = await this.query({ account: user });
+    if (!dm.accounts || !dm.accounts[user]) {
+      return null;
+    }
+    return dm.accounts[user];
   }
 
   // Sends a query message. Returns the data message response.

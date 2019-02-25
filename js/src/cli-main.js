@@ -39,19 +39,11 @@ async function ask(question, hideResponse) {
 // Fetches, displays, and returns the account data for a user.
 async function status(user) {
   let client = new ChainClient();
-  let qm = new Message("Query", {
-    account: user
-  });
-  let dm = await client.sendMessage(qm);
-  if (dm.type === "Error") {
-    fatal("server reported error: " + dm.error);
-  }
-
-  if (!dm.accounts || !dm.accounts[user]) {
+  let account = await client.getAccount(user);
+  if (!account) {
     console.log("no account found for user", user);
     return null;
   }
-  let account = dm.accounts[user];
 
   console.log("account data:");
   console.log(account);
