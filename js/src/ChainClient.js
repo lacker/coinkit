@@ -18,6 +18,15 @@ let URLS = [
   "http://localhost:8003"
 ];
 
+const STANDARD_WAIT = 1000;
+
+async function standardWait() {
+  let promise = new Promise((resolve, reject) => {
+    setTimeout(resolve, STANDARD_WAIT);
+  });
+  return await promise;
+}
+
 function getServerURL() {
   let index = Math.floor(Math.random() * URLS.length);
   return URLS[index];
@@ -36,6 +45,17 @@ class ChainClient {
       kp = KeyPair.fromRandom();
     }
     this.keyPair = kp;
+  }
+
+  // Keeps re-fetching the provider until it exists.
+  async waitForProvider(providerID) {
+    while (true) {
+      let provider = await this.getProvider(providerID);
+      if (provider !== null) {
+        return provider;
+      }
+      standardWait();
+    }
   }
 
   // Fetches the provider with the given provider id.
