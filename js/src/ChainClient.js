@@ -35,10 +35,16 @@ class ChainClient {
       kp = KeyPair.fromRandom();
     }
     this.keyPair = kp;
+
     this.listening = false;
+    this.listenBuckets = {};
+    this.listenProviders = {};
   }
 
   listen() {
+    if (this.listening) {
+      return;
+    }
     this.listening = true;
     this.tick();
   }
@@ -51,10 +57,6 @@ class ChainClient {
     // TODO: update whatever data we're listening to
 
     setTimeout(() => this.tick(), 1000);
-  }
-
-  stopListening() {
-    this.listening = false;
   }
 
   // Sends a Message upstream, signing with our keypair.
