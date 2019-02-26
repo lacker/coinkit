@@ -102,6 +102,15 @@ async function main() {
     return;
   }
 
+  if (op === "create-provider") {
+    if (rest.length != 1) {
+      fatal("Usage: npm run cli create-provider <capacity>");
+    }
+
+    await createProvider(rest[0]);
+    return;
+  }
+
   fatal("unrecognized operation: " + op);
 }
 
