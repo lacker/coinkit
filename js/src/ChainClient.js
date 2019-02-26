@@ -113,13 +113,21 @@ class ChainClient {
 
   // Fetches data for the listed buckets.
   // Returns an object mapping bucket name to bucket data.
-  async getBuckets(names) {
-    let dm = await this.query({ buckets: { names: names } });
+  async getBuckets(query) {
+    let dm = await this.query({ buckets: query });
     let answer = {};
     for (let bucket of dm.buckets) {
       answer[bucket.name] = bucket;
     }
     return answer;
+  }
+
+  // Fetches data for providers according to the given query.
+  // Returns an object mapping provider id to provider data.
+  async getProviders(query) {
+    let dm = await this.query({ providers: query });
+
+    // XXX
   }
 
   // Fetches the account with the given user, or null if there is no such account.
