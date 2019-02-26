@@ -68,6 +68,10 @@ class ChainClient {
     return dm.providers[providerID];
   }
 
+  async createProvider(capacity) {
+    return await this.sendOperation("CreateProvider", { capacity });
+  }
+
   // Returns once the operation has been accepted into the blockchain.
   // Signer, fee, and sequence are all added.
   // TODO: there is a race condition where a different operation with the same sequence
@@ -105,10 +109,6 @@ class ChainClient {
       }
       await standardWait();
     }
-  }
-
-  async createProvider(capacity) {
-    return await this.sendOperation("CreateProvider", { capacity });
   }
 
   // Fetches data for the listed buckets.
