@@ -88,6 +88,7 @@ class ChainClient {
 
   // Returns once the operation has been accepted into the blockchain.
   // Signer, fee, and sequence are all added.
+  // Throws an error if there is no matching user account.
   // TODO: there is a race condition where a different operation with the same sequence
   // number could be sent. We should detect that.
   async sendOperation(type, operation) {

@@ -62,6 +62,14 @@ async function generate() {
   console.log("key pair generation complete");
 }
 
+async function createProvider(capacity) {
+  let kp = await login();
+  let client = new ChainClient(kp);
+  let provider = await client.createProvider(capacity);
+  console.log("created provider:");
+  console.log(provider);
+}
+
 // Ask the user for a passphrase to log in.
 // Returns the keypair
 async function login() {
