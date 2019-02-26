@@ -69,13 +69,10 @@ class ChainClient {
   }
 
   // Returns once the operation has been accepted into the blockchain.
+  // Signer, fee, and sequence are all added.
   // TODO: there is a race condition where a different operation with the same sequence
   // number could be sent. We should detect that.
-  async sendOperation(op) {
-    // TODO
-  }
-
-  async createProvider(capacity) {
+  async sendOperation(type, operation) {
     // First check that we have an account
     let user = this.keyPair.getPublicKey();
     let account = await this.getAccount(user);
@@ -83,13 +80,26 @@ class ChainClient {
       throw new Error("cannot create provider for a nonexistent user account");
     }
 
-    let op = this.keyPair.signOperation({
-      sequence: account.sequence + 1,
-      fee: 0,
-      capacity: capacity
-    });
+    // Make a signed op without the actual signature
+    let sop = {
+      type: type,
+      operation: {
+        ...operation,
+        fee: 0,
+        sequence: account.sequence + 1
+      }
+    };
 
-    // XXX refactor here
+    let opm = new Message("Operation", { operations: [sop] });
+    let sopm = this.keyPair.signOperationMessage(opm);
+    let response = await this.sendMessage(sopm);
+
+    // TODO: check for responses that indicate trouble
+    // XXX: wait for the op to be included
+  }
+
+  async createProvider(capacity) {
+    return await this.sendOperation("CreateProvider", { capacity });
   }
 
   // Fetches data for the listed buckets.

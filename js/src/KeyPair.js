@@ -171,7 +171,7 @@ class KeyPair {
 
   // Signs an operation, represented as a plain old object.
   // A "signer" field is automatically added.
-  // TODO: this isn't used?
+  // TODO: this isn't used, should we remove it?
   signOperation(type, operation) {
     let op = {
       ...operation,
@@ -187,6 +187,7 @@ class KeyPair {
   }
 
   // Signs the individual operations in an operation message
+  // The "signer" field is added to each op
   // Any other fields besides operations are dropped
   signOperationMessage(opm) {
     if (opm.type != "Operation") {
