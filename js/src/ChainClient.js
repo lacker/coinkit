@@ -68,6 +68,17 @@ class ChainClient {
     return dm.providers[providerID];
   }
 
+  async createProvider() {
+    // First check that we have an account
+    let user = this.keyPair.getPublicKey();
+    let account = await this.getAccount(user);
+    if (!account) {
+      throw new Error("cannot create provider for a nonexistent user account");
+    }
+
+    // TODO: more
+  }
+
   // Fetches data for the listed buckets.
   // Returns an object mapping bucket name to bucket data.
   async getBuckets(names) {
