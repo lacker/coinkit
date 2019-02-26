@@ -71,9 +71,19 @@ class ChainClient {
   // Returns the information for the newly-created provider.
   async createProvider(capacity) {
     // To figure out which provider is newly-created, we need to check existing ones
-    // XXX
     let user = this.keyPair.getPublicKey();
-    return await this.sendOperation("CreateProvider", { capacity });
+    let initialProviders = await this.getProviders({ owner: user });
+    await this.sendOperation("CreateProvider", { capacity });
+    let providers = await this.getProviders({ owner: user });
+
+    for (let provider of providers) {
+      if (!initialProviders[provider.id]) {
+        // This provider wasn't in the initial set
+        return provider;
+      }
+    }
+
+    throw new Error("no provider seems to have been created");
   }
 
   // Returns once the operation has been accepted into the blockchain.
