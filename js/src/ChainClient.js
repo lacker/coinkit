@@ -54,7 +54,7 @@ class ChainClient {
       if (provider !== null) {
         return provider;
       }
-      standardWait();
+      await standardWait();
     }
   }
 
@@ -81,12 +81,13 @@ class ChainClient {
     }
 
     // Make a signed op without the actual signature
+    let newSequence = account.sequence + 1;
     let sop = {
       type: type,
       operation: {
         ...operation,
         fee: 0,
-        sequence: account.sequence + 1
+        sequence: newSequence
       }
     };
 
@@ -95,7 +96,15 @@ class ChainClient {
     let response = await this.sendMessage(sopm);
 
     // TODO: check for responses that indicate trouble
-    // XXX: wait for the op to be included
+
+    // Wait for the op to be processed
+    while (true) {
+      let account = await this.getAccount(user);
+      if (account.sequence === newSequence) {
+        break;
+      }
+      await standardWait();
+    }
   }
 
   async createProvider(capacity) {
