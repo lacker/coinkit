@@ -171,6 +171,7 @@ class KeyPair {
 
   // Signs an operation, represented as a plain old object.
   // A "signer" field is automatically added.
+  // TODO: this isn't used?
   signOperation(type, operation) {
     let op = {
       ...operation,

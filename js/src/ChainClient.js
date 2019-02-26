@@ -68,7 +68,14 @@ class ChainClient {
     return dm.providers[providerID];
   }
 
-  async createProvider() {
+  // Returns once the operation has been accepted into the blockchain.
+  // TODO: there is a race condition where a different operation with the same sequence
+  // number could be sent. We should detect that.
+  async sendOperation(op) {
+    // TODO
+  }
+
+  async createProvider(capacity) {
     // First check that we have an account
     let user = this.keyPair.getPublicKey();
     let account = await this.getAccount(user);
@@ -76,7 +83,13 @@ class ChainClient {
       throw new Error("cannot create provider for a nonexistent user account");
     }
 
-    // TODO: more
+    let op = this.keyPair.signOperation({
+      sequence: account.sequence + 1,
+      fee: 0,
+      capacity: capacity
+    });
+
+    // XXX refactor here
   }
 
   // Fetches data for the listed buckets.
