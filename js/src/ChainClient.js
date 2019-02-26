@@ -68,7 +68,11 @@ class ChainClient {
     return dm.providers[providerID];
   }
 
+  // Returns the information for the newly-created provider.
   async createProvider(capacity) {
+    // To figure out which provider is newly-created, we need to check existing ones
+    // XXX
+    let user = this.keyPair.getPublicKey();
     return await this.sendOperation("CreateProvider", { capacity });
   }
 
@@ -126,8 +130,11 @@ class ChainClient {
   // Returns an object mapping provider id to provider data.
   async getProviders(query) {
     let dm = await this.query({ providers: query });
-
-    // XXX
+    let answer = {};
+    for (let provider of dm.providers) {
+      answer[provider.id] = provider;
+    }
+    return answer;
   }
 
   // Fetches the account with the given user, or null if there is no such account.
