@@ -184,6 +184,7 @@ class ChainClient {
 
   // Sends a Message upstream, signing with our keypair.
   // Returns a promise for the response Message.
+  // If the response is an error message, we throw an error with the provided error string.
   async sendMessage(message) {
     let clientMessage = SignedMessage.fromSigning(message, this.keyPair);
     let url = getServerURL() + "/messages";
@@ -198,7 +199,11 @@ class ChainClient {
     // When there is an empty keepalive message from the server, we just return null
     let signed = SignedMessage.fromSerialized(serialized);
     if (signed == null) {
-      return signed;
+      return null;
+    }
+
+    if (signed.message.type === "Error") {
+      throw new Error(signed.message.error);
     }
     return signed.message;
   }
