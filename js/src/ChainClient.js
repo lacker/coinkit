@@ -110,6 +110,7 @@ class ChainClient {
     if (!account) {
       throw new Error("cannot create provider for a nonexistent user account");
     }
+    this.log("current account:", account);
 
     // Make a signed op without the actual signature
     let newSequence = account.sequence + 1;
@@ -126,7 +127,8 @@ class ChainClient {
     let sopm = this.keyPair.signOperationMessage(opm);
     let response = await this.sendMessage(sopm);
 
-    // TODO: check for responses that indicate trouble
+    // TODO: handle responses that indicate trouble
+    this.log("got response to operation:", response);
 
     // Wait for the op to be processed
     while (true) {
