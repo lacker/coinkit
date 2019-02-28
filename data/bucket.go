@@ -39,7 +39,7 @@ func IsValidBucketName(s string) bool {
 // Magnet URIs must be valid urls
 func IsValidMagnet(m string) bool {
 	_, err := url.ParseRequestURI(m)
-	return err != nil
+	return err == nil
 }
 
 // Joins and '-quotes string names

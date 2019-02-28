@@ -186,10 +186,10 @@ class ChainClient {
   // Returns a promise for the response Message.
   // If the response is an error message, we throw an error with the provided error string.
   async sendMessage(message) {
-    this.log("sending message:", message);
     let clientMessage = SignedMessage.fromSigning(message, this.keyPair);
     let url = getServerURL() + "/messages";
     let body = clientMessage.serialize() + "\n";
+    this.log("sending body:", body);
     let response = await axios.post(url, body, {
       headers: { "Content-Type": "text/plain" },
       responseType: "text"
