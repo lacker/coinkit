@@ -57,12 +57,3 @@ func TestCreateDocumentOperationMessageFromJS(t *testing.T) {
 		t.Fatalf("expected one operation but got %v", opm.Operations)
 	}
 }
-
-// TODO: put some test in JS land for this. We got it from the CLI
-func TestCreateProviderOperationMessageFromJS(t *testing.T) {
-	serialized := `e:0x32652ebe42a8d56314b8b11abf51c01916a238920c1f16db597ee87374515f4609d3:qQQnKWUG4bj94qV+dvNprxiGVo4GdXo3Dg2vf0FixywljvWT2JsYI57mGLdR0miifyIDFsC8vE7paWwMherBCg:{"type":"Operation","message":{"operations":[{"operation":{"signer":"0x32652ebe42a8d56314b8b11abf51c01916a238920c1f16db597ee87374515f4609d3","capacity":"100","fee":0,"sequence":1},"type":"CreateProvider","signature":"NC70cgQ8FEtxhRjoGXoeHWg71Dkm+PBbD4sCY3HK/ch3mf/TIobNC0oOE1g1GF06ub/X8qxY9QpCaCFFXak2Cg"}]}}`
-	_, err := util.NewSignedMessageFromSerialized(serialized)
-	if err != nil {
-		t.Fatalf("could not decode signed message: %s", err)
-	}
-}

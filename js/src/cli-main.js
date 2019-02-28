@@ -116,6 +116,10 @@ async function main() {
       fatal("Usage: npm run cli create-provider <capacity>");
     }
 
+    let capacity = parseInt(rest[0]);
+    if (!capacity) {
+      fatal("bad argument:", rest[0]);
+    }
     await createProvider(rest[0]);
     return;
   }
