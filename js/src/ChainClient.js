@@ -56,11 +56,13 @@ class ChainClient {
 
   // Keeps re-fetching the provider until it exists.
   async waitForProvider(providerID) {
+    this.log("waiting for provider", providerID, "to be created");
     while (true) {
       let provider = await this.getProvider(providerID);
       if (provider !== null) {
         return provider;
       }
+      this.log("not yet, still waiting");
       await standardWait();
     }
   }
