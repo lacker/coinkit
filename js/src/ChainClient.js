@@ -45,6 +45,13 @@ class ChainClient {
       kp = KeyPair.fromRandom();
     }
     this.keyPair = kp;
+    this.verbose = false;
+  }
+
+  log(...args) {
+    if (this.verbose) {
+      console.log(...args);
+    }
   }
 
   // Keeps re-fetching the provider until it exists.
