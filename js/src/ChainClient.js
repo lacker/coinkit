@@ -82,9 +82,11 @@ class ChainClient {
     // To figure out which provider is newly-created, we need to check existing ones
     let user = this.keyPair.getPublicKey();
     let initialProviders = await this.getProviders({ owner: user });
-    this.log("some providers already exist:", Object.keys(initialProviders));
+    this.log("existing providers:", Object.keys(initialProviders));
     await this.sendOperation("CreateProvider", { capacity });
+    this.log("the CreateProvider operation has been sent");
     let providers = await this.getProviders({ owner: user });
+    this.log("new provider set:", Object.keys(initialProviders));
 
     for (let provider of providers) {
       if (!initialProviders[provider.id]) {
