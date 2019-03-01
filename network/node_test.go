@@ -309,13 +309,13 @@ func TestDocumentOperations(t *testing.T) {
 	}
 
 	// Make sure we can't delete nonexistent documents
-	op = data.MakeTestDeleteOperation(10, 3)
+	op = data.MakeTestDeleteDocumentOperation(10, 3)
 	if nodes[0].queue.Validate(op) {
 		t.Fatalf("deleting a nonexistent doc should not validate")
 	}
 
 	// Delete our document
-	op = data.MakeTestDeleteOperation(1, 3)
+	op = data.MakeTestDeleteDocumentOperation(1, 3)
 	if !nodes[0].queue.Validate(op) {
 		t.Fatalf("the delete op should validate")
 	}
