@@ -79,6 +79,12 @@ class ChainClient {
 
   // Returns the information for the newly-created provider.
   async createProvider(capacity) {
+    if (typeof capacity !== "number") {
+      throw new Error(
+        "capacity " + capacity + " must be number, not " + typeof capacity
+      );
+    }
+
     // To figure out which provider is newly-created, we need to check existing ones
     let user = this.keyPair.getPublicKey();
     let initialProviders = await this.getProviders({ owner: user });
