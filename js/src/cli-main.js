@@ -120,7 +120,7 @@ async function main() {
     if (!capacity) {
       fatal("bad argument:", rest[0]);
     }
-    await createProvider(rest[0]);
+    await createProvider(capacity);
     return;
   }
 
