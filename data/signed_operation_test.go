@@ -77,3 +77,12 @@ func TestSignedOperationDecodingAlsoVerifiesOperation(t *testing.T) {
 		t.Fatal("expected error in decoding")
 	}
 }
+
+func TestSignedOperationInSignedMessage(t *testing.T) {
+	s := `e:0x32652ebe42a8d56314b8b11abf51c01916a238920c1f16db597ee87374515f4609d3:dak3Jy9lAdyrpjNL3Mlzse6+/BmX6EYTiJZVG9FAnteUiG/IxS1XrnIFyKbyb+S/nygveflkOgcRjAQIdaagAw:{"type":"Operation","message":{"operations":[{"operation":{"signer":"0x32652ebe42a8d56314b8b11abf51c01916a238920c1f16db597ee87374515f4609d3","capacity":100,"fee":0,"sequence":1},"type":"CreateProvider","signature":"7oAcPtGDW6togW9yv2eBaP1IfxVnciBJoylNIB38qlVHuJXkpR6cJCALPUKKGx0/Mc0dPglIYLU+Cv9xBkthCQ"}]}}`
+	sm, err := util.NewSignedMessageFromSerialized(s)
+	if sm == nil {
+		util.Logger.Print(err)
+		t.Fatal("deserialization failed")
+	}
+}

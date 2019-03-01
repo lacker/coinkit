@@ -475,8 +475,12 @@ func (s *Server) ServeHttpInBackground(port int) {
 	})
 
 	// /messages/ accepts signed messages over http, with or without trailing slash
+	// It returns a signed message if there is one, or an ok if there is none.
 	messageHandler := func(w http.ResponseWriter, r *http.Request) {
 		output := s.handleMessageRequest(r)
+		if output == nil {
+			output = util.KeepAlive()
+		}
 		output.Write(w)
 	}
 	http.HandleFunc("/messages/", messageHandler)
