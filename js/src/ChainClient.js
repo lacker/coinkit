@@ -10,13 +10,20 @@ const SignedMessage = require("./SignedMessage.js");
 // create a different client object.
 // This code should work in both Node and in the browser.
 
-// TODO: load this in some way that distinguishes between local testing, and prod
-let URLS = [
+// TODO: load urls differently for local, testing, and prod at runtime
+
+// For general local operation
+let LOCAL_URLS = [
   "http://localhost:8000",
   "http://localhost:8001",
   "http://localhost:8002",
   "http://localhost:8003"
 ];
+
+// For easy-to-debug operation, only hit a single server
+let DEBUG_URLS = ["http://localhost:8000"];
+
+let URLS = DEBUG_URLS;
 
 const STANDARD_WAIT = 1000;
 
