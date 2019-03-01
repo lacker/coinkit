@@ -271,7 +271,7 @@ func TestDocumentOperations(t *testing.T) {
 
 	// Make sure the wrong user can't delete our document
 	wrong := util.NewKeyPairFromSecretPhrase("wrong")
-	dop := &data.DeleteOperation{
+	dop := &data.DeleteDocumentOperation{
 		Signer:   wrong.PublicKey().String(),
 		Sequence: 3,
 		ID:       1,
