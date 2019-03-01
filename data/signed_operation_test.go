@@ -83,6 +83,13 @@ func TestSignedOperationInSignedMessage(t *testing.T) {
 	sm, err := util.NewSignedMessageFromSerialized(s)
 	if sm == nil {
 		util.Logger.Print(err)
-		t.Fatal("deserialization failed")
+		t.Fatal("initial deserialization failed")
+	}
+
+	s2 := sm.Serialize()
+	sm2, err := util.NewSignedMessageFromSerialized(s2)
+	if sm2 == nil {
+		util.Logger.Print(err)
+		t.Fatal("serialize-then-deserialize failed")
 	}
 }
