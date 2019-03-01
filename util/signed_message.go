@@ -88,6 +88,9 @@ func KeepAlive() *SignedMessage {
 }
 
 func (sm *SignedMessage) Write(w io.Writer) {
+	if sm == nil {
+		panic("cannot write nil signed message")
+	}
 	var data string
 	if sm.keepalive {
 		data = OK + "\n"
