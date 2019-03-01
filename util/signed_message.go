@@ -73,6 +73,7 @@ func NewSignedMessageFromSerialized(serialized string) (*SignedMessage, error) {
 	}
 	m, err := DecodeMessage(ms)
 	if err != nil {
+		Logger.Printf("DecodeMessage failed reading SignedMessage: %s", serialized)
 		return nil, err
 	}
 	return &SignedMessage{

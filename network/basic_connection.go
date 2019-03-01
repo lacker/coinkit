@@ -65,7 +65,7 @@ func (c *BasicConnection) runIncoming() {
 			break
 		}
 		if err != nil {
-			util.Logger.Printf("connection error: %+v", err)
+			util.Logger.Printf("could not ReadSignedMessage: %+v", err)
 			c.Close()
 			break
 		}
