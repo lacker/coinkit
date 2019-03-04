@@ -28,10 +28,7 @@ func NewSignedOperation(op Operation, kp *util.KeyPair) *SignedOperation {
 		util.Logger.Fatal("you can only sign your own operations")
 	}
 
-	bytes, err := json.Marshal(op)
-	if err != nil {
-		util.Logger.Fatal("failed to sign operation because json encoding failed")
-	}
+	bytes := util.AlphabeticalJSONEncode(op)
 	sig := kp.Sign(op.OperationType() + string(bytes))
 
 	return &SignedOperation{
