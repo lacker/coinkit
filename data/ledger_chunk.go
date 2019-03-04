@@ -9,6 +9,7 @@ import (
 	"sort"
 
 	"github.com/lacker/coinkit/consensus"
+	"github.com/lacker/coinkit/util"
 )
 
 // MaxChunkSize defines how many items can be put in a chunk
@@ -57,8 +58,8 @@ func (c *LedgerChunk) String() string {
 }
 
 func (c *LedgerChunk) Value() (driver.Value, error) {
-	bytes, err := json.Marshal(c)
-	return driver.Value(bytes), err
+	bytes := util.AlphabeticalJSONEncode(c)
+	return driver.Value(bytes), nil
 }
 
 func (c *LedgerChunk) GetOperation(signature string) *SignedOperation {
