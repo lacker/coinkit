@@ -68,26 +68,35 @@ func EncodeMessage(m Message) string {
 	if m == nil || reflect.ValueOf(m).IsNil() {
 		panic("you should not EncodeMessage(nil)")
 	}
-	bytes, err := json.Marshal(DecodedMessage{
+	encoded, err := json.Marshal(DecodedMessage{
 		Type:    m.MessageType(),
 		Message: m,
 	})
 	if err != nil {
 		panic(err)
 	}
-	encoded := string(bytes)
+
+	// Decode and re-encode to alphabetize fields.
+	// TODO: find a more efficient way to do this
+	var decoded interface{}
+	json.Unmarshal(encoded, &decoded)
+	bytes, err := json.Marshal(decoded)
+	if err != nil {
+		panic(err)
+	}
+	reencoded := string(bytes)
 
 	if Testing() {
 		// Check for capitalized fields.
 		// Fields in JSON messages can be capitalized if they are programmatic strings
 		// like public keys, but those are long. So only fail when it's short.
-		matched, _ := regexp.MatchString("[^:]\"[A-Z].{0,30}\"", encoded)
+		matched, _ := regexp.MatchString("[^:]\"[A-Z].{0,30}\"", reencoded)
 		if matched {
-			Logger.Fatalf("capitalized key in encoded message: %s", encoded)
+			Logger.Fatalf("capitalized key in encoded message: %s", reencoded)
 		}
 	}
 
-	return encoded
+	return reencoded
 }
 
 func DecodeMessage(encoded string) (Message, error) {
