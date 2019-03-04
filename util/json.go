@@ -29,7 +29,7 @@ func AlphabeticalJSONEncode(x interface{}) []byte {
 	}
 	var decoded interface{}
 	json.Unmarshal(encoded, &decoded)
-	reencoded, err := json.Marshal(x)
+	reencoded, err := json.Marshal(decoded)
 	if err != nil {
 		panic(err)
 	}
