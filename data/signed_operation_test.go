@@ -26,12 +26,9 @@ func TestSignedOperationJson(t *testing.T) {
 		Signer: kp.PublicKey().String(),
 	}
 	so := NewSignedOperation(op, kp)
-	bytes, err := json.Marshal(so)
-	if err != nil {
-		t.Fatal(err)
-	}
+	bytes := util.AlphabeticalJSONEncode(so)
 	so2 := &SignedOperation{}
-	err = json.Unmarshal(bytes, so2)
+	err := json.Unmarshal(bytes, so2)
 	if err != nil {
 		t.Fatal(err)
 	}
