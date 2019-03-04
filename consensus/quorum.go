@@ -99,8 +99,8 @@ func MeetsQuorum(f QuorumFinder, nodes []string) bool {
 }
 
 func (qs *QuorumSlice) Value() (driver.Value, error) {
-	bytes, err := json.Marshal(qs)
-	return driver.Value(bytes), err
+	bytes := util.AlphabeticalJSONEncode(qs)
+	return driver.Value(bytes), nil
 }
 
 func (qs *QuorumSlice) Scan(src interface{}) error {
