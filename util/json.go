@@ -6,29 +6,29 @@ import (
 )
 
 func PrettyJSON(x interface{}) []byte {
-	bytes, err := json.MarshalIndent(x, "", "  ")
+	bs, err := json.MarshalIndent(x, "", "  ")
 	if err != nil {
 		panic(err)
 	}
-	return append(bytes, '\n')
+	return append(bs, '\n')
 }
 
 func ToJSON(x interface{}) []byte {
-	bytes, err := json.Marshal(x)
+	bs, err := json.Marshal(x)
 	if err != nil {
 		panic(err)
 	}
-	return bytes
+	return bs
 }
 
-func IsAlphabeticalJSON(bytes []byte) bool {
+func IsAlphabeticalJSON(bs []byte) bool {
 	var decoded interface{}
-	json.Unmarshal(bytes, &decoded)
+	json.Unmarshal(bs, &decoded)
 	reencoded, err := json.Marshal(decoded)
 	if err != nil {
 		return false
 	}
-	return bytes.Compare(bytes, reencoded) == 0
+	return bytes.Compare(bs, reencoded) == 0
 }
 
 // JSON-encodes something, and also alphabetizes the fields.

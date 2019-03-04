@@ -89,10 +89,14 @@ func EncodeMessage(m Message) string {
 
 func DecodeMessage(encoded string) (Message, error) {
 	bytes := []byte(encoded)
+
 	var pdm PartiallyDecodedMessage
 	err := json.Unmarshal(bytes, &pdm)
 	if err != nil {
 		return nil, err
+	}
+	if !IsAlphabeticalJSON(bytes) {
+		return nil, fmt.Errorf("message json is not alphabetized: %s", encoded)
 	}
 
 	if pdm.Type == "" {
