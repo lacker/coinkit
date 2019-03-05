@@ -233,8 +233,8 @@ func TestDataOperations(t *testing.T) {
 	}
 	ob := docs[0].Data
 	// TODO: update this test once we don't dupe id into the regular data
-	if ob.NumKeys() != 2 {
-		t.Fatalf("expected two keys but got: %s", ob)
+	if ob.NumKeys() != 3 {
+		t.Fatalf("expected three keys but got: %s", ob)
 	}
 	foo, ok := ob.GetInt("foo")
 	if !ok {
