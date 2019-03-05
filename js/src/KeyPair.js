@@ -6,6 +6,7 @@ const { fromByteArray, toByteArray } = require("base64-js");
 const nacl = require("tweetnacl");
 const forge = require("node-forge");
 const { TextEncoder } = require("text-encoding-shim");
+const stringify = require("json-stable-stringify");
 
 const Message = require("./Message.js");
 
@@ -177,7 +178,7 @@ class KeyPair {
       ...operation,
       signer: this.getPublicKey()
     };
-    let json = JSON.stringify(op);
+    let json = stringify(op);
     let signed = {
       operation: op,
       type: type,
