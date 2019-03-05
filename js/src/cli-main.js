@@ -62,6 +62,16 @@ async function generate() {
   console.log("key pair generation complete");
 }
 
+async function getProvider(id) {
+  let client = new ChainClient();
+  let provider = await client.getProvider(id);
+  if (provider) {
+    console.log(provider);
+  } else {
+    console.log("no provider with id", id);
+  }
+}
+
 async function createProvider(capacity) {
   let kp = await login();
   let client = new ChainClient(kp);
@@ -121,6 +131,18 @@ async function main() {
       fatal("bad argument:", rest[0]);
     }
     await createProvider(capacity);
+    return;
+  }
+
+  if (op === "get-provider") {
+    if (rest.length != 1) {
+      fatal("Usage: npm run cli get-provider <id>");
+    }
+    let id = parseInt(rest[0]);
+    if (!id) {
+      fatal("bad provider id argument:", rest[0]);
+    }
+    await getProvider(id);
     return;
   }
 
