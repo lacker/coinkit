@@ -30,6 +30,6 @@ test("Operation message signing", async () => {
 
   // See tests of this string in operation_message_test.go
   expect(signed.serialize()).toEqual(
-    'e:0x5b8f312caed13ac35805c69e889d24bbd3df7d6285fbca173cce47e7402a5d0bddf3:D97rQTtkUet8Ph24vm+ZkzJhULzEqI8dX6NhK8M6ivv7tAywLsIUW8OKn1fpqyLNmLRbndzIPdvE/hV01v9xDw:{"message":{"operations":[{"operation":{"data":{"foo":"bar"},"fee":1,"sequence":1,"signer":"0x5b8f312caed13ac35805c69e889d24bbd3df7d6285fbca173cce47e7402a5d0bddf3"},"signature":"wIS9/HZQQn8exsAZT2mmhPPC95UBBSqSxFmCknymwRozxe//emT0vscf8eq55n4fZ0JO+4NiDpknlCi4UKYmDA","type":"Create"}]},"type":"Operation"}'
+    'e:0x5b8f312caed13ac35805c69e889d24bbd3df7d6285fbca173cce47e7402a5d0bddf3:a09g9sLYa7xUSdLvG1K1r4kaD9Iu2+bMjFhQtnWUKrvK/UPHh3GpcZPNLbDc1vibkZs1TqF1QNz9B2u7FEzjBA:{"message":{"operations":[{"operation":{"data":{"foo":"bar"},"fee":1,"sequence":1,"signer":"0x5b8f312caed13ac35805c69e889d24bbd3df7d6285fbca173cce47e7402a5d0bddf3"},"signature":"a6a+P+y0UkhFLXonoQXobIMFCXJFGyMiCc5yjQDOa0fz9jnaQf/LKYkzN2CII4nSQjIiromm/bzOaLJumQfpCg","type":"Create"}]},"type":"Operation"}'
   );
 });
