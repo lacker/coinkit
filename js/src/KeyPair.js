@@ -201,7 +201,7 @@ class KeyPair {
         signer: this.getPublicKey(),
         ...sop.operation
       };
-      let signature = this.sign(sop.type + JSON.stringify(op));
+      let signature = this.sign(sop.type + stringify(op));
       operations.push({
         operation: op,
         type: sop.type,
