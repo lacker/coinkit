@@ -101,10 +101,10 @@ class ChainClient {
     let providers = await this.getProviders({ owner: user });
     this.log("new providers:", providers);
 
-    for (let id in providers) {
-      if (!initialProviders[id]) {
+    for (let provider of providers) {
+      if (!initialProviders.find(p => p.id === provider.id)) {
         // This provider wasn't in the initial set
-        return providers[id];
+        return provider;
       }
     }
 
@@ -165,15 +165,11 @@ class ChainClient {
   }
 
   // Fetches data for providers according to the given query.
-  // Returns an object mapping provider id to provider data.
-  // The object has integer keys so it's a bit weird.
+  // Returns a list of providers.
+  // It's a different format than getBuckets because objects with int keys are weird.
   async getProviders(query) {
     let dm = await this.query({ providers: query });
-    let answer = {};
-    for (let provider of dm.providers) {
-      answer[provider.id] = provider;
-    }
-    return answer;
+    return dm.providers;
   }
 
   // Fetches the account with the given user, or null if there is no such account.
