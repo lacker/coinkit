@@ -1,3 +1,5 @@
+const stringify = require("json-stable-stringify");
+
 // Used to communicate with the blockchain
 class Message {
   constructor(type, properties = {}) {
@@ -6,7 +8,7 @@ class Message {
     }
 
     this.type = type;
-    this._serialized = JSON.stringify({
+    this._serialized = stringify({
       type,
       message: properties
     });
