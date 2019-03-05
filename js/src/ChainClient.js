@@ -95,16 +95,16 @@ class ChainClient {
     // To figure out which provider is newly-created, we need to check existing ones
     let user = this.keyPair.getPublicKey();
     let initialProviders = await this.getProviders({ owner: user });
-    this.log("existing providers:", Object.keys(initialProviders));
+    this.log("existing providers:", initialProviders);
     await this.sendOperation("CreateProvider", { capacity });
-    this.log("the CreateProvider operation has been sent");
+    this.log("the CreateProvider operation has been accepted");
     let providers = await this.getProviders({ owner: user });
-    this.log("new provider set:", Object.keys(initialProviders));
+    this.log("new providers:", providers);
 
-    for (let provider of providers) {
-      if (!initialProviders[provider.id]) {
+    for (let id in providers) {
+      if (!initialProviders[id]) {
         // This provider wasn't in the initial set
-        return provider;
+        return providers[id];
       }
     }
 
@@ -166,6 +166,7 @@ class ChainClient {
 
   // Fetches data for providers according to the given query.
   // Returns an object mapping provider id to provider data.
+  // The object has integer keys so it's a bit weird.
   async getProviders(query) {
     let dm = await this.query({ providers: query });
     let answer = {};
