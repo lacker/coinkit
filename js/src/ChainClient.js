@@ -164,6 +164,13 @@ class ChainClient {
     return answer;
   }
 
+  // Fetches data for the named bucket.
+  // Returns null if there is no such bucket.
+  async getBucket(name) {
+    let buckets = await this.getBuckets({ name });
+    return buckets[name] || null;
+  }
+
   // Fetches data for providers according to the given query.
   // "owner" and "bucket" keys are the most likely.
   // Returns a list of providers.
