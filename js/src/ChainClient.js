@@ -78,10 +78,10 @@ class ChainClient {
   // If there is no such provider, returns null.
   async getProvider(providerID) {
     let dm = await this.query({ providers: { id: providerID } });
-    if (!dm.providers || !dm.providers[providerID]) {
+    if (!dm.providers || dm.providers.length == 0) {
       return null;
     }
-    return dm.providers[providerID];
+    return dm.providers[0];
   }
 
   // Returns the information for the newly-created provider.
