@@ -64,7 +64,6 @@ async function generate() {
 
 async function getProvider(id) {
   let client = new ChainClient();
-  client.verbose = true;
   let provider = await client.getProvider(id);
   if (provider) {
     console.log(provider);
@@ -75,7 +74,6 @@ async function getProvider(id) {
 
 async function getProviders(query) {
   let client = new ChainClient();
-  client.verbose = true;
   let providers = await client.getProviders(query);
   let word = providers.length === 1 ? "provider" : "providers";
   console.log(providers.length + " " + word + " found");
@@ -90,6 +88,16 @@ async function createProvider(capacity) {
   let provider = await client.createProvider(capacity);
   console.log("created provider:");
   console.log(provider);
+}
+
+async function getBucket(name) {
+  let client = new ChainClient();
+  let bucket = await client.getBucket(name);
+  if (bucket) {
+    console.log(bucket);
+  } else {
+    console.log("no bucket with name " + name);
+  }
 }
 
 // Ask the user for a passphrase to log in.
@@ -172,6 +180,14 @@ async function main() {
       }
     }
     await getProviders(query);
+    return;
+  }
+
+  if (op === "get-bucket") {
+    if (rest.length != 1) {
+      fatal("Usage: npm run cli get-bucket <name>");
+    }
+    await getBucket(name);
     return;
   }
 
