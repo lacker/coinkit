@@ -73,6 +73,16 @@ async function getProvider(id) {
   }
 }
 
+async function getProviders(query) {
+  let client = new ChainClient();
+  client.verbose = true;
+  let providers = await client.getProviders(query);
+  console.log(providers.length, "providers found");
+  for (let p of providers) {
+    console.log(p);
+  }
+}
+
 async function createProvider(capacity) {
   let kp = await login();
   let client = new ChainClient(kp);
@@ -143,6 +153,22 @@ async function main() {
       fatal("bad provider id argument:", rest[0]);
     }
     await getProvider(id);
+    return;
+  }
+
+  if (op === "get-providers") {
+    if (rest.length < 1) {
+      fatal("Usage: npm run cli get-providers [owner=x]");
+    }
+    let query = {};
+    for (let arg of rest) {
+      if (arg.startsWith("owner=")) {
+        query.owner = arg.split("=", 1);
+      } else {
+        fatal("unrecognized arg: " + arg);
+      }
+    }
+    await getProviders(query);
     return;
   }
 

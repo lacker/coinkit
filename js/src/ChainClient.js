@@ -165,6 +165,7 @@ class ChainClient {
   }
 
   // Fetches data for providers according to the given query.
+  // "owner" and "bucket" keys are the most likely.
   // Returns a list of providers.
   // It's a different format than getBuckets because objects with int keys are weird.
   async getProviders(query) {
