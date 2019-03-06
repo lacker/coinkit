@@ -77,7 +77,7 @@ async function getProviders(query) {
   let client = new ChainClient();
   client.verbose = true;
   let providers = await client.getProviders(query);
-  console.log(providers.length, "providers found");
+  console.log(providers.length + " providers found");
   for (let p of providers) {
     console.log(p);
   }
@@ -163,7 +163,7 @@ async function main() {
     let query = {};
     for (let arg of rest) {
       if (arg.startsWith("owner=")) {
-        query.owner = arg.split("=", 1);
+        query.owner = arg.split("=")[1];
       } else {
         fatal("unrecognized arg: " + arg);
       }
