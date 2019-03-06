@@ -111,6 +111,17 @@ class ChainClient {
     throw new Error("no provider seems to have been created");
   }
 
+  // Returns the information for the newly-created bucket.
+  async createBucket(size) {
+    if (typeof size !== "number") {
+      throw new Error(
+        "bucket size " + size + " must be number, not " + typeof size
+      );
+    }
+
+    // TODO
+  }
+
   // Returns once the operation has been accepted into the blockchain.
   // Signer, fee, and sequence are all added.
   // Throws an error if there is no matching user account.
