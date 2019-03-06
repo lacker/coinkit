@@ -100,6 +100,14 @@ async function getBucket(name) {
   }
 }
 
+async function createBucket(size) {
+  let kp = await login();
+  let client = new ChainClient(kp);
+  let bucket = await client.createBucket(size);
+  console.log("created bucket:");
+  console.log(bucket);
+}
+
 // Ask the user for a passphrase to log in.
 // Returns the keypair
 async function login() {
