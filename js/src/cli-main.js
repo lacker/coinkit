@@ -77,7 +77,8 @@ async function getProviders(query) {
   let client = new ChainClient();
   client.verbose = true;
   let providers = await client.getProviders(query);
-  console.log(providers.length + " providers found");
+  let word = providers.length === 1 ? "provider" : "providers";
+  console.log(providers.length + " " + word + " found");
   for (let p of providers) {
     console.log(p);
   }
