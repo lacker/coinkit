@@ -159,12 +159,14 @@ async function main() {
 
   if (op === "get-providers") {
     if (rest.length < 1) {
-      fatal("Usage: npm run cli get-providers [owner=x]");
+      fatal("Usage: npm run cli get-providers [owner=<id>] [bucket=<name>]");
     }
     let query = {};
     for (let arg of rest) {
       if (arg.startsWith("owner=")) {
         query.owner = arg.split("=")[1];
+      } else if (arg.startsWith("bucket=")) {
+        query.bucket = arg.split("=")[1];
       } else {
         fatal("unrecognized arg: " + arg);
       }
