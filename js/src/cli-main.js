@@ -64,6 +64,7 @@ async function generate() {
 
 async function getProvider(id) {
   let client = new ChainClient();
+  client.verbose = true;
   let provider = await client.getProvider(id);
   if (provider) {
     console.log(provider);
@@ -75,7 +76,6 @@ async function getProvider(id) {
 async function createProvider(capacity) {
   let kp = await login();
   let client = new ChainClient(kp);
-  client.verbose = true;
   let provider = await client.createProvider(capacity);
   console.log("created provider:");
   console.log(provider);
