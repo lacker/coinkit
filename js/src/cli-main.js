@@ -218,6 +218,23 @@ async function main() {
     return;
   }
 
+  if (op === "get-buckets") {
+    if (rest.length > 2) {
+      fatal("Usage: npm run cli get-buckets [owner=<id>] [provider=<id>]");
+    }
+    let query = {};
+    for (let arg of rest) {
+      fatal("XXX");
+    }
+    if (rest.length === 0) {
+      let kp = await login();
+      console.log("fetching your buckets");
+      query.owner = kp.getPublicKey();
+    }
+    await getBuckets(query);
+    return;
+  }
+
   fatal("unrecognized operation: " + op);
 }
 
