@@ -100,7 +100,7 @@ async function getBucket(name) {
   }
 }
 
-async function createBucket(size) {
+async function createBucket(name, size) {
   let kp = await login();
   let client = new ChainClient(kp);
   let bucket = await client.createBucket(size);
@@ -195,7 +195,7 @@ async function main() {
     if (rest.length != 1) {
       fatal("Usage: npm run cli get-bucket <name>");
     }
-    await getBucket(name);
+    await getBucket(rest[0]);
     return;
   }
 
