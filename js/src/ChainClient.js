@@ -112,14 +112,16 @@ class ChainClient {
   }
 
   // Returns the information for the newly-created bucket.
-  async createBucket(size) {
+  async createBucket(name, size) {
     if (typeof size !== "number") {
       throw new Error(
         "bucket size " + size + " must be number, not " + typeof size
       );
     }
 
-    // TODO
+    await this.sendOperation("CreateBucket", { name, size });
+    let bucket = await this.getBucket({ name });
+    return bucket;
   }
 
   // Returns once the operation has been accepted into the blockchain.
