@@ -167,14 +167,10 @@ class ChainClient {
   }
 
   // Fetches data for the listed buckets.
-  // Returns an object mapping bucket name to bucket data.
+  // Returns a list of buckets in no particular order.
   async getBuckets(query) {
     let dm = await this.query({ buckets: query });
-    let answer = {};
-    for (let bucket of dm.buckets) {
-      answer[bucket.name] = bucket;
-    }
-    return answer;
+    return dm.buckets;
   }
 
   // Fetches data for the named bucket.
@@ -186,8 +182,7 @@ class ChainClient {
 
   // Fetches data for providers according to the given query.
   // "owner" and "bucket" keys are the most likely.
-  // Returns a list of providers.
-  // It's a different format than getBuckets because objects with int keys are weird.
+  // Returns a list of providers in no particular order.
   async getProviders(query) {
     let dm = await this.query({ providers: query });
     return dm.providers;
