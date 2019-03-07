@@ -234,7 +234,11 @@ async function main() {
     }
     let query = {};
     for (let arg of rest) {
-      fatal("XXX");
+      if (arg.startsWith("owner=")) {
+        query.owner = arg.split("=")[1];
+      } else {
+        fatal("XXX");
+      }
     }
     if (rest.length === 0) {
       let kp = await login();
