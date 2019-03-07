@@ -120,7 +120,7 @@ class ChainClient {
     }
 
     await this.sendOperation("CreateBucket", { name, size });
-    let bucket = await this.getBucket({ name });
+    let bucket = await this.getBucket(name);
     return bucket;
   }
 
