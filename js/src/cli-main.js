@@ -174,7 +174,7 @@ async function main() {
   }
 
   if (op === "get-providers") {
-    if (rest.length < 1) {
+    if (rest.length > 2) {
       fatal("Usage: npm run cli get-providers [owner=<id>] [bucket=<name>]");
     }
     let query = {};
@@ -186,6 +186,11 @@ async function main() {
       } else {
         fatal("unrecognized arg: " + arg);
       }
+    }
+    if (rest.length === 0) {
+      let kp = await login();
+      console.log("fetching your providers");
+      query.owner = kp.getPublicKey();
     }
     await getProviders(query);
     return;
