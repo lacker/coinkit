@@ -100,6 +100,16 @@ async function getBucket(name) {
   }
 }
 
+async function getBuckets(query) {
+  let client = new ChainClient();
+  let buckets = await client.getBuckets(query);
+  let word = buckets.length === 1 ? "bucket" : "buckets";
+  console.log(buckets.length + " " + word + " found");
+  for (let b of buckets) {
+    console.log(b);
+  }
+}
+
 async function createBucket(name, size) {
   let kp = await login();
   let client = new ChainClient(kp);
