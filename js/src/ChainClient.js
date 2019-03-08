@@ -178,7 +178,10 @@ class ChainClient {
   // Returns null if there is no such bucket.
   async getBucket(name) {
     let buckets = await this.getBuckets({ name });
-    return buckets[name] || null;
+    if (buckets.length < 1) {
+      return null;
+    }
+    return buckets[0];
   }
 
   // Fetches data for providers according to the given query.
