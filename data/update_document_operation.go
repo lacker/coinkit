@@ -26,11 +26,12 @@ type UpdateDocumentOperation struct {
 }
 
 func (op *UpdateDocumentOperation) String() string {
-	return fmt.Sprintf("update owner=%s, id=%d, data=%s", util.Shorten(op.Signer), op.ID, op.Data)
+	return fmt.Sprintf("update owner=%s, id=%d, data=%s",
+		util.Shorten(op.Signer), op.ID, op.Data)
 }
 
 func (op *UpdateDocumentOperation) OperationType() string {
-	return "Update"
+	return "UpdateDocument"
 }
 
 func (op *UpdateDocumentOperation) GetSigner() string {
