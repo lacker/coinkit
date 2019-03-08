@@ -1,6 +1,12 @@
 #!/bin/bash
 
-pgrep '^cserver' | xargs kill -9
+PIDS=`pgrep '^cserver'`
+if [ -z "$PIDS" ]
+then
+    echo the local cservers are already stopped
+    exit 0
+fi
+echo $PIDS | xargs kill -9
 sleep 0.1
 LEFT=`ps aux | grep '[^a-z]cserver' | grep -v grep`
 if [ -n "$LEFT" ]
