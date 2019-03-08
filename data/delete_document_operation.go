@@ -25,7 +25,7 @@ func (op *DeleteDocumentOperation) String() string {
 }
 
 func (op *DeleteDocumentOperation) OperationType() string {
-	return "Delete"
+	return "DeleteDocument"
 }
 
 func (op *DeleteDocumentOperation) GetSigner() string {
@@ -40,7 +40,6 @@ func (op *DeleteDocumentOperation) GetSequence() uint32 {
 	return op.Sequence
 }
 
-// TODO: should this do something?
 func (op *DeleteDocumentOperation) Verify() bool {
 	return true
 }
