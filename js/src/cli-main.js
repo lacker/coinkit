@@ -113,7 +113,6 @@ async function getBuckets(query) {
 async function createBucket(name, size) {
   let kp = await login();
   let client = new ChainClient(kp);
-  client.verbose = true;
   let bucket = await client.createBucket(name, size);
   console.log("created bucket:");
   console.log(bucket);
