@@ -14,7 +14,7 @@ test("Operation message signing", async () => {
   let unsigned = new Message("Operation", {
     operations: [
       {
-        type: "Create",
+        type: "CreateDocument",
         operation: {
           sequence: 1,
           fee: 1,

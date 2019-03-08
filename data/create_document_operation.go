@@ -26,7 +26,7 @@ func (op *CreateDocumentOperation) String() string {
 }
 
 func (op *CreateDocumentOperation) OperationType() string {
-	return "Create"
+	return "CreateDocument"
 }
 
 func (op *CreateDocumentOperation) GetSigner() string {
