@@ -120,6 +120,7 @@ class ChainClient {
     }
 
     await this.sendOperation("CreateBucket", { name, size });
+    this.log("the CreateBucket operation has been accepted");
     let bucket = await this.getBucket(name);
     return bucket;
   }
