@@ -265,8 +265,9 @@ async function main() {
     if (!id) {
       fatal("bad id: " + rest[0]);
     }
-    let listener = new ProviderListener(id);
+    let listener = new ProviderListener();
     listener.verbose = true;
+    await listener.listen(id);
     return;
   }
 
