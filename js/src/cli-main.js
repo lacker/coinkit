@@ -3,6 +3,7 @@ const readline = require("readline");
 const ChainClient = require("./ChainClient.js");
 const KeyPair = require("./KeyPair.js");
 const Message = require("./Message.js");
+const ProviderListener = require("./ProviderListener.js");
 
 function fatal(message) {
   console.log(message);
@@ -256,7 +257,17 @@ async function main() {
   }
 
   if (op === "listen") {
-    fatal("XXX");
+    if (rest.length != 1) {
+      fatal("Usage: npm run cli listen [providerID]");
+    }
+
+    let id = parseInt(rest[0]);
+    if (!id) {
+      fatal("bad id: " + rest[0]);
+    }
+    let listener = new ProviderListener(id);
+    listener.verbose = true;
+    return;
   }
 
   fatal("unrecognized operation: " + op);
