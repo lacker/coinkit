@@ -235,8 +235,15 @@ async function main() {
     for (let arg of rest) {
       if (arg.startsWith("owner=")) {
         query.owner = arg.split("=")[1];
+      } else if (arg.startsWith("provider=")) {
+        let rhs = arg.split("=");
+        let id = parseInt(rhs);
+        if (!id) {
+          fatal("bad provider id: " + rhs);
+        }
+        query.provider = id;
       } else {
-        fatal("XXX");
+        fatal("unrecognized arg: " + arg);
       }
     }
     if (rest.length === 0) {
