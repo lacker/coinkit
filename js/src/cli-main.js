@@ -248,6 +248,10 @@ async function main() {
     return;
   }
 
+  if (op === "listen") {
+    fatal("XXX");
+  }
+
   fatal("unrecognized operation: " + op);
 }
 

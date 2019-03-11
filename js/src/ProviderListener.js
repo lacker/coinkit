@@ -5,6 +5,13 @@ const ChainClient = require("./ChainClient.js");
 class ProviderListener {
   constructor(id) {
     this.id = id;
+    this.verbose = false;
+  }
+
+  log(...args) {
+    if (this.verbose) {
+      console.log(...args);
+    }
   }
 }
 
