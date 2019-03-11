@@ -271,6 +271,14 @@ async function main() {
     return;
   }
 
+  if (op === "alloc" || op === "allocate") {
+    if (rest.length != 2) {
+      fatal("Usage: npm run cli " + op + " [bucketName] [providerID]");
+    }
+
+    fatal("TODO: implement");
+  }
+
   fatal("unrecognized operation: " + op);
 }
 
