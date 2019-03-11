@@ -17,13 +17,33 @@ class ProviderListener {
 
   // Listens forever
   async listen(id) {
-    let provider = null;
-
     // buckets maps bucket name to information about the bucket
     let buckets = {};
 
     while (true) {
-      // XXX
+      let bucketList = await this.client.getBuckets({ provider: id });
+
+      let newBuckets = {};
+      for (let bucket of bucketList) {
+        let oldVersion = buckets[bucket.name];
+        if (oldVersion) {
+          if (oldVersion.magnet != bucket.magnet) {
+            this.log(bucket.name, "bucket has new magnet:", bucket.magnet);
+          }
+        } else {
+          this.log("allocate bucket:", bucket);
+        }
+        newBuckets[bucket.name] = bucket;
+      }
+
+      // Check for dropped buckets
+      for (let name in newBuckets) {
+        if (!buckets[name]) {
+          this.log("deallocate bucket:", name);
+        }
+      }
+
+      await sleep(1000);
     }
   }
 }
