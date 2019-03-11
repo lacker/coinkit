@@ -119,6 +119,10 @@ async function createBucket(name, size) {
   console.log(bucket);
 }
 
+async function allocate(bucketName, providerID) {
+  // TODO
+}
+
 // Ask the user for a passphrase to log in.
 // Returns the keypair
 async function login() {
@@ -276,7 +280,13 @@ async function main() {
       fatal("Usage: npm run cli " + op + " [bucketName] [providerID]");
     }
 
-    fatal("TODO: implement");
+    let [bucketName, idstr] = rest;
+    let providerID = parseInt(idstr);
+    if (!providerID) {
+      fatal("bad id: " + idstr);
+    }
+    await allocate(bucketName, providerID);
+    return;
   }
 
   fatal("unrecognized operation: " + op);
