@@ -6,6 +6,7 @@ import KeyPair from "./KeyPair";
 import Message from "./Message";
 import SignedMessage from "./SignedMessage";
 import Storage from "./Storage";
+import { sleep } from "./Util";
 
 // A trusted client that handles interaction with the blockchain nodes.
 // This client is trusted in the sense that it holds the user's keypair.
@@ -236,8 +237,4 @@ export default class TrustedClient {
     }
     return account.sequence;
   }
-}
-
-function sleep(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
 }

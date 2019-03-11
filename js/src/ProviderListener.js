@@ -5,6 +5,7 @@ const ChainClient = require("./ChainClient.js");
 class ProviderListener {
   constructor(id) {
     this.id = id;
+    this.client = new ChainClient();
     this.verbose = false;
   }
 
