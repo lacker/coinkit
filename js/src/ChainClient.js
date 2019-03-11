@@ -140,6 +140,21 @@ class ChainClient {
     return;
   }
 
+  async deallocate(bucketName, providerID) {
+    if (typeof providerID !== "number") {
+      throw new Error(
+        "provider id " +
+          providerID +
+          " must be number, not " +
+          typeof providerID
+      );
+    }
+
+    await this.sendOperation("Deallocate", { bucketName, providerID });
+    this.log("the Deallocate operation has been accepted");
+    return;
+  }
+
   // Returns once the operation has been accepted into the blockchain.
   // Signer, fee, and sequence are all added.
   // Throws an error if there is no matching user account.
