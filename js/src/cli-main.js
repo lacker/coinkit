@@ -120,7 +120,10 @@ async function createBucket(name, size) {
 }
 
 async function allocate(bucketName, providerID) {
-  // TODO
+  let kp = await login();
+  let client = new ChainClient(kp);
+  await client.allocate(bucketName, providerID);
+  console.log("allocated", bucketName, "bucket to provider", providerID);
 }
 
 async function deallocate(bucketName, providerID) {
