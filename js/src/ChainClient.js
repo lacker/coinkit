@@ -214,6 +214,10 @@ class ChainClient {
     return buckets[0];
   }
 
+  async updateBucket(name, magnet) {
+    // XXX
+  }
+
   // Fetches data for providers according to the given query.
   // "owner" and "bucket" keys are the most likely.
   // Returns a list of providers in no particular order.
