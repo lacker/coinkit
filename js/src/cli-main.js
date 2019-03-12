@@ -127,7 +127,10 @@ async function allocate(bucketName, providerID) {
 }
 
 async function deallocate(bucketName, providerID) {
-  // TODO
+  let kp = await login();
+  let client = new ChainClient(kp);
+  await client.deallocate(bucketName, providerID);
+  console.log("deallocated", bucketName, "bucket from provider", providerID);
 }
 
 // Ask the user for a passphrase to log in.
