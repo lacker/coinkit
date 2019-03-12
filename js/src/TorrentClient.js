@@ -1,7 +1,7 @@
 // The TorrentClient finds the right torrent for a hostname and uses that to return
 // subsequent files.
 
-import WebTorrent from "webtorrent";
+const WebTorrent = require("webtorrent");
 
 // The initial server that tells us where to start finding peers
 let BOOTSTRAP = "http://localhost:4444";
