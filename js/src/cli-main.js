@@ -133,6 +133,10 @@ async function deallocate(bucketName, providerID) {
   console.log("deallocated", bucketName, "bucket from provider", providerID);
 }
 
+async function setMagnet(bucketName, magnet) {
+  // TODO
+}
+
 // Ask the user for a passphrase to log in.
 // Returns the keypair
 async function login() {
@@ -267,6 +271,16 @@ async function main() {
       query.owner = kp.getPublicKey();
     }
     await getBuckets(query);
+    return;
+  }
+
+  if (op === "set-magnet") {
+    if (rest.length != 2) {
+      fatal("Usage: npm run cli set-magnet [bucketName] [magnet]");
+    }
+
+    let [bucketName, magnet] = rest;
+    await setMagnet(bucketName, magnet);
     return;
   }
 
