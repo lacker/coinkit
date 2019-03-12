@@ -3,6 +3,7 @@ const axios = require("axios");
 const KeyPair = require("./KeyPair.js");
 const Message = require("./Message.js");
 const SignedMessage = require("./SignedMessage.js");
+const { sleep } = require("./Util.js");
 
 // A client for talking to the blockchain servers.
 // This client only uses one keypair across its lifetime.
@@ -28,10 +29,7 @@ let URLS = DEBUG_URLS;
 const STANDARD_WAIT = 1000;
 
 async function standardWait() {
-  let promise = new Promise((resolve, reject) => {
-    setTimeout(resolve, STANDARD_WAIT);
-  });
-  return await promise;
+  return await sleep(STANDARD_WAIT);
 }
 
 function getServerURL() {
