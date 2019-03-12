@@ -1,6 +1,6 @@
 // The TorrentClient finds the right torrent for a hostname and uses that to return
 // subsequent files.
-
+const axios = require("axios");
 const WebTorrent = require("webtorrent");
 
 // The initial server that tells us where to start finding peers
@@ -92,8 +92,8 @@ export default class TorrentClient {
   // Returns a promise that maps to a magnet url
   // TODO: sometimes read from cache instead of just writing to it, have staleness logic
   async getMagnetURL(hostname) {
-    let response = await fetch(BOOTSTRAP);
-    let json = await response.json();
+    let response = await axios.get(BOOTSTRAP);
+    let json = JSON.parse(response.data);
     let magnet = json.magnet;
     let now = new Date();
     this.magnets[hostname] = {
