@@ -123,6 +123,10 @@ async function allocate(bucketName, providerID) {
   // TODO
 }
 
+async function deallocate(bucketName, providerID) {
+  // TODO
+}
+
 // Ask the user for a passphrase to log in.
 // Returns the keypair
 async function login() {
