@@ -43,9 +43,11 @@ class ProviderListener {
         if (oldVersion) {
           if (oldVersion.magnet != bucket.magnet) {
             this.log(bucket.name, "bucket has new magnet:", bucket.magnet);
+            this.handleAdd(bucket.magnet);
           }
         } else {
           this.log("allocate bucket:", bucket);
+          this.handleAdd(bucket.magnet);
         }
         newBuckets[bucket.name] = bucket;
       }
