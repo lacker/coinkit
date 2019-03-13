@@ -2,8 +2,9 @@
 
 const http = require("http");
 const path = require("path");
-
 const WebTorrent = require("webtorrent-hybrid");
+
+const BlackHoleProxy = require("./BlackHoleProxy.js");
 
 // Seed a WebTorrent
 let client = new WebTorrent();
@@ -26,24 +27,4 @@ client.seed(dir, torrent => {
   console.log("running fake chain on port", fakeChainPort);
 });
 
-// This code should never run because the document load gets canceled
-let content = `
-<html>
-<head>
-<script>
-console.log("running black hole");
-</script>
-</head>
-<body>
-this is the black hole proxy
-</body>
-</html>
-`;
-
-let proxyPort = 3333;
-let proxy = http.createServer((req, res) => {
-  console.log("proxying", req.url);
-  res.end(content);
-});
-proxy.listen(proxyPort);
-console.log("running proxy on port", proxyPort);
+let proxy = new BlackHoleProxy(3333);
