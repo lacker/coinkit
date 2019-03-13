@@ -1,9 +1,9 @@
 // This is the entry point for the hosting server.
 
-let http = require("http");
-let path = require("path");
+const http = require("http");
+const path = require("path");
 
-let WebTorrent = require("webtorrent-hybrid");
+const WebTorrent = require("webtorrent-hybrid");
 
 // Seed a WebTorrent
 let client = new WebTorrent();
