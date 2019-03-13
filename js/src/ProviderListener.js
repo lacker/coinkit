@@ -23,6 +23,12 @@ class ProviderListener {
     }
   }
 
+  handleRemove(magnet) {
+    if (this.removeCallback) {
+      this.removeCallback(magnet);
+    }
+  }
+
   // Listens forever
   async listen(id) {
     // buckets maps bucket name to information about the bucket
