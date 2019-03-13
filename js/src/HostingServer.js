@@ -9,6 +9,21 @@ class HostingServer {
   // id is the provider id we are hosting for
   constructor(id) {
     this.id = id;
+    this.verbose = false;
+  }
+
+  log(...args) {
+    if (this.verbose) {
+      console.log(...args);
+    }
+  }
+
+  add(magnet) {
+    this.log("adding magnet:", magnet);
+  }
+
+  remove(magnet) {
+    this.log("removing magnet:", magnet);
   }
 }
 

@@ -17,6 +17,14 @@ class ProviderListener {
     }
   }
 
+  onAdd(f) {
+    this.addCallback = f;
+  }
+
+  onRemove(f) {
+    this.removeCallback = f;
+  }
+
   handleAdd(magnet) {
     if (this.addCallback) {
       this.addCallback(magnet);
