@@ -7,11 +7,19 @@ class ProviderListener {
   constructor() {
     this.client = new ChainClient();
     this.verbose = false;
+    this.addCallback = null;
+    this.removeCallback = null;
   }
 
   log(...args) {
     if (this.verbose) {
       console.log(...args);
+    }
+  }
+
+  handleAdd(magnet) {
+    if (this.addCallback) {
+      this.addCallback(magnet);
     }
   }
 
