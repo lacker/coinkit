@@ -1,5 +1,7 @@
 // This is the entry point for the hosting server.
 
+// TODO: make this read args and create a HostingServer
+
 const http = require("http");
 const path = require("path");
 const WebTorrent = require("webtorrent-hybrid");
