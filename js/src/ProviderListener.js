@@ -43,6 +43,7 @@ class ProviderListener {
         if (oldVersion) {
           if (oldVersion.magnet != bucket.magnet) {
             this.log(bucket.name, "bucket has new magnet:", bucket.magnet);
+            this.handleRemove(oldVersion.magnet);
             this.handleAdd(bucket.magnet);
           }
         } else {
@@ -53,8 +54,8 @@ class ProviderListener {
       }
 
       // Check for dropped buckets
-      for (let name in newBuckets) {
-        if (!buckets[name]) {
+      for (let name in buckets) {
+        if (!newBuckets[name]) {
           this.log("deallocate bucket:", name);
         }
       }
