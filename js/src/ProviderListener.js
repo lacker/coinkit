@@ -57,6 +57,7 @@ class ProviderListener {
       for (let name in buckets) {
         if (!newBuckets[name]) {
           this.log("deallocate bucket:", name);
+          this.handleRemove(buckets[name].magnet);
         }
       }
 
