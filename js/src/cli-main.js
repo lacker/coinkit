@@ -122,7 +122,11 @@ async function createBucket(name, size) {
 }
 
 async function setMagnet(bucketName, magnet) {
-  // TODO
+  let kp = await login();
+  let client = new ChainClient(kp);
+  let bucket = await client.updateBucket(bucketName, magnet);
+  console.log("updated bucket:");
+  console.log(bucket);
 }
 
 async function allocate(bucketName, providerID) {
