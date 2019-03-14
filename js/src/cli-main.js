@@ -313,6 +313,15 @@ async function main() {
     return;
   }
 
+  if (op === "deploy") {
+    if (rest.length != 2) {
+      fatal("Usage: npm run cli deploy [directory] [bucketName]");
+    }
+
+    fatal("TODO: implement");
+    return;
+  }
+
   fatal("unrecognized operation: " + op);
 }
 
