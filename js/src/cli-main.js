@@ -148,6 +148,7 @@ async function deploy(directory, bucketName) {
   let client = new TorrentClient();
   let torrent = await client.seed(dir);
   await setMagnet(bucketName, torrent.magnetURI);
+  await torrent.waitForSeeds(2);
 }
 
 // Ask the user for a passphrase to log in.
