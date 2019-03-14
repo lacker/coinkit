@@ -1,6 +1,7 @@
 // The TorrentDownloader finds the right torrent for a hostname and uses that to return
 // subsequent files.
 // It is designed to be used non-persistently from a web browser.
+// TODO: make this use TorrentClient
 const axios = require("axios");
 const WebTorrent = require("webtorrent");
 
