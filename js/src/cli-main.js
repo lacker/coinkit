@@ -5,6 +5,7 @@ const ChainClient = require("./ChainClient.js");
 const KeyPair = require("./KeyPair.js");
 const Message = require("./Message.js");
 const ProviderListener = require("./ProviderListener.js");
+const TorrentClient = require("./TorrentClient.js");
 
 function fatal(message) {
   console.log(message);
@@ -140,7 +141,9 @@ async function deallocate(bucketName, providerID) {
 
 async function deploy(directory, bucketName) {
   let dir = path.resolve(directory);
-  // TODO
+  let client = new TorrentClient();
+  let torrent = await client.seed(dir);
+  await setMagnet(bucketName, torrent.magnetURI);
 }
 
 // Ask the user for a passphrase to log in.

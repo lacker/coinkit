@@ -1,10 +1,12 @@
-// The TorrentHost hosts a webtorrent, possibly over a long period of time, running
+// The TorrentHost hosts webtorrents, possibly over a long period of time, running
 // on node, backed by the filesystem.
 
-const WebTorrent = require("webtorrent");
+const TorrentClient = require("./TorrentClient.js");
 
 class TorrentHost {
-  constructor() {}
+  constructor() {
+    this.client = new TorrentClient();
+  }
 }
 
 module.exports = TorrentHost;

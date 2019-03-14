@@ -1,5 +1,6 @@
 // A wrapper around the WebTorrent client with an async API.
 const WebTorrent = require("webtorrent");
+const { sleep } = require("./Util.js");
 
 class TorrentClient {
   constructor() {
@@ -14,6 +15,14 @@ class TorrentClient {
       });
     });
     return await promise;
+  }
+
+  // Waits for the provided torrent object to be seeded
+  async waitForSeed(torrent) {
+    // TODO: actually wait for the seed
+    while (true) {
+      await sleep(10000);
+    }
   }
 }
 
