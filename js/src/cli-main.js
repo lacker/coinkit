@@ -1,3 +1,4 @@
+const path = require("path");
 const readline = require("readline");
 
 const ChainClient = require("./ChainClient.js");
@@ -138,6 +139,7 @@ async function deallocate(bucketName, providerID) {
 }
 
 async function deploy(directory, bucketName) {
+  let dir = path.resolve(directory);
   // TODO
 }
 
