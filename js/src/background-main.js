@@ -1,7 +1,7 @@
 // This code runs in the persistent background page.
 import LocalStorage from "./LocalStorage";
 import Storage from "./Storage";
-import TorrentClient from "./TorrentClient";
+import TorrentDownloader from "./TorrentDownloader";
 import TrustedClient from "./TrustedClient";
 
 window.storage = new Storage(new LocalStorage());
@@ -59,13 +59,13 @@ setBlackHoleProxy("localhost:3333", {}).then(() => {
   console.log("initial black hole proxy configuration complete");
 });
 
-let client = new TorrentClient();
+let downloader = new TorrentDownloader();
 
 // Handle non-html requests by redirecting them to a data URL
 chrome.webRequest.onBeforeRequest.addListener(
   details => {
     let url = new URL(details.url);
-    let file = client.getFileFromCache(url.hostname, url.pathname);
+    let file = downloader.getFileFromCache(url.hostname, url.pathname);
     if (!file.data) {
       console.log("no data found for", url.hostname, url.pathname);
       return { redirectUrl: "about:blank" };
@@ -106,7 +106,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     return false;
   }
   let { hostname, pathname } = message.getFile;
-  client.getFile(hostname, pathname).then(file => {
+  downloader.getFile(hostname, pathname).then(file => {
     // TODO: handle non html stuff
     console.log("sending response:", file.html);
     sendResponse(file.html);

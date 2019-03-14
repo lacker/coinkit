@@ -1,5 +1,6 @@
-// The TorrentClient finds the right torrent for a hostname and uses that to return
+// The TorrentDownloader finds the right torrent for a hostname and uses that to return
 // subsequent files.
+// It is designed to be used non-persistently from a web browser.
 const axios = require("axios");
 const WebTorrent = require("webtorrent");
 
@@ -62,7 +63,7 @@ async function downloadTorrent(client, magnet) {
   });
 }
 
-export default class TorrentClient {
+export default class TorrentDownloader {
   constructor() {
     this.client = new WebTorrent();
 
