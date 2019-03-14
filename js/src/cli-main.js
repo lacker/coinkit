@@ -119,6 +119,10 @@ async function createBucket(name, size) {
   console.log(bucket);
 }
 
+async function setMagnet(bucketName, magnet) {
+  // TODO
+}
+
 async function allocate(bucketName, providerID) {
   let kp = await login();
   let client = new ChainClient(kp);
@@ -133,7 +137,7 @@ async function deallocate(bucketName, providerID) {
   console.log("deallocated", bucketName, "bucket from provider", providerID);
 }
 
-async function setMagnet(bucketName, magnet) {
+async function deploy(directory, bucketName) {
   // TODO
 }
 
@@ -318,7 +322,9 @@ async function main() {
       fatal("Usage: npm run cli deploy [directory] [bucketName]");
     }
 
-    fatal("TODO: implement");
+    let directory = rest[0];
+    let bucketName = rest[1];
+    await deploy(directory, bucketName);
     return;
   }
 
