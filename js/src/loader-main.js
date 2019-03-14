@@ -1,7 +1,5 @@
 // This code is injected into .coinkit pages in order to load their actual content.
 
-import TorrentClient from "./TorrentClient";
-
 window.stop();
 
 chrome.runtime.sendMessage(
