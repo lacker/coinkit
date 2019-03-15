@@ -27,6 +27,7 @@ func TestSignedOperationJson(t *testing.T) {
 	}
 	so := NewSignedOperation(op, kp)
 	bytes := util.CanonicalJSONEncode(so)
+	t.Logf("canonically encoded signed op: %s", bytes)
 	so2 := &SignedOperation{}
 	err := json.Unmarshal(bytes, so2)
 	if err != nil {

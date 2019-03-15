@@ -29,7 +29,8 @@ func NewSignedOperation(op Operation, kp *util.KeyPair) *SignedOperation {
 	}
 
 	bytes := util.CanonicalJSONEncode(op)
-	sig := kp.Sign(op.OperationType() + string(bytes))
+	payload := op.OperationType() + string(bytes)
+	sig := kp.Sign(payload)
 
 	return &SignedOperation{
 		Operation: op,
@@ -50,6 +51,7 @@ func (s *SignedOperation) UnmarshalJSON(data []byte) error {
 	if err != nil {
 		return err
 	}
+
 	opType, ok := OperationTypeMap[partial.Type]
 	if !ok {
 		return fmt.Errorf("unregistered op type: %s", partial.Type)
@@ -71,8 +73,8 @@ func (s *SignedOperation) UnmarshalJSON(data []byte) error {
 	if err != nil {
 		return err
 	}
-	if !util.VerifySignature(pk, partial.Type+string(partial.Operation),
-		partial.Signature) {
+	payload := partial.Type + string(partial.Operation)
+	if !util.VerifySignature(pk, payload, partial.Signature) {
 		return fmt.Errorf("invalid signature on SignedOperation")
 	}
 

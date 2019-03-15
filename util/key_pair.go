@@ -126,5 +126,6 @@ func VerifySignature(publicKey PublicKey, message string, signature string) bool
 	if err != nil || len(sig) != ed25519.SignatureSize {
 		return false
 	}
-	return ed25519.Verify(pub, []byte(message), sig)
+	answer := ed25519.Verify(pub, []byte(message), sig)
+	return answer
 }
