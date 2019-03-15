@@ -50,8 +50,8 @@ func (op *UpdateDocumentOperation) GetData() *JSONObject {
 	return op.Data
 }
 
-func (op *UpdateDocumentOperation) Verify() bool {
-	return true
+func (op *UpdateDocumentOperation) Verify() error {
+	return nil
 }
 
 // Works with MakeTestCreateDocumentOperation to change the value

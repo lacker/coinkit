@@ -44,14 +44,14 @@ func (op *DeallocateOperation) GetSequence() uint32 {
 	return op.Sequence
 }
 
-func (op *DeallocateOperation) Verify() bool {
+func (op *DeallocateOperation) Verify() error {
 	if !IsValidBucketName(op.BucketName) {
-		return false
+		return fmt.Errorf("invalid bucket name: %s", op.BucketName)
 	}
 	if op.ProviderID == 0 {
-		return false
+		return fmt.Errorf("providerID cannot be zero")
 	}
-	return true
+	return nil
 }
 
 func init() {

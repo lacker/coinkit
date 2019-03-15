@@ -40,8 +40,8 @@ func (op *DeleteDocumentOperation) GetSequence() uint32 {
 	return op.Sequence
 }
 
-func (op *DeleteDocumentOperation) Verify() bool {
-	return true
+func (op *DeleteDocumentOperation) Verify() error {
+	return nil
 }
 
 func MakeTestDeleteDocumentOperation(id uint64, sequence int) *SignedOperation {

@@ -41,8 +41,8 @@ func (op *CreateProviderOperation) GetSequence() uint32 {
 	return op.Sequence
 }
 
-func (op *CreateProviderOperation) Verify() bool {
-	return true
+func (op *CreateProviderOperation) Verify() error {
+	return nil
 }
 
 func MakeTestCreateProviderOperation(n int) *SignedOperation {

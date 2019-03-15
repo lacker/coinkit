@@ -41,9 +41,8 @@ func (op *DeleteProviderOperation) GetSequence() uint32 {
 	return op.Sequence
 }
 
-// TODO: should this do something?
-func (op *DeleteProviderOperation) Verify() bool {
-	return true
+func (op *DeleteProviderOperation) Verify() error {
+	return nil
 }
 
 func MakeTestDeleteProviderOperation(id uint64, n int) *SignedOperation {

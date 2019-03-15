@@ -31,10 +31,10 @@ func TestOperationMessages(t *testing.T) {
 	if len(m.Operations) != 2 {
 		t.Fatal("expected len m.Operations to be 2")
 	}
-	if !m.Operations[0].Verify() {
+	if m.Operations[0].Verify() != nil {
 		t.Fatal("expected m.Operations[0].Verify()")
 	}
-	if !m.Operations[1].Verify() {
+	if m.Operations[1].Verify() != nil {
 		t.Fatal("expected m.Operations[1].Verify()")
 	}
 

@@ -62,8 +62,9 @@ func (s *SignedOperation) UnmarshalJSON(data []byte) error {
 	if op == nil {
 		return fmt.Errorf("decoding a nil operation is not valid")
 	}
-	if !op.Verify() {
-		return fmt.Errorf("the decoded operation was invalid")
+	err = op.Verify()
+	if err != nil {
+		return err
 	}
 
 	pk, err := util.ReadPublicKey(op.GetSigner())

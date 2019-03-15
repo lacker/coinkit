@@ -14,7 +14,7 @@ func TestSignedOperation(t *testing.T) {
 		Signer: kp.PublicKey().String(),
 	}
 	so := NewSignedOperation(op, kp)
-	if !so.Verify() {
+	if so.Verify() != nil {
 		t.Fatal("so should Verify")
 	}
 }

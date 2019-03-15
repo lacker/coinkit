@@ -45,8 +45,8 @@ func (op *CreateDocumentOperation) GetData() *JSONObject {
 	return op.Data
 }
 
-func (op *CreateDocumentOperation) Verify() bool {
-	return true
+func (op *CreateDocumentOperation) Verify() error {
+	return nil
 }
 
 func MakeTestCreateDocumentOperation(n int) *SignedOperation {

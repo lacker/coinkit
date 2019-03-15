@@ -10,7 +10,7 @@ func TestFullQueue(t *testing.T) {
 		op := makeTestSendOperation(i)
 		send := op.Operation.(*SendOperation)
 		q.cache.SetBalance(send.Signer, 10*send.Amount)
-		if !op.Verify() {
+		if op.Verify() != nil {
 			t.Fatalf("bad op: %+v", op)
 		}
 
@@ -41,7 +41,7 @@ func TestSendOperation(t *testing.T) {
 	op := makeTestSendOperation(0)
 	tr := op.Operation.(*SendOperation)
 	q.cache.SetBalance(tr.Signer, 10*tr.Amount)
-	if !op.Verify() {
+	if op.Verify() != nil {
 		t.Fatal("bad op")
 	}
 	q.Add(op)
@@ -53,7 +53,7 @@ func TestSendOperation(t *testing.T) {
 func TestCreateDocumentOperation(t *testing.T) {
 	q := NewTestingOperationQueue()
 	op := MakeTestCreateDocumentOperation(1)
-	if !op.Verify() {
+	if op.Verify() != nil {
 		t.Fatal("bad op")
 	}
 	q.Add(op)

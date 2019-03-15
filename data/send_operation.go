@@ -46,11 +46,11 @@ func (op *SendOperation) GetSequence() uint32 {
 	return op.Sequence
 }
 
-func (op *SendOperation) Verify() bool {
+func (op *SendOperation) Verify() error {
 	if _, err := util.ReadPublicKey(op.To); err != nil {
-		return false
+		return fmt.Errorf("cannot send to invalid public key: %s", op.To)
 	}
-	return true
+	return nil
 }
 
 func makeTestSendOperation(n int) *SignedOperation {

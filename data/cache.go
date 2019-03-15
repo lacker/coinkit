@@ -750,8 +750,9 @@ func (c *Cache) ProcessChunk(chunk *LedgerChunk) error {
 		if op == nil {
 			return fmt.Errorf("chunk has a nil op")
 		}
-		if !op.Verify() {
-			return fmt.Errorf("op failed verify: %+v", op)
+		err := op.Verify()
+		if err != nil {
+			return err
 		}
 		if !c.Process(op.Operation) {
 			return fmt.Errorf("op failed to process: %+v", op)

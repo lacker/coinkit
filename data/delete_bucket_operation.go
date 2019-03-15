@@ -41,9 +41,8 @@ func (op *DeleteBucketOperation) GetSequence() uint32 {
 	return op.Sequence
 }
 
-// TODO: should this do something?
-func (op *DeleteBucketOperation) Verify() bool {
-	return true
+func (op *DeleteBucketOperation) Verify() error {
+	return nil
 }
 
 func MakeTestDeleteBucketOperation(n int) *SignedOperation {

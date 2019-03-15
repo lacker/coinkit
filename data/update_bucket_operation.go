@@ -44,8 +44,11 @@ func (op *UpdateBucketOperation) GetSequence() uint32 {
 	return op.Sequence
 }
 
-func (op *UpdateBucketOperation) Verify() bool {
-	return IsValidMagnet(op.Magnet)
+func (op *UpdateBucketOperation) Verify() error {
+	if !IsValidMagnet(op.Magnet) {
+		return fmt.Errorf("invalid magnet: %s", op.Magnet)
+	}
+	return nil
 }
 
 func MakeTestUpdateBucketOperation(n int) *SignedOperation {

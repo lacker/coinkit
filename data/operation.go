@@ -24,8 +24,8 @@ type Operation interface {
 
 	// Verify() should do any internal checking that this operation can do to
 	// make sure it is valid. This doesn't include checking against data in the
-	// blockchain.
-	Verify() bool
+	// blockchain. This returns a descriptive error when verification fails.
+	Verify() error
 
 	// GetFee() returns how much the signer is willing to pay to prioritize this op
 	GetFee() uint64

@@ -44,9 +44,11 @@ func (op *UpdateProviderOperation) GetSequence() uint32 {
 	return op.Sequence
 }
 
-// TODO: should this do something?
-func (op *UpdateProviderOperation) Verify() bool {
-	return true
+func (op *UpdateProviderOperation) Verify() error {
+	if op.ID == 0 {
+		return fmt.Errorf("provider id cannot be zero")
+	}
+	return nil
 }
 
 func MakeTestUpdateProviderOperation(id uint64, n int) *SignedOperation {

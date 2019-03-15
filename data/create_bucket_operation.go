@@ -44,14 +44,14 @@ func (op *CreateBucketOperation) GetSequence() uint32 {
 	return op.Sequence
 }
 
-func (op *CreateBucketOperation) Verify() bool {
+func (op *CreateBucketOperation) Verify() error {
 	if !IsValidBucketName(op.Name) {
-		return false
+		return fmt.Errorf("invalid bucket name: %s", op.Name)
 	}
 	if op.Size == 0 {
-		return false
+		return fmt.Errorf("cannot create bucket of size zero")
 	}
-	return true
+	return nil
 }
 
 func MakeTestCreateBucketOperation(n int) *SignedOperation {
