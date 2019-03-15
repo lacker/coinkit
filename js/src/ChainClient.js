@@ -32,6 +32,23 @@ async function standardWait() {
   return await sleep(STANDARD_WAIT);
 }
 
+async function retryPost(url, body, params) {
+  let retries = 3;
+  for (let i = 0; i < retries; i++) {
+    try {
+      let response = await axios.post(url, body, {
+        headers: { "Content-Type": "text/plain" },
+        responseType: "text"
+      });
+      return response;
+    } catch (e) {
+      console.log(e);
+      standardWait();
+    }
+  }
+  throw new Error("connection failed after " + retries + " retries");
+}
+
 function getServerURL() {
   let index = Math.floor(Math.random() * URLS.length);
   return URLS[index];
@@ -67,7 +84,7 @@ class ChainClient {
     let url = getServerURL() + "/messages";
     let body = clientMessage.serialize() + "\n";
     this.log("sending body:", body);
-    let response = await axios.post(url, body, {
+    let response = await retryPost(url, body, {
       headers: { "Content-Type": "text/plain" },
       responseType: "text"
     });
