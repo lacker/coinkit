@@ -28,7 +28,7 @@ func NewSignedOperation(op Operation, kp *util.KeyPair) *SignedOperation {
 		util.Logger.Fatal("you can only sign your own operations")
 	}
 
-	bytes := util.AlphabeticalJSONEncode(op)
+	bytes := util.CanonicalJSONEncode(op)
 	sig := kp.Sign(op.OperationType() + string(bytes))
 
 	return &SignedOperation{

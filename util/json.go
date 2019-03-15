@@ -22,8 +22,8 @@ func ToJSON(x interface{}) []byte {
 	return bs
 }
 
-// Returns a descriptive error if this is not alphabetical json
-func CheckAlphabeticalJSON(bs []byte) error {
+// Returns a descriptive error if this is not canonical json
+func CheckCanonicalJSON(bs []byte) error {
 	var decoded interface{}
 	json.Unmarshal(bs, &decoded)
 	reencoded, err := json.Marshal(decoded)
@@ -37,9 +37,12 @@ func CheckAlphabeticalJSON(bs []byte) error {
 	return nil
 }
 
-// JSON-encodes something, and also alphabetizes the fields.
+// JSON-encodes something in a canonical way.
+// The optional choices that make this canonical:
+//   * Field order is alphabetized
+//   * & < > characters are not escaped
 // TODO: this encodes twice. find a more efficient way to do this
-func AlphabeticalJSONEncode(x interface{}) []byte {
+func CanonicalJSONEncode(x interface{}) []byte {
 	encoded, err := json.Marshal(x)
 	if err != nil {
 		panic(err)

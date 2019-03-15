@@ -72,7 +72,7 @@ func EncodeMessage(m Message) string {
 		Type:    m.MessageType(),
 		Message: m,
 	}
-	encoded := string(AlphabeticalJSONEncode(dm))
+	encoded := string(CanonicalJSONEncode(dm))
 
 	if Testing() {
 		// Check for capitalized fields.
@@ -95,7 +95,7 @@ func DecodeMessage(encoded string) (Message, error) {
 	if err != nil {
 		return nil, err
 	}
-	err = CheckAlphabeticalJSON(bytes)
+	err = CheckCanonicalJSON(bytes)
 	if err != nil {
 		return nil, err
 	}

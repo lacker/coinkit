@@ -58,7 +58,7 @@ func (c *LedgerChunk) String() string {
 }
 
 func (c *LedgerChunk) Value() (driver.Value, error) {
-	bytes := util.AlphabeticalJSONEncode(c)
+	bytes := util.CanonicalJSONEncode(c)
 	return driver.Value(bytes), nil
 }
 
