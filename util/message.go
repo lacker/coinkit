@@ -95,8 +95,9 @@ func DecodeMessage(encoded string) (Message, error) {
 	if err != nil {
 		return nil, err
 	}
-	if !IsAlphabeticalJSON(bytes) {
-		return nil, fmt.Errorf("message json is not alphabetized: %s", encoded)
+	err = CheckAlphabeticalJSON(bytes)
+	if err != nil {
+		return nil, err
 	}
 
 	if pdm.Type == "" {

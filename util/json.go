@@ -3,6 +3,7 @@ package util
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 )
 
 func PrettyJSON(x interface{}) []byte {
@@ -21,14 +22,19 @@ func ToJSON(x interface{}) []byte {
 	return bs
 }
 
-func IsAlphabeticalJSON(bs []byte) bool {
+// Returns a descriptive error if this is not alphabetical json
+func CheckAlphabeticalJSON(bs []byte) error {
 	var decoded interface{}
 	json.Unmarshal(bs, &decoded)
 	reencoded, err := json.Marshal(decoded)
 	if err != nil {
-		return false
+		return fmt.Errorf("could not reencode json: %s", err)
 	}
-	return bytes.Compare(bs, reencoded) == 0
+	if bytes.Compare(bs, reencoded) != 0 {
+		return fmt.Errorf("unalphabetical json:\n%s\nthe alphabetized version is:\n%s",
+			bs, reencoded)
+	}
+	return nil
 }
 
 // JSON-encodes something, and also alphabetizes the fields.
