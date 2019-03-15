@@ -122,6 +122,9 @@ async function createBucket(name, size) {
 }
 
 async function setMagnet(bucketName, magnet) {
+  if (!magnet || !magnet.startsWith("magnet:")) {
+    throw new Error("" + magnet + " is not a valid magnet URI");
+  }
   let kp = await login();
   let client = new ChainClient(kp);
   client.verbose = true;
