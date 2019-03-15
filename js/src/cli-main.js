@@ -151,7 +151,7 @@ async function deploy(directory, bucketName) {
   let dir = path.resolve(directory);
   let client = new TorrentClient();
   let torrent = await client.seed(dir);
-  await setMagnet(bucketName, torrent.magnetURI);
+  await setMagnet(bucketName, torrent.magnet);
   await torrent.waitForSeeds(2);
 }
 
