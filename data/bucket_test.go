@@ -69,7 +69,7 @@ func TestIsValidBucketName(t *testing.T) {
 }
 
 func TestIsValidMagnet(t *testing.T) {
-	if !IsValidMagnet("http://example.com/x") {
+	if !IsValidMagnet("magnet://example.com/x") {
 		t.Fatalf("should be valid magnet")
 	}
 }

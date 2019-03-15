@@ -393,7 +393,7 @@ func TestBuckets(t *testing.T) {
 	}))
 	check(db.UpdateBucket(&Bucket{
 		Name:   "mybucket",
-		Magnet: "http://example.com/mybucket",
+		Magnet: "magnet://example.com/mybucket",
 	}))
 	check(db.InsertBucket(&Bucket{
 		Name:  "jimsbucket",
@@ -414,7 +414,7 @@ func TestBuckets(t *testing.T) {
 	if b.Owner != "bob" {
 		t.Fatalf("GetBucket got %+v", b)
 	}
-	if b.Magnet != "http://example.com/mybucket" {
+	if b.Magnet != "magnet://example.com/mybucket" {
 		t.Fatalf("GetBucket missing magnet: %+v", b)
 	}
 

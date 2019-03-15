@@ -36,8 +36,11 @@ func IsValidBucketName(s string) bool {
 	return true
 }
 
-// Magnet URIs must be valid urls
+// Magnet URIs must be valid urls and start with "magnet:"
 func IsValidMagnet(m string) bool {
+	if !strings.HasPrefix(m, "magnet:") {
+		return false
+	}
 	_, err := url.ParseRequestURI(m)
 	return err == nil
 }

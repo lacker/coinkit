@@ -216,7 +216,7 @@ func TestAllocation(t *testing.T) {
 	if len(c.GetBucket("mybucket").Providers) != 0 {
 		t.Fatalf("bucket should have no providers")
 	}
-	url := "http://example.com/mybucket"
+	url := "magnet://example.com/mybucket"
 	c.SetMagnet("mybucket", url)
 	db.Commit()
 	if c.GetBucket("mybucket").Magnet != url {
@@ -282,7 +282,7 @@ func TestAllocationProcessing(t *testing.T) {
 		Sequence: 4,
 		Signer:   "jim",
 		Name:     "jimsbucket",
-		Magnet:   "http://example.com/x",
+		Magnet:   "magnet://example.com/x",
 	}
 	if !c.Process(ubop) {
 		t.Fatalf("should be able to update bucket")
