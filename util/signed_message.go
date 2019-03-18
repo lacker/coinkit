@@ -58,7 +58,7 @@ func (sm *SignedMessage) IsKeepAlive() bool {
 // Panics if this message cannot be serialized and deserialized
 func (sm *SignedMessage) CheckSerialization() {
 	serialized := sm.Serialize()
-	sm2, err := NewSignedMessageFromSerialized(serialized)
+	_, err := NewSignedMessageFromSerialized(serialized)
 	if err != nil {
 		panic(err)
 	}
