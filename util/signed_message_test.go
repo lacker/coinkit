@@ -1,6 +1,7 @@
 package util
 
 import (
+	"bytes"
 	"testing"
 )
 
@@ -18,5 +19,18 @@ func TestSignedMessage(t *testing.T) {
 		Logger.Printf("sm: %+v", sm)
 		Logger.Printf("sm2: %+v", sm2)
 		t.Fatal("sm should equal sm2")
+	}
+}
+
+func TestSignedMessageWithPercents(t *testing.T) {
+	m := &TestingMessage{Text: "foo %s bar %d"}
+	kp := NewKeyPairFromSecretPhrase("foo")
+	sm := NewSignedMessage(m, kp)
+	buf := new(bytes.Buffer)
+	sm.Write(buf)
+	serialized := buf.String()
+	_, err := NewSignedMessageFromSerialized(serialized)
+	if err != nil {
+		t.Fatal(err)
 	}
 }
