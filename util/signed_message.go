@@ -69,6 +69,7 @@ func NewSignedMessageFromSerialized(serialized string) (*SignedMessage, error) {
 		return nil, err
 	}
 	if !VerifySignature(publicKey, ms, signature) {
+		Logger.Printf("invalid signature on signed message: %s", serialized)
 		return nil, errors.New("signature failed verification")
 	}
 	m, err := DecodeMessage(ms)
