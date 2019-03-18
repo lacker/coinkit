@@ -55,6 +55,15 @@ func (sm *SignedMessage) IsKeepAlive() bool {
 	return sm.keepalive
 }
 
+// Panics if this message cannot be serialized and deserialized
+func (sm *SignedMessage) CheckSerialization() {
+	serialized := sm.Serialize()
+	sm2, err := NewSignedMessageFromSerialized(serialized)
+	if err != nil {
+		panic(err)
+	}
+}
+
 func NewSignedMessageFromSerialized(serialized string) (*SignedMessage, error) {
 	parts := strings.SplitN(serialized, ":", 4)
 	if len(parts) != 4 {
