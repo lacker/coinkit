@@ -5,8 +5,7 @@
 const axios = require("axios");
 const WebTorrent = require("webtorrent");
 
-// The initial server that tells us where to start finding peers
-let BOOTSTRAP = "http://localhost:4444";
+const ChainClient = require("./ChainClient.js");
 
 // Removes a leading / and adds a trailing index.html if needed
 // so that callers can be indifferent
@@ -91,18 +90,24 @@ export default class TorrentDownloader {
     return data;
   }
 
-  // Returns a promise that maps to a magnet url
+  // Returns a magnet url for a host.
+  // If there is no data for this host, returns null.
   // TODO: sometimes read from cache instead of just writing to it, have staleness logic
   async getMagnetURL(hostname) {
-    let response = await axios.get(BOOTSTRAP);
-    let json = JSON.parse(response.data);
-    let magnet = json.magnet;
+    console.log("looking up bucket for", hostname);
+    let client = new ChainClient();
+    let bucket = await client.getBucket(hostname);
+    if (!bucket || !bucket.magnet) {
+      return null;
+    }
+    console.log("found magnet:", bucket.magnet);
+
     let now = new Date();
     this.magnets[hostname] = {
-      magnet,
+      magnet: bucket.magnet,
       time: now
     };
-    return magnet;
+    return bucket.magnet;
   }
 
   // Starts downloading all files from a hostname and resolves when they are ready
