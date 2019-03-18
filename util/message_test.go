@@ -6,7 +6,8 @@ import (
 )
 
 type TestingMessage struct {
-	Number int `json:"number"`
+	Number int    `json:"number"`
+	Text   string `json:"text"`
 }
 
 func (m *TestingMessage) Slot() int {

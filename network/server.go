@@ -275,7 +275,6 @@ func (s *Server) unsafeProcessMessage(m *util.SignedMessage) *util.SignedMessage
 		return nil
 	}
 	sm := util.NewSignedMessage(message, s.keyPair)
-	sm.CheckSerialization()
 	return sm
 }
 
