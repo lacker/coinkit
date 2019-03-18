@@ -2,6 +2,7 @@ package util
 
 import (
 	"bytes"
+	"strings"
 	"testing"
 )
 
@@ -22,13 +23,26 @@ func TestSignedMessage(t *testing.T) {
 	}
 }
 
+func TestSignedMessageWriting(t *testing.T) {
+	m := &TestingMessage{Number: 7}
+	kp := NewKeyPairFromSecretPhrase("foo")
+	sm := NewSignedMessage(m, kp)
+	buf := new(bytes.Buffer)
+	sm.Write(buf)
+	serialized := strings.TrimSuffix(buf.String(), "\n")
+	_, err := NewSignedMessageFromSerialized(serialized)
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
 func TestSignedMessageWithPercents(t *testing.T) {
 	m := &TestingMessage{Text: "foo %s bar %d"}
 	kp := NewKeyPairFromSecretPhrase("foo")
 	sm := NewSignedMessage(m, kp)
 	buf := new(bytes.Buffer)
 	sm.Write(buf)
-	serialized := buf.String()
+	serialized := strings.TrimSuffix(buf.String(), "\n")
 	_, err := NewSignedMessageFromSerialized(serialized)
 	if err != nil {
 		t.Fatal(err)

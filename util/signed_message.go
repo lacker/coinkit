@@ -108,7 +108,7 @@ func (sm *SignedMessage) Write(w io.Writer) {
 	} else {
 		data = sm.Serialize() + "\n"
 	}
-	fmt.Fprintf(w, data)
+	io.WriteString(w, data)
 }
 
 // ReadSignedMessage can return a nil message even when there is no error.
