@@ -2,6 +2,8 @@
 
 window.stop();
 
+console.log("loading begins");
+
 chrome.runtime.sendMessage(
   {
     getFile: {
@@ -10,6 +12,13 @@ chrome.runtime.sendMessage(
     }
   },
   response => {
+    console.log("loading complete");
+    if (!response) {
+      document.write(
+        "error: received empty response from extension. check extension logs"
+      );
+      return;
+    }
     if (response.error) {
       document.write("error: " + response.error);
     } else {
