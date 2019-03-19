@@ -46,7 +46,9 @@ async function retryPost(url, body, params) {
       standardWait();
     }
   }
-  throw new Error("connection failed after " + retries + " retries");
+  throw new Error(
+    "connection to the blockchain failed after " + retries + " retries"
+  );
 }
 
 function getServerURL() {
