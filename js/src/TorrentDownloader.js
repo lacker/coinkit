@@ -96,12 +96,13 @@ export default class TorrentDownloader {
   async getMagnetURL(hostname) {
     console.log("looking up bucket for", hostname);
     let client = new ChainClient();
-    let bucket = await client.getBucket(hostname);
+    let name = hostname.split(".")[0];
+    let bucket = await client.getBucket(name);
     if (!bucket) {
-      throw new Error("unregistered host: " + hostname);
+      throw new Error("unregistered host: " + name);
     }
     if (!bucket.magnet) {
-      throw new Error("no data uploaded yet for host: " + hostname);
+      throw new Error("no data uploaded yet for host: " + name);
     }
     console.log("found magnet:", bucket.magnet);
 
