@@ -2,6 +2,9 @@
 
 window.stop();
 
+// If we don't clear the body, reloads appear to do nothing, which is confusing.
+document.body.innerHTML = "";
+
 console.log("loading begins");
 
 chrome.runtime.sendMessage(
