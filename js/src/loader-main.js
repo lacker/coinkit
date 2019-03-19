@@ -10,6 +10,10 @@ chrome.runtime.sendMessage(
     }
   },
   response => {
-    document.write(response);
+    if (response.error) {
+      document.write("error: " + response.error);
+    } else {
+      document.write(response);
+    }
   }
 );
