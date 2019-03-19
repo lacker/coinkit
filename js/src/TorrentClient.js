@@ -17,6 +17,22 @@ class TorrentClient {
     });
     return await promise;
   }
+
+  // Returns a Torrent object for downloading this magnet url.
+  // Does not wait for the download to complete before returning.
+  // If you want that, call waitForDone.
+  async download(magnet) {
+    // First, check if this download is already in progress.
+    for (let t of this.client.torrents) {
+      if (t.magnetURI == magnet) {
+        return new Torrent(t);
+      }
+    }
+
+    // Add a new download
+    let t = this.client.add(magnet);
+    return new Torrent(t);
+  }
 }
 
 module.exports = TorrentClient;
