@@ -10,6 +10,10 @@ class Torrent {
     this.infoHash = torrent.infoHash;
   }
 
+  isDone() {
+    return this.torrent.progress == 1;
+  }
+
   // Waits until there are n seeds for this torrent
   async waitForSeeds(n) {
     // TODO: do the right thing here, instead of the wrong thing
