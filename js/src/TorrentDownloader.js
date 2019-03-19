@@ -91,14 +91,17 @@ export default class TorrentDownloader {
   }
 
   // Returns a magnet url for a host.
-  // If there is no data for this host, returns null.
+  // If there is no data for this host, throws a helpful error.
   // TODO: sometimes read from cache instead of just writing to it, have staleness logic
   async getMagnetURL(hostname) {
     console.log("looking up bucket for", hostname);
     let client = new ChainClient();
     let bucket = await client.getBucket(hostname);
-    if (!bucket || !bucket.magnet) {
-      return null;
+    if (!bucket) {
+      throw new Error("unregistered host: " + hostname);
+    }
+    if (!bucket.magnet) {
+      throw new Error("no data uploaded yet for host: " + hostname);
     }
     console.log("found magnet:", bucket.magnet);
 
@@ -111,6 +114,7 @@ export default class TorrentDownloader {
   }
 
   // Starts downloading all files from a hostname and resolves when they are ready
+  // Throws an error if the files cannot be found
   // Resolves to a map from filename to content
   async downloadHostname(hostname) {
     let magnet = await this.getMagnetURL(hostname);
@@ -135,7 +139,7 @@ export default class TorrentDownloader {
     return cache[pathname] || null;
   }
 
-  // Rejects if there is no such file.
+  // Rejects if there is no such file or if there is a loading failure.
   async getFile(hostname, pathname) {
     pathname = cleanPathname(pathname);
     console.log("loading", pathname, "from", hostname);
