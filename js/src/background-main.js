@@ -106,10 +106,16 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     return false;
   }
   let { hostname, pathname } = message.getFile;
-  downloader.getFile(hostname, pathname).then(file => {
-    // TODO: handle non html stuff
-    console.log("sending response:", file.html);
-    sendResponse(file.html);
-  });
+  downloader
+    .getFile(hostname, pathname)
+    .then(file => {
+      // TODO: handle non html stuff
+      console.log("sending response:", file.html);
+      sendResponse(file.html);
+    })
+    .catch(e => {
+      console.log("sending error response:", e);
+      sendResponse(e);
+    });
   return true;
 });
