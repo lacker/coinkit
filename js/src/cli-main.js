@@ -152,8 +152,9 @@ async function deploy(directory, bucketName) {
   let client = new TorrentClient();
   console.log("creating torrent...");
   let torrent = await client.seed(dir);
+  console.log("serving torrent:", torrent.infoHash, "at", torrent.magnet);
   await setMagnet(bucketName, torrent.magnet);
-  console.log("serving torrent...");
+  console.log("chain updated. waiting for seeds...");
   await torrent.waitForSeeds(2);
 }
 

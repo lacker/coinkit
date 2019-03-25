@@ -8,7 +8,7 @@ const WebTorrent = require("webtorrent-hybrid");
 
 const BlackHoleProxy = require("./BlackHoleProxy.js");
 
-/* TODO: remove this webtorrent seeding once the deploy-based seeding is working
+// TODO: remove this webtorrent seeding once the deploy-based seeding is working
 
 // Seed a WebTorrent
 let client = new WebTorrent();
@@ -30,7 +30,5 @@ client.seed(dir, torrent => {
   fakeChain.listen(fakeChainPort);
   console.log("running fake chain on port", fakeChainPort);
 });
-
-*/
 
 let proxy = new BlackHoleProxy(3333);
