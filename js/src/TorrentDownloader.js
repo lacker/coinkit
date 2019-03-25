@@ -54,9 +54,11 @@ async function readTorrent(torrent) {
 
 // Adds a magnet to a WebTorrent client and resolves when it finishes
 async function downloadTorrent(client, magnet) {
+  console.log("downloading torrent:", magnet);
   return await new Promise((resolve, reject) => {
     client.add(magnet, torrent => {
       torrent.on("done", () => {
+        console.log("download complete:", magnet);
         resolve(torrent);
       });
     });

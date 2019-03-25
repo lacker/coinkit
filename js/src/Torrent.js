@@ -14,6 +14,7 @@ class Torrent {
     return this.torrent.progress == 1;
   }
 
+  // Always returns null
   async waitForDone() {
     if (this.isDone()) {
       return null;
