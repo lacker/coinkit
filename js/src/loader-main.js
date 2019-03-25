@@ -3,9 +3,10 @@
 // Stops the process of loading the nonexistent .coinkit url
 window.stop();
 
-// Starts displaying a blank document, rather than whatever document was previously
-// shown in the browser
-document.open();
+// It makes the UI more comprehensible to show something new, rather
+// than whatever document was previously shown in the browser. Making
+// this empty just causes the browser to not show anything yet.
+document.write("loading...");
 
 console.log("loading begins");
 
@@ -18,6 +19,7 @@ chrome.runtime.sendMessage(
   },
   response => {
     console.log("loading complete");
+    document.open();
     if (!response) {
       document.write(
         "error: received empty response from extension. check extension logs"
