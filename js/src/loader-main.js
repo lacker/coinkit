@@ -1,9 +1,11 @@
 // This code is injected into .coinkit pages in order to load their actual content.
 
+// Stops the process of loading the nonexistent .coinkit url
 window.stop();
 
-// If we don't clear the body, reloads appear to do nothing, which is confusing.
-document.body.innerHTML = "";
+// Starts displaying a blank document, rather than whatever document was previously
+// shown in the browser
+document.open();
 
 console.log("loading begins");
 
