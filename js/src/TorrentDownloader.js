@@ -57,6 +57,9 @@ async function downloadTorrent(client, magnet) {
   console.log("downloading torrent:", magnet);
   return await new Promise((resolve, reject) => {
     client.add(magnet, torrent => {
+      torrent.on("error", err => {
+        console.log("webtorrent error:", err.message);
+      });
       torrent.on("done", () => {
         console.log("download complete:", magnet);
         resolve(torrent);

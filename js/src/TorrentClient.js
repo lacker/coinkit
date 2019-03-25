@@ -7,7 +7,7 @@ class TorrentClient {
   constructor() {
     this.client = new WebTorrent();
     this.client.on("error", err => {
-      console.log("internal webtorrent error:", err.message);
+      console.log("WebTorrent error:", err.message);
     });
   }
 
