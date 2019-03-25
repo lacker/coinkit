@@ -6,6 +6,9 @@ const Torrent = require("./Torrent.js");
 class TorrentClient {
   constructor() {
     this.client = new WebTorrent();
+    this.client.on("error", err => {
+      console.log("internal webtorrent error:", err.message);
+    });
   }
 
   // Returns a Torrent object
