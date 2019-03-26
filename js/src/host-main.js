@@ -17,6 +17,10 @@ client.seed(dir, torrent => {
   console.log("info hash: " + torrent.infoHash);
   // console.log("magnet uri: " + torrent.magnetURI);
 
+  torrent.on("wire", (wire, addr) => {
+    console.log("connected to peer with address", addr);
+  });
+
   /*
   // fakeChain tells clients where to look for the torrent
   // TODO: make this happen via the real chain
