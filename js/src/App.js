@@ -5,7 +5,16 @@ import React, { Component } from "react";
 import UntrustedClient from "./UntrustedClient";
 import KeyPair from "./KeyPair";
 
-import WebTorrent from "webtorrent";
+import TorrentClient from "./TorrentClient";
+
+async function fetchPeerData() {
+  const SAMPLESITE = "e60f82343019bd711c5c731b46e118b0f2b2ecc6";
+  let client = new TorrentClient();
+  client.verbose = true;
+  let torrent = client.download(SAMPLESITE);
+  await torrent.monitorProgress();
+  client.destroy();
+}
 
 export default class App extends Component {
   constructor(props) {
@@ -22,28 +31,6 @@ export default class App extends Component {
   fetchBlockchainData() {
     // this.fetchBalance();
     this.fetchPublicKey();
-  }
-
-  fetchPeerData() {
-    let client = new WebTorrent();
-
-    let torrentId =
-      "magnet:?xt=urn:btih:786005acb1312a764e90317e6b26ca3447583d12&dn=hello.txt&tr=udp%3A%2F%2Fexplodie.org%3A6969&tr=udp%3A%2F%2Ftracker.coppersurfer.tk%3A6969&tr=udp%3A%2F%2Ftracker.empire-js.us%3A1337&tr=udp%3A%2F%2Ftracker.leechers-paradise.org%3A6969&tr=udp%3A%2F%2Ftracker.opentrackr.org%3A1337&tr=wss%3A%2F%2Ftracker.btorrent.xyz&tr=wss%3A%2F%2Ftracker.fastcast.nz&tr=wss%3A%2F%2Ftracker.openwebtorrent.com";
-
-    client.add(torrentId, torrent => {
-      torrent.on("done", () => {
-        let file = torrent.files[0];
-        console.log("got " + file.downloaded + " bytes");
-        file.getBlob((err, blob) => {
-          let reader = new FileReader();
-          reader.onload = () => {
-            console.log("result:", reader.result);
-            alert(reader.result);
-          };
-          reader.readAsText(blob);
-        });
-      });
-    });
   }
 
   async fetchBalance() {
@@ -97,7 +84,7 @@ export default class App extends Component {
         <hr />
         <button
           onClick={() => {
-            this.fetchPeerData();
+            fetchPeerData();
           }}
         >
           Fetch Peer Data
