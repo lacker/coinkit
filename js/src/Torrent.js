@@ -26,7 +26,11 @@ class Torrent {
       console.log("progress:", this.torrent.progress);
       await sleep(1000);
     }
-    console.log("progress complete");
+    console.log(
+      "progress complete.",
+      this.torrent.downloaded,
+      "bytes downloaded"
+    );
   }
 
   // Always returns null
