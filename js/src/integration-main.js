@@ -36,4 +36,9 @@ client.add(info, torrent => {
   for (let file of torrent.files) {
     console.log("file:", file.name);
   }
+
+  torrent.on("done", () => {
+    console.log("downloaded", torrent.downloaded, "bytes");
+    client.destroy();
+  });
 });
