@@ -11,7 +11,7 @@ async function fetchPeerData() {
   const SAMPLESITE = "e60f82343019bd711c5c731b46e118b0f2b2ecc6";
   let client = new TorrentClient();
   client.verbose = true;
-  let torrent = client.download(SAMPLESITE);
+  let torrent = await client.download(SAMPLESITE);
   await torrent.monitorProgress();
   client.destroy();
 }

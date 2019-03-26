@@ -40,7 +40,7 @@ class TorrentClient {
   // Returns a Torrent object for downloading this magnet url.
   // Does not wait for the download to complete before returning.
   // If you want that, call waitForDone.
-  download(magnet) {
+  async download(magnet) {
     // First, check if this download is already in progress.
     for (let t of this.client.torrents) {
       if (t.magnetURI == magnet) {
