@@ -4,9 +4,10 @@
   "description": "a coinkit wallet",
   "scripts": {
     "app": "parcel app/index.html",
+    "cli": "node --no-warnings src/cli-main.js",
     "extension": "parcel -p 2345 --no-hmr build src/popup-main.js src/background-main.js src/content-main.js src/loader-main.js -d extension/",
     "host": "node src/host-main.js",
-    "cli": "node --no-warnings src/cli-main.js",
+    "integration": "node src/integration-main.js",
     "test": "jest"
   },
   "author": "Kevin Lacker",
