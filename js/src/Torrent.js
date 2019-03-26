@@ -4,11 +4,11 @@ const WebTorrent = require("webtorrent");
 const { sleep } = require("./Util.js");
 
 class Torrent {
-  constructor(torrent) {
+  constructor(torrent, verbose) {
     this.torrent = torrent;
     this.magnet = torrent.magnetURI;
     this.infoHash = torrent.infoHash;
-    this.verbose = false;
+    this.verbose = !!verbose;
   }
 
   log(...args) {

@@ -9,6 +9,13 @@ class TorrentClient {
     this.client.on("error", err => {
       console.log("fatal error:", err.message);
     });
+    this.verbose = false;
+  }
+
+  log(...args) {
+    if (this.verbose) {
+      console.log(...args);
+    }
   }
 
   // Returns an array of Torrent objects
@@ -24,7 +31,7 @@ class TorrentClient {
   async seed(directory) {
     let promise = new Promise((resolve, reject) => {
       this.client.seed(directory, torrent => {
-        resolve(new Torrent(torrent));
+        resolve(new Torrent(torrent, this.verbose));
       });
     });
     return await promise;
@@ -37,13 +44,17 @@ class TorrentClient {
     // First, check if this download is already in progress.
     for (let t of this.client.torrents) {
       if (t.magnetURI == magnet) {
-        return new Torrent(t);
+        return new Torrent(t, this.verbose);
       }
     }
 
     // Add a new download
     let t = this.client.add(magnet);
-    return new Torrent(t);
+    this.log("downloading", magnet);
+    t.on("metadata", () => {
+      this.log("metadata acquired for", magnet);
+    });
+    return new Torrent(t, this.verbose);
   }
 
   // Shuts down the torrent client.

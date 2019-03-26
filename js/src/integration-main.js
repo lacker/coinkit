@@ -10,6 +10,7 @@ const DAT = "9ca28626647404a6fd831b56fb2e8530891a943e";
 
 async function main() {
   let client = new TorrentClient();
+  client.verbose = true;
   let torrent = client.download(SAMPLESITE);
   await torrent.monitorProgress();
   client.destroy();
