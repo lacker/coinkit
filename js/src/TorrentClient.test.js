@@ -20,7 +20,7 @@ test.skip("Downloading a test torrent", async () => {
 
   let client = new TorrentClient();
   client.verbose = true;
-  let torrent = await client.download(magnet);
+  let torrent = client.download(magnet);
   await torrent.waitForDone();
   // TODO: check something about the data
 
