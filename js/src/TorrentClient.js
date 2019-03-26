@@ -36,6 +36,16 @@ class TorrentClient {
     let t = this.client.add(magnet);
     return new Torrent(t);
   }
+
+  // Shuts down the torrent client.
+  async destroy() {
+    let promise = new Promise((resolve, reject) => {
+      this.client.destroy(err => {
+        resolve(null);
+      });
+    });
+    return await promise;
+  }
 }
 
 module.exports = TorrentClient;
