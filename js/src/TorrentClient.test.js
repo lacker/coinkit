@@ -7,13 +7,16 @@ test("Creating and shutting down a torrent client", async () => {
   await client.destroy();
 });
 
-test("Seeding a torrent", async () => {
-  let seedClient = new TorrentClient();
-  let dir = path.resolve(__dirname, "samplesite");
-  let t = await seedClient.seed(dir);
-  let magnet = t.magnet;
-  await seedClient.destroy();
-});
+test(
+  "Seeding a torrent",
+  async () => {
+    let seedClient = new TorrentClient();
+    let dir = path.resolve(__dirname, "samplesite");
+    let t = await seedClient.seed(dir);
+    await seedClient.destroy();
+  },
+  10000
+);
 
 /*
   // Download that exact torrent
