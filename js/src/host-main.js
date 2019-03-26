@@ -15,8 +15,9 @@ let client = new WebTorrent();
 let dir = path.resolve(__dirname, "samplesite");
 client.seed(dir, torrent => {
   console.log("info hash: " + torrent.infoHash);
-  console.log("magnet uri: " + torrent.magnetURI);
+  // console.log("magnet uri: " + torrent.magnetURI);
 
+  /*
   // fakeChain tells clients where to look for the torrent
   // TODO: make this happen via the real chain
   let fakeChainPort = 4444;
@@ -29,6 +30,7 @@ client.seed(dir, torrent => {
   });
   fakeChain.listen(fakeChainPort);
   console.log("running fake chain on port", fakeChainPort);
+*/
 });
 
 let proxy = new BlackHoleProxy(3333);
