@@ -3,7 +3,7 @@
 // It is designed to be used non-persistently from a web browser.
 // TODO: use TorrentClient instead of using WebTorrent directly
 const axios = require("axios");
-const WebTorrent = require("webtorrent");
+const WebTorrent = require("webtorrent-hybrid");
 
 const ChainClient = require("./ChainClient.js");
 

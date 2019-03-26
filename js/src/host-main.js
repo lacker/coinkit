@@ -7,6 +7,7 @@ const path = require("path");
 const WebTorrent = require("webtorrent-hybrid");
 
 const BlackHoleProxy = require("./BlackHoleProxy.js");
+let proxy = new BlackHoleProxy(3333);
 
 // TODO: remove this webtorrent seeding once the deploy-based seeding is working
 
@@ -15,26 +16,8 @@ let client = new WebTorrent();
 let dir = path.resolve(__dirname, "samplesite");
 client.seed(dir, torrent => {
   console.log("info hash: " + torrent.infoHash);
-  // console.log("magnet uri: " + torrent.magnetURI);
 
   torrent.on("wire", (wire, addr) => {
     console.log("connected to peer with address", addr);
   });
-
-  /*
-  // fakeChain tells clients where to look for the torrent
-  // TODO: make this happen via the real chain
-  let fakeChainPort = 4444;
-  let fakeChain = http.createServer((req, res) => {
-    res.end(
-      JSON.stringify({
-        magnet: torrent.magnetURI
-      })
-    );
-  });
-  fakeChain.listen(fakeChainPort);
-  console.log("running fake chain on port", fakeChainPort);
-*/
 });
-
-let proxy = new BlackHoleProxy(3333);

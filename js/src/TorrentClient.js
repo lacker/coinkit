@@ -1,5 +1,5 @@
 // A wrapper around the WebTorrent client with an async API.
-const WebTorrent = require("webtorrent");
+const WebTorrent = require("webtorrent-hybrid");
 
 const Torrent = require("./Torrent.js");
 

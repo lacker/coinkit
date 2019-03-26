@@ -1,6 +1,4 @@
 // A wrapper around WebTorrent's "torrent" object with an async API.
-const WebTorrent = require("webtorrent");
-
 const { sleep } = require("./Util.js");
 
 class Torrent {
