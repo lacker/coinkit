@@ -39,6 +39,5 @@ client.add(info, torrent => {
 
   torrent.on("done", () => {
     console.log("downloaded", torrent.downloaded, "bytes");
-    client.destroy();
   });
 });
