@@ -2,8 +2,9 @@ const path = require("path");
 
 const TorrentClient = require("./TorrentClient.js");
 
-test("Creating a torrent client", async () => {
+test("Creating and shutting down a torrent client", async () => {
   let client = new TorrentClient();
+  await client.destroy();
 });
 
 /*
