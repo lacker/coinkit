@@ -8,6 +8,13 @@ class Torrent {
     this.torrent = torrent;
     this.magnet = torrent.magnetURI;
     this.infoHash = torrent.infoHash;
+    this.verbose = false;
+  }
+
+  log(...args) {
+    if (this.verbose) {
+      console.log(...args);
+    }
   }
 
   isDone() {
@@ -16,10 +23,13 @@ class Torrent {
 
   // Always returns null
   async waitForDone() {
+    this.log("progress:", this.torrent.progress);
     if (this.isDone()) {
+      this.log("waitForDone is done because we are already done");
       return null;
     }
     let promise = new Promise((resolve, reject) => {
+      this.log("waiting for 'done' event");
       this.torrent.on("done", () => {
         resolve(null);
       });
