@@ -68,7 +68,7 @@ async function downloadTorrent(client, magnet) {
   });
 }
 
-export default class TorrentDownloader {
+class TorrentDownloader {
   constructor() {
     this.client = new WebTorrent();
 
@@ -155,3 +155,5 @@ export default class TorrentDownloader {
     return data[pathname];
   }
 }
+
+module.exports = TorrentDownloader;
