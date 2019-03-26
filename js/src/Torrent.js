@@ -21,6 +21,14 @@ class Torrent {
     return this.torrent.progress == 1;
   }
 
+  async monitorProgress() {
+    while (!this.isDone()) {
+      console.log("progress:", this.torrent.progress);
+      await sleep(1000);
+    }
+    console.log("progress complete");
+  }
+
   // Always returns null
   async waitForDone() {
     this.log("progress:", this.torrent.progress);
