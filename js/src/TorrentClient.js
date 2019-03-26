@@ -11,6 +11,15 @@ class TorrentClient {
     });
   }
 
+  // Returns an array of Torrent objects
+  getTorrents() {
+    let answer = [];
+    for (let t of this.client.torrents) {
+      answer.push(new Torrent(t));
+    }
+    return answer;
+  }
+
   // Returns a Torrent object
   async seed(directory) {
     let promise = new Promise((resolve, reject) => {
