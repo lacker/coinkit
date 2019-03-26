@@ -34,6 +34,16 @@ class Torrent {
       await sleep(1000);
     }
   }
+
+  // Shuts down this torrent
+  async destroy() {
+    let promise = new Promise((resolve, reject) => {
+      this.torrent.destroy(() => {
+        resolve(null);
+      });
+    });
+    return await promise;
+  }
 }
 
 module.exports = Torrent;
