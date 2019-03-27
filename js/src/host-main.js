@@ -27,8 +27,8 @@ let server = new Tracker.Server({
 });
 server.on("listening", () => {
   // fired when all requested servers are listening
-  console.log("tracker listening on http port:" + server.http.address().port);
-  console.log("tracker listening on udp port:" + server.udp.address().port);
+  console.log("tracker listening on http port " + server.http.address().port);
+  console.log("tracker listening on udp port " + server.udp.address().port);
 });
 server.listen(4444, "localhost");
 
