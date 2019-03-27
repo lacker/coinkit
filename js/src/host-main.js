@@ -29,6 +29,9 @@ server.on("listening", () => {
   // fired when all requested servers are listening
   console.log("tracker listening on http port " + server.http.address().port);
   console.log("tracker listening on udp port " + server.udp.address().port);
+  console.log(
+    "tracker listening on websocket port " + server.ws.address().port
+  );
 });
 server.listen(4444, "localhost");
 
@@ -37,7 +40,7 @@ server.listen(4444, "localhost");
 let client = new WebTorrent();
 let dir = path.resolve(__dirname, "samplesite");
 client.seed(dir, torrent => {
-  console.log("info hash: " + torrent.infoHash);
+  console.log("seeding torrent with info hash: " + torrent.infoHash);
 
   torrent.on("wire", (wire, addr) => {
     console.log("connected to peer with address", addr);
