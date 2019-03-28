@@ -3,6 +3,8 @@ const WebTorrent = require("webtorrent-hybrid");
 
 const Torrent = require("./Torrent.js");
 
+const TRACKERS = ["ws://localhost:4444"];
+
 class TorrentClient {
   constructor() {
     this.client = new WebTorrent();
@@ -30,9 +32,15 @@ class TorrentClient {
   // Returns a Torrent object
   async seed(directory) {
     let promise = new Promise((resolve, reject) => {
-      this.client.seed(directory, torrent => {
-        resolve(new Torrent(torrent, this.verbose));
-      });
+      this.client.seed(
+        directory,
+        {
+          announceList: [TRACKERS]
+        },
+        torrent => {
+          resolve(new Torrent(torrent, this.verbose));
+        }
+      );
     });
     return await promise;
   }
