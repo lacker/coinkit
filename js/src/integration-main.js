@@ -1,17 +1,28 @@
 // An integration test
-const WebTorrent = require("webtorrent-hybrid");
+
+const path = require("path");
+
 const TorrentClient = require("./TorrentClient.js");
 
-const SAMPLESITE =
-  "magnet:?xt=urn:btih:e60f82343019bd711c5c731b46e118b0f2b2ecc6&dn=samplesite&tr=ws%3A%2F%2Flocalhost%3A4444&tr=wss%3A%2F%2Ftracker.btorrent.xyz&tr=wss%3A%2F%2Ftracker.fastcast.nz&tr=wss%3A%2F%2Ftracker.openwebtorrent.com";
-
 async function main() {
-  let client = new TorrentClient();
-  let torrent = await client.download(SAMPLESITE);
+  console.log("seeding...");
+  let seedClient = new TorrentClient();
+  let dir = path.resolve(__dirname, "samplesite");
+  let t = await seedClient.seed(dir);
+  let magnet = t.magnet;
+
+  console.log("downloading...");
+  let downloadClient = new TorrentClient();
+  let torrent = await downloadClient.download(magnet);
   await torrent.monitorProgress();
-  await client.destroy();
+
+  console.log("cleaning up...");
+  await seedClient.destroy();
+  await downloadClient.destroy();
 }
 
 main().then(() => {
-  console.log("done");
+  console.log(
+    "done with integration test code. waiting for timer autocleanup..."
+  );
 });
