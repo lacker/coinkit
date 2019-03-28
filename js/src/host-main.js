@@ -45,7 +45,7 @@ let dir = path.resolve(__dirname, "samplesite");
 client.seed(
   dir,
   {
-    announceList: ["http://localhost:4444"]
+    announce: ["http://localhost:4444"]
   },
   torrent => {
     console.log("seeding torrent.");
