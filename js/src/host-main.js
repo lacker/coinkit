@@ -22,6 +22,7 @@ let server = new Tracker.Server({
   filter: (infoHash, params, callback) => {
     // Allow tracking all torrents
     // TODO: restrict this in a logical way
+    console.log("tracking", infoHash);
     callback(null);
   }
 });
@@ -45,7 +46,7 @@ let dir = path.resolve(__dirname, "samplesite");
 client.seed(
   dir,
   {
-    announce: ["http://localhost:4444"]
+    announceList: [["ws://localhost:4444"]]
   },
   torrent => {
     console.log("seeding torrent.");
