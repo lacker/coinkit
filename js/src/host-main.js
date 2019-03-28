@@ -33,16 +33,25 @@ server.on("listening", () => {
     "tracker listening on websocket port " + server.ws.address().port
   );
 });
+server.on("start", addr => {
+  console.log("got start message from " + addr);
+});
 server.listen(4444, "localhost");
 
 // TODO: remove this webtorrent seeding once the deploy-based seeding is working
 // Seed a WebTorrent
 let client = new WebTorrent();
 let dir = path.resolve(__dirname, "samplesite");
-client.seed(dir, torrent => {
-  console.log("seeding torrent with info hash: " + torrent.infoHash);
+client.seed(
+  dir,
+  {
+    announceList: ["http://localhost:4444"]
+  },
+  torrent => {
+    console.log("seeding torrent with info hash: " + torrent.infoHash);
 
-  torrent.on("wire", (wire, addr) => {
-    console.log("connected to peer with address", addr);
-  });
-});
+    torrent.on("wire", (wire, addr) => {
+      console.log("connected to peer with address", addr);
+    });
+  }
+);
