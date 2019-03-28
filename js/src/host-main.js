@@ -48,7 +48,9 @@ client.seed(
     announceList: ["http://localhost:4444"]
   },
   torrent => {
-    console.log("seeding torrent with info hash: " + torrent.infoHash);
+    console.log("seeding torrent.");
+    console.log("info hash: " + torrent.infoHash);
+    console.log("magnet: " + torrent.magnetURI);
 
     torrent.on("wire", (wire, addr) => {
       console.log("connected to peer with address", addr);
