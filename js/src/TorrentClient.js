@@ -26,10 +26,13 @@ class TorrentClient {
       this.log("metadata acquired for", torrent.magnetURI);
     });
     torrent.on("warning", err => {
-      this.log("warning:", err.toString());
+      this.log("warning:", err.message);
     });
     torrent.on("wire", (wire, addr) => {
       this.log("connected to peer with address:", addr);
+    });
+    torrent.on("error", err => {
+      this.log("torrent error:", err.message);
     });
   }
 
