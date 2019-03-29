@@ -5,6 +5,10 @@ const Torrent = require("./Torrent.js");
 
 const TRACKERS = ["ws://localhost:4444"];
 
+function nicePeerId(id) {
+  return "_" + ("" + id).slice(-4);
+}
+
 class TorrentClient {
   constructor(verbose) {
     this.client = new WebTorrent();
@@ -12,7 +16,7 @@ class TorrentClient {
       console.log("fatal error in TorrentClient:", err.message);
     });
     this.verbose = !!verbose;
-    this.log("creating torrent client", this.client.peerId);
+    this.log("creating torrent client", nicePeerId(this.client.peerId));
   }
 
   log(...args) {
@@ -30,7 +34,7 @@ class TorrentClient {
       this.log("warning:", err.message);
     });
     torrent.on("wire", (wire, addr) => {
-      this.log("connected to", wire.peerId, "at", addr);
+      this.log("connected to", nicePeerId(wire.peerId), "at", addr);
     });
     torrent.on("error", err => {
       this.log("torrent error:", err.message);
