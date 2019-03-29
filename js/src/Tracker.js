@@ -37,7 +37,7 @@ class Tracker {
   }
 
   onStart(addr) {
-    console.log("got start message from ", addr);
+    console.log("got start message from", addr);
   }
 }
 

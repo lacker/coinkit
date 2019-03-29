@@ -17,7 +17,7 @@ async function fetchPeerData() {
     client.verbose = true;
     let torrent = await client.download(SAMPLESITE);
     await torrent.monitorProgress();
-    client.destroy();
+    await client.destroy();
   } else {
     let downloader = new TorrentDownloader();
     await downloader.downloadMagnet(SAMPLESITE);

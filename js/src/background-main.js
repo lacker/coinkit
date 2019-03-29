@@ -1,6 +1,7 @@
 // This code runs in the persistent background page.
 import LocalStorage from "./LocalStorage";
 import Storage from "./Storage";
+import TorrentClient from "./TorrentClient";
 import TorrentDownloader from "./TorrentDownloader";
 import TrustedClient from "./TrustedClient";
 
@@ -105,6 +106,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (!message.getFile) {
     return false;
   }
+
   let { hostname, pathname } = message.getFile;
   downloader
     .getFile(hostname, pathname)
@@ -118,4 +120,21 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       sendResponse({ error: e.message });
     });
   return true;
+});
+
+async function XXX() {
+  const SAMPLESITE =
+    "magnet:?xt=urn:btih:e60f82343019bd711c5c731b46e118b0f2b2ecc6&dn=samplesite&tr=ws%3A%2F%2Flocalhost%3A4444&tr=wss%3A%2F%2Ftracker.btorrent.xyz&tr=wss%3A%2F%2Ftracker.fastcast.nz&tr=wss%3A%2F%2Ftracker.openwebtorrent.com";
+
+  let client = new TorrentClient();
+  client.verbose = true;
+  console.log("XXX pointless download begins");
+  let torrent = await client.download(SAMPLESITE);
+  await torrent.monitorProgress();
+  await client.destroy();
+  console.log("XXX pointless download done");
+}
+
+XXX().then(() => {
+  console.log("XXX done");
 });
