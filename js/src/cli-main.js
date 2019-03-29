@@ -127,7 +127,6 @@ async function setMagnet(bucketName, magnet) {
   }
   let kp = await login();
   let client = new ChainClient(kp);
-  client.verbose = true;
   let bucket = await client.updateBucket(bucketName, magnet);
   console.log("updated bucket:");
   console.log(bucket);

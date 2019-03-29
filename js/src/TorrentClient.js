@@ -16,7 +16,7 @@ class TorrentClient {
       console.log("fatal error in TorrentClient:", err.message);
     });
     this.verbose = !!verbose;
-    this.log("creating torrent client", nicePeerId(this.client.peerId));
+    this.log("creating torrent peer", nicePeerId(this.client.peerId));
   }
 
   log(...args) {
@@ -34,7 +34,20 @@ class TorrentClient {
       this.log("warning:", err.message);
     });
     torrent.on("wire", (wire, addr) => {
-      this.log("connected to", nicePeerId(wire.peerId), "at", addr);
+      let pid = nicePeerId(wire.peerId);
+      this.log("connected to", pid, "at", addr);
+      wire.on("interested", () => {
+        this.log(pid, "got interested");
+      });
+      wire.on("uninterested", () => {
+        this.log(pid, "got uninterested");
+      });
+      wire.on("choke", () => {
+        this.log(pid, "is choking us");
+      });
+      wire.on("unchoke", () => {
+        this.log(pid, "is no longer choking us");
+      });
     });
     torrent.on("error", err => {
       this.log("torrent error:", err.message);
