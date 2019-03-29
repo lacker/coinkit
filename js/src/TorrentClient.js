@@ -9,7 +9,10 @@ class TorrentClient {
   constructor() {
     this.client = new WebTorrent();
     this.client.on("error", err => {
-      console.log("fatal error:", err.message);
+      console.log("fatal error in TorrentClient:", err.message);
+    });
+    this.client.on("warning", err => {
+      this.log("warning:", err);
     });
     this.verbose = false;
   }
