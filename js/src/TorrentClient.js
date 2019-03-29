@@ -6,12 +6,13 @@ const Torrent = require("./Torrent.js");
 const TRACKERS = ["ws://localhost:4444"];
 
 class TorrentClient {
-  constructor() {
+  constructor(verbose) {
     this.client = new WebTorrent();
     this.client.on("error", err => {
       console.log("fatal error in TorrentClient:", err.message);
     });
-    this.verbose = false;
+    this.verbose = !!verbose;
+    this.log("creating torrent client", this.client.peerId);
   }
 
   log(...args) {
@@ -29,7 +30,7 @@ class TorrentClient {
       this.log("warning:", err.message);
     });
     torrent.on("wire", (wire, addr) => {
-      this.log("connected to peer with address:", addr);
+      this.log("connected to", wire.peerId, "at", addr);
     });
     torrent.on("error", err => {
       this.log("torrent error:", err.message);
