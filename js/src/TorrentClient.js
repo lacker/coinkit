@@ -11,9 +11,6 @@ class TorrentClient {
     this.client.on("error", err => {
       console.log("fatal error in TorrentClient:", err.message);
     });
-    this.client.on("warning", err => {
-      this.log("warning:", err);
-    });
     this.verbose = false;
   }
 
@@ -64,6 +61,9 @@ class TorrentClient {
     this.log("downloading", magnet);
     t.on("metadata", () => {
       this.log("metadata acquired for", magnet);
+    });
+    t.on("warning", err => {
+      this.log("warning:", err);
     });
     return new Torrent(t, this.verbose);
   }
