@@ -1,6 +1,7 @@
 // The TorrentDownloader finds the right torrent for a hostname and uses that to return
 // subsequent files.
 // It is designed to be used non-persistently from a web browser.
+
 // TODO: use TorrentClient instead of using WebTorrent directly
 const WebTorrent = require("webtorrent-hybrid");
 
@@ -52,10 +53,12 @@ async function readTorrent(torrent) {
 }
 
 // Adds a magnet to a WebTorrent client and resolves when it finishes
-async function downloadTorrent(client, magnet) {
+async function downloadTorrent(magnet) {
+  let client = new WebTorrent();
   console.log("downloading torrent:", magnet);
   return await new Promise((resolve, reject) => {
     client.add(magnet, torrent => {
+      console.log("metadata acquired");
       torrent.on("error", err => {
         console.log("webtorrent error:", err.message);
       });
@@ -69,8 +72,6 @@ async function downloadTorrent(client, magnet) {
 
 class TorrentDownloader {
   constructor() {
-    this.client = new WebTorrent();
-
     // The last time a file from a hostname was fetched
     this.lastFetchTime = {};
 
@@ -88,7 +89,7 @@ class TorrentDownloader {
     if (this.cache[magnet]) {
       return this.cache[magnet];
     }
-    let torrent = await downloadTorrent(this.client, magnet);
+    let torrent = await downloadTorrent(magnet);
     let data = await readTorrent(torrent);
     this.cache[magnet] = data;
     return data;
