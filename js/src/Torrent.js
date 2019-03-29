@@ -2,6 +2,8 @@
 const { sleep } = require("./Util.js");
 
 class Torrent {
+  // This constructor should be cheap, since we often construct many Torrent objects from
+  // the same underlying torrent.
   constructor(torrent, verbose) {
     this.torrent = torrent;
     this.magnet = torrent.magnetURI;

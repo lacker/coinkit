@@ -65,6 +65,9 @@ class TorrentClient {
     t.on("warning", err => {
       this.log("warning:", err);
     });
+    t.on("wire", (wire, addr) => {
+      this.log("connected to peer with address:", addr);
+    });
     return new Torrent(t, this.verbose);
   }
 
