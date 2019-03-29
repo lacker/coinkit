@@ -36,6 +36,7 @@ class TorrentClient {
     torrent.on("wire", (wire, addr) => {
       let pid = nicePeerId(wire.peerId);
       this.log("connected to", pid, "at", addr);
+
       wire.on("interested", () => {
         this.log(pid, "got interested");
       });
@@ -47,6 +48,9 @@ class TorrentClient {
       });
       wire.on("unchoke", () => {
         this.log(pid, "is no longer choking us");
+      });
+      wire.on("request", (index, offset, length) => {
+        this.log(pid, "requests", index, offset, length);
       });
     });
     torrent.on("error", err => {
