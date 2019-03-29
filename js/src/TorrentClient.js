@@ -20,6 +20,19 @@ class TorrentClient {
     }
   }
 
+  // Call on a raw WebTorrent object, not a wrapped Torrent
+  logTorrentEvents(torrent) {
+    torrent.on("metadata", () => {
+      this.log("metadata acquired for", torrent.magnetURI);
+    });
+    torrent.on("warning", err => {
+      this.log("warning:", err.toString());
+    });
+    torrent.on("wire", (wire, addr) => {
+      this.log("connected to peer with address:", addr);
+    });
+  }
+
   // Returns an array of Torrent objects
   getTorrents() {
     let answer = [];
@@ -38,6 +51,7 @@ class TorrentClient {
           announceList: [TRACKERS]
         },
         torrent => {
+          this.logTorrentEvents(torrent);
           resolve(new Torrent(torrent, this.verbose));
         }
       );
@@ -59,15 +73,7 @@ class TorrentClient {
     // Add a new download
     let t = this.client.add(magnet);
     this.log("downloading", magnet);
-    t.on("metadata", () => {
-      this.log("metadata acquired for", magnet);
-    });
-    t.on("warning", err => {
-      this.log("warning:", err);
-    });
-    t.on("wire", (wire, addr) => {
-      this.log("connected to peer with address:", addr);
-    });
+    this.logTorrentEvents(t);
     return new Torrent(t, this.verbose);
   }
 

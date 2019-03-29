@@ -150,6 +150,7 @@ async function deallocate(bucketName, providerID) {
 async function deploy(directory, bucketName) {
   let dir = path.resolve(directory);
   let client = new TorrentClient();
+  client.verbose = true;
   console.log("creating torrent...");
   let torrent = await client.seed(dir);
   console.log("serving torrent:", torrent.infoHash, "at", torrent.magnet);
