@@ -2,10 +2,8 @@
 // subsequent files.
 // It is designed to be used non-persistently from a web browser.
 
-// TODO: use TorrentClient instead of using WebTorrent directly
-const WebTorrent = require("webtorrent-hybrid");
-
 const ChainClient = require("./ChainClient.js");
+const TorrentClient = require("./TorrentClient.js");
 
 // Removes a leading / and adds a trailing index.html if needed
 // so that callers can be indifferent
@@ -52,26 +50,10 @@ async function readTorrent(torrent) {
   return data;
 }
 
-// Adds a magnet to a WebTorrent client and resolves when it finishes
-async function downloadTorrent(magnet) {
-  let client = new WebTorrent();
-  console.log("downloading torrent:", magnet);
-  return await new Promise((resolve, reject) => {
-    client.add(magnet, torrent => {
-      console.log("metadata acquired");
-      torrent.on("error", err => {
-        console.log("webtorrent error:", err.message);
-      });
-      torrent.on("done", () => {
-        console.log("download complete:", magnet);
-        resolve(torrent);
-      });
-    });
-  });
-}
-
 class TorrentDownloader {
   constructor() {
+    this.client = new TorrentClient();
+
     // The last time a file from a hostname was fetched
     this.lastFetchTime = {};
 
@@ -89,8 +71,9 @@ class TorrentDownloader {
     if (this.cache[magnet]) {
       return this.cache[magnet];
     }
-    let torrent = await downloadTorrent(magnet);
-    let data = await readTorrent(torrent);
+    let torrent = await this.client.download(magnet);
+    await torrent.waitForDone();
+    let data = await readTorrent(torrent.torrent);
     this.cache[magnet] = data;
     return data;
   }
