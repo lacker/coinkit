@@ -13,7 +13,7 @@ class Tracker {
       filter: (infoHash, params, callback) => {
         // Allow tracking all torrents
         // TODO: restrict this in a logical way
-        console.log("tracking", infoHash);
+        // console.log("tracking", infoHash);
         callback(null);
       }
     });
@@ -37,7 +37,7 @@ class Tracker {
   }
 
   onStart(addr) {
-    console.log("got start message from", addr);
+    // console.log("got start message from", addr);
   }
 }
 
