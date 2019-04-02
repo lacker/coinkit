@@ -20,6 +20,9 @@ class HostingServer {
     this.directory = directory;
     this.verbose = !!verbose;
 
+    // Maps info hash to magnet url
+    this.magnets = {};
+
     this.listener = new ProviderListener(verbose);
     this.listener.onAdd(magnet => this.add(magnet));
     this.listener.onRemove(magnet => this.remove(magnet));
@@ -34,11 +37,13 @@ class HostingServer {
   add(magnet) {
     let infoHash = getInfoHash(magnet);
     this.log("adding:", infoHash);
+    this.magnets[infoHash] = magnet;
   }
 
   remove(magnet) {
     let infoHash = getInfoHash(magnet);
     this.log("removing:", infoHash);
+    delete this.magnets[infoHash];
   }
 
   async serve() {
