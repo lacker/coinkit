@@ -193,18 +193,6 @@ func (q *OperationQueue) CheckConsistency() error {
 	return q.cache.CheckConsistency()
 }
 
-func (q *OperationQueue) HandleQueryMessage(m *QueryMessage) *DataMessage {
-	if m == nil || m.Account == "" {
-		return nil
-	}
-	output := &DataMessage{
-		I:        q.slot - 1,
-		Accounts: make(map[string]*Account),
-	}
-	output.Accounts[m.Account] = q.cache.GetAccount(m.Account)
-	return output
-}
-
 // Handles an operation message from another node.
 // Returns whether it made any internal updates, and an error message if there is any.
 func (q *OperationQueue) HandleOperationMessage(m *OperationMessage) (*util.ErrorMessage, bool) {

@@ -303,6 +303,7 @@ func (db *Database) TotalSizeInfo() string {
 	return answer
 }
 
+// Just returns nil if the QueryMessage is invalid
 func (db *Database) HandleQueryMessage(m *QueryMessage) *DataMessage {
 	if m == nil {
 		return nil
