@@ -848,6 +848,7 @@ func (db *Database) DeleteBucket(name string) error {
 
 // GetBuckets returns a list of matching buckets, along with the slot
 // that this data reflects.
+// If the query is invalid, returns nil.
 // This does not inflate the provider data.
 func (db *Database) GetBuckets(q *BucketQuery) ([]*Bucket, int) {
 	limit := boundLimit(q.Limit)
@@ -868,7 +869,7 @@ func (db *Database) GetBuckets(q *BucketQuery) ([]*Bucket, int) {
 			fmt.Sprintf("name IN (%s)", joinBucketNamesForSQL(q.Names)))
 	}
 	if len(whereParts) == 0 {
-		util.Logger.Fatalf("bad GetBuckets query: %+v", q)
+		return nil, 0
 	}
 	where := strings.Join(whereParts, " AND ")
 
@@ -954,6 +955,7 @@ func (db *Database) GetProvider(id uint64) *Provider {
 
 // GetProviders returns a list of matching providers, along with the slot that this
 // data reflects.
+// If the query is invalid, returns nil.
 // This does not inflate the bucket data.
 func (db *Database) GetProviders(q *ProviderQuery) ([]*Provider, int) {
 	limit := boundLimit(q.Limit)
@@ -972,7 +974,7 @@ func (db *Database) GetProviders(q *ProviderQuery) ([]*Provider, int) {
 		whereParts = append(whereParts, "available >= :available")
 	}
 	if len(whereParts) == 0 {
-		util.Logger.Fatalf("bad GetProviders query: %+v", q)
+		return nil, 0
 	}
 	where := strings.Join(whereParts, " AND ")
 
