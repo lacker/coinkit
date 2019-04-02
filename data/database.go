@@ -405,6 +405,9 @@ func (db *Database) DocumentDataMessage(q *DocumentQuery) *DataMessage {
 
 func (db *Database) BucketDataMessage(q *BucketQuery) *DataMessage {
 	buckets, slot := db.GetBuckets(q)
+	if buckets == nil {
+		return nil
+	}
 	message := &DataMessage{
 		Buckets: buckets,
 		I:       slot,
@@ -414,6 +417,9 @@ func (db *Database) BucketDataMessage(q *BucketQuery) *DataMessage {
 
 func (db *Database) ProviderDataMessage(q *ProviderQuery) *DataMessage {
 	providers, slot := db.GetProviders(q)
+	if providers == nil {
+		return nil
+	}
 	message := &DataMessage{
 		Providers: providers,
 		I:         slot,

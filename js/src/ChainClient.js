@@ -110,6 +110,7 @@ class ChainClient {
   async query(params) {
     let qm = new Message("Query", params);
     let dm = await this.sendMessage(qm);
+    console.log("XXX dm:", dm);
     if (dm.type === "Error") {
       throw new Error(dm.error);
     }
