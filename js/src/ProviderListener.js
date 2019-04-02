@@ -58,7 +58,7 @@ class ProviderListener {
             this.handleAdd(bucket.magnet);
           }
         } else {
-          this.log("allocate bucket:", bucket);
+          this.log("allocate bucket:", bucket.name);
           this.handleAdd(bucket.magnet);
         }
         newBuckets[bucket.name] = bucket;
@@ -72,6 +72,7 @@ class ProviderListener {
         }
       }
 
+      buckets = newBuckets;
       this.updates += 1;
       await sleep(1000);
     }
