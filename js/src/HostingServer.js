@@ -2,6 +2,17 @@
 
 const ProviderListener = require("./ProviderListener.js");
 
+// Throws an error if the magnet url is an unknown format
+function getInfoHash(magnet) {
+  let prefix = "magnet:?xt=urn:btih:";
+  if (!magnet.startsWith(prefix)) {
+    throw new Error("unknown magnet format: " + magnet);
+  }
+
+  let rest = magnet.replace(prefix, "");
+  return rest.split("&")[0];
+}
+
 class HostingServer {
   // id is the provider id we are hosting for
   constructor(id, directory, verbose) {
@@ -21,11 +32,13 @@ class HostingServer {
   }
 
   add(magnet) {
-    this.log("adding magnet:", magnet);
+    let infoHash = getInfoHash(magnet);
+    this.log("adding:", infoHash);
   }
 
   remove(magnet) {
-    this.log("removing magnet:", magnet);
+    let infoHash = getInfoHash(magnet);
+    this.log("removing:", infoHash);
   }
 
   async serve() {
