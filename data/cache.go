@@ -6,6 +6,8 @@ import (
 	"reflect"
 	"sort"
 
+	"github.com/jinzhu/copier"
+
 	"github.com/lacker/coinkit/util"
 )
 
@@ -334,16 +336,20 @@ func (c *Cache) GetDocument(id uint64) *Document {
 // Bucket stuff
 ///////////////////
 
-// The bucket returned from GetBucket is still in the cache.
-// This does not inflate provider data.
+// The bucket returned from GetBucket is always the same one as the bucket in the cache.
+// The caller can modify the bucket and that in turn safely modifies the cache.
 // Returns nil if there is no such bucket.
 func (c *Cache) GetBucket(name string) *Bucket {
 	bucket, ok := c.buckets[name]
 	if ok {
 		return bucket
 	}
+
 	if c.readOnly != nil {
-		return c.readOnly.GetBucket(name)
+		bucket := &Bucket{}
+		copier.Copy(bucket, c.readOnly.GetBucket(name))
+		c.buckets[name] = bucket
+		return bucket
 	}
 
 	if c.database != nil {
@@ -415,8 +421,8 @@ func (c *Cache) DeleteBucket(name string) {
 // Provider stuff
 /////////////////////
 
-// Do not modify the Provider returned from GetProvider, because it might belong to the
-// readonly cache.
+// The provider returned from GetProvider is always the same one as the provider in the cache.
+// The caller can modify the provider and that in turn safely modifies the cache.
 // Returns nil if there is no such provider.
 func (c *Cache) GetProvider(id uint64) *Provider {
 	p, ok := c.providers[id]
@@ -425,8 +431,12 @@ func (c *Cache) GetProvider(id uint64) *Provider {
 	}
 
 	if c.readOnly != nil {
-		return c.readOnly.GetProvider(id)
+		p := &Provider{}
+		copier.Copy(p, c.readOnly.GetProvider(id))
+		c.providers[id] = p
+		return p
 	}
+
 	if c.database != nil {
 		// When there is a database, read from the database and cache it.
 		p = c.database.GetProvider(id)
@@ -509,11 +519,12 @@ func (c *Cache) Allocate(bucketName string, providerID uint64) {
 		panic("invalid allocation")
 	}
 
-	cachedBucket := c.buckets[bucketName]
-	cachedBucket.Providers = append(cachedBucket.Providers, &Provider{ID: providerID})
-	cachedProvider := c.providers[providerID]
-	cachedProvider.Buckets = append(cachedProvider.Buckets, &Bucket{Name: bucketName})
-	cachedProvider.Available -= b.Size
+	// Update our own cache for the allocation
+	b.Providers = append(b.Providers, &Provider{ID: providerID})
+	c.buckets[bucketName] = b
+	p.Buckets = append(p.Buckets, &Bucket{Name: bucketName})
+	p.Available -= b.Size
+	c.providers[providerID] = p
 
 	if c.database != nil {
 		check(c.database.Allocate(bucketName, providerID))

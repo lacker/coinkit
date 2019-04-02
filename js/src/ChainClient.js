@@ -42,7 +42,7 @@ async function retryPost(url, body, params) {
       });
       return response;
     } catch (e) {
-      console.log(e);
+      console.log(e.stack);
       standardWait();
     }
   }
