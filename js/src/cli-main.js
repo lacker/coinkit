@@ -352,5 +352,6 @@ main()
     // console.log("done");
   })
   .catch(e => {
-    fatal("Unhandled " + e);
+    console.log(e.stack);
+    fatal("exiting due to error");
   });
