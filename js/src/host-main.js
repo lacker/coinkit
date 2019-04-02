@@ -11,7 +11,7 @@ if (process.argv.length != 4) {
   process.exit(1);
 }
 
-let [_, _, id, directory] = process.argv;
+let [node, hostmainjs, id, directory] = process.argv;
 console.log("id:", id);
 console.log("directory:", directory);
 
