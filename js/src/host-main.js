@@ -28,6 +28,7 @@ if (!fs.existsSync(directory) || !fs.lstatSync(directory).isDirectory()) {
 }
 console.log("hosting files for provider", id, "in", directory);
 let host = new HostingServer(id, directory, true);
+host.serve();
 
 // Run a black hole proxy
 let proxy = new BlackHoleProxy(3333);
