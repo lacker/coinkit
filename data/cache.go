@@ -538,10 +538,9 @@ func (c *Cache) Deallocate(bucketName string, providerID uint64) {
 		panic("invalid deallocation")
 	}
 
-	c.buckets[bucketName].RemoveProvider(providerID)
-	cachedProvider := c.providers[providerID]
-	cachedProvider.RemoveBucket(bucketName)
-	cachedProvider.Available += b.Size
+	b.RemoveProvider(providerID)
+	p.RemoveBucket(bucketName)
+	p.Available += b.Size
 
 	if c.database != nil {
 		check(c.database.Deallocate(bucketName, providerID))
