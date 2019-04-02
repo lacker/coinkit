@@ -521,10 +521,8 @@ func (c *Cache) Allocate(bucketName string, providerID uint64) {
 
 	// Update our own cache for the allocation
 	b.Providers = append(b.Providers, &Provider{ID: providerID})
-	c.buckets[bucketName] = b
 	p.Buckets = append(p.Buckets, &Bucket{Name: bucketName})
 	p.Available -= b.Size
-	c.providers[providerID] = p
 
 	if c.database != nil {
 		check(c.database.Allocate(bucketName, providerID))
