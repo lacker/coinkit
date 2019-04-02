@@ -3,6 +3,7 @@
 // TODO: make this read args for provider id and directory to store stuff in.
 // TODO: create a HostingServer
 
+const fs = require("fs");
 const http = require("http");
 const path = require("path");
 
@@ -21,9 +22,11 @@ if (id == 0) {
   console.log("bad id:", sid);
   process.exit(1);
 }
-console.log("id:", id);
-// TODO: check if directory is a directory
-console.log("directory:", directory);
+if (!fs.existsSync(directory) || !fs.lstatSync(directory).isDirectory()) {
+  console.log(directory, "is not a directory");
+  process.exit(1);
+}
+console.log("hosting files for provider", id, "in", directory);
 let host = new HostingServer(id, directory, true);
 
 // Run a black hole proxy
