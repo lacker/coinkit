@@ -479,8 +479,8 @@ func (c *Cache) AddCapacity(id uint64, amount uint32) {
 	if p == nil {
 		panic("no provider found for update")
 	}
-	c.providers[id].Capacity += amount
-	c.providers[id].Available += amount
+	p.Capacity += amount
+	p.Available += amount
 
 	if c.database != nil {
 		err := c.database.AddCapacity(id, amount)
