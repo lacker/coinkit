@@ -6,19 +6,28 @@
 const http = require("http");
 const path = require("path");
 
+const BlackHoleProxy = require("./BlackHoleProxy.js");
+const HostingServer = require("./HostingServer.js");
+const Tracker = require("./Tracker.js");
+
 if (process.argv.length != 4) {
   console.log("usage: npm run host <providerID> <directory for hosting files>");
   process.exit(1);
 }
 
-let [node, hostmainjs, id, directory] = process.argv;
+let [node, hostmainjs, sid, directory] = process.argv;
+let id = parseInt(sid);
+if (id == 0) {
+  console.log("bad id:", sid);
+  process.exit(1);
+}
 console.log("id:", id);
+// TODO: check if directory is a directory
 console.log("directory:", directory);
+let host = new HostingServer(id, directory, true);
 
 // Run a black hole proxy
-const BlackHoleProxy = require("./BlackHoleProxy.js");
 let proxy = new BlackHoleProxy(3333);
 
 // Run a tracker
-const Tracker = require("./Tracker.js");
 let tracker = new Tracker(4444);

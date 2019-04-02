@@ -4,9 +4,9 @@ const { sleep } = require("./Util.js");
 // The ProviderListener continuously tracks information relevant to a single provider.
 // This is designed to be the source of information for a hosting server.
 class ProviderListener {
-  constructor() {
+  constructor(verbose) {
     this.client = new ChainClient();
-    this.verbose = false;
+    this.verbose = !!verbose;
     this.addCallback = null;
     this.removeCallback = null;
 
