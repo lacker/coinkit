@@ -979,6 +979,9 @@ func (db *Database) GetProviders(q *ProviderQuery) ([]*Provider, int) {
 	if q.Available != 0 {
 		whereParts = append(whereParts, "available >= :available")
 	}
+	if q.Bucket != "" {
+		whereParts = append(whereParts, ":bucket = ANY (buckets)")
+	}
 	if len(whereParts) == 0 {
 		return nil, 0
 	}

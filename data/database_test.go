@@ -627,6 +627,11 @@ func TestProviders(t *testing.T) {
 		t.Fatalf("AddCapacity failed: %+v", p)
 	}
 
+	ps, _ := db.GetProviders(&ProviderQuery{Bucket: "bucket1"})
+	if len(ps) != 1 {
+		t.Fatalf("failed to search for provider based on bucket")
+	}
+
 	check(db.Deallocate("bucket1", 1))
 	db.Commit()
 
@@ -647,7 +652,7 @@ func TestProviders(t *testing.T) {
 	check(db.DeleteProvider(2))
 	db.Commit()
 
-	ps, _ := db.GetProviders(&ProviderQuery{Owner: "bob"})
+	ps, _ = db.GetProviders(&ProviderQuery{Owner: "bob"})
 	if len(ps) != 1 {
 		t.Fatalf("delete did not seem to delete")
 	}
