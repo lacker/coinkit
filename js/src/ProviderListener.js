@@ -9,6 +9,9 @@ class ProviderListener {
     this.verbose = false;
     this.addCallback = null;
     this.removeCallback = null;
+
+    // Number of update cycles this listener has gone through
+    this.updates = 0;
   }
 
   log(...args) {
@@ -69,6 +72,7 @@ class ProviderListener {
         }
       }
 
+      this.updates += 1;
       await sleep(1000);
     }
   }
