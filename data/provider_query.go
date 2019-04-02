@@ -11,6 +11,7 @@ type ProviderQuery struct {
 	Owner     string   `json:"owner"`
 	Limit     int      `json:"limit"`
 	Available uint32   `json:"available"`
+	Bucket    string   `json:"bucket"`
 }
 
 func (q *ProviderQuery) String() string {
@@ -26,6 +27,9 @@ func (q *ProviderQuery) String() string {
 	}
 	if q.Available != 0 {
 		parts = append(parts, fmt.Sprintf("available=%d", q.Available))
+	}
+	if q.Bucket != "" {
+		parts = append(parts, fmt.Sprintf("bucket=%s", q.Bucket))
 	}
 	if len(parts) == 0 {
 		return "<empty>"
