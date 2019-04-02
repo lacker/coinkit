@@ -1,6 +1,7 @@
 // The node hosting server that miners run to store files.
 
 const ProviderListener = require("./ProviderListener.js");
+const TorrentClient = require("./TorrentClient.js");
 
 // Throws an error if the magnet url is an unknown format
 function getInfoHash(magnet) {
@@ -19,6 +20,7 @@ class HostingServer {
     this.id = id;
     this.directory = directory;
     this.verbose = !!verbose;
+    this.client = new TorrentClient(this.verbose);
 
     // Maps info hash to magnet url
     this.magnets = {};
