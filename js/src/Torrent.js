@@ -48,11 +48,12 @@ class Torrent {
       return null;
     }
 
-    return new Promise((resolve, reject) => {
+    let promise = new Promise((resolve, reject) => {
       this.torrent.on("metadata", () => {
         resolve(null);
       });
     });
+    return await promise;
   }
 
   // Always returns null
