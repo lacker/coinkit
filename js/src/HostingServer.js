@@ -1,5 +1,7 @@
 // The node hosting server that miners run to store files.
 
+const path = require("path");
+
 const ProviderListener = require("./ProviderListener.js");
 const TorrentClient = require("./TorrentClient.js");
 
@@ -35,6 +37,10 @@ class HostingServer {
     }
   }
 
+  subdirectory(infoHash) {
+    return path.join(this.directory, infoHash);
+  }
+
   handleBuckets(buckets) {
     // Figure out the new info map
     let newInfoMap = {};
@@ -61,7 +67,12 @@ class HostingServer {
     for (let infoHash in newInfoMap) {
       if (!this.infoMap[infoHash]) {
         this.log("adding:", infoHash);
-        // TODO: start seeding this torrent. If the directory is already there, use it
+
+        // Start seeding this torrent. If the directory is already there from a previous run,
+        // this should reuse it.
+        let dir = this.subdirectory(infoHash);
+        let bucket = newInfoMap[infoHash];
+        this.client.add(bucket.magnet, { path: dir });
       }
     }
 
