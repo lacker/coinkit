@@ -41,7 +41,7 @@ class HostingServer {
     return path.join(this.directory, infoHash);
   }
 
-  handleBuckets(buckets) {
+  async handleBuckets(buckets) {
     // Figure out the new info map
     let newInfoMap = {};
     for (let bucket of buckets) {
@@ -72,7 +72,7 @@ class HostingServer {
         // this should reuse it.
         let dir = this.subdirectory(infoHash);
         let bucket = newInfoMap[infoHash];
-        this.client.download(bucket.magnet, dir);
+        await this.client.download(bucket.magnet, dir);
       }
     }
 

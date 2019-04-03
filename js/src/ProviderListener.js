@@ -16,13 +16,14 @@ class ProviderListener {
     }
   }
 
+  // Takes an async callback
   onBuckets(f) {
     this.bucketsCallback = f;
   }
 
-  handleBuckets(buckets) {
+  async handleBuckets(buckets) {
     if (this.bucketsCallback) {
-      this.bucketsCallback(buckets);
+      await this.bucketsCallback(buckets);
     }
   }
 
@@ -33,7 +34,7 @@ class ProviderListener {
 
     while (true) {
       let bucketList = await this.client.getBuckets({ provider: id });
-      this.handleBuckets(bucketList);
+      await this.handleBuckets(bucketList);
 
       await sleep(2000);
     }
