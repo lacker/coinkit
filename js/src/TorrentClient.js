@@ -85,9 +85,11 @@ class TorrentClient {
   }
 
   // Returns a Torrent object for downloading this magnet url.
+  // Continues seeding this after the download is complete.
+  // path is an optional path on disk to use.
   // Does not wait for the download to complete before returning.
   // If you want that, call waitForDone.
-  async download(magnet) {
+  async download(magnet, path) {
     // First, check if this download is already in progress.
     for (let t of this.client.torrents) {
       if (t.magnetURI == magnet) {
@@ -96,7 +98,11 @@ class TorrentClient {
     }
 
     // Add a new download
-    let t = this.client.add(magnet);
+    let options = {};
+    if (path) {
+      options.path = path;
+    }
+    let t = this.client.add(magnet, options);
     this.log("downloading", magnet);
     this.logTorrentEvents(t);
     return new Torrent(t, this.verbose);

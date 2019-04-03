@@ -72,7 +72,7 @@ class HostingServer {
         // this should reuse it.
         let dir = this.subdirectory(infoHash);
         let bucket = newInfoMap[infoHash];
-        this.client.add(bucket.magnet, { path: dir });
+        this.client.download(bucket.magnet, dir);
       }
     }
 
