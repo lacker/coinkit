@@ -72,9 +72,10 @@ class HostingServer {
         // this should reuse it.
         let dir = this.subdirectory(infoHash);
         let bucket = newInfoMap[infoHash];
-        this.client.download(bucket.magnet, dir);
+        let torrent = this.client.download(bucket.magnet, dir);
 
         // TODO: check to make sure that this torrent isn't too large
+        await torrent.waitForMetadata();
       }
     }
 

@@ -33,6 +33,28 @@ class Torrent {
     );
   }
 
+  // If you call this before metadata it will just return 0
+  totalBytes() {
+    let answer = 0;
+    for (let file of this.torrent.files) {
+      answer += file.length;
+    }
+    return answer;
+  }
+
+  // Always returns null
+  async waitForMetadata() {
+    if (this.torrent.files.length > 0) {
+      return null;
+    }
+
+    return new Promise((resolve, reject) => {
+      this.torrent.on("metadata", () => {
+        resolve(null);
+      });
+    });
+  }
+
   // Always returns null
   async waitForDone() {
     this.log("progress:", this.torrent.progress);
