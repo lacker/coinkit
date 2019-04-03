@@ -7,11 +7,7 @@ class ProviderListener {
   constructor(verbose) {
     this.client = new ChainClient();
     this.verbose = !!verbose;
-    this.addCallback = null;
-    this.removeCallback = null;
-
-    // Number of update cycles this listener has gone through
-    this.updates = 0;
+    this.bucketsCallback = null;
   }
 
   log(...args) {
@@ -20,23 +16,13 @@ class ProviderListener {
     }
   }
 
-  onAdd(f) {
-    this.addCallback = f;
+  onBuckets(f) {
+    this.bucketsCallback = f;
   }
 
-  onRemove(f) {
-    this.removeCallback = f;
-  }
-
-  handleAdd(magnet) {
-    if (this.addCallback) {
-      this.addCallback(magnet);
-    }
-  }
-
-  handleRemove(magnet) {
-    if (this.removeCallback) {
-      this.removeCallback(magnet);
+  handleBuckets(buckets) {
+    if (this.bucketsCallback) {
+      this.bucketsCallback(buckets);
     }
   }
 
@@ -47,34 +33,9 @@ class ProviderListener {
 
     while (true) {
       let bucketList = await this.client.getBuckets({ provider: id });
+      this.handleBuckets(bucketList);
 
-      let newBuckets = {};
-      for (let bucket of bucketList) {
-        let oldVersion = buckets[bucket.name];
-        if (oldVersion) {
-          if (oldVersion.magnet != bucket.magnet) {
-            this.log(bucket.name, "bucket has new magnet:", bucket.magnet);
-            this.handleRemove(oldVersion.magnet);
-            this.handleAdd(bucket.magnet);
-          }
-        } else {
-          this.log("allocate bucket:", bucket.name);
-          this.handleAdd(bucket.magnet);
-        }
-        newBuckets[bucket.name] = bucket;
-      }
-
-      // Check for dropped buckets
-      for (let name in buckets) {
-        if (!newBuckets[name]) {
-          this.log("deallocate bucket:", name);
-          this.handleRemove(buckets[name].magnet);
-        }
-      }
-
-      buckets = newBuckets;
-      this.updates += 1;
-      await sleep(1000);
+      await sleep(2000);
     }
   }
 }

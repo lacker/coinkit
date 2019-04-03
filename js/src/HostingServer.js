@@ -22,12 +22,11 @@ class HostingServer {
     this.verbose = !!verbose;
     this.client = new TorrentClient(this.verbose);
 
-    // Maps info hash to magnet url
-    this.magnets = {};
+    // Maps info hash to bucket object
+    this.infoMap = {};
 
     this.listener = new ProviderListener(verbose);
-    this.listener.onAdd(magnet => this.add(magnet));
-    this.listener.onRemove(magnet => this.remove(magnet));
+    this.listener.onBuckets(buckets => this.handleBuckets(buckets));
   }
 
   log(...args) {
@@ -36,16 +35,37 @@ class HostingServer {
     }
   }
 
-  add(magnet) {
-    let infoHash = getInfoHash(magnet);
-    this.log("adding:", infoHash);
-    this.magnets[infoHash] = magnet;
-  }
+  handleBuckets(buckets) {
+    // Figure out the new info map
+    let newInfoMap = {};
+    for (let bucket of buckets) {
+      let infoHash;
+      try {
+        infoHash = getInfoHash(bucket.magnet);
+      } catch (e) {
+        console.log(e.message);
+        continue;
+      }
+      newInfoMap[infoHash] = bucket;
+    }
 
-  remove(magnet) {
-    let infoHash = getInfoHash(magnet);
-    this.log("removing:", infoHash);
-    delete this.magnets[infoHash];
+    // Handle data that is being deleted
+    for (let infoHash in this.infoMap) {
+      if (!newInfoMap[infoHash]) {
+        this.log("removing:", infoHash);
+        // TODO: clear this directory and remove the torrent from our client
+      }
+    }
+
+    // Handle data that is being added
+    for (let infoHash in newInfoMap) {
+      if (!this.infoMap[infoHash]) {
+        this.log("adding:", infoHash);
+        // TODO: start seeding this torrent. If the directory is already there, use it
+      }
+    }
+
+    this.infoMap = newInfoMap;
   }
 
   async serve() {
