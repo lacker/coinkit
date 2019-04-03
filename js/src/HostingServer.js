@@ -41,6 +41,11 @@ class HostingServer {
     return path.join(this.directory, infoHash);
   }
 
+  async remove(infoHash) {
+    this.log("removing", infoHash);
+    // TODO: implement
+  }
+
   async handleBuckets(buckets) {
     // Figure out the new info map
     let newInfoMap = {};
@@ -58,15 +63,14 @@ class HostingServer {
     // Handle data that is being deleted
     for (let infoHash in this.infoMap) {
       if (!newInfoMap[infoHash]) {
-        this.log("removing:", infoHash);
-        // TODO: clear this directory and remove the torrent from our client
+        await this.remove(infoHash);
       }
     }
 
     // Handle data that is being added
     for (let infoHash in newInfoMap) {
       if (!this.infoMap[infoHash]) {
-        this.log("adding:", infoHash);
+        this.log("adding", infoHash);
 
         // Start seeding this torrent. If the directory is already there from a previous run,
         // this should reuse it.
@@ -74,8 +78,25 @@ class HostingServer {
         let bucket = newInfoMap[infoHash];
         let torrent = this.client.download(bucket.magnet, dir);
 
-        // TODO: check to make sure that this torrent isn't too large
+        // Check to make sure that this torrent isn't too large
         await torrent.waitForMetadata();
+        let bucketBytes = bucket.size * 1024 * 1024;
+        let torrentBytes = torrent.totalBytes();
+        if (torrentBytes > bucketBytes) {
+          // The torrent *is* too large.
+          this.log(
+            "torrent",
+            infoHash,
+            "contains",
+            torrentBytes,
+            "bytes but bucket",
+            bucket.name,
+            "only holds",
+            bucketBytes,
+            "bytes"
+          );
+          await this.remove(infoHash);
+        }
       }
     }
 
