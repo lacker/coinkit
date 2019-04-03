@@ -89,7 +89,7 @@ class TorrentClient {
   // path is an optional path on disk to use.
   // Does not wait for the download to complete before returning.
   // If you want that, call waitForDone.
-  async download(magnet, path) {
+  download(magnet, path) {
     // First, check if this download is already in progress.
     for (let t of this.client.torrents) {
       if (t.magnetURI == magnet) {
