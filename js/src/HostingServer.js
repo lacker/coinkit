@@ -2,6 +2,8 @@
 
 const path = require("path");
 
+const rimraf = require("rimraf");
+
 const ProviderListener = require("./ProviderListener.js");
 const TorrentClient = require("./TorrentClient.js");
 
@@ -41,10 +43,23 @@ class HostingServer {
     return path.join(this.directory, infoHash);
   }
 
+  // Also cleans up the files on disk
   async remove(infoHash) {
+    if (infoHash.length < 5) {
+      this.log("infoHash suspiciously short:", infoHash);
+      return null;
+    }
     this.log("removing", infoHash);
     await this.client.remove(infoHash);
-    // TODO: remove the actual file
+    let promise = new Promise((resolve, reject) => {
+      rimraf(this.subdirectory(infoHash), { disableGlob: true }, err => {
+        if (err) {
+          this.log("rimraf error:", err.message);
+        }
+        resolve(null);
+      });
+    });
+    return await promise;
   }
 
   async handleBuckets(buckets) {
