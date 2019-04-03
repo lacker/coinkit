@@ -43,7 +43,8 @@ class HostingServer {
 
   async remove(infoHash) {
     this.log("removing", infoHash);
-    // TODO: implement
+    await this.client.remove(infoHash);
+    // TODO: remove the actual file
   }
 
   async handleBuckets(buckets) {

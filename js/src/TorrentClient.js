@@ -110,8 +110,16 @@ class TorrentClient {
 
   // Stops downloading a torrent.
   // Accepts either a magnet URL or an infoHash
-  async remove(torrentId) {
-    // TODO
+  async remove(id) {
+    let promise = new Promise((resolve, reject) => {
+      this.client.remove(id, err => {
+        if (err) {
+          this.log("error in remove:", err.message);
+        }
+        resolve();
+      });
+    });
+    return await promise;
   }
 
   // Shuts down the torrent client.
