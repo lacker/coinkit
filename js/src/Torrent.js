@@ -21,6 +21,40 @@ class Torrent {
     return this.torrent.progress == 1;
   }
 
+  // Returns the number of seeders, not counting this client.
+  // If we aren't sure, we are pessimistic and assume a peer is not a seeder.
+  // In particular if we don't have metadata yet we return 0 because we are confident in
+  // zero seeders.
+  // This also doesn't pick up seeds that already have all the data, and so do we, but the
+  // peer wasn't connected to the network at the time we created this
+  // torrent, because we have never had any need to communicate with those peers.
+  numPeerSeeders() {
+    let numPieces = this.torrent.pieces.length;
+    if (numPieces == 0) {
+      return 0;
+    }
+
+    let answer = 0;
+    for (let wire of this.torrent.wires) {
+      if (wire.peerPieces.buffer.length != numPieces) {
+        // No need to iterate, this isn't a seed
+        continue;
+      }
+
+      let wireIsSeed = true;
+      for (let i = 0; i < numPieces; i++) {
+        if (!wire.peerPieces.get(i)) {
+          wireIsSeed = false;
+          break;
+        }
+      }
+      if (wireIsSeed) {
+        answer++;
+      }
+    }
+    return answer;
+  }
+
   async monitorProgress() {
     while (!this.isDone()) {
       console.log("progress:", this.torrent.progress);
@@ -74,8 +108,7 @@ class Torrent {
 
   // Waits until there are n seeds for this torrent
   async waitForSeeds(n) {
-    // TODO: do the right thing here, instead of the wrong thing
-    while (true) {
+    while (this.numPeerSeeders() < n) {
       await sleep(1000);
     }
   }
