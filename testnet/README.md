@@ -154,11 +154,11 @@ kubectl create secret generic keypair0 --from-file=./keypair0.json
 
 These scripts are designed to deploy multiple miners to one cluster. The miners are differentiated by a number in `{0,1,2,3}`. From here on out, the instructions explain how to deploy miner 0, but if you want multiples just replace the 0 with a different number.
 
-Create a new database instance at https://console.cloud.google.com/projectselector/sql/instances . Pick postgres. Name it `db0` - that is your "instance name".
+Create a new database instance at https://console.cloud.google.com/projectselector/sql/instances . Pick postgres. Name it `db0` - that is your "instance name" or "instance id".
 
 Generate a random password, but take note of it.
 
-I edited the resources to be the minimum, 1 shared cpu and 0.6 GB memory.
+I chose PostgreSQL 11, and edited the resources to be the minimum, 1 shared cpu, 0.6 GB memory, 10 GB SSD storage. It isn't obvious that the "cores" slider goes even lower than the "1 core" default.
 
 Go to the management UI for your database, from https://console.cloud.google.com/sql/instances . Go to Databases, Create a database, and name it "prod".
 
