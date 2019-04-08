@@ -13,4 +13,4 @@ docker build \
        .
 
 # Upload it to Google's container registry
-gcloud docker -- push gcr.io/${PROJECT_ID}/cserver
+gcloud docker --verbosity=error -- push gcr.io/${PROJECT_ID}/cserver

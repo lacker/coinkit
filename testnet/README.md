@@ -89,6 +89,15 @@ Server: Docker Engine - Community
   Experimental:     false
 ```
 
+On Ubuntu, you may want to give your user Docker rights, so that you don't have to
+sudo everything:
+
+```
+sudo usermod -aG docker $USER
+```
+
+Log out and log in again for this to take effect.
+
 ### 3. Make a container image
 
 The build process takes a snapshot of the latest code on `github.com/lacker/coinkit`,
