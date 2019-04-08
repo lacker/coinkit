@@ -63,29 +63,30 @@ gcloud services enable containerregistry.googleapis.com
 
 ### 2. Install Docker
 
-https://www.docker.com/community-edition
+https://hub.docker.com/search/?type=edition&offering=community
 
-I went for "Docker CE for Mac (Stable)".
+You don't need the "enterprise edition".
 
 ```
 $ docker version
 Client:
- Version:	17.12.0-ce
- API version:	1.35
- Go version:	go1.9.2
- Git commit:	c97c6d6
- Built:	Wed Dec 27 20:03:51 2017
- OS/Arch:	darwin/amd64
+ Version:           18.09.4
+ API version:       1.39
+ Go version:        go1.10.8
+ Git commit:        d14af54266
+ Built:             Wed Mar 27 18:35:44 2019
+ OS/Arch:           linux/amd64
+ Experimental:      false
 
-Server:
+Server: Docker Engine - Community
  Engine:
-  Version:	17.12.0-ce
-  API version:	1.35 (minimum version 1.12)
-  Go version:	go1.9.2
-  Git commit:	c97c6d6
-  Built:	Wed Dec 27 20:12:29 2017
-  OS/Arch:	linux/amd64
-  Experimental:	true
+  Version:          18.09.4
+  API version:      1.39 (minimum version 1.12)
+  Go version:       go1.10.8
+  Git commit:       d14af54
+  Built:            Wed Mar 27 18:01:48 2019
+  OS/Arch:          linux/amd64
+  Experimental:     false
 ```
 
 ### 3. Make a container image
