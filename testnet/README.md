@@ -154,6 +154,8 @@ kubectl create secret generic keypair0 --from-file=./keypair0.json
 
 These scripts are designed to deploy multiple miners to one cluster. The miners are differentiated by a number in `{0,1,2,3}`. From here on out, the instructions explain how to deploy miner 0, but if you want multiples just replace the 0 with a different number.
 
+TODO: do we need multiple databases or can we reuse db0 between the different miners?
+
 Create a new database instance at https://console.cloud.google.com/projectselector/sql/instances . Pick postgres. Name it `db0` - that is your "instance name" or "instance id".
 
 Generate a random password, but take note of it.
