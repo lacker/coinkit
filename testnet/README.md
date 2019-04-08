@@ -152,9 +152,7 @@ kubectl create secret generic keypair0 --from-file=./keypair0.json
 
 ### 2. Start a database
 
-These scripts are designed to deploy multiple miners to one cluster. The miners are differentiated by a number in `{0,1,2,3}`. From here on out, the instructions explain how to deploy miner 0, but if you want multiples just replace the 0 with a different number.
-
-TODO: do we need multiple databases or can we reuse db0 between the different miners?
+These scripts are designed to deploy multiple miners to one cluster. The miners are differentiated by a number in `{0,1,2,3}`. From here on out, the instructions explain how to deploy miner 0, but if you want multiples just replace the 0 with a different number. Each miner will have its own database and its own cserver process.
 
 Create a new database instance at https://console.cloud.google.com/projectselector/sql/instances . Pick postgres. Name it `db0` - that is your "instance name" or "instance id".
 
@@ -164,7 +162,7 @@ I chose PostgreSQL 11, and edited the resources to be the minimum, 1 shared cpu,
 
 Go to the management UI for your database, from https://console.cloud.google.com/sql/instances . Go to Databases, Create a database, and name it "prod".
 
-You need a "service account" for this database. Create one at https://console.cloud.google.com/projectselector/iam-admin/serviceaccounts
+You need a "service account" for your databases. If you have multiple miners, this can be shared across them. Create one at https://console.cloud.google.com/projectselector/iam-admin/serviceaccounts
 
 Create a service account with the "Cloud SQL Client" role. Name it `sql-client` and select "Furnish a new private key" using `JSON` type. Hang on to the json file that your browser downloads.
 
@@ -172,7 +170,7 @@ Now you need to create a proxy user. For the database `db0` name the user `proxy
 Use that password you noted when you created the database instance.
 
 ```
-gcloud sql users create proxyuser0 host --instance=db0 --password=[PASSWORD]
+gcloud sql users create proxyuser0 --instance=db0 --password=[PASSWORD]
 ```
 
 Now we need to create some Kubernetes secrets. Both the service account and the proxy user require secrets to use them. The service account can be shared among multiple databases, but the proxy user is tied to a specific database.
