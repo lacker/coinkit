@@ -101,6 +101,12 @@ newgrp docker
 docker run hello-world
 ```
 
+Then set up gcloud to act as a Docker credential helper.
+
+```
+gcloud auth configure-docker
+```
+
 ### 3. Make a container image
 
 The build process takes a snapshot of the latest code on `github.com/lacker/coinkit`,
@@ -129,7 +135,7 @@ Then let's make the cluster, named "testnet". Once you run this, it'll
 start charging you money.
 
 ```
-gcloud container clusters create testnet --num-nodes=1 --scopes https://www.googleapis.com/auth/logging.write
+gcloud container clusters create testnet --num-nodes=1 --scopes https://www.googleapis.com/auth/logging.write,storage-ro
 ```
 
 # Running a miner on your cluster
@@ -200,7 +206,7 @@ To deploy a `cserver` to your cluster, run:
 This same command should also update the deployment, when a new
 "latest" image exists or when the yaml file has been updated.
 
-To check the logs for your server, go to `https://console.cloud.google.com/logs/viewer` and select "GKE container" from the first dropdown, "all logs" from the second.
+To see if it worked, check the logs for your server. Go to `https://console.cloud.google.com/logs/viewer` and select "GKE container" from the first dropdown, "all logs" from the second.
 
 To expose the `cserver` to public internet ports, you need to create a load balancer, which you can do with the `expose.sh` script:
 
