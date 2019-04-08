@@ -93,10 +93,13 @@ On Ubuntu, you may want to give your user Docker rights, so that you don't have 
 sudo everything:
 
 ```
-sudo usermod -aG docker $USER
-```
+sudo groupadd docker
+sudo gpasswd -a $USER docker
+newgrp docker
 
-Log out and log in again for this to take effect.
+# Then test that it's working
+docker run hello-world
+```
 
 ### 3. Make a container image
 
