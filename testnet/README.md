@@ -214,7 +214,14 @@ To deploy a `cserver` to your cluster, run:
 This same command should also update the deployment, when a new
 "latest" image exists or when the yaml file has been updated.
 
-To see if it worked, check the logs for your server. Go to `https://console.cloud.google.com/logs/viewer` and select "GKE container" from the first dropdown, "all logs" from the second.
+To see if it worked, you can get some Kubernetes event logs from the
+command line with:
+
+```
+kubectl describe pod cserver0-deployment
+```
+
+To get the application logs, go to `https://console.cloud.google.com/logs/viewer` and select "GKE container" from the first dropdown, "all logs" from the second.
 
 To expose the `cserver` to public internet ports, you need to create a load balancer, which you can do with the `expose.sh` script:
 
