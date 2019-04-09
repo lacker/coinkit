@@ -7,6 +7,7 @@ fi
 
 if [[ $(git status | grep "branch is ahead") ]]; then
     echo "build.sh creates a container from master. push your changes before building."
+    exit 1
 fi
 
 if [ ! -f ./deployment.yaml ]; then
