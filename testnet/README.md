@@ -176,7 +176,9 @@ Go to the management UI for your database, from https://console.cloud.google.com
 
 You need a "service account" for your databases. If you have multiple miners, this can be shared across them. Create one at https://console.cloud.google.com/projectselector/iam-admin/serviceaccounts
 
-Create a service account with the "Cloud SQL Client" role. Name it `sql-client` and select "Furnish a new private key" using `JSON` type. Hang on to the json file that your browser downloads.
+Create a service account with the "Cloud SQL Client" role. Name it
+`sql-client` and select "Furnish a new private key" using `JSON`
+type. Hang on to the json file that your browser downloads. I named it `sql-client.json`.
 
 Now you need to create a proxy user. For the database `db0` name the user `proxyuser0`.
 Use that password you noted when you created the database instance.
@@ -190,7 +192,7 @@ Now we need to create some Kubernetes secrets. Both the service account and the 
 To create a secret for the service account, named `cloudsql-instance-credentials`:
 
 ```
-kubectl create secret generic cloudsql-instance-credentials --from-file=credentials.json=that-json-file-you-downloaded.json
+kubectl create secret generic cloudsql-instance-credentials --from-file=credentials.json=that-json-file-you-downloaded-which-I-named-sql-client.json
 ```
 
 If you have multiple miners, the same `cloudsql-instance-credentials` will be used for all of them.
