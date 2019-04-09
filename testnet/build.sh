@@ -1,5 +1,10 @@
 #!/bin/bash
 
+if [[ $(git diff) ]]; then
+    echo "build.sh creates a container from master. check in your changes before building."
+    exit 1
+fi
+
 if [ ! -f ./deployment.yaml ]; then
     echo "please run build.sh from the testnet directory"
     exit 1
