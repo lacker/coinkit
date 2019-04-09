@@ -11,6 +11,13 @@ var Logger = log.New(os.Stderr, "", log.LstdFlags)
 // Just useful for debugging
 var Verbose = false
 
+func Pluralize(word string, number int) string {
+	if number == 1 {
+		return word
+	}
+	return word + "s"
+}
+
 func Shorten(name string) string {
 	length := len(name)
 	if length > 6 {

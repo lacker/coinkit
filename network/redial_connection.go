@@ -138,8 +138,10 @@ func (c *RedialConnection) Send(message *util.SignedMessage) bool {
 		c.consecutiveDrops += 1
 		if isPowerOf10(c.consecutiveDrops) {
 			util.Logger.Printf(
-				"RedialConnection outbox overloaded. %d messages dropped",
-				c.consecutiveDrops)
+				"RedialConnection outbox overloaded. %d %s dropped",
+				c.consecutiveDrops,
+				util.Pluralize("message", c.consecutiveDrops))
+
 		}
 		return false
 	}
