@@ -5,6 +5,10 @@ if [[ $(git diff) ]]; then
     exit 1
 fi
 
+if [[ $(git status | grep "branch is ahead") ]]; then
+    echo "build.sh creates a container from master. push your changes before building."
+fi
+
 if [ ! -f ./deployment.yaml ]; then
     echo "please run build.sh from the testnet directory"
     exit 1
