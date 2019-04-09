@@ -141,6 +141,9 @@ start charging you money.
 gcloud container clusters create testnet --num-nodes=1 --scopes https://www.googleapis.com/auth/logging.write,storage-ro
 ```
 
+If you're going to run more than one miner you can just start off
+raising the `--num-nodes` flag.
+
 # Running a miner on your cluster
 
 ### 1. Generate a keypair for your miner
