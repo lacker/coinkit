@@ -101,6 +101,9 @@ newgrp docker
 docker run hello-world
 ```
 
+You will need to run `newgrp docker` in any new terminal you create,
+until you log out and log in again.
+
 Then set up gcloud to act as a Docker credential helper.
 
 ```
