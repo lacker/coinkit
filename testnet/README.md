@@ -221,7 +221,7 @@ command line with:
 kubectl describe pod cserver0-deployment
 ```
 
-To get the application logs, go to `https://console.cloud.google.com/logs/viewer` and select "GKE container" from the first dropdown, "all logs" from the second.
+To get the application logs, go to `https://console.cloud.google.com/logs/viewer` and select "GKE container" from the first dropdown, "cserver0" from the second.
 
 To expose the `cserver` to public internet ports, you need to create a load balancer, which you can do with the `expose.sh` script:
 
