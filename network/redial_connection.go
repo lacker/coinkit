@@ -8,19 +8,33 @@ import (
 	"github.com/lacker/coinkit/util"
 )
 
+func isPowerOf10(n int) bool {
+	if n < 1 {
+		return false
+	}
+	if n == 1 {
+		return true
+	}
+	if n%10 != 0 {
+		return false
+	}
+	return isPowerOf10(n / 10)
+}
+
 // A RedialConnection is a Connection that will automatically redial when there
 // is any connection failure that would normally close the
 // connection. You can close it yourself, though, and it will stay
 // closed.
 // Some messages might get dropped during a reconnect.
 type RedialConnection struct {
-	conn     *BasicConnection
-	address  *Address
-	inbox    chan *util.SignedMessage
-	outbox   chan *util.SignedMessage
-	quit     chan bool
-	closed   bool
-	quitOnce sync.Once
+	conn             *BasicConnection
+	address          *Address
+	inbox            chan *util.SignedMessage
+	outbox           chan *util.SignedMessage
+	quit             chan bool
+	closed           bool
+	quitOnce         sync.Once
+	consecutiveDrops int
 }
 
 func NewRedialConnection(address *Address,
@@ -118,10 +132,15 @@ func (c *RedialConnection) runOutgoing() {
 func (c *RedialConnection) Send(message *util.SignedMessage) bool {
 	select {
 	case c.outbox <- message:
+		c.consecutiveDrops = 0
 		return true
 	default:
-		util.Logger.Printf(
-			"RedialConnection outbox overloaded, dropping message")
+		c.consecutiveDrops += 1
+		if isPowerOf10(c.consecutiveDrops) {
+			util.Logger.Printf(
+				"RedialConnection outbox overloaded. %d messages dropped",
+				c.consecutiveDrops)
+		}
 		return false
 	}
 }
