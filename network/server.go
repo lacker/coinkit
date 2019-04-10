@@ -471,6 +471,7 @@ func (s *Server) ServeHttpInBackground(port int) {
 		util.Logger.Print("got /statusz request")
 		fmt.Fprintf(w, "%.1fs uptime\n", s.Uptime())
 		fmt.Fprintf(w, "%d messages broadcasted\n", s.broadcasted)
+		fmt.Fprintf(w, "%d peers connected\n", s.numPeersConnected())
 		fmt.Fprintf(w, "current slot: %d\n", s.node.Slot())
 		fmt.Fprintf(w, "DB_USER: %s\n", os.Getenv("DB_USER"))
 		fmt.Fprintf(w, "public key: %s\n", s.keyPair.PublicKey())
@@ -483,8 +484,17 @@ func (s *Server) ServeHttpInBackground(port int) {
 			}
 			fmt.Fprintf(w, "total database size: %s\n", s.db.TotalSizeInfo())
 		}
-		fmt.Fprintf(w, "\nlast received message:\n%s", spew.Sdump(s.lastReceived))
-		fmt.Fprintf(w, "\nlast broadcasted message:\n%s", spew.Sdump(s.lastBroadcasted))
+		if s.lastReceived == nil {
+			fmt.Fprintf(w, "no messages received\n")
+		} else {
+			fmt.Fprintf(w, "\nlast received message, from %s:\n%s",
+				s.lastReceived.Signer(), spew.Sdump(s.lastReceived.Message()))
+		}
+		if s.lastBroadcasted == nil {
+			fmt.Fprintf(w, "no messages broadcasted\n")
+		} else {
+			fmt.Fprintf(w, "\nlast broadcasted message:\n%s", spew.Sdump(s.lastBroadcasted.Message()))
+		}
 	})
 
 	// /messages/ accepts signed messages over http, with or without trailing slash
