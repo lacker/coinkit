@@ -332,7 +332,6 @@ func (s *Server) listen() {
 	s.Logf("listening on port %d", s.port)
 	for {
 		conn, err := s.listener.Accept()
-		util.Logger.Print("XXX incoming connection")
 		if s.shutdown {
 			break
 		}
