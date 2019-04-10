@@ -31,4 +31,4 @@ The hosting server is run as a Node app, via `npm run host`.
 
 1. Make sure you have the local blockchain running: `./start-local.sh`
 
-2. Try `npm run cli status`. The mint is set up by default.
+2. Try `npm run cli status`. The mint is set up by default. The mint's username is 0x32652ebe42a8d56314b8b11abf51c01916a238920c1f16db597ee87374515f4609d3 but you can just use the passphrase "mint".

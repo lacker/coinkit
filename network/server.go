@@ -485,13 +485,13 @@ func (s *Server) ServeHttpInBackground(port int) {
 			fmt.Fprintf(w, "total database size: %s\n", s.db.TotalSizeInfo())
 		}
 		if s.lastReceived == nil {
-			fmt.Fprintf(w, "no messages received\n")
+			fmt.Fprintf(w, "\nno messages received\n")
 		} else {
 			fmt.Fprintf(w, "\nlast received message, from %s:\n%s",
 				s.lastReceived.Signer(), spew.Sdump(s.lastReceived.Message()))
 		}
 		if s.lastBroadcasted == nil {
-			fmt.Fprintf(w, "no messages broadcasted\n")
+			fmt.Fprintf(w, "\nno messages broadcasted\n")
 		} else {
 			fmt.Fprintf(w, "\nlast broadcasted message:\n%s", spew.Sdump(s.lastBroadcasted.Message()))
 		}
