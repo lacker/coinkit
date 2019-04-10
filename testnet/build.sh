@@ -37,7 +37,7 @@ NAME=$DOMAIN/${PROJECT_ID}/$1
 
 # The `--no-cache` is needed because the build process grabs fresh code from GitHub, and
 # if you enable the cache it'll keep using your old code.
-echo building Docker image...
+echo building $NAME image...
 docker build \
        --no-cache \
        --tag $NAME \
@@ -45,5 +45,5 @@ docker build \
        .
 
 # Upload it to the container registry
-echo uploading image to the $DOMAIN registry...
+echo uploading to the registry...
 docker push $NAME
