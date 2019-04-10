@@ -329,8 +329,10 @@ func (s *Server) processMessagesForever() {
 }
 
 func (s *Server) listen() {
+	s.Logf("listening on port %d", s.port)
 	for {
 		conn, err := s.listener.Accept()
+		util.Logger.Print("XXX incoming connection")
 		if s.shutdown {
 			break
 		}
@@ -345,12 +347,13 @@ func (s *Server) listen() {
 // Must be called before listen()
 // Will retry up to 5 seconds
 func (s *Server) acquirePort() {
-	s.Logf("listening on port %d", s.port)
+	s.Logf("acquiring port %d...", s.port)
 	for i := 0; i < 100; i++ {
 		ln, err := net.Listen("tcp", fmt.Sprintf("127.0.0.1:%d", s.port))
 		if err == nil {
 			s.listener = ln
 			s.start = time.Now()
+			s.Logf("port %d acquired", s.port)
 			return
 		}
 		time.Sleep(time.Millisecond * time.Duration(50))
