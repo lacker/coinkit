@@ -349,7 +349,7 @@ func (s *Server) listen() {
 func (s *Server) acquirePort() {
 	s.Logf("acquiring port %d...", s.port)
 	for i := 0; i < 100; i++ {
-		ln, err := net.Listen("tcp", fmt.Sprintf("127.0.0.1:%d", s.port))
+		ln, err := net.Listen("tcp", fmt.Sprintf("0.0.0.0:%d", s.port))
 		if err == nil {
 			s.listener = ln
 			s.start = time.Now()
