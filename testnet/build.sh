@@ -5,6 +5,11 @@ if [ "$1" == "" ] || [ "$2" != "" ]; then
     exit 1
 fi
 
+if [ "${PROJECT_ID}" == "" ]; then
+    echo "the PROJECT_ID environment variable is not set. check the readme"
+    exit 1
+fi
+
 if [ ! -f ./deployment.yaml ]; then
     echo "please run build.sh from the testnet directory"
     exit 1
@@ -22,22 +27,23 @@ fi
 
 DOCKERFILE="./$1-Dockerfile"
 if [ ! -f "$DOCKERFILE" ]; then
-    echo invalid image name: $1
+    echo $1 is not a valid name. try one of:
+    ls | grep Dockerfile | sed s/-Dockerfile//
     exit 1
 fi
 
-echo XXX
-exit 1
+DOMAIN=gcr.io
+NAME=$DOMAIN/${PROJECT_ID}/$1
 
 # The `--no-cache` is needed because the build process grabs fresh code from GitHub, and
 # if you enable the cache it'll keep using your old code.
 echo building Docker image...
 docker build \
        --no-cache \
-       -t gcr.io/${PROJECT_ID}/cserver \
-       --file ./cserver-Dockerfile \
+       --tag $NAME \
+       --file $DOCKERFILE \
        .
 
-# Upload it to Google's container registry
-echo uploading Docker image to Google\'s container registry...
-docker push gcr.io/${PROJECT_ID}/cserver
+# Upload it to the container registry
+echo uploading image to the $DOMAIN registry...
+docker push $NAME

@@ -120,7 +120,7 @@ From the `testnet` directory, build a container and upload it to Google's contai
 registry with:
 
 ```
-./build-cserver.sh
+./build.sh cserver
 ```
 
 The container and its presence on the registry is specific to your project, so this
