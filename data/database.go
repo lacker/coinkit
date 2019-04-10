@@ -68,11 +68,18 @@ func NewDatabase(config *Config) *Database {
 		info = fmt.Sprintf("%s password=%s", info, config.Password)
 	}
 	postgres, err := sqlx.Connect("postgres", info)
+	retries := 3
+	for i := 0; i < retries && err != nil; i++ {
+		util.Logger.Printf("postgres connection failure. retrying...")
+		time.Sleep(2000 * time.Millisecond)
+		postgres, err = sqlx.Connect("postgres", info)
+	}
 	if err != nil {
 		util.Logger.Printf("failed to connect to postgres with user %s, db %s",
 			username, config.Database)
 		panic(err)
 	}
+	util.Logger.Printf("postgres connection successful")
 
 	if config.testOnly {
 		// util.Logger.Printf("clearing test-only database %s", config.Database)
