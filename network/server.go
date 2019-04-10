@@ -9,6 +9,8 @@ import (
 	"os"
 	"time"
 
+	"github.com/davecgh/go-spew/spew"
+
 	"github.com/lacker/coinkit/data"
 	"github.com/lacker/coinkit/util"
 )
@@ -39,6 +41,12 @@ type Server struct {
 	// inbox contains messages that are going to be handled serially
 	// by the node, and do not require a response.
 	inbox chan *util.SignedMessage
+
+	// The last message we received
+	lastReceived *util.SignedMessage
+
+	// The last message we broadcasted
+	lastBroadcasted *util.SignedMessage
 
 	// requests contains messages that are going to be handled
 	// serially by the node, and *do* require a response.
@@ -145,6 +153,8 @@ func (s *Server) handleConnection(connection net.Conn) {
 		if sm == nil {
 			return
 		}
+
+		s.lastReceived = sm
 
 		m, ok := s.handleMessage(sm)
 		if !ok {
@@ -353,6 +363,7 @@ func (s *Server) broadcast(messages []*util.SignedMessage) {
 		for _, peer := range s.peers {
 			peer.Send(message)
 		}
+		s.lastBroadcasted = message
 		s.broadcasted += 1
 	}
 }
@@ -472,6 +483,8 @@ func (s *Server) ServeHttpInBackground(port int) {
 			}
 			fmt.Fprintf(w, "total database size: %s\n", s.db.TotalSizeInfo())
 		}
+		fmt.Fprintf(w, "\nlast received message:\n%s", spew.Sdump(s.lastReceived))
+		fmt.Fprintf(w, "\nlast broadcasted message:\n%s", spew.Sdump(s.lastBroadcasted))
 	})
 
 	// /messages/ accepts signed messages over http, with or without trailing slash
