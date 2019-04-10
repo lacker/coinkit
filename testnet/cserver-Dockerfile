@@ -6,7 +6,7 @@ WORKDIR /go/src/github.com/lacker/coinkit
 
 RUN go install ./...
 
-ENTRYPOINT ./testnet/entrypoint.sh
+ENTRYPOINT ./testnet/cserver-entrypoint.sh
 
 # Healthz
 EXPOSE 8000
