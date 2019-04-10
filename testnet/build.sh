@@ -21,7 +21,7 @@ echo building Docker image...
 docker build \
        --no-cache \
        -t gcr.io/${PROJECT_ID}/cserver \
-       .
+       --file ./cserver-Dockerfile
 
 # Upload it to Google's container registry
 echo uploading Docker image to Google\'s container registry...
