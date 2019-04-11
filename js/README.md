@@ -8,7 +8,7 @@ The sample app is built into `/app/`.
 
 The CLI is run as a Node app, via `npm run cli`.
 
-The hosting server is run as a Node app, via `npm run host`.
+The hosting server is run as a Node app, via `npm run hserver`.
 
 # Installing the chrome extension locally
 
