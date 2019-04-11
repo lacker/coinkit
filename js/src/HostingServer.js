@@ -153,8 +153,32 @@ class HostingServer {
 
     // Check to see if we already have a provider created.
     let client = new ChainClient(this.keyPair);
+    let providers = await client.getProviders({
+      owner: this.keyPair.getPublicKey()
+    });
+    if (providers.length > 1) {
+      throw new Error(
+        "HostingServer doesn't know how to handle a user that owns multiple providers"
+      );
+    }
+    if (providers.length == 1) {
+      let provider = providers[0];
+      if (provider.capacity > this.capacity) {
+        throw new Error(
+          "the chain says we need " +
+            provider.capacity +
+            " capacity but we only have " +
+            this.capacity
+        );
+      }
+      this.id = providers.id;
+      return this.id;
+    }
 
-    throw new Error("XXX: implement acquireProviderID");
+    // Create a provider
+    let provider = await client.createProvider(this.capacity);
+    this.id = provider.id;
+    return this.id;
   }
 
   async serve() {
