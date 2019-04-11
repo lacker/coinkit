@@ -1,5 +1,6 @@
 // The node hosting server that miners run to store files.
 
+const fs = require("fs");
 const path = require("path");
 
 const rimraf = require("rimraf");
@@ -19,17 +20,35 @@ function getInfoHash(magnet) {
 }
 
 class HostingServer {
-  // id is the provider id we are hosting for
-  constructor(id, directory, verbose) {
-    this.id = id;
-    this.directory = directory;
-    this.verbose = !!verbose;
+  // options must contain exactly one way to specify the provider:
+  // id - the id of the provider
+  // keyPair - the filename containing keys for the owner
+  // other options:
+  // directory - where to store the hosted files
+  // verbose - defaults to false
+  constructor(options) {
+    if (options.owner && options.keyPair) {
+      throw new Error(
+        "only one of the owner and id options can be set for HostingServer"
+      );
+    }
+    if (
+      !fs.existsSync(options.directory) ||
+      !fs.lstatSync(options.directory).isDirectory()
+    ) {
+      throw new Error(options.directory + " is not a directory");
+    }
+
+    this.owner = options.owner;
+    this.id = options.id;
+    this.directory = options.directory;
+    this.verbose = !!options.verbose;
     this.client = new TorrentClient(this.verbose);
 
     // Maps info hash to bucket object
     this.infoMap = {};
 
-    this.listener = new ProviderListener(verbose);
+    this.listener = new ProviderListener(this.verbose);
     this.listener.onBuckets(buckets => this.handleBuckets(buckets));
   }
 
@@ -119,7 +138,13 @@ class HostingServer {
     this.infoMap = newInfoMap;
   }
 
+  // Makes sure that this.id is set, creating a new provider if need be.
+  async acquireProviderID() {
+    // TODO
+  }
+
   async serve() {
+    await this.acquireProviderID();
     await this.listener.listen(this.id);
   }
 }
