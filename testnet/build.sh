@@ -15,10 +15,10 @@ if [ ! -f ./deployment.yaml ]; then
     exit 1
 fi
 
-if [[ $(git diff) ]]; then
-    echo "build.sh creates a container from master. check in your changes before building."
-    exit 1
-fi
+#if [[ $(git diff) ]]; then
+#    echo "build.sh creates a container from master. check in your changes before building."
+#    exit 1
+#fi
 
 if [[ $(git status | grep "branch is ahead") ]]; then
     echo "build.sh creates a container from master. push your changes before building."
@@ -43,6 +43,10 @@ docker build \
        --tag $NAME \
        --file $DOCKERFILE \
        .
+
+if [ $? -ne 0 ]; then
+    exit 1
+fi
 
 # Upload it to the container registry
 echo uploading to the registry...
