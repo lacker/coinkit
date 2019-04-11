@@ -5,6 +5,7 @@ const path = require("path");
 
 const rimraf = require("rimraf");
 
+const ChainClient = require("./ChainClient.js");
 const ProviderListener = require("./ProviderListener.js");
 const TorrentClient = require("./TorrentClient.js");
 const { isDirectory, loadKeyPair } = require("./FileUtil.js");
@@ -25,6 +26,7 @@ class HostingServer {
   // id - the id of the provider
   // keyPair - the filename containing keys for the owner
   // other options:
+  // capacity - how much space we have to store files, in megabytes
   // directory - where to store the hosted files
   // verbose - defaults to false
   constructor(options) {
@@ -36,9 +38,15 @@ class HostingServer {
 
     if (!isDirectory(options.directory)) {
       throw new Error(options.directory + " is not a directory");
+    } else {
+      this.log("hosting files in", options.directory);
     }
 
-    this.keyPair = options.keyPair;
+    if (options.keyPair) {
+      this.keyPair = loadKeyPair(options.keyPair);
+    }
+
+    this.capacity = options.capacity;
     this.id = options.id;
     this.directory = options.directory;
     this.verbose = !!options.verbose;
@@ -139,7 +147,14 @@ class HostingServer {
 
   // Makes sure that this.id is set, creating a new provider if need be.
   async acquireProviderID() {
-    throw new Error("TODO: implement acquireProviderID");
+    if (this.id) {
+      return this.id;
+    }
+
+    // Check to see if we already have a provider created.
+    let client = new ChainClient(this.keyPair);
+
+    throw new Error("XXX: implement acquireProviderID");
   }
 
   async serve() {
