@@ -13,6 +13,7 @@ spec:
         app: cserverX
     spec:
       containers:
+        
       - name: cserverX
         image: gcr.io/PROJECT_ID/cserver
         ports:
@@ -35,6 +36,7 @@ spec:
             secretKeyRef:
               name: cloudsql-dbX-credentials
               key: password
+              
       - name: cloudsql-proxy
         image: gcr.io/cloudsql-docker/gce-proxy:1.11
         command: ["/cloud_sql_proxy",
@@ -44,6 +46,20 @@ spec:
           - name: cloudsql-instance-credentials
             mountPath: /secrets/cloudsql
             readOnly: true
+            
+      - name: hserverX
+        image: gcr.io/PROJECT_ID/hserver
+        ports:
+        - containerPort: 3000
+        - containerPort: 4000
+        volumeMounts:
+          - name: keypairX
+            mountPath: /secrets/keypair
+            readOnly: true
+        env:
+        - name: FORCE_REDEPLOY
+          value: 'DEPLOY_TIME'
+            
       volumes:
         - name: cloudsql-instance-credentials
           secret:

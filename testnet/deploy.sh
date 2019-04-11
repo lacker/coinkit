@@ -10,7 +10,8 @@ if (( "$1" < 0 )) || (( "$1" > 3 )); then
     exit 1
 fi
 
-APP=cserver$1
+CSERVER=cserver$1
+HSERVER=hserver$1
 DB=db$1
 KEYPAIR=keypair$1
 
@@ -19,7 +20,8 @@ CONNECTION_NAME=`gcloud sql instances describe $DB | grep connectionName | sed '
 echo sql connection name: $CONNECTION_NAME
 
 sed s/PROJECT_ID/$PROJECT_ID/g ./deployment.yaml \
-    | sed "s/cserverX/$APP/g" \
+    | sed "s/cserverX/$CSERVER/g" \
+    | sed "s/hserverX/$HSERVER/g" \
     | sed "s/dbX/$DB/g" \
     | sed "s/keypairX/$KEYPAIR/g" \
     | sed "s/DEPLOY_TIME/`date`/" \
