@@ -122,17 +122,19 @@ class KeyPair {
     return new KeyPair(keys.publicKey, keys.secretKey);
   }
 
-  // The input format is a serialized JSON string with 'Public' and 'Private' keys
+  // The input format is a serialized JSON string with 'public' and 'private' keys
   static fromSerialized(s) {
     let j = JSON.parse(s);
-    if (!j.Public) {
+    j.public = j.public || j.Public;
+    j.private = j.private || j.Private;
+    if (!j.public) {
       throw new Error("serialized key pair must have Public field");
     }
-    if (!j.Private) {
+    if (!j.private) {
       throw new Error("serialized key pair must have Private field");
     }
-    let pub = KeyPair.decodePublicKey(j.Public);
-    let priv = base64Decode(j.Private);
+    let pub = KeyPair.decodePublicKey(j.public);
+    let priv = base64Decode(j.private);
     return new KeyPair(pub, priv);
   }
 
@@ -154,8 +156,8 @@ class KeyPair {
   // serialize() returns a serialized JSON string with 'Public' and 'Private' keys
   serialize() {
     let j = {
-      Public: this.getPublicKey(),
-      Private: this.getPrivateKey()
+      public: this.getPublicKey(),
+      private: this.getPrivateKey()
     };
 
     // Pretty-encoding so that it matches our code style when saved to a file
