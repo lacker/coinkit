@@ -8,4 +8,4 @@ echo ------------------------------ hserver-entrypoint.sh ----------------------
 KEYPAIR=`find /secrets/keypair | grep json | head -1`
 echo loading keypair: $KEYPAIR
 
-npm run hserver
+node src/hserver-main.js --keypair=$KEYPAIR --directory=/hostfiles

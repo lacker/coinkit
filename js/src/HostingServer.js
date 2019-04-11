@@ -7,6 +7,7 @@ const rimraf = require("rimraf");
 
 const ProviderListener = require("./ProviderListener.js");
 const TorrentClient = require("./TorrentClient.js");
+const { isDirectory, loadKeyPair } = require("./FileUtil.js");
 
 // Throws an error if the magnet url is an unknown format
 function getInfoHash(magnet) {
@@ -27,19 +28,17 @@ class HostingServer {
   // directory - where to store the hosted files
   // verbose - defaults to false
   constructor(options) {
-    if (options.owner && options.keyPair) {
+    if (options.id && options.keyPair) {
       throw new Error(
-        "only one of the owner and id options can be set for HostingServer"
+        "only one of the id and keyPair options can be set for HostingServer"
       );
     }
-    if (
-      !fs.existsSync(options.directory) ||
-      !fs.lstatSync(options.directory).isDirectory()
-    ) {
+
+    if (!isDirectory(options.directory)) {
       throw new Error(options.directory + " is not a directory");
     }
 
-    this.owner = options.owner;
+    this.keyPair = options.keyPair;
     this.id = options.id;
     this.directory = options.directory;
     this.verbose = !!options.verbose;
@@ -140,7 +139,7 @@ class HostingServer {
 
   // Makes sure that this.id is set, creating a new provider if need be.
   async acquireProviderID() {
-    // TODO
+    throw new Error("TODO: implement acquireProviderID");
   }
 
   async serve() {

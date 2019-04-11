@@ -4,12 +4,12 @@ const fs = require("fs");
 
 const KeyPair = require("./KeyPair.js");
 
-function isFile(filename) {
-  return fs.existsSync(filename) && fs.lstatSync(filename).isFile();
-}
-
 function isDirectory(dir) {
   return fs.existsSync(dir) && fs.lstatSync(dir).isDirectory();
+}
+
+function isFile(filename) {
+  return fs.existsSync(filename) && fs.lstatSync(filename).isFile();
 }
 
 function loadKeyPair(filename) {
@@ -21,7 +21,7 @@ function loadKeyPair(filename) {
 }
 
 module.exports = {
-  isFile,
   isDirectory,
+  isFile,
   loadKeyPair
 };
