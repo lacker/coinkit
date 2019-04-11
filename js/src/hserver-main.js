@@ -10,7 +10,8 @@ const args = require("args");
 args
   .option("tracker", "The port on which the tracker will be running", 4000)
   .option("proxy", "The port on which the proxy will be running", 3000)
-  .option("id", "The provider id to host files for", 1)
+  .option("id", "The provider id to host files for", 0)
+  .option("owner", "The owner of the provider to host files for", "")
   .option(
     "directory",
     "The directory to store files in",
@@ -30,8 +31,12 @@ if (
   console.log(flags.directory, "is not a directory");
   process.exit(1);
 }
-if (flags.id < 1) {
-  console.log(flags.id, "is not a valid provider id");
+
+if (flags.id < 1 && flags.owner.length < 1) {
+  console.log(
+    flags.id,
+    "you must specify a provider with either --id or --owner"
+  );
   process.exit(1);
 }
 
