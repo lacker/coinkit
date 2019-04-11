@@ -3,7 +3,7 @@ const WebTorrent = require("webtorrent-hybrid");
 
 const Torrent = require("./Torrent.js");
 
-const TRACKERS = ["ws://localhost:4444"];
+const TRACKERS = ["ws://localhost:4000"];
 
 function nicePeerId(id) {
   return "_" + ("" + id).slice(-4);

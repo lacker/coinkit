@@ -8,8 +8,8 @@ const path = require("path");
 const args = require("args");
 
 args
-  .option("tracker", "The port on which the tracker will be running", 4444)
-  .option("proxy", "The port on which the proxy will be running", 3333)
+  .option("tracker", "The port on which the tracker will be running", 4000)
+  .option("proxy", "The port on which the proxy will be running", 3000)
   .option("id", "The provider id to host files for", 1)
   .option(
     "directory",
