@@ -1,9 +1,9 @@
-const axios = require("axios");
+import axios from "axios";
 
-const KeyPair = require("./KeyPair.js");
-const Message = require("./Message.js");
-const SignedMessage = require("./SignedMessage.js");
-const { sleep } = require("./Util.js");
+import KeyPair from "./KeyPair";
+import Message from "./Message";
+import SignedMessage from "./SignedMessage";
+import { sleep } from "./Util";
 
 // A client for talking to the blockchain servers.
 // This client only uses one keypair across its lifetime.

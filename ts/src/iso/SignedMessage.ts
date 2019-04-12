@@ -1,5 +1,5 @@
-const KeyPair = require("./KeyPair.js");
-const Message = require("./Message.js");
+import KeyPair from "./KeyPair";
+import Message from "./Message";
 
 class SignedMessage {
   // Creates a signed message.

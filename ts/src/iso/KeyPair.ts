@@ -2,13 +2,13 @@
 // Annoyingly, our crypto library calls it a "secret key" while the Go library calls it
 // a "private key". We try to name things "private key" when possible here.
 
-const { fromByteArray, toByteArray } = require("base64-js");
-const nacl = require("tweetnacl");
-const forge = require("node-forge");
-const { TextEncoder } = require("text-encoding-shim");
-const stringify = require("json-stable-stringify");
+import { fromByteArray, toByteArray } from "base64-js";
+import nacl from "tweetnacl";
+import forge from "node-forge";
+import { TextEncoder } from "text-encoding-shim";
+import stringify from "json-stable-stringify";
 
-const Message = require("./Message.js");
+import Message from "./Message";
 
 // Decodes a Uint8Array from a base64 string.
 // Adds = padding at the end, which our library requires but some do not.
