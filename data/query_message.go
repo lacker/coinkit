@@ -52,6 +52,15 @@ func (m *QueryMessage) String() string {
 	if m.Documents != nil {
 		parts = append(parts, fmt.Sprintf("docs=%s", m.Documents))
 	}
+	if m.Buckets != nil {
+		parts = append(parts, fmt.Sprintf("buckets=(%s)", m.Buckets))
+	}
+	if m.Providers != nil {
+		parts = append(parts, fmt.Sprintf("providers=(%s)", m.Providers))
+	}
+	if m.Signature != nil {
+		parts = append(parts, fmt.Sprintf("signature=%s", m.Signature))
+	}
 	return strings.Join(parts, " ")
 }
 
