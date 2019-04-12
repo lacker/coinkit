@@ -171,13 +171,15 @@ class HostingServer {
             this.capacity
         );
       }
-      this.id = providers.id;
+      this.id = provider.id;
+      this.log("found provider id:", this.id);
       return this.id;
     }
 
     // Create a provider
     let provider = await client.createProvider(this.capacity);
     this.id = provider.id;
+    this.log("created a new provider with id:", this.id);
     return this.id;
   }
 

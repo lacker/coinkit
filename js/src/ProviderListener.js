@@ -29,6 +29,10 @@ class ProviderListener {
 
   // Listens forever
   async listen(id) {
+    if (!id || id < 1) {
+      throw new Error("cannot listen to invalid provider id:", id);
+    }
+
     // buckets maps bucket name to information about the bucket
     let buckets = {};
 
