@@ -7,7 +7,7 @@ const TorrentClient = require("./TorrentClient.js");
 async function main() {
   console.log("seeding...");
   let seedClient = new TorrentClient();
-  let dir = path.resolve(__dirname, "samplesite");
+  let dir = path.resolve(__dirname, "../samplesite");
   let t = await seedClient.seed(dir);
   let magnet = t.magnet;
 

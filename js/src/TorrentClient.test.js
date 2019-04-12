@@ -32,7 +32,7 @@ test.skip(
   async () => {
     // Seed a torrent
     let seedClient = new TorrentClient();
-    let dir = path.resolve(__dirname, "samplesite");
+    let dir = path.resolve(__dirname, "../samplesite");
     console.log("test: waiting for seed");
     let t = await seedClient.seed(dir);
 
