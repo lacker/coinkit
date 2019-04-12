@@ -1,4 +1,4 @@
-const TorrentDownloader = require("./TorrentDownloader.js");
+import TorrentDownloader from "./TorrentDownloader";
 
 // TODO: this is broken with some error around calling unref on undefined.
 // It seems like either the WebTorrent library is broken, or our test environment mucks

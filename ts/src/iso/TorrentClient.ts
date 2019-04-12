@@ -1,7 +1,7 @@
 // A wrapper around the WebTorrent client with an async API.
-const WebTorrent = require("webtorrent-hybrid");
+import WebTorrent from "webtorrent-hybrid";
 
-const Torrent = require("./Torrent.js");
+import Torrent from "./Torrent";
 
 const TRACKERS = ["ws://localhost:4000"];
 
@@ -9,7 +9,7 @@ function nicePeerId(id) {
   return "_" + ("" + id).slice(-4);
 }
 
-class TorrentClient {
+export default class TorrentClient {
   constructor() {
     this.client = new WebTorrent();
     this.client.on("error", err => {
@@ -131,5 +131,3 @@ class TorrentClient {
     return await promise;
   }
 }
-
-module.exports = TorrentClient;

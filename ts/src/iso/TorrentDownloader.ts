@@ -2,8 +2,8 @@
 // subsequent files.
 // It is designed to be used non-persistently from a web browser.
 
-const ChainClient = require("./ChainClient.js");
-const TorrentClient = require("./TorrentClient.js");
+import ChainClient from "./ChainClient";
+import TorrentClient from "./TorrentClient";
 
 // Removes a leading / and adds a trailing index.html if needed
 // so that callers can be indifferent
@@ -50,7 +50,7 @@ async function readTorrent(torrent) {
   return data;
 }
 
-class TorrentDownloader {
+export default class TorrentDownloader {
   constructor() {
     this.client = new TorrentClient();
 
@@ -138,5 +138,3 @@ class TorrentDownloader {
     return data[pathname];
   }
 }
-
-module.exports = TorrentDownloader;
