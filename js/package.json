@@ -6,7 +6,7 @@
     "app": "parcel app/index.html",
     "cli": "node --no-warnings src/cli-main.js",
     "extension": "parcel -p 2345 --no-hmr build src/popup-main.js src/background-main.js src/content-main.js src/loader-main.js -d extension/",
-    "hserver": "node src/hserver-main.js --keypair=./mint.json --capacity=100",
+    "hserver": "node src/hserver-main.js --keypair=./mint.json --capacity=1000",
     "integration": "node src/integration-main.js",
     "test": "jest"
   },
