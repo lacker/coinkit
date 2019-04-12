@@ -15,6 +15,8 @@ import { sleep } from "../iso/Util";
 // This wraps a ChainClient which handles the direct communication with the chain.
 
 export default class TrustedClient {
+  storage: Storage;
+
   // Create a new client with no keypair.
   constructor(storage) {
     this.storage = storage;
@@ -46,7 +48,7 @@ export default class TrustedClient {
 
   // Call from the background page
   static init(storage) {
-    window.client = new TrustedClient(storage);
+    (window as any).client = new TrustedClient(storage);
   }
 
   // Get the global trusted client from the background page

@@ -6,6 +6,7 @@ import TorrentDownloader from "../iso/TorrentDownloader";
 import TrustedClient from "./TrustedClient";
 
 let storage = new Storage(new LocalStorage());
+(window as any).storage = storage;
 TrustedClient.init(storage);
 
 // Work around requestIdleCallback issue
