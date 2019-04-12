@@ -42,7 +42,7 @@ func (m *QueryMessage) MessageType() string {
 }
 
 func (m *QueryMessage) String() string {
-	parts := []string{"info"}
+	parts := []string{"query"}
 	if m.Account != "" {
 		parts = append(parts, fmt.Sprintf("account=%s", util.Shorten(m.Account)))
 	}

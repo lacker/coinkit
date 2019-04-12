@@ -310,37 +310,37 @@ func (db *Database) TotalSizeInfo() string {
 	return answer
 }
 
-// Just returns nil if the QueryMessage is invalid
-func (db *Database) HandleQueryMessage(m *QueryMessage) *DataMessage {
+// Returns (nil, error) if the query message is invalid
+func (db *Database) HandleQueryMessage(m *QueryMessage) (*DataMessage, error) {
 	if m == nil {
-		return nil
+		return nil, fmt.Errorf("nil is not a valid query message")
 	}
 
 	if m.Account != "" {
-		return db.AccountDataMessage(m.Account)
+		return db.AccountDataMessage(m.Account), nil
 	}
 
 	if m.Block != 0 {
-		return db.BlockDataMessage(m.Block)
+		return db.BlockDataMessage(m.Block), nil
 	}
 
 	if m.Documents != nil {
-		return db.DocumentDataMessage(m.Documents)
+		return db.DocumentDataMessage(m.Documents), nil
 	}
 
 	if m.Signature != "" {
-		return db.SignatureDataMessage(m.Signature)
+		return db.SignatureDataMessage(m.Signature), nil
 	}
 
 	if m.Buckets != nil {
-		return db.BucketDataMessage(m.Buckets)
+		return db.BucketDataMessage(m.Buckets), nil
 	}
 
 	if m.Providers != nil {
-		return db.ProviderDataMessage(m.Providers)
+		return db.ProviderDataMessage(m.Providers), nil
 	}
 
-	return nil
+	return nil, fmt.Errorf("query message does not contain any recognizable fields")
 }
 
 // readTransaction is a helper to let you use a transaction to fetch data that reflects
