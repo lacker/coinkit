@@ -10,13 +10,12 @@ function nicePeerId(id) {
 }
 
 class TorrentClient {
-  constructor(verbose) {
+  constructor() {
     this.client = new WebTorrent();
     this.client.on("error", err => {
       console.log("fatal error in TorrentClient:", err.message);
     });
-    this.verbose = !!verbose;
-    this.log("creating torrent peer", nicePeerId(this.client.peerId));
+    this.verbose = false;
   }
 
   log(...args) {

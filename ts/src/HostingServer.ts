@@ -50,7 +50,8 @@ class HostingServer {
     this.id = options.id;
     this.directory = options.directory;
     this.verbose = !!options.verbose;
-    this.client = new TorrentClient(this.verbose);
+    this.client = new TorrentClient();
+    this.client.verbose = this.verbose;
 
     // Maps info hash to bucket object
     this.infoMap = {};

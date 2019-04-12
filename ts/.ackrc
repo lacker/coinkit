@@ -1,0 +1,2 @@
+--ignore-dir=is:build
+--ignore-file=is:package-lock.json
