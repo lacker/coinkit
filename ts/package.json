@@ -38,6 +38,7 @@
     "last 10 chrome versions"
   ],
   "devDependencies": {
+    "@types/node": "^11.13.4",
     "jest": "^24.0.0"
   }
 }
