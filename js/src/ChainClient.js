@@ -100,6 +100,7 @@ class ChainClient {
     }
 
     if (signed.message.type === "Error") {
+      console.log("error sending message:", message);
       throw new Error(signed.message.error);
     }
     return signed.message;
@@ -110,9 +111,6 @@ class ChainClient {
   async query(params) {
     let qm = new Message("Query", params);
     let dm = await this.sendMessage(qm);
-    if (dm.type === "Error") {
-      throw new Error(dm.error);
-    }
     return dm;
   }
 
@@ -128,7 +126,6 @@ class ChainClient {
     if (!account) {
       throw new Error("cannot create provider for a nonexistent user account");
     }
-    this.log("current account:", account);
 
     // Make a signed op without the actual signature
     let newSequence = account.sequence + 1;
@@ -144,9 +141,6 @@ class ChainClient {
     let opm = new Message("Operation", { operations: [sop] });
     let sopm = this.keyPair.signOperationMessage(opm);
     let response = await this.sendMessage(sopm);
-
-    // TODO: handle responses that indicate trouble
-    this.log("got response to operation:", response);
 
     // Wait for the op to be processed
     while (true) {
