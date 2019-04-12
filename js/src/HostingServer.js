@@ -182,7 +182,12 @@ class HostingServer {
   }
 
   async serve() {
-    await this.acquireProviderID();
+    try {
+      await this.acquireProviderID();
+    } catch (e) {
+      console.log("failed to acquire provider id: " + e.message);
+      process.exit(1);
+    }
     await this.listener.listen(this.id);
   }
 }
