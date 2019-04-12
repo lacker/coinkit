@@ -155,7 +155,8 @@ async function deploy(directory, bucketName) {
   await setMagnet(bucketName, torrent.magnet);
   console.log("chain updated. waiting for host to sync torrent...");
   await torrent.waitForSeeds(1);
-  console.log("deploy complete");
+  console.log("deploy complete. cleaning up...");
+  await client.destroy();
 }
 
 // Ask the user for a passphrase to log in.
