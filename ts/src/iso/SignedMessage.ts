@@ -2,6 +2,11 @@ import KeyPair from "./KeyPair";
 import Message from "./Message";
 
 export default class SignedMessage {
+  message: any;
+  messageString: string;
+  signer: string;
+  signature: string;
+
   // Creates a signed message.
   // Users should generally not use this directly; use fromSigning or fromSerialized.
   // signer and signature are base64-encoded.

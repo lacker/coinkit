@@ -3,7 +3,8 @@
 // a "private key". We try to name things "private key" when possible here.
 
 import { fromByteArray, toByteArray } from "base64-js";
-import nacl from "tweetnacl";
+
+const nacl = require("tweetnacl");
 import forge from "node-forge";
 import { TextEncoder } from "text-encoding-shim";
 import stringify from "json-stable-stringify";
@@ -52,7 +53,7 @@ function shorten(s) {
 }
 
 // Encodes a Uint8Array into a hex string.
-function hexEncode(bytes) {
+function hexEncode(bytes: Uint8Array) {
   return Array.from(bytes)
     .map(byte => byte.toString(16).padStart(2, "0"))
     .join("");
@@ -89,6 +90,9 @@ function sha512_256(inputBytes) {
 }
 
 export default class KeyPair {
+  publicKey: string;
+  privateKey: string;
+
   constructor(publicKey, privateKey) {
     this.publicKey = publicKey;
     this.privateKey = privateKey;

@@ -10,6 +10,9 @@ function nicePeerId(id) {
 }
 
 export default class TorrentClient {
+  client: WebTorrent;
+  verbose: boolean;
+
   constructor() {
     this.client = new WebTorrent();
     this.client.on("error", err => {
@@ -88,7 +91,7 @@ export default class TorrentClient {
   // path is an optional path on disk to use.
   // Does not wait for the download to complete before returning.
   // If you want that, call waitForDone.
-  download(magnet, path) {
+  download(magnet, path?) {
     // First, check if this download is already in progress.
     for (let t of this.client.torrents) {
       if (t.magnetURI == magnet) {
@@ -97,7 +100,7 @@ export default class TorrentClient {
     }
 
     // Add a new download
-    let options = {};
+    let options = { path: undefined };
     if (path) {
       options.path = path;
     }

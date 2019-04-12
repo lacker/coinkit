@@ -2,9 +2,14 @@
 import { sleep } from "./Util";
 
 export default class Torrent {
+  torrent: any;
+  magnet: string;
+  infoHash: number;
+  verbose: boolean;
+
   // This constructor should be cheap, since we often construct many Torrent objects from
   // the same underlying torrent.
-  constructor(torrent, verbose) {
+  constructor(torrent, verbose?) {
     this.torrent = torrent;
     this.magnet = torrent.magnetURI;
     this.infoHash = torrent.infoHash;

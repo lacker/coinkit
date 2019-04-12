@@ -28,12 +28,12 @@ async function readFile(file) {
 
       if (file.name.endsWith(".html")) {
         reader.onload = e => {
-          resolve({ html: e.target.result });
+          resolve({ html: (e.target as any).result });
         };
         reader.readAsText(blob);
       } else {
         reader.onload = e => {
-          resolve({ data: e.target.result });
+          resolve({ data: (e.target as any).result });
         };
         reader.readAsDataURL(blob);
       }
@@ -51,6 +51,11 @@ async function readTorrent(torrent) {
 }
 
 export default class TorrentDownloader {
+  client: TorrentClient;
+  lastFetchTime: { [hostname: string]: Date };
+  magnets: any;
+  cache: any;
+
   constructor() {
     this.client = new TorrentClient();
 

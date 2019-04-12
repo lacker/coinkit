@@ -64,6 +64,9 @@ function isEmpty(object) {
 }
 
 export default class ChainClient {
+  keyPair: KeyPair;
+  verbose: boolean;
+
   constructor(kp?) {
     if (!kp) {
       kp = KeyPair.fromRandom();

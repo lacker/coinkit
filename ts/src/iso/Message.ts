@@ -2,11 +2,10 @@ import stringify from "json-stable-stringify";
 
 // Used to communicate with the blockchain
 export default class Message {
-  constructor(type, properties = {}) {
-    if (typeof type !== "string") {
-      throw new Error("Message must be constructed with a string type");
-    }
+  type: string;
+  _serialized: string;
 
+  constructor(type: string, properties = {}) {
     this.type = type;
     this._serialized = stringify({
       type,
@@ -21,7 +20,7 @@ export default class Message {
     return this._serialized;
   }
 
-  static fromSerialized(serialized) {
+  static fromSerialized(serialized): any {
     let { type, message } = JSON.parse(serialized);
     return new Message(type, message);
   }
