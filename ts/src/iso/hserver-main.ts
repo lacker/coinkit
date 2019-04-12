@@ -38,6 +38,8 @@ if (flags.id < 1 && flags.keypair.length < 1) {
 }
 
 let options = {
+  id: undefined,
+  keyPair: undefined,
   capacity: flags.capacity,
   directory: flags.directory,
   verbose: true

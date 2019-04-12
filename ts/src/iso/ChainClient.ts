@@ -64,7 +64,7 @@ function isEmpty(object) {
 }
 
 class ChainClient {
-  constructor(kp) {
+  constructor(kp?) {
     if (!kp) {
       kp = KeyPair.fromRandom();
     }
