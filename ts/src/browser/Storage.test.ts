@@ -2,7 +2,7 @@ import KeyPair from "../iso/KeyPair";
 import MockLocalStorage from "./MockLocalStorage";
 import Storage from "./Storage";
 
-import { newKeyPair, newPassword } from "./actions";
+import { newKeyPair, newPassword } from "./Actions";
 
 test("basic redux store usage", async () => {
   let local = new MockLocalStorage();

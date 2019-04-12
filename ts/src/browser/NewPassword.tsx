@@ -1,12 +1,12 @@
 // A screen to let the user create a password to locally encrypt keys.
 
-import React, { Component } from "react";
+import * as React from "react";
 import Button from "@material-ui/core/Button";
 import TextField from "@material-ui/core/TextField";
 
 import Styles from "./Styles";
 
-export default class NewPassword extends Component {
+export default class NewPassword extends React.Component<any, any> {
   // props.popup is a reference to the root popup
   constructor(props) {
     super(props);

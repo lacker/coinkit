@@ -1,6 +1,6 @@
 // Styles to be used in multiple places
 
-let Styles = {
+let Styles: { [styleName: string]: any } = {
   popup: {
     display: "flex",
     flexDirection: "column",

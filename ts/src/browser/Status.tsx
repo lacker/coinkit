@@ -1,12 +1,12 @@
 // A screen to show the status of your account.
 
-import React, { Component } from "react";
+import * as React from "react";
 import Button from "@material-ui/core/Button";
 
 import Styles from "./Styles";
 import TrustedClient from "./TrustedClient";
 
-export default class Status extends Component {
+export default class Status extends React.Component<any, any> {
   constructor(props) {
     super(props);
     this.state = {

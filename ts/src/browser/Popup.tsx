@@ -1,10 +1,10 @@
 // The root to display in the extension popup.
 
-import React, { Component } from "react";
+import * as React from "react";
 import { connect } from "react-redux";
 import Button from "@material-ui/core/Button";
 
-import KeyPair from "./KeyPair";
+import KeyPair from "../iso/KeyPair";
 import Login from "./Login";
 import NewPassword from "./NewPassword";
 import RequestPermission from "./RequestPermission";
@@ -19,9 +19,9 @@ import {
   newPassword,
   denyPermission,
   grantPermission
-} from "./actions";
+} from "./Actions";
 
-class Popup extends Component {
+class Popup extends React.Component<any, any> {
   constructor(props) {
     super(props);
   }
@@ -61,7 +61,7 @@ class Popup extends Component {
   }
 
   render() {
-    let style = {
+    let style: any = {
       display: "flex",
       alignSelf: "stretch",
       flexDirection: "column",

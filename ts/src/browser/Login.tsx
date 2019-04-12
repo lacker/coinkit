@@ -1,13 +1,13 @@
 // A screen to prompt a login.
 
-import React, { Component } from "react";
+import * as React from "react";
 import Button from "@material-ui/core/Button";
 import TextField from "@material-ui/core/TextField";
 
 import KeyPair from "./KeyPair";
 import Styles from "./Styles";
 
-export default class Login extends Component {
+export default class Login extends React.Component<any, any> {
   // props.popup is a reference to the root popup
   constructor(props) {
     super(props);

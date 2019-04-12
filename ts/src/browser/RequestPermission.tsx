@@ -1,11 +1,11 @@
 // A screen for an app to request permissions from the user.
 
-import React, { Component } from "react";
+import * as React from "react";
 import Button from "@material-ui/core/Button";
 
 import Styles from "./Styles";
 
-export default class RequestPermission extends Component {
+export default class RequestPermission extends React.Component<any, any> {
   // props.host is the entity requesting permissions
   // props.permissions is the permissions we are requesting
   // props.accept is what we call when the user accepts
