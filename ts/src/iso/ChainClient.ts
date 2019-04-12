@@ -63,7 +63,7 @@ function isEmpty(object) {
   return true;
 }
 
-class ChainClient {
+export default class ChainClient {
   constructor(kp?) {
     if (!kp) {
       kp = KeyPair.fromRandom();
@@ -287,5 +287,3 @@ class ChainClient {
     return;
   }
 }
-
-module.exports = ChainClient;

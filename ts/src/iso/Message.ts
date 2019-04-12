@@ -1,7 +1,7 @@
 import stringify from "json-stable-stringify";
 
 // Used to communicate with the blockchain
-class Message {
+export default class Message {
   constructor(type, properties = {}) {
     if (typeof type !== "string") {
       throw new Error("Message must be constructed with a string type");
@@ -26,5 +26,3 @@ class Message {
     return new Message(type, message);
   }
 }
-
-module.exports = Message;

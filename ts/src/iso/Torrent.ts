@@ -1,7 +1,7 @@
 // A wrapper around WebTorrent's "torrent" object with an async API.
 import { sleep } from "./Util";
 
-class Torrent {
+export default class Torrent {
   // This constructor should be cheap, since we often construct many Torrent objects from
   // the same underlying torrent.
   constructor(torrent, verbose) {
@@ -128,5 +128,3 @@ class Torrent {
     // TODO
   }
 }
-
-module.exports = Torrent;

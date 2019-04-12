@@ -88,7 +88,7 @@ function sha512_256(inputBytes) {
   return outputBytes;
 }
 
-class KeyPair {
+export default class KeyPair {
   constructor(publicKey, privateKey) {
     this.publicKey = publicKey;
     this.privateKey = privateKey;
@@ -272,5 +272,3 @@ class KeyPair {
     return base64Encode(this.privateKey);
   }
 }
-
-module.exports = KeyPair;

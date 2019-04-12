@@ -1,7 +1,7 @@
 import KeyPair from "./KeyPair";
 import Message from "./Message";
 
-class SignedMessage {
+export default class SignedMessage {
   // Creates a signed message.
   // Users should generally not use this directly; use fromSigning or fromSerialized.
   // signer and signature are base64-encoded.
@@ -63,5 +63,3 @@ class SignedMessage {
     return new SignedMessage({ message, messageString, signer, signature });
   }
 }
-
-module.exports = SignedMessage;
