@@ -1,12 +1,12 @@
 // The root to display in the sample app.
 
-import React, { Component } from "react";
+import * as React from "react";
 
 import UntrustedClient from "./UntrustedClient";
-import KeyPair from "./KeyPair";
+import KeyPair from "../iso/KeyPair";
 
-import TorrentClient from "./TorrentClient";
-import TorrentDownloader from "./TorrentDownloader";
+import TorrentClient from "../iso/TorrentClient";
+import TorrentDownloader from "../iso/TorrentDownloader";
 
 async function fetchPeerData() {
   // localStorage.debug = "webtorrent:torrent";
@@ -19,7 +19,9 @@ async function fetchPeerData() {
   await client.destroy();
 }
 
-export default class App extends Component {
+export default class App extends React.Component<any, any> {
+  client: UntrustedClient;
+
   constructor(props) {
     super(props);
 

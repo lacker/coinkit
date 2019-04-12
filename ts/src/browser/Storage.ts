@@ -63,7 +63,7 @@ export default class Storage {
     if (Storage.mock) {
       return Storage.mock;
     }
-    let storage = chrome.extension.getBackgroundPage().storage;
+    let storage = (chrome.extension.getBackgroundPage() as any).storage;
     if (!storage) {
       throw new Error("cannot find storage");
     }

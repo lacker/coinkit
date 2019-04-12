@@ -1,5 +1,5 @@
-import { requestPermission } from "./actions";
-import { missingPermissions, hasPermission } from "./permission";
+import { requestPermission } from "./Actions";
+import { missingPermissions, hasPermission } from "./Permission";
 
 import ChainClient from "../iso/ChainClient";
 import KeyPair from "../iso/KeyPair";
@@ -53,7 +53,7 @@ export default class TrustedClient {
 
   // Get the global trusted client from the background page
   static get() {
-    let client = chrome.extension.getBackgroundPage().client;
+    let client = (chrome.extension.getBackgroundPage() as any).client;
     if (!client) {
       throw new Error("cannot find client");
     }
@@ -136,7 +136,8 @@ export default class TrustedClient {
     let start = new Date();
     while (true) {
       await sleep(500);
-      let ms = new Date() - start;
+      let now = new Date();
+      let ms = now.valueOf() - start.valueOf();
       if (ms > 1000 * 60 * 10) {
         break;
       }

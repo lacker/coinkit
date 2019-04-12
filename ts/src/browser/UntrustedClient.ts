@@ -17,7 +17,7 @@ import { missingPermissions, hasPermission } from "./Permission.js";
 // When the extension sends a response message, it includes the same id as the message
 // that it was responding to.
 
-export default class Client {
+export default class UntrustedClient {
   publicKey: string;
   callbacks: { [id: string]: any };
   permissions: any;
@@ -71,9 +71,8 @@ export default class Client {
     return "" + Math.random();
   }
 
-  async sendMessage(message) {
+  async sendMessage(message): Promise<any> {
     let id = this.getMessageId();
-    this.nextId++;
     let data = {
       id: id,
       type: "toCoinkit",

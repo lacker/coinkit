@@ -7,6 +7,10 @@ import TextField from "@material-ui/core/TextField";
 import Styles from "./Styles";
 
 export default class NewPassword extends React.Component<any, any> {
+  popup: any;
+  passwordField: any;
+  repeatPasswordField: any;
+
   // props.popup is a reference to the root popup
   constructor(props) {
     super(props);

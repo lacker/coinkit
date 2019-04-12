@@ -1,5 +1,5 @@
 // Redux actions
-import KeyPair from "./KeyPair";
+import KeyPair from "../iso/KeyPair";
 
 export const DENY_PERMISSION = "DENY_PERMISSION";
 export const GRANT_PERMISSION = "GRANT_PERMISSION";

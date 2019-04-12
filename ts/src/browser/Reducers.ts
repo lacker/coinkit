@@ -7,7 +7,7 @@ import {
   LOG_OUT,
   NEW_KEY_PAIR,
   NEW_PASSWORD
-} from "./actions";
+} from "./Actions";
 
 function password(state = null, action) {
   switch (action.type) {

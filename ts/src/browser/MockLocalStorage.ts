@@ -1,4 +1,6 @@
 export default class MockLocalStorage {
+  data: any;
+
   constructor() {
     this.data = {};
   }

@@ -4,10 +4,12 @@ import * as React from "react";
 import Button from "@material-ui/core/Button";
 import TextField from "@material-ui/core/TextField";
 
-import KeyPair from "./KeyPair";
+import KeyPair from "../iso/KeyPair";
 import Styles from "./Styles";
 
 export default class Login extends React.Component<any, any> {
+  popup: any;
+
   // props.popup is a reference to the root popup
   constructor(props) {
     super(props);

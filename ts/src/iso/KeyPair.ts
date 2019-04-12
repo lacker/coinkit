@@ -90,8 +90,8 @@ function sha512_256(inputBytes) {
 }
 
 export default class KeyPair {
-  publicKey: string;
-  privateKey: string;
+  publicKey: Uint8Array;
+  privateKey: Uint8Array;
 
   constructor(publicKey, privateKey) {
     this.publicKey = publicKey;
