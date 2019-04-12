@@ -107,7 +107,7 @@ func TestLastBlock(t *testing.T) {
 	qm := &QueryMessage{
 		Block: b.Slot,
 	}
-	dm := db.HandleQueryMessage(qm)
+	dm, _ := db.HandleQueryMessage(qm)
 	if dm == nil {
 		t.Fatalf("got nil data message")
 	}
@@ -120,7 +120,7 @@ func TestLastBlock(t *testing.T) {
 	qm = &QueryMessage{
 		Signature: op.Signature,
 	}
-	dm = db.HandleQueryMessage(qm)
+	dm, _ = db.HandleQueryMessage(qm)
 	if dm == nil {
 		t.Fatalf("got nil data message")
 	}
@@ -373,7 +373,7 @@ func TestAccounts(t *testing.T) {
 	m := &QueryMessage{
 		Account: "bob",
 	}
-	dm := db.HandleQueryMessage(m)
+	dm, _ := db.HandleQueryMessage(m)
 	if dm == nil || dm.I != 0 || dm.Accounts["bob"].Balance != 4 {
 		t.Fatalf("got unexpected data message: %+v", dm)
 	}
@@ -549,7 +549,7 @@ func TestBuckets(t *testing.T) {
 			Owner: "bob",
 		},
 	}
-	dm := db.HandleQueryMessage(qm)
+	dm, _ := db.HandleQueryMessage(qm)
 	if len(dm.Buckets) != 1 {
 		t.Fatalf("failed to HandleQueryMessage: %+v", qm)
 	}
@@ -662,7 +662,7 @@ func TestProviders(t *testing.T) {
 			ID: 1,
 		},
 	}
-	dm := db.HandleQueryMessage(qm)
+	dm, _ := db.HandleQueryMessage(qm)
 	if len(dm.Providers) != 1 {
 		t.Fatalf("failed to HandleQueryMessage: %+v", qm)
 	}

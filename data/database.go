@@ -310,7 +310,8 @@ func (db *Database) TotalSizeInfo() string {
 	return answer
 }
 
-// Returns (nil, error) if the query message is invalid
+// Ideally returns (nil, error) if the query message is invalid.
+// There might be some code paths that return nil, nil when it's invalid.
 func (db *Database) HandleQueryMessage(m *QueryMessage) (*DataMessage, error) {
 	if m == nil {
 		return nil, fmt.Errorf("nil is not a valid query message")

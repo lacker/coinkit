@@ -58,7 +58,7 @@ func (m *QueryMessage) String() string {
 	if m.Providers != nil {
 		parts = append(parts, fmt.Sprintf("providers=(%s)", m.Providers))
 	}
-	if m.Signature != nil {
+	if m.Signature != "" {
 		parts = append(parts, fmt.Sprintf("signature=%s", m.Signature))
 	}
 	return strings.Join(parts, " ")
