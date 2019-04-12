@@ -60,7 +60,7 @@ async function setBlackHoleProxy(server) {
 
 // For now there must be a black hole proxy running on localhost:3000.
 // Later this proxy address will need to be loaded dynamically from somewhere.
-setBlackHoleProxy("localhost:3000", {}).then(() => {
+setBlackHoleProxy("localhost:3000").then(() => {
   console.log("initial black hole proxy configuration complete");
 });
 
