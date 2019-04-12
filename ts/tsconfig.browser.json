@@ -5,8 +5,8 @@
       "allowJs": true,
       "jsx": "react",
       "target": "es5",
-      "lib": [ "es2015", "dom" ],
-      "types": [ "chrome" ]
+      "lib": [ "es2017", "dom" ],
+      "types": [ "chrome", "jest" ]
     },
     "include": [
       "./src/browser/",

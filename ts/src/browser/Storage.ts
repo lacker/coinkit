@@ -6,12 +6,20 @@
 
 import { createStore } from "redux";
 
-import Cipher from "./Cipher";
-import KeyPair from "./KeyPair";
-import { loadFromStorage } from "./actions";
-import reducers from "./reducers";
+import Cipher from "../iso/Cipher";
+import KeyPair from "../iso/KeyPair";
+import { loadFromStorage } from "./Actions";
+import reducers from "./Reducers";
 
 export default class Storage {
+  static mock: any;
+  local: any;
+  encrypted: any;
+  data: any;
+  request: any;
+  password: string;
+  initialized: boolean;
+
   constructor(local) {
     this.local = local;
 

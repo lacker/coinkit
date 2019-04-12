@@ -1,5 +1,5 @@
-import Message from "./Message";
-import { missingPermissions, hasPermission } from "./permission.js";
+import Message from "../iso/Message";
+import { missingPermissions, hasPermission } from "./Permission.js";
 
 // Client is designed to be included in applications and run in an untrusted application
 // environment. It gets permissions by requesting them from the extension, whose code
@@ -18,6 +18,11 @@ import { missingPermissions, hasPermission } from "./permission.js";
 // that it was responding to.
 
 export default class Client {
+  publicKey: string;
+  callbacks: { [id: string]: any };
+  permissions: any;
+  popupURL: string;
+
   constructor() {
     // publicKey is null before permissions are acquired
     this.publicKey = null;

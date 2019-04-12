@@ -1,12 +1,12 @@
 import { requestPermission } from "./actions";
 import { missingPermissions, hasPermission } from "./permission";
 
-import ChainClient from "./ChainClient";
-import KeyPair from "./KeyPair";
-import Message from "./Message";
-import SignedMessage from "./SignedMessage";
+import ChainClient from "../iso/ChainClient";
+import KeyPair from "../iso/KeyPair";
+import Message from "../iso/Message";
+import SignedMessage from "../iso/SignedMessage";
 import Storage from "./Storage";
-import { sleep } from "./Util";
+import { sleep } from "../iso/Util";
 
 // A trusted client that handles interaction with the blockchain nodes.
 // This client is trusted in the sense that it holds the user's keypair.

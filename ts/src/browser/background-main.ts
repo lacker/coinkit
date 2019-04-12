@@ -1,16 +1,16 @@
 // This code runs in the persistent background page.
 import LocalStorage from "./LocalStorage";
 import Storage from "./Storage";
-import TorrentClient from "./TorrentClient";
-import TorrentDownloader from "./TorrentDownloader";
+import TorrentClient from "../iso/TorrentClient";
+import TorrentDownloader from "../iso/TorrentDownloader";
 import TrustedClient from "./TrustedClient";
 
-window.storage = new Storage(new LocalStorage());
-TrustedClient.init(window.storage);
+let storage = new Storage(new LocalStorage());
+TrustedClient.init(storage);
 
 // Work around requestIdleCallback issue
 // https://stackoverflow.com/questions/55461030/does-requestidlecallback-work-in-the-background-page-of-chrome-extensions
-window.requestIdleCallback = f => f();
+(window as any).requestIdleCallback = f => f();
 
 // Creates a pac script so that all .coinkit URLs get proxied to a
 // black hole server.

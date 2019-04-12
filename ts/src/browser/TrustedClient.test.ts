@@ -1,7 +1,7 @@
-import KeyPair from "./KeyPair";
-import Message from "./Message";
+import KeyPair from "../iso/KeyPair";
+import Message from "../iso/Message";
 import MockLocalStorage from "./MockLocalStorage";
-import SignedMessage from "./SignedMessage";
+import SignedMessage from "../iso/SignedMessage";
 import Storage from "./Storage";
 import TrustedClient from "./TrustedClient";
 

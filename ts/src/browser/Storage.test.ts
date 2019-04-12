@@ -1,4 +1,4 @@
-import KeyPair from "./KeyPair";
+import KeyPair from "../iso/KeyPair";
 import MockLocalStorage from "./MockLocalStorage";
 import Storage from "./Storage";
 
