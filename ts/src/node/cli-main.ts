@@ -272,12 +272,12 @@ async function main() {
     if (rest.length > 2) {
       fatal("Usage: npm run cli get-buckets [owner=<id>] [provider=<id>]");
     }
-    let query = {};
+    let query = {} as any;
     for (let arg of rest) {
       if (arg.startsWith("owner=")) {
         query.owner = arg.split("=")[1];
       } else if (arg.startsWith("provider=")) {
-        let rhs = arg.split("=");
+        let rhs = arg.split("=")[1];
         let id = parseInt(rhs);
         if (!id) {
           fatal("bad provider id: " + rhs);

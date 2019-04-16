@@ -1,8 +1,8 @@
 // This is the entry point for the hosting server.
 
-import http from "http";
-import os from "os";
-import path from "path";
+import * as http from "http";
+import * as os from "os";
+import * as path from "path";
 
 import args from "args";
 
