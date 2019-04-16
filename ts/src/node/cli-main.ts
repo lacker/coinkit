@@ -1,11 +1,11 @@
-const path = require("path");
-const readline = require("readline");
+import * as path from "path";
+import * as readline from "readline";
 
-const ChainClient = require("./ChainClient.js");
-const KeyPair = require("./KeyPair.js");
-const Message = require("./Message.js");
-const ProviderListener = require("./ProviderListener.js");
-const TorrentClient = require("./TorrentClient.js");
+import ChainClient from "../iso/ChainClient";
+import KeyPair from "../iso/KeyPair";
+import Message from "../iso/Message";
+import ProviderListener from "./ProviderListener";
+import TorrentClient from "../iso/TorrentClient";
 
 function fatal(message) {
   console.log(message);
@@ -206,7 +206,7 @@ async function main() {
 
     let capacity = parseInt(rest[0]);
     if (!capacity) {
-      fatal("bad argument:", rest[0]);
+      fatal("bad argument: " + rest[0]);
     }
     await createProvider(capacity);
     return;
@@ -218,7 +218,7 @@ async function main() {
     }
     let id = parseInt(rest[0]);
     if (!id) {
-      fatal("bad provider id argument:", rest[0]);
+      fatal("bad provider id argument: " + rest[0]);
     }
     await getProvider(id);
     return;
@@ -228,7 +228,7 @@ async function main() {
     if (rest.length > 2) {
       fatal("Usage: npm run cli get-providers [owner=<id>] [bucket=<name>]");
     }
-    let query = {};
+    let query = {} as any;
     for (let arg of rest) {
       if (arg.startsWith("owner=")) {
         query.owner = arg.split("=")[1];
@@ -254,7 +254,7 @@ async function main() {
     let name = rest[0];
     let size = parseInt(rest[1]);
     if (!size) {
-      fatal("bad size:", rest[1]);
+      fatal("bad size:" + rest[1]);
     }
     await createBucket(name, size);
     return;

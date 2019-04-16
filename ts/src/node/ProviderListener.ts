@@ -1,9 +1,9 @@
-const ChainClient = require("./ChainClient.js");
-const { sleep } = require("./Util.js");
+import ChainClient from "../iso/ChainClient";
+import { sleep } from "../iso/Util";
 
 // The ProviderListener continuously tracks information relevant to a single provider.
 // This is designed to be the source of information for a hosting server.
-class ProviderListener {
+export default class ProviderListener {
   constructor(verbose) {
     this.client = new ChainClient();
     this.verbose = !!verbose;
@@ -44,5 +44,3 @@ class ProviderListener {
     }
   }
 }
-
-module.exports = ProviderListener;
