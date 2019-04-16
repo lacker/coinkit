@@ -1,10 +1,10 @@
 // This is the entry point for the hosting server.
 
-const http = require("http");
-const os = require("os");
-const path = require("path");
+import http from "http";
+import os from "os";
+import path from "path";
 
-const args = require("args");
+import args from "args";
 
 args
   .option("tracker", "The port on which the tracker will be running", 4000)

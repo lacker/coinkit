@@ -2,7 +2,7 @@
 // we need to have an external proxy that just redirects everything to a single tatic page.
 // This is that proxy.
 
-const http = require("http");
+import http from "http";
 
 // This code should never run in browsers because the document load gets canceled
 const CONTENT = `
@@ -18,7 +18,10 @@ this is the black hole proxy
 </html>
 `;
 
-class BlackHoleProxy {
+export default class BlackHoleProxy {
+  port: number;
+  server: any;
+
   constructor(port) {
     this.port = port;
     this.server = http.createServer((req, res) => {
@@ -29,5 +32,3 @@ class BlackHoleProxy {
     console.log("running black hole proxy on port", this.port);
   }
 }
-
-module.exports = BlackHoleProxy;
