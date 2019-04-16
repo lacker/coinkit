@@ -1,14 +1,14 @@
 // The node hosting server that miners run to store files.
 
-const fs = require("fs");
-const path = require("path");
+import * as fs from "fs";
+import * as path from "path";
 
-const rimraf = require("rimraf");
+import rimraf from "rimraf";
 
-const ChainClient = require("./ChainClient.js");
-const ProviderListener = require("./ProviderListener.js");
-const TorrentClient = require("./TorrentClient.js");
-const { isDirectory, loadKeyPair } = require("./FileUtil.js");
+import ChainClient from "../iso/ChainClient";
+import ProviderListener from "./ProviderListener";
+import TorrentClient from "../iso/TorrentClient";
+import { isDirectory, loadKeyPair } from "./FileUtil";
 
 // Throws an error if the magnet url is an unknown format
 function getInfoHash(magnet) {
@@ -21,7 +21,15 @@ function getInfoHash(magnet) {
   return rest.split("&")[0];
 }
 
-class HostingServer {
+export default class HostingServer {
+  capacity: number;
+  id: number;
+  directory: string;
+  verbose: boolean;
+  client: TorrentClient;
+  infoMap: { [infoHash: string]: any };
+  listener: ProviderListener;
+
   // options must contain exactly one way to specify the provider:
   // id - the id of the provider
   // keyPair - the filename containing keys for the owner
@@ -194,5 +202,3 @@ class HostingServer {
     await this.listener.listen(this.id);
   }
 }
-
-module.exports = HostingServer;

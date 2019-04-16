@@ -4,7 +4,11 @@ import { sleep } from "../iso/Util";
 // The ProviderListener continuously tracks information relevant to a single provider.
 // This is designed to be the source of information for a hosting server.
 export default class ProviderListener {
-  constructor(verbose) {
+  client: ChainClient;
+  bucketsCallback: (buckets: string[]) => any;
+  verbose: boolean;
+
+  constructor(verbose?) {
     this.client = new ChainClient();
     this.verbose = !!verbose;
     this.bucketsCallback = null;
@@ -30,7 +34,7 @@ export default class ProviderListener {
   // Listens forever
   async listen(id) {
     if (!id || id < 1) {
-      throw new Error("cannot listen to invalid provider id:", id);
+      throw new Error("cannot listen to invalid provider id: " + id);
     }
 
     // buckets maps bucket name to information about the bucket

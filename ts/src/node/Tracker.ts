@@ -1,9 +1,11 @@
-const { Server } = require("bittorrent-tracker");
+import { Server } from "bittorrent-tracker";
 
 // Run a webtorrent tracker
 // See https://github.com/webtorrent/bittorrent-tracker for docs
 
-class Tracker {
+export default class Tracker {
+  server: Server;
+
   constructor(port) {
     this.server = new Server({
       udp: true,
@@ -40,5 +42,3 @@ class Tracker {
     // console.log("got start message from", addr);
   }
 }
-
-module.exports = Tracker;

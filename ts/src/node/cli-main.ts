@@ -17,7 +17,7 @@ async function ask(question, hideResponse) {
   let r = readline.createInterface({
     input: process.stdin,
     output: process.stdout
-  });
+  }) as any;
 
   let p = new Promise((resolve, reject) => {
     r.question(question, answer => {
