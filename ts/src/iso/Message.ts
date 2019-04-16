@@ -1,4 +1,4 @@
-import stringify from "json-stable-stringify";
+import * as stringify from "json-stable-stringify";
 
 // Used to communicate with the blockchain
 export default class Message {
