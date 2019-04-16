@@ -5,9 +5,9 @@
 import { fromByteArray, toByteArray } from "base64-js";
 
 import * as nacl from "tweetnacl";
-import forge from "node-forge";
+import * as forge from "node-forge";
 import { TextEncoder } from "text-encoding-shim";
-import stringify from "json-stable-stringify";
+import * as stringify from "json-stable-stringify";
 
 import Message from "./Message";
 
