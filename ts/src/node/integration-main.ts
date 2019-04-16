@@ -1,8 +1,8 @@
 // An integration test
 
-const path = require("path");
+import * as path from "path";
 
-const TorrentClient = require("./TorrentClient.js");
+import TorrentClient from "../iso/TorrentClient";
 
 async function main() {
   console.log("seeding...");

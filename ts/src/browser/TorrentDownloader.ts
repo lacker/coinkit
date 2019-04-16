@@ -2,8 +2,8 @@
 // subsequent files.
 // It is designed to be used non-persistently from a web browser.
 
-import ChainClient from "./ChainClient";
-import TorrentClient from "./TorrentClient";
+import ChainClient from "../iso/ChainClient";
+import TorrentClient from "../iso/TorrentClient";
 
 // Removes a leading / and adds a trailing index.html if needed
 // so that callers can be indifferent

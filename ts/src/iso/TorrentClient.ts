@@ -70,7 +70,7 @@ export default class TorrentClient {
   }
 
   // Returns a Torrent object
-  async seed(directory) {
+  async seed(directory): Promise<any> {
     let promise = new Promise((resolve, reject) => {
       this.client.seed(
         directory,

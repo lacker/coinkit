@@ -4,9 +4,8 @@ import * as React from "react";
 
 import UntrustedClient from "./UntrustedClient";
 import KeyPair from "../iso/KeyPair";
-
 import TorrentClient from "../iso/TorrentClient";
-import TorrentDownloader from "../iso/TorrentDownloader";
+import TorrentDownloader from "./TorrentDownloader";
 
 async function fetchPeerData() {
   // localStorage.debug = "webtorrent:torrent";

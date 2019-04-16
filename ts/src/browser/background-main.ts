@@ -2,7 +2,7 @@
 import LocalStorage from "./LocalStorage";
 import Storage from "./Storage";
 import TorrentClient from "../iso/TorrentClient";
-import TorrentDownloader from "../iso/TorrentDownloader";
+import TorrentDownloader from "./TorrentDownloader";
 import TrustedClient from "./TrustedClient";
 
 let storage = new Storage(new LocalStorage());
