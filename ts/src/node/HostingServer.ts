@@ -6,6 +6,7 @@ import * as path from "path";
 import rimraf from "rimraf";
 
 import ChainClient from "../iso/ChainClient";
+import KeyPair from "../iso/KeyPair";
 import ProviderListener from "./ProviderListener";
 import TorrentClient from "../iso/TorrentClient";
 import { isDirectory, loadKeyPair } from "./FileUtil";
@@ -29,6 +30,7 @@ export default class HostingServer {
   client: TorrentClient;
   infoMap: { [infoHash: string]: any };
   listener: ProviderListener;
+  keyPair: KeyPair;
 
   // options must contain exactly one way to specify the provider:
   // id - the id of the provider

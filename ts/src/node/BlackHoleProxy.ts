@@ -2,7 +2,7 @@
 // we need to have an external proxy that just redirects everything to a single tatic page.
 // This is that proxy.
 
-import http from "http";
+import * as http from "http";
 
 // This code should never run in browsers because the document load gets canceled
 const CONTENT = `

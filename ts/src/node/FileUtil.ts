@@ -1,27 +1,21 @@
 // Utility functions that involve the filesystem and only work in Node
 
-const fs = require("fs");
+import * as fs from "fs";
 
-const KeyPair = require("./KeyPair.js");
+import KeyPair from "../iso/KeyPair";
 
-function isDirectory(dir) {
+export function isDirectory(dir) {
   return fs.existsSync(dir) && fs.lstatSync(dir).isDirectory();
 }
 
-function isFile(filename) {
+export function isFile(filename) {
   return fs.existsSync(filename) && fs.lstatSync(filename).isFile();
 }
 
-function loadKeyPair(filename) {
+export function loadKeyPair(filename) {
   if (!isFile(filename)) {
     throw new Error(filename + " is not a file");
   }
   let serialized = fs.readFileSync(filename, "utf8");
   return KeyPair.fromSerialized(serialized);
 }
-
-module.exports = {
-  isDirectory,
-  isFile,
-  loadKeyPair
-};
