@@ -1,6 +1,6 @@
 // A wrapper for AES encryption and decryption
 
-import forge from "node-forge";
+import * as forge from "node-forge";
 
 export default class Cipher {
   static keyFromPassword(password, salt) {
