@@ -4,7 +4,7 @@ import * as http from "http";
 import * as os from "os";
 import * as path from "path";
 
-import args from "args";
+import * as args from "args";
 
 args
   .option("tracker", "The port on which the tracker will be running", 4000)
@@ -20,9 +20,9 @@ args
 
 const flags = args.parse(process.argv);
 
-const BlackHoleProxy = require("./BlackHoleProxy.js");
-const HostingServer = require("./HostingServer.js");
-const Tracker = require("./Tracker.js");
+import BlackHoleProxy from "./BlackHoleProxy";
+import HostingServer from "./HostingServer";
+import Tracker from "./Tracker";
 
 if (flags.capacity <= 0) {
   console.log("to host files you must set --capacity");
