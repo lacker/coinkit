@@ -1,3 +1,7 @@
+# Deprecation Warning
+
+We switched to using typescript. Check the `ts` directory. For now this code is left here for reference.
+
 # Overview
 
 There are several different build targets produced by this JavaScript codebase.
