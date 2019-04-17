@@ -250,7 +250,8 @@ Once you have a static ip, it's a good time to set an A record for some domain t
 When you've updated the code, just rebuild a container image and redeploy.
 
 ```
-./build.sh
+./build.sh cserver
+./build.sh hserver
 ./deploy.sh 0
 ```
 
