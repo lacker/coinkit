@@ -6,7 +6,7 @@
     "app": "parcel app/index.html",
     "cli": "NODE_NO_WARNINGS=1 ts-node --project tsconfig.node.json src/node/cli-main.ts",
     "ext-local": "parcel -p 2345 --no-hmr build src/browser/popup-main.tsx src/browser/background-main.ts src/browser/content-main.ts src/browser/loader-main.ts -d ext-local/",
-    "hserver": "node src/hserver-main.js --keypair=./mint.json --capacity=1000",
+    "hserver": "NODE_NO_WARNINGS=1 ts-node --project tsconfig.node.json src/node/hserver-main.js --keypair=./mint.json --capacity=1000",
     "test": "jest"
   },
   "author": "Kevin Lacker",
