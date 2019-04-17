@@ -1,4 +1,4 @@
-import * as stringify from "json-stable-stringify";
+const stringify = require("json-stable-stringify");
 
 // Used to communicate with the blockchain
 export default class Message {

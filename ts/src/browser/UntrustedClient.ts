@@ -1,5 +1,5 @@
 import Message from "../iso/Message";
-import { missingPermissions, hasPermission } from "./Permission.js";
+import { missingPermissions, hasPermission } from "./Permission";
 
 // Client is designed to be included in applications and run in an untrusted application
 // environment. It gets permissions by requesting them from the extension, whose code
