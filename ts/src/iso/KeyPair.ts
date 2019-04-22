@@ -128,16 +128,16 @@ export default class KeyPair {
 
   // The "plain" format is a plain object with 'public' and 'private' keys
   static fromPlain(j) {
-    let public = j.public || j.Public;
-    let private = j.private || j.Private;
-    if (!public) {
+    let publicString = j.public || j.Public;
+    let privateString = j.private || j.Private;
+    if (!publicString) {
       throw new Error("serialized key pair must have public field");
     }
-    if (!private) {
+    if (!privateString) {
       throw new Error("serialized key pair must have private field");
     }
-    let pub = KeyPair.decodePublicKey(public);
-    let priv = base64Decode(private);
+    let pub = KeyPair.decodePublicKey(publicString);
+    let priv = base64Decode(privateString);
     return new KeyPair(pub, priv);
   }
 
