@@ -13,6 +13,12 @@ export function isFile(filename) {
 }
 
 export function loadKeyPair(filename) {
+  if (!fs.existsSync(filename)) {
+    throw new Error(filename + " does not exist");
+  }
+  if (!fs.lstatSync(filename).isFile()) {
+    throw new Error(filename + " isFile is false");
+  }
   if (!isFile(filename)) {
     throw new Error(filename + " is not a file");
   }
