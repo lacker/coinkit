@@ -126,20 +126,25 @@ export default class KeyPair {
     return new KeyPair(keys.publicKey, keys.secretKey);
   }
 
+  // The "plain" format is a plain object with 'public' and 'private' keys
+  static fromPlain(j) {
+    let public = j.public || j.Public;
+    let private = j.private || j.Private;
+    if (!public) {
+      throw new Error("serialized key pair must have public field");
+    }
+    if (!private) {
+      throw new Error("serialized key pair must have private field");
+    }
+    let pub = KeyPair.decodePublicKey(public);
+    let priv = base64Decode(private);
+    return new KeyPair(pub, priv);
+  }
+
   // The input format is a serialized JSON string with 'public' and 'private' keys
   static fromSerialized(s) {
     let j = JSON.parse(s);
-    j.public = j.public || j.Public;
-    j.private = j.private || j.Private;
-    if (!j.public) {
-      throw new Error("serialized key pair must have Public field");
-    }
-    if (!j.private) {
-      throw new Error("serialized key pair must have Private field");
-    }
-    let pub = KeyPair.decodePublicKey(j.public);
-    let priv = base64Decode(j.private);
-    return new KeyPair(pub, priv);
+    return KeyPair.fromPlain(j);
   }
 
   // Generates a keypair randomly
@@ -157,12 +162,17 @@ export default class KeyPair {
     return new KeyPair(keys.publicKey, keys.secretKey);
   }
 
-  // serialize() returns a serialized JSON string with 'Public' and 'Private' keys
-  serialize() {
-    let j = {
+  // plain() returns a plain-object form, with 'public' and 'private' keys
+  plain() {
+    return {
       public: this.getPublicKey(),
       private: this.getPrivateKey()
     };
+  }
+
+  // serialize() returns a serialized JSON string
+  serialize() {
+    let j = this.plain();
 
     // Pretty-encoding so that it matches our code style when saved to a file
     return JSON.stringify(j, null, 2) + "\n";

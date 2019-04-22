@@ -2,6 +2,7 @@ import * as path from "path";
 import * as readline from "readline";
 
 import ChainClient from "../iso/ChainClient";
+import CLIConfig from "./CLIConfig";
 import KeyPair from "../iso/KeyPair";
 import Message from "../iso/Message";
 import ProviderListener from "./ProviderListener";

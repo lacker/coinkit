@@ -5,8 +5,11 @@ import * as path from "path";
 const stringify = require("json-stable-stringify");
 
 import { isDirectory } from "./FileUtil";
+import KeyPair from "../iso/KeyPair";
 
-// A singleton object that keeps itself synced to disk.
+// An object that keeps itself synced to disk.
+// The serialized form may contain these fields:
+// keyPair: a plain-object keypair
 export default class CLIConfig {
   constructor() {
     // If the directory doesn't exist, create it
@@ -28,12 +31,12 @@ export default class CLIConfig {
     }
   }
 
-  get(key) {
-    return this.data[key];
+  getKeyPair() {
+    return KeyPair.fromPlain(this.data.keyPair);
   }
 
-  set(key, value) {
-    this.data[key] = value;
+  setKeyPair(kp) {
+    this.data.keyPair = kp.plain();
     this.write();
   }
 
