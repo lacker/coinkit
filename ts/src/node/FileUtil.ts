@@ -16,7 +16,16 @@ export function loadKeyPair(filename) {
   if (!fs.existsSync(filename)) {
     throw new Error(filename + " does not exist");
   }
-  if (!fs.lstatSync(filename).isFile()) {
+  let stat = fs.lstatSync(filename);
+  if (!stat.isFile()) {
+    console.log("XXX stat:", stat);
+    console.log("XXX stat.isFile() ", stat.isFile());
+    console.log("XXX stat.isDirectory() ", stat.isDirectory());
+    console.log("XXX stat.isBlockDevice() ", stat.isBlockDevice());
+    console.log("XXX stat.isSymbolicLink() ", stat.isSymbolicLink());
+    console.log("XXX stat.isCharacterDevice() ", stat.isCharacterDevice());
+    console.log("XXX stat.isFIFO() ", stat.isFIFO());
+    console.log("XXX stat.isSocket() ", stat.isSocket());
     throw new Error(filename + " isFile is false");
   }
   if (!isFile(filename)) {
