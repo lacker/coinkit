@@ -10,6 +10,7 @@ import KeyPair from "../iso/KeyPair";
 // An object that keeps itself synced to disk.
 // The serialized form may contain these fields:
 // keyPair: a plain-object keypair
+// network: which network to point to. either "local" or "alpha".
 export default class CLIConfig {
   constructor() {
     // If the directory doesn't exist, create it
@@ -32,6 +33,9 @@ export default class CLIConfig {
   }
 
   getKeyPair() {
+    if (!this.data.keyPair) {
+      return null;
+    }
     return KeyPair.fromPlain(this.data.keyPair);
   }
 
