@@ -21,9 +21,6 @@ export function loadKeyPair(filename) {
     console.log(filename, "lstat:", stat);
     throw new Error("cannot read " + filename);
   }
-  if (!isFile(filename)) {
-    throw new Error(filename + " is not a file");
-  }
   let serialized = fs.readFileSync(filename, "utf8");
   return KeyPair.fromSerialized(serialized);
 }
