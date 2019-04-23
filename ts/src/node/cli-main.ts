@@ -163,8 +163,20 @@ async function deploy(directory, bucketName) {
 // Ask the user for a passphrase to log in.
 // Returns the keypair
 async function login() {
+  let config = new CLIConfig();
+  let kp = config.getKeyPair();
+  if (kp) {
+    console.log(
+      "logged into",
+      config.getNetwork(),
+      " network as",
+      kp.getPublicKey()
+    );
+    return kp;
+  }
+  console.log("logging into", config.getNetwork(), "network....");
   let phrase = await ask("please enter your passphrase: ", true);
-  let kp = KeyPair.fromSecretPhrase(phrase);
+  kp = KeyPair.fromSecretPhrase(phrase);
   console.log("hello. your name is", kp.getPublicKey());
   return kp;
 }

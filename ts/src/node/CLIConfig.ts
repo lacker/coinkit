@@ -6,6 +6,7 @@ const stringify = require("json-stable-stringify");
 
 import { isDirectory } from "./FileUtil";
 import KeyPair from "../iso/KeyPair";
+import NetworkConfig from "../iso/NetworkConfig";
 
 // An object that keeps itself synced to disk.
 // The serialized form may contain these fields:
@@ -30,6 +31,22 @@ export default class CLIConfig {
       this.data = {};
       this.write();
     }
+  }
+
+  getNetwork() {
+    if (!this.data.network) {
+      // Defaults to local.
+      return "local";
+    }
+
+    return this.data.network;
+  }
+
+  setNetwork(network) {
+    // Check that the network is valid
+    new NetworkConfig(network);
+    this.data.network = network;
+    this.write();
   }
 
   getKeyPair() {
