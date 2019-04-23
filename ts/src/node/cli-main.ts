@@ -189,8 +189,10 @@ async function login() {
 }
 
 // Sends currency
-async function send(to, amount) {
-  throw new Error("XXX: implement me");
+async function send(to: string, amount: number) {
+  await login();
+  let client = newChainClient();
+  await client.send(to, amount);
 }
 
 async function main() {
@@ -407,7 +409,7 @@ async function main() {
     let [to, amountStr] = rest;
     let amount = parseInt(amountStr);
     if (!amount || amount < 0) {
-      fatal("bad amount:", amount);
+      fatal("bad amount: " + amount);
     }
     await send(to, amount);
     return;

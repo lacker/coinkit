@@ -251,16 +251,13 @@ export default class ChainClient {
     return bucket;
   }
 
-  async allocate(bucketName, providerID) {
-    if (typeof providerID !== "number") {
-      throw new Error(
-        "provider id " +
-          providerID +
-          " must be number, not " +
-          typeof providerID
-      );
-    }
+  // Send money
+  async send(to, amount) {
+    await this.performOperation("Send", { to, amount });
+    this.log(amount, "sent to", to);
+  }
 
+  async allocate(bucketName, providerID: number) {
     await this.performOperation("Allocate", { bucketName, providerID });
     this.log("the Allocate operation has been accepted");
     return;
