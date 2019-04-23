@@ -2,6 +2,7 @@ import axios from "axios";
 
 import KeyPair from "./KeyPair";
 import Message from "./Message";
+import NetworkConfig from "./NetworkConfig";
 import SignedMessage from "./SignedMessage";
 import { sleep } from "./Util";
 
@@ -9,22 +10,6 @@ import { sleep } from "./Util";
 // This client only uses one keypair across its lifetime.
 // It is not expensive to set up, though, so if you have a different keypair just
 // create a different client object.
-// This code should work in both Node and in the browser.
-
-// TODO: load urls differently for local, testing, and prod at runtime
-
-// For general local operation
-let LOCAL_URLS = [
-  "http://localhost:8000",
-  "http://localhost:8001",
-  "http://localhost:8002",
-  "http://localhost:8003"
-];
-
-// For easy-to-debug operation, only hit a single server
-let DEBUG_URLS = ["http://localhost:8000"];
-
-let URLS = DEBUG_URLS;
 
 const STANDARD_WAIT = 1000;
 
@@ -51,11 +36,6 @@ async function retryPost(url, body, params) {
   );
 }
 
-function getServerURL() {
-  let index = Math.floor(Math.random() * URLS.length);
-  return URLS[index];
-}
-
 function isEmpty(object) {
   for (let key in object) {
     return false;
@@ -66,8 +46,14 @@ function isEmpty(object) {
 export default class ChainClient {
   keyPair: KeyPair;
   verbose: boolean;
+  urls: string[];
 
-  constructor(kp?) {
+  constructor(kp?: KeyPair, network?: string) {
+    if (!network) {
+      network = "local";
+    }
+    let config = new NetworkConfig(network);
+    this.urls = config.chain;
     if (!kp) {
       kp = KeyPair.fromRandom();
     }
@@ -81,12 +67,17 @@ export default class ChainClient {
     }
   }
 
+  getServerURL(): string {
+    let index = Math.floor(Math.random() * this.urls.length);
+    return this.urls[index];
+  }
+
   // Sends a Message upstream, signing with our keypair.
   // Returns a promise for the response Message.
   // If the response is an error message, we throw an error with the provided error string.
   async sendMessage(message) {
     let clientMessage = SignedMessage.fromSigning(message, this.keyPair);
-    let url = getServerURL() + "/messages";
+    let url = this.getServerURL() + "/messages";
     let body = clientMessage.serialize() + "\n";
     this.log("sending body:", body);
     let response = await retryPost(url, body, {

@@ -13,6 +13,12 @@ function fatal(message) {
   process.exit(1);
 }
 
+function newChainClient(kp?: KeyPair): ChainClient {
+  let config = new CLIConfig();
+  let client = new ChainClient(kp, config.getNetwork());
+  return client;
+}
+
 // Asks the CLI user a question, asynchronously returns the response.
 async function ask(question, hideResponse) {
   let r = readline.createInterface({
@@ -42,7 +48,7 @@ async function ask(question, hideResponse) {
 
 // Fetches, displays, and returns the account data for a user.
 async function status(user) {
-  let client = new ChainClient();
+  let client = newChainClient();
   let account = await client.getAccount(user);
   if (!account) {
     console.log("no account found for user", user);
@@ -67,7 +73,7 @@ async function generate() {
 }
 
 async function getProvider(id) {
-  let client = new ChainClient();
+  let client = newChainClient();
   let provider = await client.getProvider(id);
   if (provider) {
     console.log(provider);
@@ -77,7 +83,7 @@ async function getProvider(id) {
 }
 
 async function getProviders(query) {
-  let client = new ChainClient();
+  let client = newChainClient();
   let providers = await client.getProviders(query);
   let word = providers.length === 1 ? "provider" : "providers";
   console.log(providers.length + " " + word + " found");
@@ -88,14 +94,14 @@ async function getProviders(query) {
 
 async function createProvider(capacity) {
   let kp = await login();
-  let client = new ChainClient(kp);
+  let client = newChainClient(kp);
   let provider = await client.createProvider(capacity);
   console.log("created provider:");
   console.log(provider);
 }
 
 async function getBucket(name) {
-  let client = new ChainClient();
+  let client = newChainClient();
   let bucket = await client.getBucket(name);
   if (bucket) {
     console.log(bucket);
@@ -105,7 +111,7 @@ async function getBucket(name) {
 }
 
 async function getBuckets(query) {
-  let client = new ChainClient();
+  let client = newChainClient();
   let buckets = await client.getBuckets(query);
   let word = buckets.length === 1 ? "bucket" : "buckets";
   console.log(buckets.length + " " + word + " found");
@@ -116,7 +122,7 @@ async function getBuckets(query) {
 
 async function createBucket(name, size) {
   let kp = await login();
-  let client = new ChainClient(kp);
+  let client = newChainClient(kp);
   let bucket = await client.createBucket(name, size);
   console.log("created bucket:");
   console.log(bucket);
@@ -127,7 +133,7 @@ async function setMagnet(bucketName, magnet) {
     throw new Error("" + magnet + " is not a valid magnet URI");
   }
   let kp = await login();
-  let client = new ChainClient(kp);
+  let client = newChainClient(kp);
   let bucket = await client.updateBucket(bucketName, magnet);
   console.log("updated bucket:");
   console.log(bucket);
@@ -135,14 +141,14 @@ async function setMagnet(bucketName, magnet) {
 
 async function allocate(bucketName, providerID) {
   let kp = await login();
-  let client = new ChainClient(kp);
+  let client = newChainClient(kp);
   await client.allocate(bucketName, providerID);
   console.log("allocated", bucketName, "bucket to provider", providerID);
 }
 
 async function deallocate(bucketName, providerID) {
   let kp = await login();
-  let client = new ChainClient(kp);
+  let client = newChainClient(kp);
   await client.deallocate(bucketName, providerID);
   console.log("deallocated", bucketName, "bucket from provider", providerID);
 }
@@ -169,7 +175,7 @@ async function login() {
     console.log(
       "logged into",
       config.getNetwork(),
-      " network as",
+      "network as",
       kp.getPublicKey()
     );
     return kp;
