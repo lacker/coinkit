@@ -113,7 +113,7 @@ export default class ChainClient {
   // Throws an error if there is no matching user account.
   // TODO: there is a race condition where a different operation with the same sequence
   // number could be sent. We should detect that.
-  async sendOperation(type, operation) {
+  async performOperation(type, operation) {
     // First check that we have an account
     let user = this.keyPair.getPublicKey();
     let account = await this.getAccount(user);
@@ -198,7 +198,7 @@ export default class ChainClient {
     let user = this.keyPair.getPublicKey();
     let initialProviders = await this.getProviders({ owner: user });
     this.log("existing providers:", initialProviders);
-    await this.sendOperation("CreateProvider", { capacity });
+    await this.performOperation("CreateProvider", { capacity });
     this.log("the CreateProvider operation has been accepted");
     let providers = await this.getProviders({ owner: user });
     this.log("new providers:", providers);
@@ -238,14 +238,14 @@ export default class ChainClient {
       );
     }
 
-    await this.sendOperation("CreateBucket", { name, size });
+    await this.performOperation("CreateBucket", { name, size });
     this.log("the CreateBucket operation has been accepted");
     let bucket = await this.getBucket(name);
     return bucket;
   }
 
   async updateBucket(name, magnet) {
-    await this.sendOperation("UpdateBucket", { name, magnet });
+    await this.performOperation("UpdateBucket", { name, magnet });
     this.log("the UpdateBucket operation has been accepted");
     let bucket = await this.getBucket(name);
     return bucket;
@@ -261,7 +261,7 @@ export default class ChainClient {
       );
     }
 
-    await this.sendOperation("Allocate", { bucketName, providerID });
+    await this.performOperation("Allocate", { bucketName, providerID });
     this.log("the Allocate operation has been accepted");
     return;
   }
@@ -276,7 +276,7 @@ export default class ChainClient {
       );
     }
 
-    await this.sendOperation("Deallocate", { bucketName, providerID });
+    await this.performOperation("Deallocate", { bucketName, providerID });
     this.log("the Deallocate operation has been accepted");
     return;
   }

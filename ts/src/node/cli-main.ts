@@ -188,6 +188,11 @@ async function login() {
   return kp;
 }
 
+// Sends currency
+async function send(to, amount) {
+  throw new Error("XXX: implement me");
+}
+
 async function main() {
   let args = process.argv.slice(2);
 
@@ -392,6 +397,19 @@ async function main() {
     let config = new CLIConfig();
     config.setNetwork(network);
     console.log("your CLI is now configured to use the", network, "network");
+    return;
+  }
+
+  if (op === "send") {
+    if (rest.length != 2) {
+      fatal("Usage: npm run cli send [recipient] [amount]");
+    }
+    let [to, amountStr] = rest;
+    let amount = parseInt(amountStr);
+    if (!amount || amount < 0) {
+      fatal("bad amount:", amount);
+    }
+    await send(to, amount);
     return;
   }
 
