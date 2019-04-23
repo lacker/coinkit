@@ -61,6 +61,11 @@ export default class CLIConfig {
     this.write();
   }
 
+  logout() {
+    this.data.keyPair = null;
+    this.write();
+  }
+
   write() {
     fs.writeFileSync(this.filename, stringify(this.data));
   }
