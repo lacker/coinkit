@@ -9,6 +9,7 @@ import ChainClient from "../iso/ChainClient";
 import KeyPair from "../iso/KeyPair";
 import ProviderListener from "./ProviderListener";
 import TorrentClient from "../iso/TorrentClient";
+import { sleep } from "../iso/Util";
 import { isDirectory, loadKeyPair } from "./FileUtil";
 
 // Throws an error if the magnet url is an unknown format
@@ -194,7 +195,28 @@ export default class HostingServer {
     return this.id;
   }
 
+  // Checks that our keypair is valid if we have one.
+  // If it isn't valid, we just wait. This lets servers get started up
+  // before the keypairs have affiliated accounts created yet.
+  async checkKeyPair() {
+    if (!this.keyPair) {
+      return;
+    }
+    let client = new ChainClient(this.keyPair);
+    let user = this.keyPair.getPublicKey();
+    while (true) {
+      let account = await client.getAccount(user);
+      if (account) {
+        return;
+      }
+
+      console.log("user", user, "does not exist. please create it");
+      await sleep(10000);
+    }
+  }
+
   async serve() {
+    await this.checkKeyPair();
     try {
       await this.acquireProviderID();
     } catch (e) {
