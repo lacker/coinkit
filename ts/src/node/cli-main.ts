@@ -359,6 +359,33 @@ async function main() {
     return;
   }
 
+  if (op === "login") {
+    if (rest.length != 0) {
+      fatal("Usage: npm run cli login");
+    }
+    await login();
+    return;
+  }
+
+  if (op === "logout") {
+    if (rest.length != 0) {
+      fatal("Usage: npm run cli logout");
+    }
+    let config = new CLIConfig();
+    config.logout();
+    console.log("logged out of", config.getNetwork(), "network");
+    return;
+  }
+
+  if (op === "config") {
+    if (rest.length != 1) {
+      fatal("Usage: npm run cli config [network]");
+    }
+    let config = new CLIConfig();
+    config.setNetwork(rest[0]);
+    return;
+  }
+
   fatal("unrecognized operation: " + op);
 }
 

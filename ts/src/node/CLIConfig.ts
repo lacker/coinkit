@@ -43,9 +43,16 @@ export default class CLIConfig {
   }
 
   setNetwork(network) {
+    if (network == this.getNetwork()) {
+      return;
+    }
+
     // Check that the network is valid
     new NetworkConfig(network);
+
+    // Changing the network also logs us out
     this.data.network = network;
+    this.data.keyPair = null;
     this.write();
   }
 
