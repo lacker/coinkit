@@ -381,8 +381,10 @@ async function main() {
     if (rest.length != 1) {
       fatal("Usage: npm run cli config [network]");
     }
+    let network = rest[0];
     let config = new CLIConfig();
-    config.setNetwork(rest[0]);
+    config.setNetwork(network);
+    console.log("your CLI is now configured to use the", network, "network");
     return;
   }
 
