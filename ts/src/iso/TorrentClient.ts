@@ -1,6 +1,6 @@
 // A wrapper around the WebTorrent client with an async API.
 
-const WebTorrent = require("webtorrent-hybrid");
+import WebTorrent = require("webtorrent-hybrid");
 import Torrent from "./Torrent";
 
 const TRACKERS = ["ws://localhost:4000"];

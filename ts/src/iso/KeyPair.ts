@@ -7,7 +7,7 @@ import { fromByteArray, toByteArray } from "base64-js";
 import * as nacl from "tweetnacl";
 import * as forge from "node-forge";
 import { TextEncoder } from "text-encoding-shim";
-const stringify = require("json-stable-stringify");
+import stringify = require("json-stable-stringify");
 
 import Message from "./Message";
 

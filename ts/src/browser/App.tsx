@@ -7,6 +7,8 @@ import KeyPair from "../iso/KeyPair";
 import TorrentClient from "../iso/TorrentClient";
 import TorrentDownloader from "./TorrentDownloader";
 
+import stringify = require("json-stable-stringify");
+
 async function fetchPeerData() {
   // localStorage.debug = "webtorrent:torrent";
   const SAMPLESITE =
@@ -34,7 +36,9 @@ export default class App extends React.Component<any, any> {
 
   fetchBlockchainData() {
     // this.fetchBalance();
-    this.fetchPublicKey();
+    // this.fetchPublicKey();
+    console.log(stringify);
+    console.log(stringify({ b: 2, a: 1 }));
   }
 
   async fetchBalance() {
