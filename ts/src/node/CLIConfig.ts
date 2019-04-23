@@ -2,8 +2,6 @@ import * as fs from "fs";
 import * as os from "os";
 import * as path from "path";
 
-const stringify = require("json-stable-stringify");
-
 import { isDirectory, isFile } from "./FileUtil";
 import KeyPair from "../iso/KeyPair";
 import NetworkConfig from "../iso/NetworkConfig";
@@ -80,6 +78,7 @@ export default class CLIConfig {
   }
 
   write() {
-    fs.writeFileSync(this.filename, stringify(this.data));
+    let pretty = JSON.stringify(this.data, null, 2) + "\n";
+    fs.writeFileSync(this.filename, pretty);
   }
 }

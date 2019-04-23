@@ -174,10 +174,11 @@ async function login() {
     );
     return kp;
   }
-  console.log("logging into", config.getNetwork(), "network....");
+  console.log("logging into", config.getNetwork(), "network...");
   let phrase = await ask("please enter your passphrase: ", true);
   kp = KeyPair.fromSecretPhrase(phrase);
-  console.log("hello. your name is", kp.getPublicKey());
+  console.log("hello. your username is", kp.getPublicKey());
+  config.setKeyPair(kp);
   return kp;
 }
 
