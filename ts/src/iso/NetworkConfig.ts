@@ -5,6 +5,10 @@
 // alpha: the alpha test network running under alphatest.network
 
 export default class NetworkConfig {
+  name: string;
+  chain: string[];
+  trackers: string[];
+
   constructor(name) {
     this.name = name;
     if (name == "local") {

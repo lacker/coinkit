@@ -4,7 +4,7 @@ import * as path from "path";
 
 const stringify = require("json-stable-stringify");
 
-import { isDirectory } from "./FileUtil";
+import { isDirectory, isFile } from "./FileUtil";
 import KeyPair from "../iso/KeyPair";
 import NetworkConfig from "../iso/NetworkConfig";
 
@@ -13,6 +13,12 @@ import NetworkConfig from "../iso/NetworkConfig";
 // keyPair: a plain-object keypair
 // network: which network to point to. either "local" or "alpha".
 export default class CLIConfig {
+  data: {
+    keyPair?: KeyPair;
+    network?: string;
+  };
+  filename: string;
+
   constructor() {
     // If the directory doesn't exist, create it
     let dir = path.join(os.homedir(), ".coinkit");
