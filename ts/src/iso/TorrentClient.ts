@@ -1,6 +1,8 @@
 // A wrapper around the WebTorrent client with an async API.
 
 import WebTorrent = require("webtorrent-hybrid");
+
+import NetworkConfig from "../iso/NetworkConfig";
 import Torrent from "./Torrent";
 
 const TRACKERS = ["ws://localhost:4000"];
@@ -10,10 +12,17 @@ function nicePeerId(id) {
 }
 
 export default class TorrentClient {
-  client: any;
+  client: WebTorrent;
   verbose: boolean;
+  trackers: string[];
 
-  constructor() {
+  constructor(network?: string) {
+    if (!network) {
+      network = "local";
+    }
+    let config = new NetworkConfig(network);
+    this.trackers = config.trackers;
+
     this.client = new WebTorrent();
     this.client.on("error", err => {
       console.log("fatal error in TorrentClient:", err.message);
