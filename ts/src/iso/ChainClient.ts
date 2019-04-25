@@ -17,6 +17,10 @@ async function standardWait() {
   return await sleep(STANDARD_WAIT);
 }
 
+function numDigits(num: number): number {
+  return ("" + num).length;
+}
+
 function isEmpty(object) {
   for (let key in object) {
     return false;
@@ -28,6 +32,7 @@ export default class ChainClient {
   keyPair: KeyPair;
   verbose: boolean;
   urls: string[];
+  retries: number;
 
   constructor(kp?: KeyPair, network?: string) {
     if (!network) {
@@ -35,6 +40,7 @@ export default class ChainClient {
     }
     let config = new NetworkConfig(network);
     this.urls = config.chain;
+    this.retries = config.retries;
     if (!kp) {
       kp = KeyPair.fromRandom();
     }
@@ -54,8 +60,8 @@ export default class ChainClient {
   }
 
   async retryPost(url, body, params) {
-    let retries = 3;
-    for (let i = 0; i < retries; i++) {
+    let tries = 0;
+    while (true) {
       try {
         let response = await axios.post(url, body, {
           headers: { "Content-Type": "text/plain" },
@@ -63,13 +69,17 @@ export default class ChainClient {
         });
         return response;
       } catch (e) {
+        tries++;
         console.log("connection error: " + e.message);
-        standardWait();
+        if (this.retries > 0 && tries >= this.retries) {
+          throw new Error(
+            "connection to the blockchain failed after " + tries + " attempts"
+          );
+        }
+        // Exponential backoff
+        await sleep(numDigits(tries) * STANDARD_WAIT);
       }
     }
-    throw new Error(
-      "connection to the blockchain failed after " + retries + " retries"
-    );
   }
 
   // Sends a Message upstream, signing with our keypair.
