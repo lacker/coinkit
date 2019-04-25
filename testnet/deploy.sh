@@ -6,7 +6,11 @@ if [ ! -f ./deployment.yaml ]; then
 fi
 
 if [ "$1" = "all" ]; then
-    for x in `seq 0 3`; do ./deploy.sh $x; done
+    for x in `seq 0 3`; do
+	echo ./deploy.sh $x
+	./deploy.sh $x
+    done
+    exit 0
 fi
 
 if (( "$1" < 0 )) || (( "$1" > 3 )); then
