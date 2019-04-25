@@ -124,13 +124,6 @@ export default class ChainClient {
   // TODO: there is a race condition where a different operation with the same sequence
   // number could be sent. We should detect that.
   async performOperation(type, operation) {
-    // First check that we have an account
-    let user = this.keyPair.getPublicKey();
-    let account = await this.getAccount(user);
-    if (!account) {
-      throw new Error("cannot create provider for a nonexistent user account");
-    }
-
     // Make a signed op without the actual signature
     let newSequence = account.sequence + 1;
     let sop = {
@@ -197,10 +190,13 @@ export default class ChainClient {
   }
 
   // Returns the information for the newly-created provider.
-  async createProvider(capacity) {
-    if (typeof capacity !== "number") {
+  async createProvider(capacity: number) {
+    // First check that we have an account
+    let user = this.keyPair.getPublicKey();
+    let account = await this.getAccount(user);
+    if (!account) {
       throw new Error(
-        "capacity " + capacity + " must be number, not " + typeof capacity
+        "cannot create provider for user " + user + " that has no account"
       );
     }
 
