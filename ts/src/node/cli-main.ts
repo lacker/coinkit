@@ -190,8 +190,8 @@ async function login() {
 
 // Sends currency
 async function send(to: string, amount: number) {
-  await login();
-  let client = newChainClient();
+  let kp = await login();
+  let client = newChainClient(kp);
   await client.send(to, amount);
 }
 
