@@ -5,6 +5,10 @@ if [ ! -f ./deployment.yaml ]; then
     exit 1
 fi
 
+if [ "$1" = "all" ]; then
+    for x in `seq 0 3`; do ./deploy.sh $x; done
+fi
+
 if (( "$1" < 0 )) || (( "$1" > 3 )); then
     echo "usage: ./deploy.sh n where n is in 0..3"
     exit 1
