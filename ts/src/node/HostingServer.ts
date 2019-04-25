@@ -207,6 +207,7 @@ export default class HostingServer {
     while (true) {
       let account = await client.getAccount(user);
       if (account) {
+        console.log("found our user account:", account);
         return;
       }
 
