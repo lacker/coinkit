@@ -9,6 +9,9 @@ export default class NetworkConfig {
   chain: string[];
   trackers: string[];
 
+  // A negative number means no limit
+  retries: number;
+
   constructor(name) {
     this.name = name;
     if (name == "local") {
@@ -19,6 +22,7 @@ export default class NetworkConfig {
         "http://localhost:8003"
       ];
       this.trackers = ["ws://localhost:4000"];
+      this.retries = 3;
     } else if (name == "alpha") {
       this.chain = [
         "http://0.alphatest.network:8000",
@@ -32,6 +36,7 @@ export default class NetworkConfig {
         "ws://2.alphatest.network:4000",
         "ws://3.alphatest.network:4000"
       ];
+      this.retries = -1;
     } else {
       throw new Error("unrecognized network config name: " + name);
     }

@@ -17,25 +17,6 @@ async function standardWait() {
   return await sleep(STANDARD_WAIT);
 }
 
-async function retryPost(url, body, params) {
-  let retries = 3;
-  for (let i = 0; i < retries; i++) {
-    try {
-      let response = await axios.post(url, body, {
-        headers: { "Content-Type": "text/plain" },
-        responseType: "text"
-      });
-      return response;
-    } catch (e) {
-      console.log("connection error: " + e.message);
-      standardWait();
-    }
-  }
-  throw new Error(
-    "connection to the blockchain failed after " + retries + " retries"
-  );
-}
-
 function isEmpty(object) {
   for (let key in object) {
     return false;
@@ -72,6 +53,25 @@ export default class ChainClient {
     return this.urls[index];
   }
 
+  async retryPost(url, body, params) {
+    let retries = 3;
+    for (let i = 0; i < retries; i++) {
+      try {
+        let response = await axios.post(url, body, {
+          headers: { "Content-Type": "text/plain" },
+          responseType: "text"
+        });
+        return response;
+      } catch (e) {
+        console.log("connection error: " + e.message);
+        standardWait();
+      }
+    }
+    throw new Error(
+      "connection to the blockchain failed after " + retries + " retries"
+    );
+  }
+
   // Sends a Message upstream, signing with our keypair.
   // Returns a promise for the response Message.
   // If the response is an error message, we throw an error with the provided error string.
@@ -80,7 +80,7 @@ export default class ChainClient {
     let url = this.getServerURL() + "/messages";
     let body = clientMessage.serialize() + "\n";
     this.log("sending body:", body);
-    let response = await retryPost(url, body, {
+    let response = await this.retryPost(url, body, {
       headers: { "Content-Type": "text/plain" },
       responseType: "text"
     });
