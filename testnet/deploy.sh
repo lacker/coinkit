@@ -8,7 +8,7 @@ fi
 if [ "$1" = "all" ]; then
     for x in `seq 0 3`; do
 	echo ./deploy.sh $x
-	./deploy.sh $x
+	./deploy.sh $x || exit 1
     done
     exit 0
 fi
@@ -24,6 +24,11 @@ DB=db$1
 KEYPAIR=keypair$1
 
 CONNECTION_NAME=`gcloud sql instances describe $DB | grep connectionName | sed 's/connectionName: //'`
+
+if [ -z "$CONNECTION_NAME" ]; then
+    echo "could not find sql connection name"
+    exit 1
+fi
 
 echo sql connection name: $CONNECTION_NAME
 
