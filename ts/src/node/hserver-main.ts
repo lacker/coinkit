@@ -46,7 +46,7 @@ try {
   console.log(
     "available space:",
     Math.floor(info.available / 1024 / 1024),
-    "MB"
+    "MiB"
   );
 } catch (err) {
   console.log("disk check error:", err);
