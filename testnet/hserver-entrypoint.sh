@@ -11,5 +11,6 @@ echo loading keypair: $KEYPAIR
 node_modules/.bin/ts-node --project tsconfig.node.json \
 	src/node/hserver-main.ts \
 	--keypair=$KEYPAIR \
+	--network=alpha \
 	--directory=/hostfiles \
 	--capacity=1000
