@@ -5,6 +5,7 @@ import * as os from "os";
 import * as path from "path";
 
 import * as args from "args";
+import * as diskusage from "diskusage";
 
 import BlackHoleProxy from "./BlackHoleProxy";
 import HostingServer from "./HostingServer";
@@ -36,6 +37,19 @@ if (flags.id < 1 && flags.keypair.length < 1) {
     "you must specify a provider with either --id or --keypair"
   );
   process.exit(1);
+}
+
+// Just for logging, check how much available disk space there is
+try {
+  let root = os.platform() === "win32" ? "c:" : "/";
+  let info = diskusage.checkSync(root);
+  console.log(
+    "available space:",
+    Math.floor(info.available / 1024 / 1024),
+    "MB"
+  );
+} catch (err) {
+  console.log("disk check error:", err);
 }
 
 let options = {
