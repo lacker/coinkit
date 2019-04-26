@@ -7,6 +7,7 @@ import rimraf from "rimraf";
 
 import ChainClient from "../iso/ChainClient";
 import KeyPair from "../iso/KeyPair";
+import NetworkConfig from "../iso/NetworkConfig";
 import ProviderListener from "./ProviderListener";
 import TorrentClient from "../iso/TorrentClient";
 import { sleep } from "../iso/Util";
@@ -32,6 +33,7 @@ export default class HostingServer {
   infoMap: { [infoHash: string]: any };
   listener: ProviderListener;
   keyPair: KeyPair;
+  network: string;
 
   // options must contain exactly one way to specify the provider:
   // id - the id of the provider
@@ -40,6 +42,7 @@ export default class HostingServer {
   // capacity - how much space we have to store files, in megabytes
   // directory - where to store the hosted files
   // verbose - defaults to false
+  // network - required
   constructor(options) {
     if (options.id && options.keyPair) {
       throw new Error(
@@ -53,6 +56,9 @@ export default class HostingServer {
       this.log("hosting files in", options.directory);
     }
 
+    let config = new NetworkConfig(options.network);
+    this.network = options.network;
+
     if (options.keyPair) {
       this.keyPair = loadKeyPair(options.keyPair);
     }
@@ -61,13 +67,13 @@ export default class HostingServer {
     this.id = options.id;
     this.directory = options.directory;
     this.verbose = !!options.verbose;
-    this.client = new TorrentClient();
+    this.client = new TorrentClient(options.network);
     this.client.verbose = this.verbose;
 
     // Maps info hash to bucket object
     this.infoMap = {};
 
-    this.listener = new ProviderListener(this.verbose);
+    this.listener = new ProviderListener(options.network, this.verbose);
     this.listener.onBuckets(buckets => this.handleBuckets(buckets));
   }
 
@@ -164,7 +170,7 @@ export default class HostingServer {
     }
 
     // Check to see if we already have a provider created.
-    let client = new ChainClient(this.keyPair);
+    let client = new ChainClient(this.keyPair, this.network);
     let providers = await client.getProviders({
       owner: this.keyPair.getPublicKey()
     });
@@ -202,7 +208,7 @@ export default class HostingServer {
     if (!this.keyPair) {
       return;
     }
-    let client = new ChainClient(this.keyPair);
+    let client = new ChainClient(this.keyPair, this.network);
     let user = this.keyPair.getPublicKey();
     while (true) {
       let account = await client.getAccount(user);

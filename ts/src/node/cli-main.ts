@@ -13,9 +13,13 @@ function fatal(message) {
   process.exit(1);
 }
 
-function newChainClient(kp?: KeyPair): ChainClient {
+function getNetwork(): string {
   let config = new CLIConfig();
-  let client = new ChainClient(kp, config.getNetwork());
+  return config.getNetwork();
+}
+
+function newChainClient(kp?: KeyPair): ChainClient {
+  let client = new ChainClient(kp, getNetwork());
   return client;
 }
 
@@ -342,8 +346,7 @@ async function main() {
     if (!id) {
       fatal("bad id: " + rest[0]);
     }
-    let listener = new ProviderListener();
-    listener.verbose = true;
+    let listener = new ProviderListener(getNetwork(), true);
     await listener.listen(id);
     return;
   }

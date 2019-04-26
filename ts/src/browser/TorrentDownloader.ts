@@ -88,7 +88,8 @@ export default class TorrentDownloader {
   // TODO: sometimes read from cache instead of just writing to it, have staleness logic
   async getMagnetURL(hostname) {
     console.log("looking up bucket for", hostname);
-    let client = new ChainClient();
+    // TODO: generalize away from "local" constant
+    let client = new ChainClient(null, "local");
     let name = hostname.split(".")[0];
     let bucket = await client.getBucket(name);
     if (!bucket) {

@@ -197,7 +197,8 @@ export default class TrustedClient {
   // Returns a promise for the response Message.
   async sendMessage(message) {
     let kp = this.getBestEffortKeyPair();
-    let client = new ChainClient(kp);
+    // TODO: generalize away from "local" constant
+    let client = new ChainClient(kp, "local");
     return await client.sendMessage(message);
   }
 

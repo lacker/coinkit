@@ -8,9 +8,9 @@ export default class ProviderListener {
   bucketsCallback: (buckets: string[]) => any;
   verbose: boolean;
 
-  constructor(verbose?) {
-    this.client = new ChainClient();
-    this.verbose = !!verbose;
+  constructor(network: string, verbose: boolean) {
+    this.client = new ChainClient(null, network);
+    this.verbose = verbose;
     this.bucketsCallback = null;
   }
 

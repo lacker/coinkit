@@ -5,8 +5,6 @@ import WebTorrent = require("webtorrent-hybrid");
 import NetworkConfig from "../iso/NetworkConfig";
 import Torrent from "./Torrent";
 
-const TRACKERS = ["ws://localhost:4000"];
-
 function nicePeerId(id) {
   return "_" + ("" + id).slice(-4);
 }
@@ -84,7 +82,7 @@ export default class TorrentClient {
       this.client.seed(
         directory,
         {
-          announceList: [TRACKERS]
+          announceList: [this.trackers]
         },
         torrent => {
           this.logTorrentEvents(torrent);

@@ -6,12 +6,17 @@ import * as path from "path";
 
 import * as args from "args";
 
+import BlackHoleProxy from "./BlackHoleProxy";
+import HostingServer from "./HostingServer";
+import Tracker from "./Tracker";
+
 args
   .option("tracker", "The port on which the tracker will be running", 4000)
   .option("proxy", "The port on which the proxy will be running", 3000)
   .option("id", "The provider id to host files for", 0)
   .option("keypair", "File containing keys for the user to host files for", "")
   .option("capacity", "Amount of space in megabytes to host", 0)
+  .option("network", "Which network to connect to", "local")
   .option(
     "directory",
     "The directory to store files in",
@@ -19,10 +24,6 @@ args
   );
 
 const flags = args.parse(process.argv);
-
-import BlackHoleProxy from "./BlackHoleProxy";
-import HostingServer from "./HostingServer";
-import Tracker from "./Tracker";
 
 if (flags.capacity <= 0) {
   console.log("to host files you must set --capacity");
@@ -42,7 +43,8 @@ let options = {
   keyPair: undefined,
   capacity: flags.capacity,
   directory: flags.directory,
-  verbose: true
+  verbose: true,
+  network: flags.network
 };
 if (flags.id >= 1) {
   options.id = flags.id;

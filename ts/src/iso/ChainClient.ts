@@ -34,7 +34,7 @@ export default class ChainClient {
   urls: string[];
   retries: number;
 
-  constructor(kp?: KeyPair, network?: string) {
+  constructor(kp: KeyPair, network: string) {
     if (!network) {
       network = "local";
     }
