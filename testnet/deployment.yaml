@@ -1,3 +1,14 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: claimX
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 11Gi
+---
 apiVersion: apps/v1beta2
 kind: Deployment
 metadata:
@@ -23,6 +34,8 @@ spec:
           - name: keypairX
             mountPath: /secrets/keypair
             readOnly: true
+          - name: volumeX
+            mountPath: /hostfiles
         env:
         - name: FORCE_REDEPLOY
           value: 'DEPLOY_TIME'
@@ -67,3 +80,7 @@ spec:
         - name: keypairX
           secret:
             secretName: keypairX
+        - name: volumeX
+          persistentVolumeClaim:
+            claimName: claimX
+

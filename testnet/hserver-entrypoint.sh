@@ -13,4 +13,4 @@ node_modules/.bin/ts-node --project tsconfig.node.json \
 	--keypair=$KEYPAIR \
 	--network=alpha \
 	--directory=/hostfiles \
-	--capacity=1000
+	--capacity=10000

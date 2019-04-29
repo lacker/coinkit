@@ -41,8 +41,7 @@ if (flags.id < 1 && flags.keypair.length < 1) {
 
 // Just for logging, check how much available disk space there is
 try {
-  let root = os.platform() === "win32" ? "c:" : "/";
-  let info = diskusage.checkSync(root);
+  let info = diskusage.checkSync(flags.directory);
   console.log(
     "available space:",
     Math.floor(info.available / 1024 / 1024),

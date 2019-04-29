@@ -22,6 +22,8 @@ CSERVER=cserver$1
 HSERVER=hserver$1
 DB=db$1
 KEYPAIR=keypair$1
+VOLUME=volume$1
+CLAIM=claim$1
 
 CONNECTION_NAME=`gcloud sql instances describe $DB | grep connectionName | sed 's/connectionName: //'`
 
@@ -37,6 +39,8 @@ sed s/PROJECT_ID/$PROJECT_ID/g ./deployment.yaml \
     | sed "s/hserverX/$HSERVER/g" \
     | sed "s/dbX/$DB/g" \
     | sed "s/keypairX/$KEYPAIR/g" \
+    | sed "s/claimX/$CLAIM/g" \
+    | sed "s/volumeX/$VOLUME/g" \
     | sed "s/DEPLOY_TIME/`date`/" \
     | sed "s/CONNECTION_NAME/$CONNECTION_NAME/" \
     | kubectl apply -f -
