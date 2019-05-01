@@ -1,3 +1,4 @@
+import * as fs from "fs";
 import * as path from "path";
 import * as readline from "readline";
 
@@ -168,6 +169,22 @@ async function deploy(directory, bucketName) {
   await torrent.waitForSeeds(1);
   console.log("deploy complete. cleaning up...");
   await client.destroy();
+}
+
+async function download(bucketName, directory) {
+  let dir = path.resolve(directory);
+  if (fs.existsSync(dir)) {
+    fatal(dir + " already exists");
+  }
+  let cc = newChainClient();
+  let bucket = await cc.getBucket(name);
+  if (!bucket || !bucket.magnet || !bucket.magnet.startsWith("magnet")) {
+    fatal("bucket has no magnet: " + JSON.stringify(bucket));
+  }
+  console.log("downloading", bucket.magnet, "to", dir);
+  let tc = new TorrentClient(getNetwork());
+  let torrent = tc.download(bucket.magnet, dir);
+  await torrent.waitForDone();
 }
 
 // Ask the user for a passphrase to log in.
