@@ -48,7 +48,8 @@ sed s/PROJECT_ID/$PROJECT_ID/g ./deployment.yaml \
     | sed "s/CONNECTION_NAME/$CONNECTION_NAME/" \
     | kubectl apply -f -
 
-kubectl wait --for=condition=available deployment/$DEPLOYMENT
+echo waiting for $DEPLOYMENT to be available...
+kubectl wait --for=condition=available --timeout=5m deployment/$DEPLOYMENT
 
 if [ $? -ne 0 ]; then
     echo the deploy seems to have failed
