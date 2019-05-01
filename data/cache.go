@@ -798,6 +798,7 @@ func (c *Cache) ProcessChunk(chunk *LedgerChunk) error {
 	}
 
 	for _, op := range chunk.Operations {
+		util.Logger.Printf("XXX op: %s", op)
 		if op == nil {
 			return fmt.Errorf("chunk has a nil op")
 		}
@@ -805,7 +806,9 @@ func (c *Cache) ProcessChunk(chunk *LedgerChunk) error {
 		if err != nil {
 			return fmt.Errorf("op %s failed to verify: %s", op, err)
 		}
+		util.Logger.Printf("XXX 4 hello %t", c.BucketExists("hello"))
 		err = c.Process(op.Operation)
+		util.Logger.Printf("XXX 5 hello %t", c.BucketExists("hello"))
 		if err != nil {
 			return fmt.Errorf("op %s failed to process: %s", op, err)
 		}
@@ -831,6 +834,7 @@ func (c *Cache) ProcessChunk(chunk *LedgerChunk) error {
 // ValidateChunk returns an error iff ProcessChunk would fail.
 func (c *Cache) ValidateChunk(chunk *LedgerChunk) error {
 	copy := c.CowCopy()
+	util.Logger.Printf("XXX 3 hello %t", copy.BucketExists("hello"))
 	return copy.ProcessChunk(chunk)
 }
 
