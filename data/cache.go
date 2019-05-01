@@ -768,11 +768,11 @@ func (c *Cache) FinalizeBlock(block *Block) {
 	}
 
 	if err := c.ValidateChunk(block.Chunk); err != nil {
+		util.Logger.Printf("XXX 2 hello %t", c.BucketExists("hello"))
 		util.Logger.Fatalf("We could not validate a finalized chunk: %s", err)
 	}
 
 	if err := c.ProcessChunk(block.Chunk); err != nil {
-		util.Logger.Printf("XXX 2 hello %t", c.BucketExists("hello"))
 		util.Logger.Fatalf("Failure while processing a finalized chunk: %s", err)
 	}
 
