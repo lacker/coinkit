@@ -551,81 +551,121 @@ func (c *Cache) Deallocate(bucketName string, providerID uint64) {
 // General block processing stuff
 /////////////////////////////////////
 
-// Validate returns whether this operation is valid.
+// Validate returns nil if this operation is valid, or an error if it is not.
 // Issues that can be caught just by looking at the operation itself should be checked in
 // the Verify method of the operation. Validation here is for checking whether operations
 // are consistent with the data that is already in the database.
-func (c *Cache) Validate(operation Operation) bool {
+func (c *Cache) Validate(operation Operation) error {
 	account := c.GetAccount(operation.GetSigner())
 	if account == nil {
-		return false
+		return fmt.Errorf("no account exists for user %s", operation.GetSigner())
 	}
 	if account.Sequence+1 != operation.GetSequence() {
-		return false
+		return fmt.Errorf("%d is not the right sequence id for user %s",
+			operation.GetSequence(), operation.GetSigner())
 	}
 	if account.Balance < operation.GetFee() {
-		return false
+		return fmt.Errorf("user %s cannot pay a fee of %d",
+			operation.GetSigner(), operation.GetFee())
 	}
 
 	switch op := operation.(type) {
 
 	case *SendOperation:
-		return account.ValidateSendOperation(op)
+		if !account.ValidateSendOperation(op) {
+			return fmt.Errorf("account.ValidateSendOperation failed")
+		}
+		return nil
 
 	case *CreateDocumentOperation:
-		return true
+		return nil
 
 	case *UpdateDocumentOperation:
-		return c.DocOwner(op.ID) == op.Signer
+		if c.DocOwner(op.ID) != op.Signer {
+			return fmt.Errorf("c.DocOwner(op.ID) != op.Signer")
+		}
+		return nil
 
 	case *DeleteDocumentOperation:
-		return c.DocOwner(op.ID) == op.Signer
+		if c.DocOwner(op.ID) != op.Signer {
+			return fmt.Errorf("c.DocOwner(op.ID) != op.Signer")
+		}
+		return nil
 
 	case *CreateBucketOperation:
-		return !c.BucketExists(op.Name)
+		if c.BucketExists(op.Name) {
+			return fmt.Errorf("cannot create bucket %s which already exists", op.Name)
+		}
+		return nil
 
 	case *UpdateBucketOperation:
-		return c.BucketExists(op.Name)
+		if !c.BucketExists(op.Name) {
+			return fmt.Errorf("cannot update bucket %s which does not exist", op.Name)
+		}
+		if c.BucketOwner(op.Name) != op.Signer {
+			return fmt.Errorf("user %s does not own bucket %s so cannot update it",
+				op.Signer, op.Name)
+		}
+		return nil
 
 	case *DeleteBucketOperation:
-		return c.BucketOwner(op.Name) == op.Signer
+		if c.BucketOwner(op.Name) != op.Signer {
+			return fmt.Errorf("user %s does not own bucket %s so cannot delete it",
+				op.Signer, op.Name)
+		}
+		return nil
 
 	case *CreateProviderOperation:
-		return true
+		return nil
 
 	case *DeleteProviderOperation:
-		return c.ProviderOwner(op.ID) == op.Signer
+		if c.ProviderOwner(op.ID) != op.Signer {
+			return fmt.Errorf("user %s does not own provider %d so cannot update it",
+				op.Signer, op.ID)
+		}
+		return nil
 
 	case *AllocateOperation:
 		p := c.GetProvider(op.ProviderID)
-		b := c.GetBucket(op.BucketName)
-		if p == nil || b == nil {
-			return false
+		if p == nil {
+			return fmt.Errorf("no provider with id %d", op.ProviderID)
 		}
+		b := c.GetBucket(op.BucketName)
+		if b == nil {
+			return fmt.Errorf("no bucket with name %s", op.BucketName)
+		}
+
 		if p.Owner != op.Signer && b.Owner != op.Signer {
-			return false
+			return fmt.Errorf("%s not authorized to allocate", op.Signer)
 		}
 		if p.Available < b.Size {
-			return false
+			return fmt.Errorf("provider %d does not have %d space available",
+				op.ProviderID, b.Size)
 		}
 		if p.HasBucket(op.BucketName) || b.HasProvider(op.ProviderID) {
-			return false
+			return fmt.Errorf("bucket %s -> provider %d is already allocated",
+				op.BucketName, op.ProviderID)
 		}
-		return true
+		return nil
 
 	case *DeallocateOperation:
 		p := c.GetProvider(op.ProviderID)
-		b := c.GetBucket(op.BucketName)
-		if p == nil || b == nil {
-			return false
+		if p == nil {
+			return fmt.Errorf("no provider with id %d", op.ProviderID)
 		}
+		b := c.GetBucket(op.BucketName)
+		if b == nil {
+			return fmt.Errorf("no bucket with name %s", op.BucketName)
+		}
+
 		if p.Owner != op.Signer && b.Owner != op.Signer {
-			return false
+			return fmt.Errorf("%s not authorized to deallocate", op.Signer)
 		}
 		if !p.HasBucket(op.BucketName) || !b.HasProvider(op.ProviderID) {
-			return false
+			return fmt.Errorf("bucket %s -> provider %d is not allocated, so we cannot deallocate",
+				op.BucketName, op.ProviderID)
 		}
-		return true
+		return nil
 
 	default:
 		util.Printf("operation: %+v has type %s", operation, reflect.TypeOf(operation))
@@ -635,7 +675,7 @@ func (c *Cache) Validate(operation Operation) bool {
 
 // Process returns false if the operation cannot be processed
 func (c *Cache) Process(operation Operation) bool {
-	if !c.Validate(operation) {
+	if c.Validate(operation) != nil {
 		return false
 	}
 

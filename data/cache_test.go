@@ -15,21 +15,21 @@ func TestSendOperationProcessing(t *testing.T) {
 		Signer:   "alice",
 		To:       "bob",
 	}
-	if c.Validate(payBob) {
+	if c.Validate(payBob) == nil {
 		t.Fatalf("alice should not be able to pay bob with no account")
 	}
 	c.SetBalance("alice", 50)
-	if c.Validate(payBob) {
+	if c.Validate(payBob) == nil {
 		t.Fatalf("alice should not be able to pay bob with only 50 money")
 	}
 	c.SetBalance("alice", 200)
-	if !c.Validate(payBob) {
+	if c.Validate(payBob) != nil {
 		t.Fatalf("alice should be able to pay bob with 200 money")
 	}
 	if !c.Process(payBob) {
 		t.Fatalf("the payment should have worked")
 	}
-	if c.Validate(payBob) {
+	if c.Validate(payBob) == nil {
 		t.Fatalf("validation should reject replay attacks")
 	}
 }
@@ -84,7 +84,7 @@ func TestValidation(t *testing.T) {
 
 	// First create a document
 	op := MakeTestCreateDocumentOperation(2).Operation
-	if c.Validate(op) {
+	if c.Validate(op) == nil {
 		t.Fatalf("should get rejected for bad sequence")
 	}
 	op = MakeTestCreateDocumentOperation(1).Operation
@@ -101,15 +101,15 @@ func TestValidation(t *testing.T) {
 
 	// Update our document
 	badId := uint64(100)
-	if c.Validate(MakeTestUpdateDocumentOperation(badId, 2).Operation) {
+	if c.Validate(MakeTestUpdateDocumentOperation(badId, 2).Operation) == nil {
 		t.Fatalf("badId for update should be bad")
 	}
-	if c.Validate(MakeTestUpdateDocumentOperation(1, 10).Operation) {
+	if c.Validate(MakeTestUpdateDocumentOperation(1, 10).Operation) == nil {
 		t.Fatalf("sequence number of 10 should be bad for update")
 	}
 	uop := MakeTestUpdateDocumentOperation(1, 1).Operation.(*UpdateDocumentOperation)
 	uop.Signer = "jimmy"
-	if c.Validate(uop) {
+	if c.Validate(uop) == nil {
 		t.Fatalf("only the doc owner should be allowed to update")
 	}
 	if !c.Process(MakeTestUpdateDocumentOperation(1, 2).Operation) {
@@ -127,24 +127,24 @@ func TestValidation(t *testing.T) {
 	}
 
 	// Delete our document
-	if c.Validate(MakeTestDeleteDocumentOperation(badId, 3).Operation) {
+	if c.Validate(MakeTestDeleteDocumentOperation(badId, 3).Operation) == nil {
 		t.Fatalf("badId for delete should be bad")
 	}
-	if c.Validate(MakeTestDeleteDocumentOperation(1, 10).Operation) {
+	if c.Validate(MakeTestDeleteDocumentOperation(1, 10).Operation) == nil {
 		t.Fatalf("sequence number of 10 should be bad for delete")
 	}
 	dop := MakeTestDeleteDocumentOperation(1, 1).Operation.(*DeleteDocumentOperation)
 	dop.Signer = "jimmy"
-	if c.Validate(dop) {
+	if c.Validate(dop) == nil {
 		t.Fatalf("only the doc owner should be allowed to delete")
 	}
 	if !c.Process(MakeTestDeleteDocumentOperation(1, 3).Operation) {
 		t.Fatalf("delete should work")
 	}
-	if c.Validate(MakeTestDeleteDocumentOperation(1, 4).Operation) {
+	if c.Validate(MakeTestDeleteDocumentOperation(1, 4).Operation) == nil {
 		t.Fatalf("delete-after-delete should not work")
 	}
-	if c.Validate(MakeTestUpdateDocumentOperation(1, 4).Operation) {
+	if c.Validate(MakeTestUpdateDocumentOperation(1, 4).Operation) == nil {
 		t.Fatalf("update-after-delete should not work")
 	}
 
@@ -237,7 +237,7 @@ func TestAllocationProcessing(t *testing.T) {
 		Size:     100,
 	}
 
-	if c.Validate(cbop) {
+	if c.Validate(cbop) == nil {
 		t.Fatalf("jim should not be able to make a bucket with no account")
 	}
 	c.SetBalance("jim", 100)
@@ -250,7 +250,7 @@ func TestAllocationProcessing(t *testing.T) {
 		Signer:   "miney",
 		Capacity: 1000,
 	}
-	if c.Validate(cpop) {
+	if c.Validate(cpop) == nil {
 		t.Fatalf("miney should not be able to make a provider with no account")
 	}
 	c.SetBalance("miney", 100)

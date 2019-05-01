@@ -248,7 +248,7 @@ func (q *OperationQueue) Validate(op *SignedOperation) bool {
 	if op.Operation.Verify() != nil {
 		return false
 	}
-	if !q.cache.Validate(op.Operation) {
+	if q.cache.Validate(op.Operation) != nil {
 		return false
 	}
 	return true
