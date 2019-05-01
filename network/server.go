@@ -533,13 +533,13 @@ func (s *Server) handleMessageRequest(r *http.Request) *util.SignedMessage {
 		return s.errorf("error in reading signed message: %s", err)
 	}
 
-	util.Logger.Printf("handling /messages/ input: %v", input)
+	// util.Logger.Printf("handling /messages/ input: %v", input)
 	output, ok := s.handleMessage(input)
 	if !ok {
 		return s.errorf("the server is overloaded or is shutting down")
 	}
 
-	util.Logger.Printf("got response message: %v", output)
+	// util.Logger.Printf("got response message: %v", output)
 	return output
 }
 
