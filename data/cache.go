@@ -345,8 +345,12 @@ func (c *Cache) GetBucket(name string) *Bucket {
 	}
 
 	if c.readOnly != nil {
+		readOnlyBucket := c.readOnly.GetBucket(name)
+		if readOnlyBucket == nil {
+			return nil
+		}
 		bucket := &Bucket{}
-		copier.Copy(bucket, c.readOnly.GetBucket(name))
+		copier.Copy(bucket, readOnlyBucket)
 		c.buckets[name] = bucket
 		return bucket
 	}
