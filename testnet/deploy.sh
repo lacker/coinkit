@@ -19,6 +19,7 @@ if (( "$1" < 0 )) || (( "$1" > 3 )); then
 fi
 
 CSERVER=cserver$1
+DEPLOYMENT=cserver$1-deployment
 HSERVER=hserver$1
 DB=db$1
 KEYPAIR=keypair$1
@@ -32,7 +33,9 @@ if [ -z "$CONNECTION_NAME" ]; then
     exit 1
 fi
 
-echo sql connection name: $CONNECTION_NAME
+# echo sql connection name: $CONNECTION_NAME
+
+kubectl delete deployment $DEPLOYMENT > /dev/null 2>&1
 
 sed s/PROJECT_ID/$PROJECT_ID/g ./deployment.yaml \
     | sed "s/cserverX/$CSERVER/g" \
@@ -44,3 +47,10 @@ sed s/PROJECT_ID/$PROJECT_ID/g ./deployment.yaml \
     | sed "s/DEPLOY_TIME/`date`/" \
     | sed "s/CONNECTION_NAME/$CONNECTION_NAME/" \
     | kubectl apply -f -
+
+kubectl wait --for=condition=available deployment/$DEPLOYMENT
+
+if [ $? -ne 0 ]; then
+    echo the deploy seems to have failed
+    exit 1
+fi
