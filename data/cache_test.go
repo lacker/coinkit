@@ -68,6 +68,14 @@ func TestReadThrough(t *testing.T) {
 	if prereads != db.reads {
 		t.Fatalf("double nil read should not require a db hit")
 	}
+
+	if c1.BucketExists("hello") {
+		t.Fatalf("hello bucket should not exist")
+	}
+	copy := c1.CowCopy()
+	if copy.BucketExists("hello") {
+		t.Fatalf("hello bucket should not exist on CowCopy either")
+	}
 }
 
 func TestValidation(t *testing.T) {
