@@ -393,6 +393,17 @@ async function main() {
     return;
   }
 
+  if (op === "download") {
+    if (rest.length != 2) {
+      fatal("Usage: npm run cli download [bucketName] [directory]");
+    }
+
+    let bucketName = rest[0];
+    let directory = rest[1];
+    await download(bucketName, directory);
+    return;
+  }
+
   if (op === "login") {
     if (rest.length != 0) {
       fatal("Usage: npm run cli login");
