@@ -70,7 +70,7 @@ export default class ChainClient {
         return response;
       } catch (e) {
         tries++;
-        console.log("error connecting to", url, ":", e.message);
+        console.log("error posting to", url, ":", e.message);
         if (this.retries > 0 && tries >= this.retries) {
           throw new Error(
             "connection to the blockchain failed after " + tries + " attempts"
