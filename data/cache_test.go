@@ -26,7 +26,7 @@ func TestSendOperationProcessing(t *testing.T) {
 	if c.Validate(payBob) != nil {
 		t.Fatalf("alice should be able to pay bob with 200 money")
 	}
-	if !c.Process(payBob) {
+	if c.Process(payBob) != nil {
 		t.Fatalf("the payment should have worked")
 	}
 	if c.Validate(payBob) == nil {
@@ -88,7 +88,7 @@ func TestValidation(t *testing.T) {
 		t.Fatalf("should get rejected for bad sequence")
 	}
 	op = MakeTestCreateDocumentOperation(1).Operation
-	if !c.Process(op) {
+	if c.Process(op) != nil {
 		t.Fatalf("should be a valid create, id = 1 seq = 1")
 	}
 
@@ -112,7 +112,7 @@ func TestValidation(t *testing.T) {
 	if c.Validate(uop) == nil {
 		t.Fatalf("only the doc owner should be allowed to update")
 	}
-	if !c.Process(MakeTestUpdateDocumentOperation(1, 2).Operation) {
+	if c.Process(MakeTestUpdateDocumentOperation(1, 2).Operation) != nil {
 		t.Fatalf("update should work")
 	}
 
@@ -138,7 +138,7 @@ func TestValidation(t *testing.T) {
 	if c.Validate(dop) == nil {
 		t.Fatalf("only the doc owner should be allowed to delete")
 	}
-	if !c.Process(MakeTestDeleteDocumentOperation(1, 3).Operation) {
+	if c.Process(MakeTestDeleteDocumentOperation(1, 3).Operation) != nil {
 		t.Fatalf("delete should work")
 	}
 	if c.Validate(MakeTestDeleteDocumentOperation(1, 4).Operation) == nil {
@@ -241,7 +241,7 @@ func TestAllocationProcessing(t *testing.T) {
 		t.Fatalf("jim should not be able to make a bucket with no account")
 	}
 	c.SetBalance("jim", 100)
-	if !c.Process(cbop) {
+	if c.Process(cbop) != nil {
 		t.Fatalf("jim should be able to create a bucket")
 	}
 
@@ -254,7 +254,7 @@ func TestAllocationProcessing(t *testing.T) {
 		t.Fatalf("miney should not be able to make a provider with no account")
 	}
 	c.SetBalance("miney", 100)
-	if !c.Process(cpop) {
+	if c.Process(cpop) != nil {
 		t.Fatalf("miney should be able to make a provider")
 	}
 
@@ -264,7 +264,7 @@ func TestAllocationProcessing(t *testing.T) {
 		BucketName: "jimsbucket",
 		ProviderID: 1,
 	}
-	if !c.Process(aop) {
+	if c.Process(aop) != nil {
 		t.Fatalf("should be able to allocate")
 	}
 
@@ -274,7 +274,7 @@ func TestAllocationProcessing(t *testing.T) {
 		BucketName: "jimsbucket",
 		ProviderID: 1,
 	}
-	if !c.Process(dop) {
+	if c.Process(dop) != nil {
 		t.Fatalf("should be able to deallocate")
 	}
 
@@ -284,7 +284,7 @@ func TestAllocationProcessing(t *testing.T) {
 		Name:     "jimsbucket",
 		Magnet:   "magnet://example.com/x",
 	}
-	if !c.Process(ubop) {
+	if c.Process(ubop) != nil {
 		t.Fatalf("should be able to update bucket")
 	}
 
@@ -293,7 +293,7 @@ func TestAllocationProcessing(t *testing.T) {
 		Signer:   "jim",
 		Name:     "jimsbucket",
 	}
-	if !c.Process(dbop) {
+	if c.Process(dbop) != nil {
 		t.Fatalf("should be able to delete bucket")
 	}
 
@@ -302,7 +302,7 @@ func TestAllocationProcessing(t *testing.T) {
 		Signer:   "miney",
 		ID:       1,
 	}
-	if !c.Process(dpop) {
+	if c.Process(dpop) != nil {
 		t.Fatalf("should be able to delete provider")
 	}
 

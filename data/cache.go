@@ -231,8 +231,8 @@ func (c *Cache) SetBalance(owner string, amount uint64) {
 }
 
 // ProcessSendOperation writes through.
-// ProcessSendOperation returns false if the operation cannot be processed
-func (c *Cache) ProcessSendOperation(op *SendOperation) bool {
+// ProcessSendOperation does not sanity check its input, so be sure you validate first
+func (c *Cache) ProcessSendOperation(op *SendOperation) {
 	source := c.GetAccount(op.Signer)
 	target := c.GetAccount(op.To)
 	if target == nil {
@@ -250,7 +250,6 @@ func (c *Cache) ProcessSendOperation(op *SendOperation) bool {
 	}
 	c.UpsertAccount(newSource)
 	c.UpsertAccount(newTarget)
-	return true
 }
 
 // IncrementSequence writes through.
@@ -673,34 +672,36 @@ func (c *Cache) Validate(operation Operation) error {
 	}
 }
 
-// Process returns false if the operation cannot be processed
-func (c *Cache) Process(operation Operation) bool {
-	if c.Validate(operation) != nil {
-		return false
+// Process returns an error iff the operation cannot be processed
+func (c *Cache) Process(operation Operation) error {
+	err := c.Validate(operation)
+	if err != nil {
+		return err
 	}
 
 	switch op := operation.(type) {
 
 	case *SendOperation:
-		return c.ProcessSendOperation(op)
+		c.ProcessSendOperation(op)
+		return nil
 
 	case *CreateDocumentOperation:
 		c.IncrementSequence(op)
 		doc := NewDocumentFromOperation(c.NextDocumentID, op)
 		c.InsertDocument(doc)
 		c.NextDocumentID++
-		return true
+		return nil
 
 	case *UpdateDocumentOperation:
 		c.IncrementSequence(op)
 		doc := NewDocumentFromOperation(op.ID, op)
 		c.UpdateDocument(doc)
-		return true
+		return nil
 
 	case *DeleteDocumentOperation:
 		c.IncrementSequence(op)
 		c.DeleteDocument(op.ID)
-		return true
+		return nil
 
 	case *CreateBucketOperation:
 		c.IncrementSequence(op)
@@ -710,17 +711,17 @@ func (c *Cache) Process(operation Operation) bool {
 			Size:  op.Size,
 		}
 		c.InsertBucket(bucket)
-		return true
+		return nil
 
 	case *UpdateBucketOperation:
 		c.IncrementSequence(op)
 		c.SetMagnet(op.Name, op.Magnet)
-		return true
+		return nil
 
 	case *DeleteBucketOperation:
 		c.IncrementSequence(op)
 		c.DeleteBucket(op.Name)
-		return true
+		return nil
 
 	case *CreateProviderOperation:
 		c.IncrementSequence(op)
@@ -732,26 +733,26 @@ func (c *Cache) Process(operation Operation) bool {
 		}
 		c.InsertProvider(p)
 		c.NextProviderID++
-		return true
+		return nil
 
 	case *DeleteProviderOperation:
 		c.IncrementSequence(op)
 		c.DeleteProvider(op.ID)
-		return true
+		return nil
 
 	case *AllocateOperation:
 		c.IncrementSequence(op)
 		c.Allocate(op.BucketName, op.ProviderID)
-		return true
+		return nil
 
 	case *DeallocateOperation:
 		c.IncrementSequence(op)
 		c.Deallocate(op.BucketName, op.ProviderID)
-		return true
+		return nil
 
 	default:
 		util.Fatalf("unhandled type in cache.Process: %s", reflect.TypeOf(operation))
-		return false
+		return fmt.Errorf("fatal")
 	}
 	panic("you forgot to add a return statement in the cache.Process switch")
 }
@@ -800,10 +801,11 @@ func (c *Cache) ProcessChunk(chunk *LedgerChunk) error {
 		}
 		err := op.Verify()
 		if err != nil {
-			return err
+			return fmt.Errorf("op %s failed to verify: %s", op, err)
 		}
-		if !c.Process(op.Operation) {
-			return fmt.Errorf("op failed to process: %+v", op)
+		err = c.Process(op.Operation)
+		if err != nil {
+			return fmt.Errorf("op %s failed to process: %s", op, err)
 		}
 	}
 

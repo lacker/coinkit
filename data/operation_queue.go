@@ -280,7 +280,7 @@ func (q *OperationQueue) NewChunk(
 			panic("NewLedgerChunk called on non-sorted list")
 		}
 		last = op
-		if validator.Process(op.Operation) {
+		if validator.Process(op.Operation) == nil {
 			validOps = append(validOps, op)
 		}
 		state[op.GetSigner()] = validator.GetAccount(op.GetSigner())
