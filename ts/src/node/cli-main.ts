@@ -177,7 +177,7 @@ async function download(bucketName, directory) {
     fatal(dir + " already exists");
   }
   let cc = newChainClient();
-  let bucket = await cc.getBucket(name);
+  let bucket = await cc.getBucket(bucketName);
   if (!bucket || !bucket.magnet || !bucket.magnet.startsWith("magnet")) {
     fatal("bucket has no magnet: " + JSON.stringify(bucket));
   }
