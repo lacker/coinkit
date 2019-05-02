@@ -1,5 +1,6 @@
 // This code runs in the persistent background page.
 import LocalStorage from "./LocalStorage";
+import NetworkConfig from "../iso/NetworkConfig";
 import Storage from "./Storage";
 import TorrentClient from "../iso/TorrentClient";
 import TorrentDownloader from "./TorrentDownloader";
@@ -60,10 +61,11 @@ async function setBlackHoleProxy(server) {
 }
 
 console.log("configuring extension for the", process.env.NETWORK, "network");
+let config = new NetworkConfig(process.env.NETWORK);
 
 // For now there must be a black hole proxy running on localhost:3000.
 // Later this proxy address will need to be loaded dynamically from somewhere.
-setBlackHoleProxy("localhost:3000").then(() => {
+setBlackHoleProxy(config.getProxy()).then(() => {
   console.log("initial black hole proxy configuration complete");
 });
 
