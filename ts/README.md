@@ -39,18 +39,23 @@ use as a testbed sometimes.
 1. Make sure you have the local blockchain running:
    * `./start-local.sh`
    * If this isn't working, see the README one directory up.
+   
 2. Build the extension locally
    * `npm install`
    * `npm run ext-local`
+   
 3. Load the extension in Chrome
    * Navigate to `chrome://extensions`
    * Toggle "Developer Mode" on
    * Click "Load Unpacked" and select the `coinkit/ts/ext-local` directory
+   
 4. Run a hosting server
    * `npm run hserver`
+   
 5. Deploy the "hello" website. Use the passphrase "mint"
    * `npm run cli create-bucket`
    * `npm run cli deploy ./samplesite hello
+   
 6. Test that it works
    * Navigate to "hello.coinkit" in your browser
    * You should see a website with a picture of a frog
