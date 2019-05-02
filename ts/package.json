@@ -6,6 +6,7 @@
     "app": "parcel app/index.html",
     "cli": "NODE_NO_WARNINGS=1 ts-node --project tsconfig.node.json src/node/cli-main.ts",
     "ext-local": "NETWORK=local parcel -p 2345 --no-hmr build src/browser/popup-main.tsx src/browser/background-main.ts src/browser/content-main.ts src/browser/loader-main.ts -d ext-local/",
+    "ext-alpha": "NETWORK=alpha parcel -p 2345 --no-hmr build src/browser/popup-main.tsx src/browser/background-main.ts src/browser/content-main.ts src/browser/loader-main.ts -d ext-alpha/",
     "hserver": "NODE_NO_WARNINGS=1 ts-node --project tsconfig.node.json src/node/hserver-main.ts --keypair=./mint.json --capacity=1000",
     "test": "jest"
   },
