@@ -60,6 +60,9 @@ async function setBlackHoleProxy(server) {
   });
 }
 
+// Parcel will automatically stick this in
+declare var process: any;
+
 console.log("configuring extension for the", process.env.NETWORK, "network");
 let config = new NetworkConfig(process.env.NETWORK);
 
