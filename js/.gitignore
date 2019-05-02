@@ -1,7 +1,0 @@
-extension/*-main*
-node_modules/
-.cache/
-dist/
-*woff
-*woff2
-npm-debug.log
