@@ -1,4 +1,5 @@
 --ignore-dir=is:extension
 --ignore-dir=is:ext-local
+--ignore-dir=is:ext-alpha
 --ignore-dir=is:dist
 --ignore-file=is:package-lock.json
