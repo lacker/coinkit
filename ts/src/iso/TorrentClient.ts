@@ -14,10 +14,7 @@ export default class TorrentClient {
   verbose: boolean;
   trackers: string[];
 
-  constructor(network?: string) {
-    if (!network) {
-      network = "local";
-    }
+  constructor(network: string) {
     let config = new NetworkConfig(network);
     this.trackers = config.trackers;
 

@@ -35,9 +35,6 @@ export default class ChainClient {
   retries: number;
 
   constructor(kp: KeyPair, network: string) {
-    if (!network) {
-      network = "local";
-    }
     let config = new NetworkConfig(network);
     this.urls = config.chain;
     this.retries = config.retries;
