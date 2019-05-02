@@ -185,6 +185,7 @@ async function download(bucketName, directory) {
   let tc = new TorrentClient(getNetwork());
   let torrent = tc.download(bucket.magnet, dir);
   await torrent.waitForDone();
+  await tc.destroy();
 }
 
 // Ask the user for a passphrase to log in.
