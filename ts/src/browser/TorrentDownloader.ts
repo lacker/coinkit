@@ -56,8 +56,8 @@ export default class TorrentDownloader {
   magnets: any;
   cache: any;
 
-  constructor() {
-    this.client = new TorrentClient();
+  constructor(network: string) {
+    this.client = new TorrentClient(network);
 
     // The last time a file from a hostname was fetched
     this.lastFetchTime = {};

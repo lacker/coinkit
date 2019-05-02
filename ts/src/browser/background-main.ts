@@ -72,7 +72,7 @@ setBlackHoleProxy(config.getProxy()).then(() => {
   console.log("initial black hole proxy configuration complete");
 });
 
-let downloader = new TorrentDownloader();
+let downloader = new TorrentDownloader(process.env.NETWORK);
 
 // Handle non-html requests by redirecting them to a data URL
 chrome.webRequest.onBeforeRequest.addListener(
