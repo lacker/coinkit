@@ -59,6 +59,6 @@ export default class NetworkConfig {
 }
 
 function randomChoice(list) {
-  let i = Math.floor(len(list) * Math.random());
+  let i = Math.floor(list.length * Math.random());
   return list[i];
 }
