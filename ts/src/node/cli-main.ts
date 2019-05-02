@@ -274,7 +274,9 @@ async function main() {
 
   if (op === "get-providers") {
     if (rest.length > 2) {
-      fatal("Usage: npm run cli get-providers [owner=<id>] [bucket=<name>]");
+      fatal(
+        "Usage: npm run cli get-providers [owner=<id>] [bucket=<name>] [available=<amount]"
+      );
     }
     let query = {} as any;
     for (let arg of rest) {
@@ -282,6 +284,12 @@ async function main() {
         query.owner = arg.split("=")[1];
       } else if (arg.startsWith("bucket=")) {
         query.bucket = arg.split("=")[1];
+      } else if (arg.startsWith("available=")) {
+        let s = arg.split("=")[1];
+        query.available = parseInt(s);
+        if (!query.available) {
+          fatal("bad available argument: " + s);
+        }
       } else {
         fatal("unrecognized arg: " + arg);
       }
