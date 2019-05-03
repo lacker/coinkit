@@ -10,6 +10,8 @@ if [ "$1" = "all" ]; then
 	echo ./deploy.sh $x
 	./deploy.sh $x || exit 1
     done
+    echo kubectl get pods
+    kubectl get pods
     exit 0
 fi
 
