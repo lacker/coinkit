@@ -248,10 +248,6 @@ You're going to want this IP to be static. Go to https://console.cloud.google.co
 
 Once you have a static ip, it's a good time to set an A record for some domain to point to it. That will give you a host name (like `0.alphatest.network`) that you can share with other nodes.
 
-You may need to add a firewall rule to allow ports 3000, 4000, 8000, and 9000. You can do this at:
-
-`https://console.cloud.google.com/networking/firewalls`
-
 ### 4. Updating the server
 
 When you've updated the code, just rebuild a container image and redeploy.
