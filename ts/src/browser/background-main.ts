@@ -60,14 +60,13 @@ async function setBlackHoleProxy(server) {
   });
 }
 
-// Parcel will automatically stick this in
+// Parcel will automatically insert this variable
 declare var process: any;
 
 console.log("configuring extension for the", process.env.NETWORK, "network");
 let config = new NetworkConfig(process.env.NETWORK);
 
-// For now there must be a black hole proxy running on localhost:3000.
-// Later this proxy address will need to be loaded dynamically from somewhere.
+// The network config tells us where to find our black hole proxy
 setBlackHoleProxy(config.getProxy()).then(() => {
   console.log("initial black hole proxy configuration complete");
 });
