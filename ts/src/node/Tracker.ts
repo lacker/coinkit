@@ -23,7 +23,7 @@ export default class Tracker {
     this.server.on("listening", () => this.onListening());
     this.server.on("start", addr => this.onStart(addr));
 
-    this.server.listen(port, "0.0.0.0");
+    this.server.listen(port, "::");
   }
 
   onListening() {
