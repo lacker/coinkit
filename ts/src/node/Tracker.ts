@@ -23,7 +23,7 @@ export default class Tracker {
     this.server.on("listening", () => this.onListening());
     this.server.on("start", addr => this.onStart(addr));
 
-    this.server.listen(port, "localhost");
+    this.server.listen(port, "0.0.0.0");
   }
 
   onListening() {
@@ -39,6 +39,6 @@ export default class Tracker {
   }
 
   onStart(addr) {
-    // console.log("got start message from", addr);
+    console.log("got torrent start message from", addr);
   }
 }
