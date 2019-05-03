@@ -241,9 +241,16 @@ Once it displays an external ip, go to `your.external.ip:8000/healthz` in the br
 You should see an `OK`.
 Port `8000` is where the http interface is, port `9000` runs the peer-to-peer protocol.
 
+You should also be able to access the black hole proxy at `your.external.ip:3000`, and your
+WebTorrent tracker at `your.external.ip:4000/stats`.
+
 You're going to want this IP to be static. Go to https://console.cloud.google.com/networking/addresses/list and use the dropdown to make this static. Name it something like `cservice0-ip`, because the IP is attached to the service. As long as you don't delete the load balancing service, it'll keep the same IP.
 
 Once you have a static ip, it's a good time to set an A record for some domain to point to it. That will give you a host name (like `0.alphatest.network`) that you can share with other nodes.
+
+You may need to add a firewall rule to allow ports 3000, 4000, 8000, and 9000. You can do this at:
+
+`https://console.cloud.google.com/networking/firewalls`
 
 ### 4. Updating the server
 
