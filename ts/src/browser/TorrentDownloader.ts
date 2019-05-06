@@ -55,8 +55,10 @@ export default class TorrentDownloader {
   lastFetchTime: { [hostname: string]: Date };
   magnets: any;
   cache: any;
+  network: string;
 
   constructor(network: string) {
+    this.network = network;
     this.client = new TorrentClient(network);
 
     // The last time a file from a hostname was fetched
@@ -88,8 +90,7 @@ export default class TorrentDownloader {
   // TODO: sometimes read from cache instead of just writing to it, have staleness logic
   async getMagnetURL(hostname) {
     console.log("looking up bucket for", hostname);
-    // TODO: generalize away from "local" constant
-    let client = new ChainClient(null, "local");
+    let client = new ChainClient(null, this.network);
     let name = hostname.split(".")[0];
     let bucket = await client.getBucket(name);
     if (!bucket) {
