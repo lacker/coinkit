@@ -8,7 +8,7 @@ window.stop();
 // this empty just causes the browser to not show anything yet.
 document.write("loading...");
 
-console.log("loading begins");
+console.log("loading from", process.env.NETWORK, "network begins");
 
 chrome.runtime.sendMessage(
   {
@@ -18,7 +18,7 @@ chrome.runtime.sendMessage(
     }
   },
   response => {
-    console.log("loading complete");
+    console.log("loading from", process.env.NETWORK, "network complete");
     document.open();
     if (!response) {
       document.write(
