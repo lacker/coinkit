@@ -8,6 +8,9 @@ window.stop();
 // this empty just causes the browser to not show anything yet.
 document.write("loading...");
 
+// Parcel will automatically insert this variable
+declare var process: any;
+
 console.log("loading from", process.env.NETWORK, "network begins");
 
 chrome.runtime.sendMessage(
