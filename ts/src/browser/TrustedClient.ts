@@ -16,10 +16,12 @@ import { sleep } from "../iso/Util";
 
 export default class TrustedClient {
   storage: Storage;
+  network: string;
 
   // Create a new client with no keypair.
-  constructor(storage) {
+  constructor(storage, network) {
     this.storage = storage;
+    this.network = network;
 
     if (typeof chrome == "object") {
       chrome.runtime.onMessage.addListener((m, sender, sendResponse) => {
@@ -47,8 +49,8 @@ export default class TrustedClient {
   }
 
   // Call from the background page
-  static init(storage) {
-    (window as any).client = new TrustedClient(storage);
+  static init(storage, network) {
+    (window as any).client = new TrustedClient(storage, network);
   }
 
   // Get the global trusted client from the background page
@@ -197,8 +199,7 @@ export default class TrustedClient {
   // Returns a promise for the response Message.
   async sendMessage(message) {
     let kp = this.getBestEffortKeyPair();
-    // TODO: generalize away from "local" constant
-    let client = new ChainClient(kp, "local");
+    let client = new ChainClient(kp, this.network);
     return await client.sendMessage(message);
   }
 

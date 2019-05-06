@@ -10,7 +10,7 @@ test("Operation message signing", async () => {
   let storage = new Storage(local);
   let kp = KeyPair.fromSecretPhrase("blorp");
   await storage.setPasswordAndData("monkey", kp, {});
-  let client = new TrustedClient(storage);
+  let client = new TrustedClient(storage, "test");
   let unsigned = new Message("Operation", {
     operations: [
       {

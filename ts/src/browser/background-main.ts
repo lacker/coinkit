@@ -6,7 +6,10 @@ import TorrentClient from "../iso/TorrentClient";
 import TorrentDownloader from "./TorrentDownloader";
 import TrustedClient from "./TrustedClient";
 
-let storage = new Storage(new LocalStorage());
+// Parcel will automatically insert this variable
+declare var process: any;
+
+let storage = new Storage(new LocalStorage(), process.env.NETWORK);
 (window as any).storage = storage;
 TrustedClient.init(storage);
 
@@ -59,9 +62,6 @@ async function setBlackHoleProxy(server) {
     });
   });
 }
-
-// Parcel will automatically insert this variable
-declare var process: any;
 
 console.log("configuring extension for the", process.env.NETWORK, "network");
 let config = new NetworkConfig(process.env.NETWORK);
