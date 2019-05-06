@@ -1,3 +1,4 @@
+--ignore-dir=is:build
 --ignore-dir=is:extension
 --ignore-dir=is:ext-local
 --ignore-dir=is:ext-alpha
