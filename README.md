@@ -1,3 +1,9 @@
+# DEPRECATED
+
+Development is now happening at:
+
+https://github.com/axiom-org/axiom
+
 # coinkit
 Tools for making cryptocurrency stuff.
 
